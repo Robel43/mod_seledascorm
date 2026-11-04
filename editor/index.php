@@ -105,6 +105,29 @@ $packageurl = exescorm_get_package_url($exescorm, $context);
 // Build the save endpoint URL.
 $saveurl = new moodle_url('/mod/exescorm/editor/save.php');
 
+// Site-specific Seleda branding configured during plugin installation.
+$brandname = exescorm_get_brand_name();
+$brandlogourl = exescorm_get_brand_logo_url();
+$brandlogourlstring = $brandlogourl ? $brandlogourl->out(false) : '';
+$brandingconfig = json_encode([
+    'name' => $brandname,
+    'logoUrl' => $brandlogourlstring,
+    'activityName' => format_string($exescorm->name),
+], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+
+$brandingstyle = '';
+if ($brandlogourlstring !== '') {
+    $escapedbrandinglogo = htmlspecialchars($brandlogourlstring, ENT_QUOTES, 'UTF-8');
+    $brandingstyle = '<style id="mod-exescorm-seleda-branding">'
+        . '#load-screen-main,#load-screen-node-content,.load-screen{'
+        . 'background-image:url(&quot;' . $escapedbrandinglogo . '&quot;)!important;'
+        . 'background-repeat:no-repeat!important;'
+        . 'background-position:center 40%!important;'
+        . 'background-size:250px auto!important;'
+        . '}'
+        . '</style>';
+}
+
 // Serve editor resources through static.php (slash arguments) to ensure
 // files are always accessible regardless of web server configuration.
 $editorbaseurl = $CFG->wwwroot . '/mod/exescorm/editor/static.php/' . $cm->id;
@@ -184,6 +207,7 @@ $configscript = <<<EOT
 <script>
     window.__MOODLE_EXE_CONFIG__ = $moodleconfig;
     window.__EXE_EMBEDDING_CONFIG__ = $embeddingconfig;
+    window.__MOODLE_SELEDA_BRANDING__ = $brandingconfig;
     (function() {
         var OVERRIDE = $themeoverride;
         function injectConfig(cfg) {
@@ -327,11 +351,12 @@ $configscript = <<<EOT
 </script>
 EOT;
 
-// Inject bridge script before </body>.
+// Inject Moodle branding + bridge scripts before </body>.
+$brandingscript = '<script src="' . $CFG->wwwroot . '/mod/exescorm/editor/branding.js"></script>';
 $bridgescript = '<script src="' . $CFG->wwwroot . '/mod/exescorm/editor/bridge.js"></script>';
 
-$html = str_replace('</head>', $configscript . "\n" . '</head>', $html);
-$html = str_replace('</body>', $bridgescript . "\n" . '</body>', $html);
+$html = str_replace('</head>', $brandingstyle . "\n" . $configscript . "\n" . '</head>', $html);
+$html = str_replace('</body>', $brandingscript . "\n" . $bridgescript . "\n" . '</body>', $html);
 
 // Output the processed HTML.
 header('Content-Type: text/html; charset=utf-8');

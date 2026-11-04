@@ -10,23 +10,10 @@ on:
         description: "Release label for package name (e.g. 1.2.3 or 1.2.3-beta)"
         required: false
         default: ""
-      editor_repo_url:
-        description: "Editor source repository URL"
+      seleda_ref:
+        description: "Seleda Studio ref to embed (branch, tag, or commit)"
         required: false
-        default: "https://github.com/exelearning/exelearning.git"
-      editor_ref:
-        description: "Editor ref value (main, branch name, or tag)"
-        required: false
-        default: "main"
-      editor_ref_type:
-        description: "Type of editor ref"
-        required: false
-        default: "auto"
-        type: choice
-        options:
-          - auto
-          - branch
-          - tag
+        default: ""
 
 permissions:
   contents: write
@@ -37,34 +24,31 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-
       - name: Set environment variables
         run: |
           if [ "${{ github.event_name }}" = "release" ]; then
             RAW_TAG="${GITHUB_REF##*/}"
             VERSION_TAG="${RAW_TAG#v}"
-            EDITOR_TAG="$(cat .editor-version)"
+            SELEDA_REF="$(cat .seleda-editor-ref)"
             echo "RELEASE_TAG=${VERSION_TAG}" >> $GITHUB_ENV
-            echo "EXELEARNING_EDITOR_REPO_URL=https://github.com/exelearning/exelearning.git" >> $GITHUB_ENV
-            # Seleda SCORM has its own release version. The optional embedded
-            # fallback remains independently pinned in .editor-version.
-            echo "EXELEARNING_EDITOR_REF=${EDITOR_TAG}" >> $GITHUB_ENV
-            echo "EXELEARNING_EDITOR_REF_TYPE=tag" >> $GITHUB_ENV
+            echo "SELEDA_STUDIO_REF=${SELEDA_REF}" >> $GITHUB_ENV
+            echo "APP_VERSION=${VERSION_TAG}" >> $GITHUB_ENV
           else
             INPUT_RELEASE="${{ github.event.inputs.release_tag }}"
             if [ -z "$INPUT_RELEASE" ]; then
               INPUT_RELEASE="manual-$(date +%Y%m%d)-${GITHUB_SHA::7}"
             fi
+            INPUT_SELEDA_REF="${{ github.event.inputs.seleda_ref }}"
+            if [ -z "$INPUT_SELEDA_REF" ]; then
+              INPUT_SELEDA_REF="$(cat .seleda-editor-ref)"
+            fi
             echo "RELEASE_TAG=${INPUT_RELEASE}" >> $GITHUB_ENV
-            echo "EXELEARNING_EDITOR_REPO_URL=${{ github.event.inputs.editor_repo_url }}" >> $GITHUB_ENV
-            echo "EXELEARNING_EDITOR_REF=${{ github.event.inputs.editor_ref }}" >> $GITHUB_ENV
-            echo "EXELEARNING_EDITOR_REF_TYPE=${{ github.event.inputs.editor_ref_type }}" >> $GITHUB_ENV
+            echo "SELEDA_STUDIO_REF=${INPUT_SELEDA_REF}" >> $GITHUB_ENV
+            echo "APP_VERSION=${INPUT_RELEASE}" >> $GITHUB_ENV
           fi
 
-      - name: Build static editor
-        run: make build-editor
+      - name: Build embedded Seleda editor
+        run: sh scripts/build-seleda-editor.sh
 
       - name: Create package
         run: make package RELEASE=${RELEASE_TAG}

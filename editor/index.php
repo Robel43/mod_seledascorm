@@ -20,20 +20,20 @@
  * Loads the static editor and injects Moodle configuration so the editor
  * can communicate with Moodle (load/save packages).
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  2025 eXeLearning
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require('../../../config.php');
-require_once($CFG->dirroot . '/mod/exescorm/lib.php');
+require_once($CFG->dirroot . '/mod/seledascorm/lib.php');
 
 /**
  * Output a visible error page inside the editor iframe.
  *
  * @param string $message The error message to display.
  */
-function exescorm_editor_error_page(string $message): void {
+function seledascorm_editor_error_page(string $message): void {
     $escapedmessage = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
     header('Content-Type: text/html; charset=utf-8');
     echo <<<HTML
@@ -72,9 +72,9 @@ HTML;
 
 $id = required_param('id', PARAM_INT); // Course module ID.
 
-$cm = get_coursemodule_from_id('exescorm', $id, 0, false, MUST_EXIST);
+$cm = get_coursemodule_from_id('seledascorm', $id, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST);
-$exescorm = $DB->get_record('exescorm', ['id' => $cm->instance], '*', MUST_EXIST);
+$seledascorm = $DB->get_record('seledascorm', ['id' => $cm->instance], '*', MUST_EXIST);
 
 require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
@@ -89,36 +89,36 @@ require_sesskey();
 // no package yet is fine: there is nothing to import.
 // See https://github.com/exelearning/exelearning/issues/2415.
 $fs = get_file_storage();
-$packagefile = $exescorm->reference
-    ? $fs->get_file($context->id, 'mod_exescorm', 'package', 0, '/', $exescorm->reference)
+$packagefile = $seledascorm->reference
+    ? $fs->get_file($context->id, 'mod_seledascorm', 'package', 0, '/', $seledascorm->reference)
     : false;
 if ($packagefile) {
     $filelist = $packagefile->list_files(get_file_packer('application/zip'));
-    if (is_array($filelist) && !\mod_exescorm\exescorm_package::has_editable_source($filelist)) {
-        exescorm_editor_error_page(get_string('nosourcetoedit', 'mod_exescorm'));
+    if (is_array($filelist) && !\mod_seledascorm\seledascorm_package::has_editable_source($filelist)) {
+        seledascorm_editor_error_page(get_string('nosourcetoedit', 'mod_seledascorm'));
     }
 }
 
 // Build the package URL for the editor to import.
-$packageurl = exescorm_get_package_url($exescorm, $context);
+$packageurl = seledascorm_get_package_url($seledascorm, $context);
 
 // Build the save endpoint URL.
-$saveurl = new moodle_url('/mod/exescorm/editor/save.php');
+$saveurl = new moodle_url('/mod/seledascorm/editor/save.php');
 
 // Site-specific Seleda branding configured during plugin installation.
-$brandname = exescorm_get_brand_name();
-$brandlogourl = exescorm_get_brand_logo_url();
+$brandname = seledascorm_get_brand_name();
+$brandlogourl = seledascorm_get_brand_logo_url();
 $brandlogourlstring = $brandlogourl ? $brandlogourl->out(false) : '';
 $brandingconfig = json_encode([
     'name' => $brandname,
     'logoUrl' => $brandlogourlstring,
-    'activityName' => format_string($exescorm->name),
+    'activityName' => format_string($seledascorm->name),
 ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
 
 $brandingstyle = '';
 if ($brandlogourlstring !== '') {
     $cssbrandinglogo = str_replace(['\\', '"'], ['\\\\', '\\"'], $brandlogourlstring);
-    $brandingstyle = '<style id="mod-exescorm-seleda-branding">'
+    $brandingstyle = '<style id="mod-seledascorm-seleda-branding">'
         . '#load-screen-main,#load-screen-node-content,.load-screen{'
         . 'background-image:url("' . $cssbrandinglogo . '")!important;'
         . 'background-repeat:no-repeat!important;'
@@ -130,20 +130,20 @@ if ($brandlogourlstring !== '') {
 
 // Serve editor resources through static.php (slash arguments) to ensure
 // files are always accessible regardless of web server configuration.
-$editorbaseurl = $CFG->wwwroot . '/mod/exescorm/editor/static.php/' . $cm->id;
+$editorbaseurl = $CFG->wwwroot . '/mod/seledascorm/editor/static.php/' . $cm->id;
 
 // Read the editor template from the active local source.
-$editorindexsource = exescorm_get_embedded_editor_index_source();
+$editorindexsource = seledascorm_get_embedded_editor_index_source();
 if ($editorindexsource === null) {
     if (is_siteadmin()) {
-        exescorm_editor_error_page(get_string('embeddednotinstalledadmin', 'mod_exescorm'));
+        seledascorm_editor_error_page(get_string('embeddednotinstalledadmin', 'mod_seledascorm'));
     } else {
-        exescorm_editor_error_page(get_string('embeddednotinstalledcontactadmin', 'mod_exescorm'));
+        seledascorm_editor_error_page(get_string('embeddednotinstalledcontactadmin', 'mod_seledascorm'));
     }
 }
 $html = @file_get_contents($editorindexsource);
 if ($html === false || empty($html)) {
-    exescorm_editor_error_page(get_string('editormissing', 'mod_exescorm'));
+    seledascorm_editor_error_page(get_string('editormissing', 'mod_seledascorm'));
 }
 
 // Inject <base> tag pointing directly to the static directory.
@@ -164,7 +164,7 @@ $moodleconfig = json_encode([
     'sesskey' => sesskey(),
     'packageUrl' => $packageurl ? $packageurl->out(false) : '',
     'saveUrl' => $saveurl->out(false),
-    'activityName' => format_string($exescorm->name),
+    'activityName' => format_string($seledascorm->name),
     'wwwroot' => $CFG->wwwroot,
     'editorBaseUrl' => $editorbaseurl,
 ]);
@@ -185,14 +185,14 @@ $embeddingconfig = json_encode([
         'userMenu' => true,
     ],
     'platform' => 'moodle',
-    'pluginVersion' => get_config('mod_exescorm', 'version'),
+    'pluginVersion' => get_config('mod_seledascorm', 'version'),
 ]);
 
 // Approved style registry consumed by the editor's themeRegistryOverride
 // hook (see exelearning/exelearning#1722). Filters built-ins, appends
 // admin-uploaded styles, and blocks install-from-content paths.
 $themeoverride = json_encode(
-    \mod_exescorm\local\styles_service::build_theme_registry_override()
+    \mod_seledascorm\local\styles_service::build_theme_registry_override()
 );
 
 // Inject configuration scripts before </head>.
@@ -282,7 +282,7 @@ $configscript = <<<EOT
                 var url = typeof input === "string" ? input : (input && input.url) || "";
                 return originalFetch.apply(this, arguments).then(function(response) {
                     if (!response.ok && (url.indexOf(".css") !== -1 || url.indexOf("idevices") !== -1)) {
-                        console.warn("[mod_exescorm] Fetch 404 fallback:", url);
+                        console.warn("[mod_seledascorm] Fetch 404 fallback:", url);
                         return new Response("/* empty fallback */", {
                             status: 200,
                             headers: { "Content-Type": "text/css" }
@@ -291,7 +291,7 @@ $configscript = <<<EOT
                     return response;
                 }).catch(function(error) {
                     if (url.indexOf(".css") !== -1 || url.indexOf("idevices") !== -1) {
-                        console.warn("[mod_exescorm] Fetch error fallback:", url);
+                        console.warn("[mod_seledascorm] Fetch error fallback:", url);
                         return new Response("/* empty fallback */", {
                             status: 200,
                             headers: { "Content-Type": "text/css" }
@@ -315,12 +315,12 @@ $configscript = <<<EOT
                             if (xhr.status >= 200 && xhr.status < 300) {
                                 completeCallback(xhr.status, xhr.statusText, { text: xhr.responseText });
                             } else {
-                                console.warn("[mod_exescorm] jQuery 404 fallback:", url);
+                                console.warn("[mod_seledascorm] jQuery 404 fallback:", url);
                                 completeCallback(200, "OK", { text: "/* empty fallback */" });
                             }
                         };
                         xhr.onerror = function() {
-                            console.warn("[mod_exescorm] jQuery error fallback:", url);
+                            console.warn("[mod_seledascorm] jQuery error fallback:", url);
                             completeCallback(200, "OK", { text: "/* empty fallback */" });
                         };
                         xhr.send();
@@ -352,8 +352,8 @@ $configscript = <<<EOT
 EOT;
 
 // Inject Moodle branding + bridge scripts before </body>.
-$brandingscript = '<script src="' . $CFG->wwwroot . '/mod/exescorm/editor/branding.js"></script>';
-$bridgescript = '<script src="' . $CFG->wwwroot . '/mod/exescorm/editor/bridge.js"></script>';
+$brandingscript = '<script src="' . $CFG->wwwroot . '/mod/seledascorm/editor/branding.js"></script>';
+$bridgescript = '<script src="' . $CFG->wwwroot . '/mod/seledascorm/editor/bridge.js"></script>';
 
 $html = str_replace('</head>', $brandingstyle . "\n" . $configscript . "\n" . '</head>', $html);
 $html = str_replace('</body>', $brandingscript . "\n" . $bridgescript . "\n" . '</body>', $html);

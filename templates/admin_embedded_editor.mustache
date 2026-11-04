@@ -15,10 +15,10 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template mod_exescorm/admin_embedded_editor
+    @template mod_seledascorm/admin_embedded_editor
 
     Inline admin-settings widget for managing the embedded eXeLearning editor.
-    JavaScript (mod_exescorm/admin_embedded_editor) reads data-* attributes on the
+    JavaScript (mod_seledascorm/admin_embedded_editor) reads data-* attributes on the
     container and uses AJAX external functions to perform install/update/uninstall.
 
     Context variables required for this template:
@@ -52,110 +52,110 @@
     }
 }}
 
-<div class="mod_exescorm-admin-embedded-editor"
+<div class="mod_seledascorm-admin-embedded-editor"
      data-sesskey="{{sesskey}}"
      data-active-source="{{active_source}}"
      data-can-install="{{#can_install}}1{{/can_install}}{{^can_install}}0{{/can_install}}"
      data-can-uninstall="{{#can_uninstall}}1{{/can_uninstall}}{{^can_uninstall}}0{{/can_uninstall}}"
-     data-confirm-uninstall="{{#str}} confirmuninstall, mod_exescorm {{/str}}">
+     data-confirm-uninstall="{{#str}} confirmuninstall, mod_seledascorm {{/str}}">
 
     <div class="card">
         <div class="card-body">
 
             {{! Status section }}
             <div class="d-flex align-items-center mb-3">
-                <span class="mod_exescorm-status-primary">
+                <span class="mod_seledascorm-status-primary">
                     {{#active_source_moodledata}}
                         <span class="badge badge-success bg-success mr-2 me-2">
-                            {{#str}} editormoodledatasource, mod_exescorm {{/str}}
+                            {{#str}} editormoodledatasource, mod_seledascorm {{/str}}
                         </span>
                         {{#moodledata_version}}
                             <span class="font-weight-bold fw-bold mr-2 me-2">v{{moodledata_version}}</span>
                         {{/moodledata_version}}
                         {{#moodledata_installed_at}}
                             <span class="text-muted small">
-                                {{#str}} editorinstalledat, mod_exescorm {{/str}} {{moodledata_installed_at}}
+                                {{#str}} editorinstalledat, mod_seledascorm {{/str}} {{moodledata_installed_at}}
                             </span>
                         {{/moodledata_installed_at}}
                     {{/active_source_moodledata}}
 
                     {{#active_source_bundled}}
                         <span class="badge badge-info bg-info mr-2 me-2">
-                            {{#str}} editorbundledsource, mod_exescorm {{/str}}
+                            {{#str}} editorbundledsource, mod_seledascorm {{/str}}
                         </span>
                         <span class="text-muted small">
-                            {{#str}} editorbundleddesc, mod_exescorm {{/str}}
+                            {{#str}} editorbundleddesc, mod_seledascorm {{/str}}
                         </span>
                     {{/active_source_bundled}}
 
                     {{#active_source_none}}
                         <span class="badge badge-danger bg-danger mr-2 me-2">
-                            {{#str}} noeditorinstalled, mod_exescorm {{/str}}
+                            {{#str}} noeditorinstalled, mod_seledascorm {{/str}}
                         </span>
                         <span class="text-muted small">
-                            {{#str}} editornotinstalleddesc, mod_exescorm {{/str}}
+                            {{#str}} editornotinstalleddesc, mod_seledascorm {{/str}}
                         </span>
                     {{/active_source_none}}
                 </span>
 
                 {{! Latest version area — JS populates after actions }}
-                <span class="mod_exescorm-latest-version-area ml-2 ms-2">
-                    <span class="mod_exescorm-latest-version-spinner" style="display:none;">
+                <span class="mod_seledascorm-latest-version-area ml-2 ms-2">
+                    <span class="mod_seledascorm-latest-version-spinner" style="display:none;">
                         <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                        <span class="text-muted small">{{#str}} checkingforupdates, mod_exescorm {{/str}}</span>
+                        <span class="text-muted small">{{#str}} checkingforupdates, mod_seledascorm {{/str}}</span>
                     </span>
-                    <span class="mod_exescorm-latest-version-text text-muted small" style="display:none;"></span>
+                    <span class="mod_seledascorm-latest-version-text text-muted small" style="display:none;"></span>
                 </span>
             </div>
 
             {{! Help text }}
             <p class="text-muted small mb-3">
-                {{#str}} editormanagementhelp, mod_exescorm {{/str}}
+                {{#str}} editormanagementhelp, mod_seledascorm {{/str}}
             </p>
 
             {{! Action buttons }}
-            <div class="mod_exescorm-editor-actions d-flex flex-wrap gap-2 mb-0">
+            <div class="mod_seledascorm-editor-actions d-flex flex-wrap gap-2 mb-0">
 
                 {{#can_install}}
                     <button type="button"
-                            class="btn btn-primary btn-sm mod_exescorm-btn-install"
+                            class="btn btn-primary btn-sm mod_seledascorm-btn-install"
                             data-action="install">
                         {{#pix}} i/import, core {{/pix}}
-                        {{#str}} editorinstall, mod_exescorm {{/str}}
+                        {{#str}} editorinstall, mod_seledascorm {{/str}}
                     </button>
                 {{/can_install}}
 
                 {{! Update button — hidden by default; JS shows when update is available }}
                 <button type="button"
-                        class="btn btn-info btn-sm mod_exescorm-btn-update"
+                        class="btn btn-info btn-sm mod_seledascorm-btn-update"
                         data-action="update"
                         style="display:none;">
                     {{#pix}} i/reload, core {{/pix}}
-                    {{#str}} editorupdate, mod_exescorm {{/str}}
+                    {{#str}} editorupdate, mod_seledascorm {{/str}}
                 </button>
 
                 {{#can_uninstall}}
                     <button type="button"
-                            class="btn btn-outline-danger btn-sm mod_exescorm-btn-uninstall"
+                            class="btn btn-outline-danger btn-sm mod_seledascorm-btn-uninstall"
                             data-action="uninstall">
                         {{#pix}} t/delete, core {{/pix}}
-                        {{#str}} editoruninstall, mod_exescorm {{/str}}
+                        {{#str}} editoruninstall, mod_seledascorm {{/str}}
                     </button>
                 {{/can_uninstall}}
 
             </div>
 
             {{! Spinner — hidden until an action is running }}
-            <div class="mod_exescorm-progress-container mt-3" style="display:none;" aria-live="polite">
+            <div class="mod_seledascorm-progress-container mt-3" style="display:none;" aria-live="polite">
                 <div class="d-flex align-items-center">
                     <span class="spinner-border spinner-border-sm mr-2 me-2" role="status" aria-hidden="true"></span>
-                    <span class="mod_exescorm-progress-message text-muted small"></span>
+                    <span class="mod_seledascorm-progress-message text-muted small"></span>
                 </div>
             </div>
 
             {{! Result / error message area — hidden until set by JS }}
-            <div class="mod_exescorm-result-area mt-3" style="display:none;" aria-live="polite">
-                <div class="mod_exescorm-result-message alert mb-0" role="alert"></div>
+            <div class="mod_seledascorm-result-area mt-3" style="display:none;" aria-live="polite">
+                <div class="mod_seledascorm-result-message alert mb-0" role="alert"></div>
             </div>
 
         </div>

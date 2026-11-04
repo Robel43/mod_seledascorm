@@ -15,17 +15,17 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Embedded editor source resolver for mod_exescorm.
+ * Embedded editor source resolver for mod_seledascorm.
  *
  * Single source of truth for determining which embedded editor source is active.
  * Implements the Seleda V1 precedence policy: bundled → moodledata → none.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  2025 eXeLearning
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_exescorm\local;
+namespace mod_seledascorm\local;
 
 /**
  * Resolves which embedded editor source should be used at runtime.
@@ -47,7 +47,7 @@ class embedded_editor_source_resolver {
     const SOURCE_NONE = 'none';
 
     /** @var string Subdirectory under dataroot for admin-installed editor. */
-    const MOODLEDATA_SUBDIR = 'mod_exescorm/embedded_editor';
+    const MOODLEDATA_SUBDIR = 'mod_seledascorm/embedded_editor';
 
     /**
      * Directories expected in a valid static editor bundle.
@@ -74,7 +74,7 @@ class embedded_editor_source_resolver {
      */
     public static function get_bundled_dir(): string {
         global $CFG;
-        return $CFG->dirroot . '/mod/exescorm/dist/static';
+        return $CFG->dirroot . '/mod/seledascorm/dist/static';
     }
 
     /**
@@ -113,7 +113,7 @@ class embedded_editor_source_resolver {
      * @return string|null Version string or null if not recorded.
      */
     public static function get_moodledata_version(): ?string {
-        $version = get_config('exescorm', 'embedded_editor_version');
+        $version = get_config('seledascorm', 'embedded_editor_version');
         return ($version !== false && $version !== '') ? $version : null;
     }
 
@@ -123,7 +123,7 @@ class embedded_editor_source_resolver {
      * @return string|null Datetime string or null if not recorded.
      */
     public static function get_moodledata_installed_at(): ?string {
-        $installedat = get_config('exescorm', 'embedded_editor_installed_at');
+        $installedat = get_config('seledascorm', 'embedded_editor_installed_at');
         return ($installedat !== false && $installedat !== '') ? $installedat : null;
     }
 

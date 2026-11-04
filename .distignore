@@ -13,6 +13,7 @@
 /.claude
 /.distignore
 /.editor-version
+/.seleda-editor-ref
 /.env
 /.env.dist
 /.omc

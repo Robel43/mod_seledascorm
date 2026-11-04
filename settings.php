@@ -35,6 +35,38 @@ if ($ADMIN->fulltree) {
     $yesno = [0 => get_string('no'),
                    1 => get_string('yes')];
 
+    // Site branding. Moodle presents new plugin settings during the web
+    // installation/upgrade flow, so these fields form the first-run Seleda
+    // branding step and remain editable later from Site administration.
+    $settings->add(new admin_setting_heading(
+        'mod_exescorm/brandingsettings',
+        get_string('brandingsettings', 'mod_exescorm'),
+        get_string('brandingsettings_desc', 'mod_exescorm')
+    ));
+
+    $settings->add(new admin_setting_requiredtext(
+        'mod_exescorm/brandname',
+        get_string('brandname', 'mod_exescorm'),
+        get_string('brandname_desc', 'mod_exescorm'),
+        'Seleda',
+        PARAM_TEXT
+    ));
+
+    $brandlogosetting = new admin_setting_configstoredfile(
+        'mod_exescorm/brandlogo',
+        get_string('brandlogo', 'mod_exescorm'),
+        get_string('brandlogo_desc', 'mod_exescorm'),
+        'brandinglogo',
+        0,
+        [
+            'maxfiles' => 1,
+            'subdirs' => 0,
+            'accepted_types' => ['.png', '.jpg', '.jpeg', '.webp', '.svg'],
+        ]
+    );
+    $brandlogosetting->set_updatedcallback('purge_all_caches');
+    $settings->add($brandlogosetting);
+
     // Embedded editor settings.
     $settings->add(new admin_setting_heading('exescorm/embeddededitorsettings',
         get_string('embeddededitorsettings', 'mod_exescorm'), ''));

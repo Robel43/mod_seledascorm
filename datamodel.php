@@ -90,6 +90,14 @@ if (confirm_sesskey() && (!empty($scoid))) {
                 }
             }
         }
+        // Seleda: preserve label metadata with this learner/SCO/attempt.
+        require_once(__DIR__ . '/report/timhirt_reporting.php');
+        try {
+            \mod_exescorm\local\timhirt_reporting::snapshot(context_module::instance($cm->id), $exescorm, (int)$scoid, (int)$USER->id, (int)$attempt);
+        } catch (\Throwable $error) {
+            // A metadata problem must never corrupt the SCORM commit response.
+            error_log('[Seleda reporting] Could not preserve the attempt label catalog.');
+        }
     }
     if ($result) {
         echo "true\n0";

@@ -117,10 +117,10 @@ $brandingconfig = json_encode([
 
 $brandingstyle = '';
 if ($brandlogourlstring !== '') {
-    $escapedbrandinglogo = htmlspecialchars($brandlogourlstring, ENT_QUOTES, 'UTF-8');
+    $cssbrandinglogo = str_replace(['\\\\', '"'], ['\\\\\\\\', '\\"'], $brandlogourlstring);
     $brandingstyle = '<style id="mod-exescorm-seleda-branding">'
         . '#load-screen-main,#load-screen-node-content,.load-screen{'
-        . 'background-image:url(&quot;' . $escapedbrandinglogo . '&quot;)!important;'
+        . 'background-image:url("' . $cssbrandinglogo . '")!important;'
         . 'background-repeat:no-repeat!important;'
         . 'background-position:center 40%!important;'
         . 'background-size:250px auto!important;'

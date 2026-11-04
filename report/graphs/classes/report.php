@@ -16,12 +16,12 @@
 /**
  * Core Report class of graphs reporting plugin
  *
- * @package    exescormreport_graphs
+ * @package    seledascormreport_graphs
  * @copyright  2012 Ankit Kumar Agarwal
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace exescormreport_graphs;
+namespace seledascormreport_graphs;
 
 use context_module;
 use core\chart_bar;
@@ -31,12 +31,12 @@ use moodle_url;
 /**
  * Main class to control the graphs reporting
  *
- * @package    exescormreport_graphs
+ * @package    seledascormreport_graphs
  * @copyright  2012 Ankit Kumar Agarwal
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-class report extends \mod_exescorm\report {
+class report extends \mod_seledascorm\report {
 
     /** Number of bars. */
     const BANDS = 11;
@@ -61,16 +61,16 @@ class report extends \mod_exescorm\report {
         // Construct the SQL.
         $sql = "SELECT DISTINCT " . $DB->sql_concat('st.userid', '\'#\'', 'COALESCE(st.attempt, 0)') . " AS uniqueid,
                        st.userid AS userid,
-                       st.exescormid AS exescormid,
+                       st.seledascormid AS seledascormid,
                        st.attempt AS attempt,
                        st.scoid AS scoid
-                  FROM {exescorm_scoes_track} st
+                  FROM {seledascorm_scoes_track} st
                  WHERE st.userid IN ({$allowedlist}) AND st.scoid = :scoid";
         $attempts = $DB->get_records_sql($sql, $params);
 
         $usergrades = [];
         foreach ($attempts as $attempt) {
-            if ($trackdata = exescorm_get_tracks($scoid, $attempt->userid, $attempt->attempt)) {
+            if ($trackdata = seledascorm_get_tracks($scoid, $attempt->userid, $attempt->attempt)) {
                 if (isset($trackdata->score_raw)) {
                     $score = (int) $trackdata->score_raw;
                     if (empty($trackdata->score_min)) {
@@ -122,19 +122,19 @@ class report extends \mod_exescorm\report {
     /**
      * Displays the full report.
      *
-     * @param \stdClass $exescorm full EXESCORM object
+     * @param \stdClass $seledascorm full SELEDASCORM object
      * @param \stdClass $cm - full course_module object
      * @param \stdClass $course - full course object
      * @param string $download - type of download being requested
      * @return void
      */
-    public function display($exescorm, $cm, $course, $download) {
+    public function display($seledascorm, $cm, $course, $download) {
         global $DB, $OUTPUT, $PAGE;
 
         $contextmodule = context_module::instance($cm->id);
 
-        $actionbar = new \mod_exescorm\output\actionbar($cm->id, false, 0);
-        $renderer = $PAGE->get_renderer('mod_exescorm');
+        $actionbar = new \mod_seledascorm\output\actionbar($cm->id, false, 0);
+        $renderer = $PAGE->get_renderer('mod_seledascorm');
         echo $renderer->report_actionbar($actionbar);
 
         if ($groupmode = groups_get_activity_groupmode($cm)) {   // Groups are being used.
@@ -143,15 +143,15 @@ class report extends \mod_exescorm\report {
 
         // Find out current restriction.
         $group = groups_get_activity_group($cm, true);
-        $allowedlistsql = get_enrolled_sql($contextmodule, 'mod/exescorm:savetrack', (int) $group);
+        $allowedlistsql = get_enrolled_sql($contextmodule, 'mod/seledascorm:savetrack', (int) $group);
 
         // Labels.
-        $labels = [get_string('invaliddata', 'exescormreport_graphs')];
+        $labels = [get_string('invaliddata', 'seledascormreport_graphs')];
         for ($i = 1; $i <= self::BANDS - 1; $i++) {
             $labels[] = ($i - 1) * self::BANDWIDTH . ' - ' . $i * self::BANDWIDTH;
         }
 
-        if ($scoes = $DB->get_records('exescorm_scoes', array("exescorm" => $exescorm->id), 'sortorder, id')) {
+        if ($scoes = $DB->get_records('seledascorm_scoes', array("seledascorm" => $seledascorm->id), 'sortorder, id')) {
             foreach ($scoes as $sco) {
                 if ($sco->launch != '') {
 
@@ -161,9 +161,9 @@ class report extends \mod_exescorm\report {
                     $chart = new chart_bar();
                     $chart->set_labels($labels);
                     $chart->add_series($series);
-                    $chart->get_xaxis(0, true)->set_label(get_string('percent', 'exescormreport_graphs'));
+                    $chart->get_xaxis(0, true)->set_label(get_string('percent', 'seledascormreport_graphs'));
                     $yaxis = $chart->get_yaxis(0, true);
-                    $yaxis->set_label(get_string('participants', 'exescormreport_graphs'));
+                    $yaxis->set_label(get_string('participants', 'seledascormreport_graphs'));
                     $yaxis->set_stepsize(max(1, round(max($data) / 10)));
 
                     echo $OUTPUT->heading($sco->title, 3);

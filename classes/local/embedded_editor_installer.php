@@ -15,17 +15,17 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Embedded editor installer for mod_exescorm.
+ * Embedded editor installer for mod_seledascorm.
  *
  * Downloads, validates, and installs the static eXeLearning editor from
  * GitHub Releases into the moodledata directory.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  2025 eXeLearning
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_exescorm\local;
+namespace mod_seledascorm\local;
 
 /**
  * Handles downloading, validating, and installing the static eXeLearning editor.
@@ -174,18 +174,18 @@ class embedded_editor_installer {
      */
     private function extract_latest_version_from_feed(string $feedbody): string {
         if ($feedbody === '') {
-            throw new \moodle_exception('editorgithubparseerror', 'mod_exescorm');
+            throw new \moodle_exception('editorgithubparseerror', 'mod_seledascorm');
         }
 
         $entrybody = $this->extract_first_feed_entry($feedbody);
         $candidate = $this->extract_version_candidate_from_entry($entrybody);
         if ($candidate === null) {
-            throw new \moodle_exception('editorgithubparseerror', 'mod_exescorm');
+            throw new \moodle_exception('editorgithubparseerror', 'mod_seledascorm');
         }
 
         $version = $this->normalize_version_candidate($candidate);
         if ($version === null) {
-            throw new \moodle_exception('editorgithubparseerror', 'mod_exescorm', '', $candidate);
+            throw new \moodle_exception('editorgithubparseerror', 'mod_seledascorm', '', $candidate);
         }
 
         return $version;
@@ -206,19 +206,19 @@ class embedded_editor_installer {
             'CURLOPT_TIMEOUT' => 30,
             'CURLOPT_HTTPHEADER' => [
                 'Accept: application/atom+xml, application/xml;q=0.9, text/xml;q=0.8',
-                'User-Agent: Moodle mod_exescorm',
+                'User-Agent: Moodle mod_seledascorm',
             ],
         ]);
 
         $response = $curl->get($this->get_releases_feed_url());
         if ($curl->get_errno()) {
-            throw new \moodle_exception('editorgithubconnecterror', 'mod_exescorm', '', $curl->error);
+            throw new \moodle_exception('editorgithubconnecterror', 'mod_seledascorm', '', $curl->error);
         }
 
         $info = $curl->get_info();
         if (!isset($info['http_code']) || (int)$info['http_code'] !== 200) {
             $code = isset($info['http_code']) ? (int)$info['http_code'] : 0;
-            throw new \moodle_exception('editorgithubapierror', 'mod_exescorm', '', $code);
+            throw new \moodle_exception('editorgithubapierror', 'mod_seledascorm', '', $code);
         }
 
         return $response;
@@ -233,7 +233,7 @@ class embedded_editor_installer {
      */
     private function extract_first_feed_entry(string $feedbody): string {
         if (!preg_match('/<entry\b[^>]*>(.*?)<\/entry>/si', $feedbody, $entrymatch)) {
-            throw new \moodle_exception('editorgithubparseerror', 'mod_exescorm');
+            throw new \moodle_exception('editorgithubparseerror', 'mod_seledascorm');
         }
 
         return $entrymatch[1];
@@ -332,7 +332,7 @@ class embedded_editor_installer {
      * @throws \moodle_exception If the download fails.
      */
     public function download_to_temp(string $url): string {
-        $tempdir = make_temp_directory('mod_exescorm');
+        $tempdir = make_temp_directory('mod_seledascorm');
         $tmpfile = $tempdir . '/editor-download-' . random_string(12) . '.zip';
 
         $curl = new \curl(['ignoresecurity' => true]);
@@ -346,13 +346,13 @@ class embedded_editor_installer {
 
         if ($result === false || $curl->get_errno()) {
             $this->cleanup_temp_file($tmpfile);
-            throw new \moodle_exception('editordownloaderror', 'mod_exescorm', '', $curl->error);
+            throw new \moodle_exception('editordownloaderror', 'mod_seledascorm', '', $curl->error);
         }
 
         if (!is_file($tmpfile) || filesize($tmpfile) === 0) {
             $this->cleanup_temp_file($tmpfile);
-            throw new \moodle_exception('editordownloaderror', 'mod_exescorm', '',
-                get_string('editordownloademptyfile', 'mod_exescorm'));
+            throw new \moodle_exception('editordownloaderror', 'mod_seledascorm', '',
+                get_string('editordownloademptyfile', 'mod_seledascorm'));
         }
 
         return $tmpfile;
@@ -367,13 +367,13 @@ class embedded_editor_installer {
     public function validate_zip(string $filepath): void {
         $handle = fopen($filepath, 'rb');
         if ($handle === false) {
-            throw new \moodle_exception('editorinvalidzip', 'mod_exescorm');
+            throw new \moodle_exception('editorinvalidzip', 'mod_seledascorm');
         }
         $header = fread($handle, 4);
         fclose($handle);
 
         if ($header !== "PK\x03\x04") {
-            throw new \moodle_exception('editorinvalidzip', 'mod_exescorm');
+            throw new \moodle_exception('editorinvalidzip', 'mod_seledascorm');
         }
     }
 
@@ -437,22 +437,22 @@ class embedded_editor_installer {
      */
     public function extract_to_temp(string $zippath): string {
         if (!class_exists('ZipArchive')) {
-            throw new \moodle_exception('editorzipextensionmissing', 'mod_exescorm');
+            throw new \moodle_exception('editorzipextensionmissing', 'mod_seledascorm');
         }
 
-        $tmpdir = make_temp_directory('mod_exescorm/extract-' . random_string(12));
+        $tmpdir = make_temp_directory('mod_seledascorm/extract-' . random_string(12));
 
         $zip = new \ZipArchive();
         $result = $zip->open($zippath);
         if ($result !== true) {
-            throw new \moodle_exception('editorextractfailed', 'mod_exescorm', '', $result);
+            throw new \moodle_exception('editorextractfailed', 'mod_seledascorm', '', $result);
         }
 
         if (!$zip->extractTo($tmpdir)) {
             $zip->close();
             $this->cleanup_temp_dir($tmpdir);
-            throw new \moodle_exception('editorextractfailed', 'mod_exescorm', '',
-                get_string('editorextractwriteerror', 'mod_exescorm'));
+            throw new \moodle_exception('editorextractfailed', 'mod_seledascorm', '',
+                get_string('editorextractwriteerror', 'mod_seledascorm'));
         }
 
         $zip->close();
@@ -502,7 +502,7 @@ class embedded_editor_installer {
             }
         }
 
-        throw new \moodle_exception('editorinvalidlayout', 'mod_exescorm');
+        throw new \moodle_exception('editorinvalidlayout', 'mod_seledascorm');
     }
 
     /**
@@ -513,7 +513,7 @@ class embedded_editor_installer {
      */
     public function validate_editor_contents(string $sourcedir): void {
         if (!embedded_editor_source_resolver::validate_editor_dir($sourcedir)) {
-            throw new \moodle_exception('editorinvalidlayout', 'mod_exescorm');
+            throw new \moodle_exception('editorinvalidlayout', 'mod_seledascorm');
         }
     }
 
@@ -532,8 +532,8 @@ class embedded_editor_installer {
         // Ensure parent directory exists and is writable.
         if (!is_dir($parentdir)) {
             if (!make_writable_directory($parentdir)) {
-                throw new \moodle_exception('editorinstallfailed', 'mod_exescorm', '',
-                    get_string('editormkdirerror', 'mod_exescorm', $parentdir));
+                throw new \moodle_exception('editorinstallfailed', 'mod_seledascorm', '',
+                    get_string('editormkdirerror', 'mod_seledascorm', $parentdir));
             }
         }
 
@@ -543,8 +543,8 @@ class embedded_editor_installer {
         if ($hadexisting) {
             $backupdir = $parentdir . '/embedded_editor-backup-' . time();
             if (!@rename($targetdir, $backupdir)) {
-                throw new \moodle_exception('editorinstallfailed', 'mod_exescorm', '',
-                    get_string('editorbackuperror', 'mod_exescorm'));
+                throw new \moodle_exception('editorinstallfailed', 'mod_seledascorm', '',
+                    get_string('editorbackuperror', 'mod_seledascorm'));
             }
         }
 
@@ -567,8 +567,8 @@ class embedded_editor_installer {
                 }
                 @rename($backupdir, $targetdir);
             }
-            throw new \moodle_exception('editorinstallfailed', 'mod_exescorm', '',
-                get_string('editorcopyfailed', 'mod_exescorm'));
+            throw new \moodle_exception('editorinstallfailed', 'mod_seledascorm', '',
+                get_string('editorcopyfailed', 'mod_seledascorm'));
         }
 
         // Clean up backup on success.
@@ -594,16 +594,16 @@ class embedded_editor_installer {
      * @param string $version The installed version string.
      */
     public function store_metadata(string $version): void {
-        set_config(self::CONFIG_VERSION, $version, 'exescorm');
-        set_config(self::CONFIG_INSTALLED_AT, date('Y-m-d H:i:s'), 'exescorm');
+        set_config(self::CONFIG_VERSION, $version, 'seledascorm');
+        set_config(self::CONFIG_INSTALLED_AT, date('Y-m-d H:i:s'), 'seledascorm');
     }
 
     /**
      * Clear installation metadata from plugin config.
      */
     public function clear_metadata(): void {
-        unset_config(self::CONFIG_VERSION, 'exescorm');
-        unset_config(self::CONFIG_INSTALLED_AT, 'exescorm');
+        unset_config(self::CONFIG_VERSION, 'seledascorm');
+        unset_config(self::CONFIG_INSTALLED_AT, 'seledascorm');
     }
 
     /**
@@ -630,18 +630,18 @@ class embedded_editor_installer {
      * @throws \moodle_exception If another installation is already in progress.
      */
     private function acquire_lock(): void {
-        $locktime = get_config('exescorm', self::CONFIG_INSTALLING);
+        $locktime = get_config('seledascorm', self::CONFIG_INSTALLING);
         if ($locktime !== false && (time() - (int)$locktime) < self::INSTALL_LOCK_TIMEOUT) {
-            throw new \moodle_exception('editorinstallconcurrent', 'mod_exescorm');
+            throw new \moodle_exception('editorinstallconcurrent', 'mod_seledascorm');
         }
-        set_config(self::CONFIG_INSTALLING, time(), 'exescorm');
+        set_config(self::CONFIG_INSTALLING, time(), 'seledascorm');
     }
 
     /**
      * Release the installation lock.
      */
     private function release_lock(): void {
-        unset_config(self::CONFIG_INSTALLING, 'exescorm');
+        unset_config(self::CONFIG_INSTALLING, 'seledascorm');
     }
 
     /**

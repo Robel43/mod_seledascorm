@@ -12,7 +12,7 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template mod_exescorm/player_editexitbar
+    @template mod_seledascorm/player_editexitbar
     Actions bar for the player page UI.
     Classes required for JS:
     * none
@@ -32,26 +32,26 @@
 }}
 <div class="d-flex flex-row-reverse mb-2">
     <a class="btn btn-secondary" href="{{{returnaction}}}">
-        {{#str}}exitactivity, mod_exescorm{{/str}}
+        {{#str}}exitactivity, mod_seledascorm{{/str}}
     </a>
     {{#editorurl}}
         <button type="button" class="btn btn-secondary mr-1"
-            data-action="mod_exescorm/editor-open"
+            data-action="mod_seledascorm/editor-open"
             data-cmid="{{cmid}}"
             data-editorurl="{{{editorurl}}}"
             data-activityname="{{activityname}}">
-            {{#str}}editembedded, mod_exescorm{{/str}}
+            {{#str}}editembedded, mod_seledascorm{{/str}}
         </button>
     {{/editorurl}}
     {{#editaction}}
         {{#hasgrades}}
-            <button type="button" class="btn btn-secondary mr-1" data-action="edit-exescorm" data-editurl="{{{editaction}}}">
-                {{#str}}typeexescormedit, mod_exescorm{{/str}}
+            <button type="button" class="btn btn-secondary mr-1" data-action="edit-seledascorm" data-editurl="{{{editaction}}}">
+                {{#str}}typeseledascormedit, mod_seledascorm{{/str}}
             </button>
         {{/hasgrades}}
         {{^hasgrades}}
             <a class="btn btn-secondary mr-1" href="{{{editaction}}}">
-                {{#str}}typeexescormedit, mod_exescorm{{/str}}
+                {{#str}}typeseledascormedit, mod_seledascorm{{/str}}
             </a>
         {{/hasgrades}}
     {{/editaction}}
@@ -59,6 +59,6 @@
 
 {{#editaction}}
     {{#js}}
-        require(['mod_exescorm/edit_confirmation'], (module) => module.init());
+        require(['mod_seledascorm/edit_confirmation'], (module) => module.init());
     {{/js}}
 {{/editaction}}

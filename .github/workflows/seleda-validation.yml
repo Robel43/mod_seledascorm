@@ -54,8 +54,8 @@ jobs:
           grep -F "function exescorm_get_brand_name()" lib.php
           grep -F "function exescorm_get_brand_logo_url()" lib.php
           grep -F "__MOODLE_SELEDA_BRANDING__" editor/index.php
-          grep -F "Create with {$a}" lang/en/exescorm.php
-          grep -F "Edit with {$a}" lang/en/exescorm.php
+          grep -F 'Create with {$a}' lang/en/exescorm.php
+          grep -F 'Edit with {$a}' lang/en/exescorm.php
 
       - name: Verify Seleda player alignment
         run: |

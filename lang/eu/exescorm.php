@@ -321,7 +321,7 @@ $string['missing_attribute'] = '({$a->attr}) atributua falta da {$a->tag} markan
 $string['missingparam'] = 'Eskatutako parametro bat falta da edo ez da zuzena';
 $string['missing_tag'] = '{$A->tag} marka falta da';
 $string['mode'] = 'Moda';
-$string['modulename'] = 'eXeLearning (SCORM)';
+$string['modulename'] = 'Seleda SCORM';
 $string['modulename_help'] = 'eXeLearning bidez sortutako SCORM bat fitxategi-multzo bat da, ikaskuntza-objektuetarako arau estandar baten arabera paketatzen dena. eXeLearning (SCORM) jarduera-moduluak aukera ematen du SCORM horiek sortzeko eta editatzeko.
 
 Edukia, normalean, hainbat orrialdetan erakusten da, eta orrialdeen artean nabigatzen da. Edukiak ikusteko hainbat aukera daude, pop-up leihoekin, edukien tauletan, nabigazio-botoiekin, eta abar. eXeLearningeko edukiek, askotan, kalifikazioen liburuan erregistratzen diren galdera kalifikagarriak dituzte.
@@ -331,7 +331,7 @@ eXeLearning jarduerak erabil daitezke
 * Multimedia-edukiak eta animazioak aurkezteko
 * Ebaluazio-tresna gisa ';
 $string['modulename_link'] = 'mod/mod_exescorm/view';
-$string['modulenameplural'] = 'eXeLearning (SCORM) edukiak';
+$string['modulenameplural'] = 'Seleda SCORM';
 $string['nav'] = 'Erakutsi nabigazioa';
 $string['nav_help'] = 'Doikuntza horrek zehazten du nabigazio-botoiak eta horien kokapena erakutsi/ezkutatu behar diren.
 
@@ -389,8 +389,8 @@ $string['player:skipnext'] = 'Maila bereko hurrengoa';
 $string['player:skipprev'] = 'Maila bereko aurrekoa';
 $string['player:toogleFullscreen'] = 'Txandakatu pantaila osoa';
 $string['player:up'] = 'Igo maila';
-$string['pluginadministration'] = 'eXeLearning edukiaren administrazioa';
-$string['pluginname'] = 'eXeLearning (SCORM)';
+$string['pluginadministration'] = 'Seleda SCORM';
+$string['pluginname'] = 'Seleda SCORM';
 $string['popup'] = 'Ireki Ikaskuntza-objektuak beste leiho batean';
 $string['popuplaunched'] = 'Eduki hori beste leiho batean ireki da. Baliabide hau ikustez bukatu baduzu, egin klik hemen ikastaroaren orrira itzultzeko.';
 $string['popupmenu'] = 'Goitibeherako menu batean';

@@ -60,9 +60,9 @@ class mod_exescorm_mod_form extends moodleform_mod {
         $defaulttype = EXESCORM_TYPE_LOCAL;
         if (exescorm_embedded_editor_available()) {
             if ($editmode) {
-                $exescormtypes[EXESCORM_TYPE_EMBEDDED] = get_string('typeexescormedit', 'mod_exescorm');
+                $exescormtypes[EXESCORM_TYPE_EMBEDDED] = get_string('typeembeddededit', 'mod_exescorm');
             } else {
-                $exescormtypes[EXESCORM_TYPE_EMBEDDED] = get_string('typeexescormcreate', 'mod_exescorm');
+                $exescormtypes[EXESCORM_TYPE_EMBEDDED] = get_string('typeembedded', 'mod_exescorm');
                 $defaulttype = EXESCORM_TYPE_EMBEDDED;
             }
         } else if (!empty($cfgexescorm->exeonlinebaseuri)) {

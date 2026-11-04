@@ -1,133 +1,107 @@
-# eXeLearning SCORM activities for Moodle
+# Seleda SCORM for Moodle
 
-<a href="https://moodle-playground.com/?blueprint-url=https://raw.githubusercontent.com/exelearning/mod_exescorm/refs/heads/main/blueprint.json"><img src="https://raw.githubusercontent.com/ateeducacion/action-moodle-playground-pr-preview/refs/heads/main/assets/playground-preview-button.svg" alt="Preview in Moodle Playground" width="224"></a>
+Seleda SCORM is the Moodle activity plugin used with **Seleda Studio** for publishing, launching and tracking SCORM learning packages. It is maintained as a compatibility-preserving customization of upstream `exelearning/mod_exescorm`.
 
-> ℹ️ The eXeLearning editor is fetched from the shared release and unpacked into the plugin when the playground boots, so the first load may take a few extra seconds. ELPX upload, viewer and preview work normally.
+## Compatibility contract
 
-Activity-type module to create and edit SCORM packages with eXeLearning inside Moodle.
+The repository and user-facing product are Seleda-branded, but the Moodle plugin keeps its upstream technical identity:
 
-The plugin can run in either of two editing modes, selected by the site administrator under _Site administration > Plugins > Activity modules > eXeLearning (SCORM) > Editor mode_:
+- plugin component: `mod_exescorm`
+- installation folder: `mod/exescorm`
+- database tables and capabilities: `exescorm_*` / `mod/exescorm:*`
+- SCORM 1.2/2004 API and Moodle backup/restore identifiers: unchanged
 
-* **eXeLearning Cloud (remote server, default)** — connects to an existing eXeLearning Cloud instance using its base URL and signing key. This is the default mode shipped by the plugin and the recommended choice when an organisation operates a shared eXeLearning Cloud deployment.
-* **Embedded editor (integrated)** — a self-contained build of the eXeLearning editor ships with the plugin (or can be installed by an administrator from the plugin settings page). It runs directly inside Moodle, so **no external server is required**.
+This is intentional. Renaming those internal identifiers would break existing activities, attempts, grades, completion data, backups and upgrade compatibility.
 
-Both modes produce the same kind of activity; pick the one that best fits your infrastructure.
+## Seleda customizations
 
-## Compatibility
+This fork layers Seleda-specific behavior on top of the upstream plugin:
 
-This plugin works on every supported Moodle release from **Moodle 4.2** (the minimum required, see `version.php`: `$plugin->requires = 2023042400`) up to the latest Moodle 5.2.x stable. It is verified on the LTS branches commonly deployed in production:
+- **Seleda SCORM** course/activity terminology
+- **Seleda Studio** remote-authoring terminology
+- Seleda blue/teal player styling aligned with the Studio visual identity
+- readable interaction reporting for Seleda's shared LMS reporting contract
+- learner-attempt interaction tables showing human-readable question/activity text, learner response, correct response, result and calculated weight
+- activity-wide Interactions reports using the same readable decoder
+- attempt-time label snapshots so later package edits do not silently rewrite historical report wording when metadata is available
+- safe fallback to original SCORM identifiers when readable labels cannot be resolved
 
-| Moodle branch         | Status                                |
-| --------------------- | ------------------------------------- |
-| 4.2.x                 | Supported (minimum required version)  |
-| 4.3.x                 | Supported                             |
-| 4.4.x                 | Supported                             |
-| 4.5.x (LTS)           | Supported                             |
-| 5.0.x                 | Supported                             |
-| 5.1.x                 | Supported                             |
-| 5.2.x (latest stable) | Supported                             |
+## Editor modes
 
-Older Moodle releases (3.x, 4.0 and 4.1) are **not** supported. The plugin is expected to keep working with newer Moodle releases as they appear; if you find an incompatibility please open an issue at <https://github.com/exelearning/exelearning/issues> (label `moodle`).
+Administrators choose the editor mode under:
 
-### Requirements
+`Site administration > Plugins > Activity modules > Seleda SCORM > Editor mode`
 
-* **Moodle**: 4.2 or later (see table above).
-* **PHP**: any version required by the Moodle release in use — the plugin does not add extra PHP requirements on top of Moodle's own.
-* **Database**: any database supported by the Moodle release in use.
-* **Browser**: any modern, evergreen browser with JavaScript enabled.
-* **Required for _eXeLearning Cloud_ mode (default)**: an eXeLearning Cloud instance and access to its configuration files / signing key. Not needed when running the plugin in _Embedded editor_ mode.
+### Seleda Studio server
+
+The recommended Seleda deployment connects Moodle to a Seleda Studio server using the existing eXeLearning-compatible remote-editor protocol. Existing configuration keys such as `exeonlinebaseuri` are retained for compatibility.
+
+### Embedded eXeLearning-compatible editor
+
+The plugin also retains the upstream embedded-editor path. This is an **upstream eXeLearning-compatible editor**, not the customized Seleda Studio Docker build. Keeping that distinction explicit avoids presenting upstream editor assets as Seleda-branded software.
+
+## Moodle compatibility
+
+The upstream base supports Moodle **4.2+** through current Moodle 5.x releases. Seleda customizations are designed to preserve that support boundary and the upstream plugin data model.
 
 ## Installation
 
-> **Important:** It is recommended to install from a [release ZIP](https://github.com/exelearning/mod_exescorm/releases), which includes the embedded editor pre-built for optimal performance. If the release ZIP does not include the editor, or if you want to install a newer version, administrators can download it from GitHub Releases via the embedded editor controls in the plugin settings.
+Install the plugin in:
 
-### Installing via uploaded ZIP file
+```text
+{moodle-root}/mod/exescorm
+```
 
-1. Download the latest ZIP from [Releases](https://github.com/exelearning/mod_exescorm/releases).
-2. Log in to your Moodle site as an admin and go to _Site administration >
-   Plugins > Install plugins_.
-3. Upload the ZIP file with the plugin code. You should only be prompted to add
-   extra details if your plugin type is not automatically detected.
-4. Check the plugin validation report and finish the installation.
+Then complete the Moodle upgrade from the web interface or run:
 
-### Installing manually
+```bash
+php admin/cli/upgrade.php
+php admin/cli/purge_caches.php
+```
 
-1. Download and extract the latest ZIP from [Releases](https://github.com/exelearning/mod_exescorm/releases).
-2. Place the extracted contents in `{your/moodle/dirroot}/mod/exescorm`.
-3. Log in to your Moodle site as an admin and go to _Site administration >
-   Notifications_ to complete the installation.
+Do not install this repository in `mod/seledascorm`; the technical component remains `mod_exescorm`.
 
-Alternatively, you can run
+## Updating an existing mod_exescorm installation
 
-    $ php admin/cli/upgrade.php
+Back up the existing plugin directory and Moodle database before replacing plugin code. Because the technical component remains `mod_exescorm`, the Seleda fork is intended to upgrade an existing eXeSCORM installation in place while preserving activities and attempts.
 
-to complete the installation from the command line.
+After replacing the plugin code:
 
-## Configuration
+```bash
+php admin/cli/upgrade.php
+php admin/cli/purge_caches.php
+```
 
-Go to the URL:
+Verify at minimum:
 
-    {your/moodle/dirroot}/admin/settings.php?section=modsettingexescorm
+1. existing Seleda SCORM activities open;
+2. previous learner attempts and grades remain visible;
+3. completion status is unchanged;
+4. a fresh Seleda Studio SCORM 1.2 export reports score and status;
+5. Reports > Interactions shows readable question/response labels when the package provides Seleda reporting metadata;
+6. older packages still fall back safely to SCORM identifiers.
 
-  * Remote URI: *exescorm  | exeonlinebaseuri*
-    * eXeLearning Cloud base URI
+## Reporting architecture
 
-  * Signing Key: *exescorm | hmackey1*
-    * Key used to sign data sent to the eXeLearning server, to check the data origin. Use up to 32 characters.
+The readable report implementation does not introduce a separate grade store. It reads Moodle's existing `exescorm_scoes_track` records and enriches them with bounded label metadata captured from the Seleda package.
 
-  * Token expiration: *exescorm | tokenexpiration*
-    * Max time (in seconds) to edit the package in eXeLearning and get back to Moodle.
+The reporting decoder is shared across interaction types and is intended to support Seleda Content Blocks progressively. A Content Block still needs to emit meaningful SCORM interactions through Seleda's shared reporting contract; the Moodle plugin cannot reconstruct interaction data that a package never reported.
 
-  * New package template: *exescorm | template*
-    * Package uploaded there will be used as the default package for new activities.
+## Upstream relationship
 
-  * Send template: *exescorm | sendtemplate*
-    * Sends uploaded (or default) template to eXeLearning when creating a new activity.
+Current upstream base:
 
-  * Mandatory files RE list: *exescorm | mandatoryfileslist*
-    * A mandatory files list can be configurad here. Enter each mandatory file as a PHP regular expression (RE) on a new line.
+- repository: `exelearning/mod_exescorm`
+- internal component: `mod_exescorm`
 
-  * Forbidden files RE list: *exescorm | forbiddenfileslist*
-    * A forbidden files list can be configurad here. Enter each forbidden file as a PHP regular expression (RE) on a new line.
+Upstream compatibility fixes should be merged into this fork without renaming the technical plugin identity. Seleda-specific changes should remain isolated and documented so future upstream synchronization stays reviewable.
 
-## Embedded Editor Management
+## Repository
 
-The plugin supports two local editor sources with the following precedence:
+```text
+https://github.com/Robel43/mod_seledascorm
+```
 
-1. **Admin-installed** (moodledata): Downloaded from GitHub Releases via the plugin settings.
-2. **Bundled** (plugin): Included in the plugin release ZIP at `dist/static/`.
+## License
 
-The admin-installed version takes priority over the bundled one. If neither source is available, the embedded editor mode cannot be used.
-
-## Development
-
-For development setup, build instructions, and contributing guidelines, see [DEVELOPMENT.md](DEVELOPMENT.md).
-
-## Support
-
-Issue tracking for this plugin is centralized in the main
-[`exelearning/exelearning`](https://github.com/exelearning/exelearning) repository.
-Please [open new issues there](https://github.com/exelearning/exelearning/issues/new),
-and browse [existing `moodle`-labeled issues](https://github.com/exelearning/exelearning/issues?q=is%3Aissue+label%3Amoodle)
-before reporting a bug or requesting a feature.
-
-## About
-
-Copyright 2023-2026:
-Centro Nacional de Desarrollo Curricular en Sistemas no Propietarios (CeDeC) /
-INTEF (Instituto Nacional de Tecnologías Educativas y de Formación del Profesorado)
-
-### License
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should receive a copy of the GNU General Public License
-along with this program.
+This fork remains licensed under **GNU GPL v3 or later**, consistent with the upstream project. Upstream copyright and license notices in source files are retained.

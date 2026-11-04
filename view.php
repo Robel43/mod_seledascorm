@@ -186,7 +186,7 @@ if (($exescorm->exescormtype === EXESCORM_TYPE_EMBEDDED || $iselpx)
         'sesskey' => sesskey(),
     ]);
     echo html_writer::start_div('d-flex mb-2');
-    echo html_writer::tag('button', get_string('editembedded', 'mod_exescorm'), [
+    echo html_writer::tag('button', get_string('editwithbrand', 'mod_exescorm', exescorm_get_brand_name()), [
         'type' => 'button',
         'class' => 'btn btn-primary',
         'data-action' => 'mod_exescorm/editor-open',

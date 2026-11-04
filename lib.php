@@ -57,6 +57,99 @@ define('EXESCORM_DISPLAY_ATTEMPTSTATUS_MY', 2);
 define('EXESCORM_DISPLAY_ATTEMPTSTATUS_ENTRY', 3);
 
 define('EXESCORM_EVENT_TYPE_OPEN', 'open');
+
+/**
+ * Return the site-specific product name used by the embedded Seleda editor.
+ *
+ * The technical Moodle component remains mod_exescorm; this setting controls
+ * only product-facing branding owned by the plugin/editor.
+ *
+ * @return string
+ */
+function exescorm_get_brand_name(): string {
+    $name = trim((string) get_config('mod_exescorm', 'brandname'));
+    return $name !== '' ? $name : 'Seleda';
+}
+
+/**
+ * Return the configured branding logo URL, or null when the bundled Seleda
+ * logo should be used.
+ *
+ * @return moodle_url|null
+ */
+function exescorm_get_brand_logo_url(): ?moodle_url {
+    $context = context_system::instance();
+    $fs = get_file_storage();
+    $files = $fs->get_area_files(
+        $context->id,
+        'mod_exescorm',
+        'brandinglogo',
+        0,
+        'sortorder, filepath, filename',
+        false
+    );
+    if (!$files) {
+        return null;
+    }
+
+    /** @var stored_file $file */
+    $file = reset($files);
+    $url = moodle_url::make_pluginfile_url(
+        $file->get_contextid(),
+        $file->get_component(),
+        $file->get_filearea(),
+        $file->get_itemid(),
+        $file->get_filepath(),
+        $file->get_filename(),
+        false
+    );
+    $url->param('rev', $file->get_timemodified());
+    return $url;
+}
+
+/**
+ * Serve the administrator-uploaded Seleda branding logo.
+ *
+ * @param stdClass|null $course Course record supplied by Moodle file API.
+ * @param stdClass|null $cm Course module record supplied by Moodle file API.
+ * @param context $context File context.
+ * @param string $filearea File area.
+ * @param array $args Remaining pluginfile path arguments.
+ * @param bool $forcedownload Whether download is forced.
+ * @param array $options File serving options.
+ * @return bool
+ */
+function exescorm_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
+    if ($context->contextlevel !== CONTEXT_SYSTEM || $filearea !== 'brandinglogo') {
+        return false;
+    }
+
+    require_login();
+
+    $itemid = (int) array_shift($args);
+    if ($itemid !== 0 || empty($args)) {
+        return false;
+    }
+
+    $filename = array_pop($args);
+    $filepath = $args ? '/' . implode('/', $args) . '/' : '/';
+
+    $fs = get_file_storage();
+    $file = $fs->get_file(
+        $context->id,
+        'mod_exescorm',
+        'brandinglogo',
+        0,
+        $filepath,
+        $filename
+    );
+    if (!$file || $file->is_directory()) {
+        return false;
+    }
+
+    send_stored_file($file, DAYSECS, 0, false, $options);
+}
+
 define('EXESCORM_EVENT_TYPE_CLOSE', 'close');
 
 require_once(__DIR__ . '/deprecatedlib.php');

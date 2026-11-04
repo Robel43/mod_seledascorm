@@ -15,22 +15,22 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * External functions for managing the embedded editor in mod_exescorm.
+ * External functions for managing the embedded editor in mod_seledascorm.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @category   external
  * @copyright  2025 eXeLearning
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_exescorm\external;
+namespace mod_seledascorm\external;
 
 use core_external\external_api;
 use core_external\external_function_parameters;
 use core_external\external_single_structure;
 use core_external\external_value;
-use mod_exescorm\local\embedded_editor_installer;
-use mod_exescorm\local\embedded_editor_source_resolver;
+use mod_seledascorm\local\embedded_editor_installer;
+use mod_seledascorm\local\embedded_editor_source_resolver;
 
 /**
  * External API for managing the embedded eXeLearning editor.
@@ -61,7 +61,7 @@ class manage_embedded_editor extends external_api {
     /**
      * Execute an install/update/repair/uninstall action on the embedded editor.
      *
-     * Requires both moodle/site:config AND mod/exescorm:manageembeddededitor
+     * Requires both moodle/site:config AND mod/seledascorm:manageembeddededitor
      * capabilities in the system context.
      *
      * @param string $action One of: install, update, repair, uninstall.
@@ -77,14 +77,14 @@ class manage_embedded_editor extends external_api {
         $validactions = ['install', 'update', 'repair', 'uninstall'];
         if (!in_array($action, $validactions, true)) {
             throw new \invalid_parameter_exception(
-                get_string('invalidaction', 'mod_exescorm', $action)
+                get_string('invalidaction', 'mod_seledascorm', $action)
             );
         }
 
         $context = \context_system::instance();
         self::validate_context($context);
         require_capability('moodle/site:config', $context);
-        require_capability('mod/exescorm:manageembeddededitor', $context);
+        require_capability('mod/seledascorm:manageembeddededitor', $context);
 
         $installer = new embedded_editor_installer();
 
@@ -133,7 +133,7 @@ class manage_embedded_editor extends external_api {
             'repair'    => 'editorrepairsuccess',
             'uninstall' => 'editoruninstalledsuccess',
         ];
-        return get_string($map[$action], 'mod_exescorm');
+        return get_string($map[$action], 'mod_seledascorm');
     }
 
     /**
@@ -192,13 +192,13 @@ class manage_embedded_editor extends external_api {
         $context = \context_system::instance();
         self::validate_context($context);
         require_capability('moodle/site:config', $context);
-        require_capability('mod/exescorm:manageembeddededitor', $context);
+        require_capability('mod/seledascorm:manageembeddededitor', $context);
 
         // Resolve source state.
         $localstatus = embedded_editor_source_resolver::get_status();
 
         // Install lock state.
-        $locktime = get_config('exescorm', embedded_editor_installer::CONFIG_INSTALLING);
+        $locktime = get_config('seledascorm', embedded_editor_installer::CONFIG_INSTALLING);
         $installing = false;
         $installstale = false;
         if ($locktime !== false && $locktime !== '') {
@@ -232,7 +232,7 @@ class manage_embedded_editor extends external_api {
 
         // Capability flags.
         $canconfigure = has_capability('moodle/site:config', $context)
-            && has_capability('mod/exescorm:manageembeddededitor', $context);
+            && has_capability('mod/seledascorm:manageembeddededitor', $context);
 
         $moodledataavailable = $localstatus->moodledata_available ?? false;
 

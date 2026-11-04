@@ -110,90 +110,28 @@ phpmd:
 behat:
 	composer behat
 # -------------------------------------------------------
-# Embedded static editor build targets
+# Embedded Seleda editor build targets
 # -------------------------------------------------------
 
-EDITOR_SUBMODULE_PATH = exelearning
 EDITOR_DIST_PATH = dist/static
-EDITOR_REPO_DEFAULT = https://github.com/exelearning/exelearning.git
-EDITOR_REF_DEFAULT = main
 
-# Check if bun is installed
-check-bun:
-	@command -v bun > /dev/null 2>&1 || (echo "Error: bun is not installed. Please install bun: https://bun.sh" && exit 1)
+# Build the exact Seleda Studio embedded profile used by Moodle releases.
+# This intentionally does NOT provide a generic upstream eXeLearning build
+# path. The source/ref is resolved by scripts/build-seleda-editor.sh from
+# SELEDA_STUDIO_REPO_URL / SELEDA_STUDIO_REF or .seleda-editor-ref.
+build-editor: check-docker
+	sh scripts/build-seleda-editor.sh
 
-# Fetch editor source code from remote repository (branch/tag, shallow clone)
-fetch-editor-source:
-	@set -e; \
-	get_env() { \
-		if [ -f .env ]; then \
-			grep -E "^$$1=" .env | tail -n1 | cut -d '=' -f2-; \
-		fi; \
-	}; \
-	REPO_URL="$${EXELEARNING_EDITOR_REPO_URL:-$$(get_env EXELEARNING_EDITOR_REPO_URL)}"; \
-	REF="$${EXELEARNING_EDITOR_REF:-$$(get_env EXELEARNING_EDITOR_REF)}"; \
-	REF_TYPE="$${EXELEARNING_EDITOR_REF_TYPE:-$$(get_env EXELEARNING_EDITOR_REF_TYPE)}"; \
-	if [ -z "$$REPO_URL" ]; then REPO_URL="$(EDITOR_REPO_DEFAULT)"; fi; \
-	if [ -z "$$REF" ]; then REF="$${EXELEARNING_EDITOR_DEFAULT_BRANCH:-$$(get_env EXELEARNING_EDITOR_DEFAULT_BRANCH)}"; fi; \
-	if [ -z "$$REF" ]; then REF="$(EDITOR_REF_DEFAULT)"; fi; \
-	if [ -z "$$REF_TYPE" ]; then REF_TYPE="auto"; fi; \
-	echo "Fetching editor source from $$REPO_URL (ref=$$REF, type=$$REF_TYPE)"; \
-	rm -rf $(EDITOR_SUBMODULE_PATH); \
-	git init -q $(EDITOR_SUBMODULE_PATH); \
-	git -C $(EDITOR_SUBMODULE_PATH) remote add origin "$$REPO_URL"; \
-	case "$$REF_TYPE" in \
-		tag) \
-			git -C $(EDITOR_SUBMODULE_PATH) fetch --depth 1 origin "refs/tags/$$REF:refs/tags/$$REF"; \
-			git -C $(EDITOR_SUBMODULE_PATH) checkout -q "tags/$$REF"; \
-			;; \
-		branch) \
-			git -C $(EDITOR_SUBMODULE_PATH) fetch --depth 1 origin "$$REF"; \
-			git -C $(EDITOR_SUBMODULE_PATH) checkout -q FETCH_HEAD; \
-			;; \
-		auto) \
-			if git -C $(EDITOR_SUBMODULE_PATH) fetch --depth 1 origin "refs/tags/$$REF:refs/tags/$$REF" > /dev/null 2>&1; then \
-				echo "Resolved $$REF as tag"; \
-				git -C $(EDITOR_SUBMODULE_PATH) checkout -q "tags/$$REF"; \
-			else \
-				echo "Resolved $$REF as branch"; \
-				git -C $(EDITOR_SUBMODULE_PATH) fetch --depth 1 origin "$$REF"; \
-				git -C $(EDITOR_SUBMODULE_PATH) checkout -q FETCH_HEAD; \
-			fi; \
-			;; \
-		*) \
-			echo "Error: EXELEARNING_EDITOR_REF_TYPE must be one of: auto, branch, tag"; \
-			exit 1; \
-			;; \
-	esac
-
-# Build static editor to dist/static/
-build-editor: check-bun fetch-editor-source
-	@# Resolve the version to embed in the editor build. The editor's build script
-	@# (scripts/build-static-bundle.ts) reads APP_VERSION/VERSION; without it the
-	@# build falls back to package.json (0.0.0-alpha). Resolution order:
-	@#   APP_VERSION -> VERSION -> EXELEARNING_EDITOR_REF (env or .env) ->
-	@#   exact git tag of the checked-out editor -> empty (dev default -> alpha)
-	@set -e; \
-	get_env() { \
-		if [ -f .env ]; then \
-			grep -E "^$$1=" .env | tail -n1 | cut -d '=' -f2-; \
-		fi; \
-	}; \
-	APP_VER="$${APP_VERSION:-$${VERSION:-$${EXELEARNING_EDITOR_REF:-$$(get_env EXELEARNING_EDITOR_REF)}}}"; \
-	if [ -z "$$APP_VER" ] || [ "$$APP_VER" = "main" ] || [ "$$APP_VER" = "master" ]; then \
-		EXACT_TAG="$$(git -C $(EDITOR_SUBMODULE_PATH) describe --tags --exact-match 2>/dev/null || true)"; \
-		if [ -n "$$EXACT_TAG" ]; then APP_VER="$$EXACT_TAG"; fi; \
-	fi; \
-	echo "Editor version input: $${APP_VER:-(default -> alpha)}"; \
-	cd $(EDITOR_SUBMODULE_PATH) && bun install && APP_VERSION="$$APP_VER" bun run build:static
-	@mkdir -p $(EDITOR_DIST_PATH)
-	@rm -rf $(EDITOR_DIST_PATH)/*
-	cp -r $(EDITOR_SUBMODULE_PATH)/dist/static/* $(EDITOR_DIST_PATH)/
-
-# Backward-compatible alias
+# Backward-compatible alias. It is deliberately routed through Seleda too.
 build-editor-no-update: build-editor
 
-# Remove build artifacts
+# Legacy target retained as a safe alias for developer muscle memory.
+# It must never fetch/build stock eXeLearning independently.
+fetch-editor-source:
+	@echo "Seleda V1 does not fetch a generic editor source."
+	@echo "Use 'make build-editor'; source is controlled by .seleda-editor-ref."
+
+# Remove build artifacts.
 clean-editor:
 	rm -rf $(EDITOR_DIST_PATH)
 
@@ -270,10 +208,10 @@ help:
 	@echo "  test                   - Run tests using Composer"
 	@echo "  phpmd                  - Run PHP Mess Detector using Composer"
 	@echo "  behat                  - Run Behat tests using Composer"
-	@echo "  build-editor           - Build embedded static editor"
-	@echo "  build-editor-no-update - Alias of build-editor"
+	@echo "  build-editor           - Build the embedded Seleda Studio editor into dist/static"
+	@echo "  build-editor-no-update - Safe alias of build-editor (also Seleda)"
 	@echo "  clean-editor           - Remove editor build artifacts"
-	@echo "  fetch-editor-source    - Download editor source from configured repo/ref"
+	@echo "  fetch-editor-source    - Explains Seleda source control; does not fetch stock eXeLearning"
 	@echo "  package                - Create distributable ZIP (RELEASE=X.Y.Z required)"
 	@echo "  help                   - Display this help with available commands"
 

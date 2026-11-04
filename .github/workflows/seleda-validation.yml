@@ -32,11 +32,11 @@ jobs:
           php -l report/userreportinteractions.php
           php -l report/timhirt_reporting.php
           php -l report/interactions/classes/report.php
-          php -l lang/en/exescorm.php
-          php -l lang/es/exescorm.php
-          php -l lang/ca/exescorm.php
-          php -l lang/eu/exescorm.php
-          php -l lang/gl/exescorm.php
+          php -l lang/en/seledascorm.php
+          php -l lang/es/seledascorm.php
+          php -l lang/ca/seledascorm.php
+          php -l lang/eu/seledascorm.php
+          php -l lang/gl/seledascorm.php
 
       - name: Check embedded branding JavaScript
         run: |
@@ -44,18 +44,23 @@ jobs:
 
       - name: Verify compatibility identity
         run: |
-          grep -F "\$plugin->component = 'mod_exescorm';" version.php
-          grep -F "\$string['modulename'] = 'Seleda';" lang/en/exescorm.php
+          grep -F "\$plugin->component = 'mod_seledascorm';" version.php
+          grep -F "\$string['modulename'] = 'Seleda';" lang/en/seledascorm.php
           test -f report/timhirt_reporting.php
           grep -F "timhirt_reporting::snapshot" datamodel.php
           grep -F "timhirt_reporting::rows" report/userreportinteractions.php
-          grep -F "mod_exescorm/brandname" settings.php
-          grep -F "mod_exescorm/brandlogo" settings.php
-          grep -F "function exescorm_get_brand_name()" lib.php
-          grep -F "function exescorm_get_brand_logo_url()" lib.php
+          grep -F "mod_seledascorm/brandname" settings.php
+          grep -F "mod_seledascorm/brandlogo" settings.php
+          grep -F "function seledascorm_get_brand_name()" lib.php
+          grep -F "function seledascorm_get_brand_logo_url()" lib.php
           grep -F "__MOODLE_SELEDA_BRANDING__" editor/index.php
-          grep -F 'Create with {$a}' lang/en/exescorm.php
-          grep -F 'Edit with {$a}' lang/en/exescorm.php
+          grep -F 'Create with {$a}' lang/en/seledascorm.php
+          grep -F 'Edit with {$a}' lang/en/seledascorm.php
+
+      - name: Reject legacy Moodle component identity
+        run: |
+          ! grep -R "mod_exescorm" version.php settings.php lib.php mod_form.php editor classes --include='*.php'
+          ! grep -R "/mod/exescorm" version.php settings.php lib.php mod_form.php editor classes --include='*.php'
 
       - name: Verify Seleda player alignment
         run: |

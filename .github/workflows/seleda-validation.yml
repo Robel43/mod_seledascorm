@@ -35,7 +35,7 @@ jobs:
       - name: Verify compatibility identity
         run: |
           grep -F "\$plugin->component = 'mod_exescorm';" version.php
-          grep -F "\$string['modulename'] = 'Seleda SCORM';" lang/en/exescorm.php
+          grep -F "\$string['modulename'] = 'Seleda';" lang/en/exescorm.php
           test -f report/timhirt_reporting.php
           grep -F "timhirt_reporting::snapshot" datamodel.php
           grep -F "timhirt_reporting::rows" report/userreportinteractions.php
@@ -43,5 +43,7 @@ jobs:
       - name: Verify Seleda player alignment
         run: |
           grep -F "SELEDA SCORM ALIGNMENT" styles.css
+          grep -F "\$plugin->requires = 2024100700; // Moodle 4.5+." version.php
+          grep -F '"moodle": "4.5"' blueprint.json
           grep -F -- "--seleda-primary: #2f6df6;" styles.css
           grep -F -- "--seleda-secondary: #12b8aa;" styles.css

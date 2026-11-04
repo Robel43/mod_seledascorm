@@ -1,0 +1,47 @@
+---
+name: Seleda SCORM Validation
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+
+      - name: Lint Seleda-modified PHP
+        run: |
+          php -l datamodel.php
+          php -l report/userreportinteractions.php
+          php -l report/timhirt_reporting.php
+          php -l report/interactions/classes/report.php
+          php -l lang/en/exescorm.php
+          php -l lang/es/exescorm.php
+          php -l lang/ca/exescorm.php
+          php -l lang/eu/exescorm.php
+          php -l lang/gl/exescorm.php
+
+      - name: Verify compatibility identity
+        run: |
+          grep -F "\$plugin->component = 'mod_exescorm';" version.php
+          grep -F "\$string['modulename'] = 'Seleda SCORM';" lang/en/exescorm.php
+          test -f report/timhirt_reporting.php
+          grep -F "timhirt_reporting::snapshot" datamodel.php
+          grep -F "timhirt_reporting::rows" report/userreportinteractions.php
+
+      - name: Verify Seleda player alignment
+        run: |
+          grep -F "SELEDA SCORM ALIGNMENT" styles.css
+          grep -F -- "--seleda-primary: #2f6df6;" styles.css
+          grep -F -- "--seleda-secondary: #12b8aa;" styles.css

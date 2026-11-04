@@ -126,7 +126,7 @@ $string['displaycoursestructure_help'] = 'If enabled, the table of contents is d
 $string['displaycoursestructuredesc'] = 'If enabled, the table of contents is displayed on the Seleda Studio outline page.';
 $string['displaydesc'] = 'Whether to display the Seleda Studio content in a new window.';
 $string['displaysettings'] = 'Display settings';
-$string['dnduploadexescorm'] = 'Add an Seleda Studio SCORM package';
+$string['dnduploadexescorm'] = 'Add a Seleda Studio SCORM package';
 $string['domxml'] = 'DOMXML external library';
 $string['editdialogcontent'] = 'You are about to edit this package in Seleda Studio. When you finish editing, you will return to Moodle automatically.';
 $string['editdialogcontent:caution'] = 'If the activity has grades or attempts, they might be lost if you change the content structure or any interactive activity in Seleda Studio.';
@@ -174,7 +174,7 @@ $string['exescorm:editonlineandreturntocourse'] = 'Edit in Seleda Studio and ret
 $string['exescormtype'] = 'Type';
 $string['exescormtype_help'] = 'This setting determines how the package is included in the course. There are up to 2 options:
 
-* Uploaded package - Enables an Seleda Studio package to be chosen via the file picker
+* Uploaded package - Enables a Seleda Studio package to be chosen via the file picker
 * Edit with Seleda Studio - Creates the activity and takes you to Seleda Studio to edit the content. When done, Seleda Studio will send it back to Moodle.';
 $string['exescorm:viewreport'] = 'View reports';
 $string['exescorm:viewscores'] = 'View scores';
@@ -497,17 +497,17 @@ $string['youmustselectastatus'] = 'You must select a status to require';
 // Embedded editor strings.
 $string['embeddededitorsettings'] = 'Editor type';
 $string['editormode'] = 'Editor mode';
-$string['editormodedesc'] = 'Select which editor to use for creating and editing Seleda Studio content. Seleda Studio server connection settings only apply when "Seleda Studio server" mode is selected.';
+$string['editormodedesc'] = 'Select either the Seleda Studio server or the embedded eXeLearning-compatible editor. Seleda Studio server connection settings only apply when remote mode is selected.';
 $string['editormodeonline'] = 'Seleda Studio server (remote server)';
-$string['editormodeembedded'] = 'Integrated editor (embedded)';
+$string['editormodeembedded'] = 'Embedded eXeLearning-compatible editor';
 $string['embeddednotinstalledcontactadmin'] = 'The embedded editor files are not installed. Please contact your site administrator to install it.';
 $string['embeddednotinstalledadmin'] = 'The embedded editor files are not installed. You can install it from the plugin settings.';
-$string['editembedded'] = 'Edit with Seleda Studio';
+$string['editembedded'] = 'Edit with embedded eXeLearning editor';
 $string['editembedded_integrated'] = 'Integrated';
-$string['editembedded_help'] = 'Open the embedded Seleda Studio editor to edit the content directly within Moodle.';
-$string['editormissing'] = 'The Seleda Studio embedded editor is not installed. Please contact your administrator.';
-$string['embeddedtypehelp'] = 'The activity will be created and you can then edit it using the embedded Seleda Studio editor from the activity view page. You can optionally upload an .elpx project file to import existing content.';
-$string['typeembedded'] = 'Create with Seleda Studio (embedded editor)';
+$string['editembedded_help'] = 'Open the embedded eXeLearning-compatible editor to edit the content directly within Moodle.';
+$string['editormissing'] = 'The embedded eXeLearning-compatible editor is not installed. Please contact your administrator.';
+$string['embeddedtypehelp'] = 'The activity will be created and can then be edited with the embedded eXeLearning-compatible editor from the activity view page. You can optionally upload an .elpx project file to import existing content.';
+$string['typeembedded'] = 'Create with embedded eXeLearning editor';
 $string['saving'] = 'Saving...';
 $string['savedsuccess'] = 'Changes saved successfully';
 $string['savetomoodle'] = 'Save to Moodle';
@@ -518,14 +518,14 @@ $string['unsavedchanges'] = 'You have unsaved changes. Are you sure you want to 
 $string['info'] = 'Info';
 $string['displayactivityname'] = 'Display activity name';
 $string['displayactivityname_help'] = 'Whether or not to display the activity name above the Seleda SCORM player.';
-$string['nosourcetoedit'] = 'This activity\'s package does not contain an Seleda Studio source, so it cannot be opened in the embedded editor. It still works as a SCORM package.';
-$string['nosourcetosave'] = 'The exported package does not contain an Seleda Studio source, so it was not saved. The activity keeps its previous package.';
+$string['nosourcetoedit'] = 'This activity\'s package does not contain a Seleda Studio source, so it cannot be opened in the embedded editor. It still works as a SCORM package.';
+$string['nosourcetosave'] = 'The exported package does not contain a Seleda Studio source, so it was not saved. The activity keeps its previous package.';
 $string['elpxneedsconversion'] = 'This activity currently contains an .elpx project. Open it in the embedded Seleda Studio editor and save to convert it to a SCORM 1.2 package for playback and tracking.';
 $string['packageempty'] = 'This activity does not contain any playable content yet. Open it in the Seleda Studio editor to add content.';
 
 // Embedded editor management.
 $string['manageembeddededitor'] = 'Manage embedded editor';
-$string['manageembeddededitor_desc'] = 'Install, update, or repair the embedded Seleda Studio editor.';
+$string['manageembeddededitor_desc'] = 'Install, update, or repair the embedded eXeLearning-compatible editor.';
 $string['embeddededitorstatus'] = 'Embedded editor';
 $string['editorsource_moodledata'] = 'Installed (admin-managed)';
 $string['editorsource_bundled'] = 'Bundled with plugin';
@@ -533,7 +533,7 @@ $string['editorsource_none'] = 'Not installed';
 $string['editorinstall'] = 'Install latest version';
 $string['editorupdate'] = 'Update editor';
 $string['editoruninstall'] = 'Remove';
-$string['editorinstallsuccess'] = 'Seleda Studio editor v{$a} installed successfully.';
+$string['editorinstallsuccess'] = 'Embedded eXeLearning editor v{$a} installed successfully.';
 $string['editoruninstallsuccess'] = 'Embedded editor installation removed.';
 $string['editorversion'] = 'Version';
 $string['editorinstalledat'] = 'Installed at';
@@ -543,7 +543,7 @@ $string['editormoodledatadir'] = 'Data directory';
 $string['editorbundleddir'] = 'Bundled directory';
 $string['editorlatestversion'] = 'Latest available version';
 $string['editorlatestversionongithub'] = 'Latest version on GitHub:';
-$string['editorstatusinfo'] = 'The embedded editor serves static assets for the integrated Seleda Studio editor. Sources are checked in order: admin-installed (moodledata), then bundled (plugin dist/).';
+$string['editorstatusinfo'] = 'The embedded editor serves upstream eXeLearning-compatible static assets. Sources are checked in order: admin-installed (moodledata), then bundled (plugin dist/).';
 $string['editorgithubconnecterror'] = 'Could not connect to GitHub: {$a}';
 $string['editorgithubapierror'] = 'GitHub returned HTTP status {$a}. Please try again later.';
 $string['editorgithubparseerror'] = 'Could not parse the latest release information from GitHub.';
@@ -569,11 +569,11 @@ $string['editoravailable'] = 'Available';
 $string['editornotavailable'] = 'Not available';
 $string['editormanagelink'] = 'Manage embedded editor';
 $string['editorsourceprecedence'] = 'Source precedence: admin-installed > bundled.';
-$string['exescorm:manageembeddededitor'] = 'Manage the embedded Seleda Studio editor installation';
+$string['exescorm:manageembeddededitor'] = 'Manage the embedded eXeLearning-compatible editor installation';
 $string['editorcheckingerror'] = 'Could not check for updates. GitHub may be temporarily unreachable.';
-$string['editorinstallconfirm'] = 'This will download and install the latest Seleda Studio editor (v{$a}) from GitHub. Continue?';
-$string['editoradminrequired'] = 'The embedded Seleda Studio editor is not installed. Please contact your site administrator.';
-$string['editormanagementhelp'] = 'Download and install the latest Seleda Studio editor from GitHub. The version installed by the administrator takes priority over the bundled one.';
+$string['editorinstallconfirm'] = 'This will download and install the configured eXeLearning-compatible editor (v{$a}) from GitHub. Continue?';
+$string['editoradminrequired'] = 'The embedded eXeLearning-compatible editor is not installed. Please contact your site administrator.';
+$string['editormanagementhelp'] = 'Download and install the eXeLearning-compatible embedded editor from GitHub. The version installed by the administrator takes priority over the bundled one.';
 $string['editorbundleddesc'] = 'A version is included with the plugin. You can install the latest version published on GitHub.';
 $string['editornotinstalleddesc'] = 'Install the editor from GitHub to enable the embedded editing mode.';
 $string['invalidaction'] = 'Invalid action: {$a}';
@@ -603,13 +603,13 @@ $string['editoruploadmissingfile'] = 'No editor ZIP file was uploaded.';
 
 // Style management.
 $string['stylesmanager'] = 'Styles';
-$string['stylesmanager_hint'] = 'Upload Seleda Studio style packages and control which styles the embedded editor exposes.';
-$string['stylesmanager_intro'] = 'Manage the Seleda Studio styles available to the embedded editor. Built-in styles can be hidden individually. Uploaded styles can be enabled, disabled, or deleted at any time.';
+$string['stylesmanager_hint'] = 'Upload eXeLearning-compatible style packages and control which styles the embedded editor exposes.';
+$string['stylesmanager_intro'] = 'Manage the eXeLearning-compatible styles available to the embedded editor. Built-in styles can be hidden individually. Uploaded styles can be enabled, disabled, or deleted at any time.';
 $string['stylesmanager_manage'] = 'Manage installed styles';
 $string['stylesmanager_manage_hint'] = 'Open the styles page to enable/disable built-in styles or delete uploaded ones.';
 $string['stylesonlywhenembedded'] = 'The embedded editor is not enabled. Styles managed here only take effect when the editor mode is set to "embedded".';
 $string['stylesblockimport'] = 'Block user-imported styles';
-$string['stylesblockimport_desc'] = 'When enabled, the embedded editor hides the "User styles" tab and refuses to install a style bundled inside an imported .elpx project. Users may only choose from the admin-approved list above. This mirrors the Seleda Studio ONLINE_THEMES_INSTALL=false behavior.';
+$string['stylesblockimport_desc'] = 'When enabled, the embedded editor hides the "User styles" tab and refuses to install a style bundled inside an imported .elpx project. Users may only choose from the admin-approved list above. This mirrors the eXeLearning ONLINE_THEMES_INSTALL=false behavior.';
 $string['stylesupload_label'] = 'Style ZIP package';
 $string['stylesupload_submit'] = 'Upload style';
 $string['stylesupload_hint'] = 'Maximum file size: {$a}. Only .zip packages containing a valid config.xml are accepted.';

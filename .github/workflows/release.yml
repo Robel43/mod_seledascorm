@@ -21,6 +21,8 @@ permissions:
 jobs:
   build_and_upload:
     runs-on: ubuntu-latest
+    env:
+      SELEDA_STUDIO_TOKEN: ${{ secrets.SELEDA_STUDIO_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 

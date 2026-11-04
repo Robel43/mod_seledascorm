@@ -17,23 +17,23 @@
 /**
  * Unit tests for the eXeLearning redirector.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  2026 eXeLearning
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_exescorm\exeonline;
+namespace mod_seledascorm\exeonline;
 
 use moodle_url;
 
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Tests for mod_exescorm\exeonline\exescorm_redirector.
+ * Tests for mod_seledascorm\exeonline\seledascorm_redirector.
  *
- * @covers \mod_exescorm\exeonline\exescorm_redirector
+ * @covers \mod_seledascorm\exeonline\seledascorm_redirector
  */
-class exescorm_redirector_test extends \advanced_testcase {
+class seledascorm_redirector_test extends \advanced_testcase {
 
     /** @var int Arbitrary course module id; the redirector only forwards it, it never looks it up. */
     const CMID = 42;
@@ -41,9 +41,9 @@ class exescorm_redirector_test extends \advanced_testcase {
     protected function setUp(): void {
         parent::setUp();
         $this->resetAfterTest(true);
-        set_config('exeonlinebaseuri', 'https://exelearning.example.com', 'exescorm');
-        set_config('hmackey1', 'testkey', 'exescorm');
-        set_config('tokenexpiration', 300, 'exescorm');
+        set_config('exeonlinebaseuri', 'https://exelearning.example.com', 'seledascorm');
+        set_config('hmackey1', 'testkey', 'seledascorm');
+        set_config('tokenexpiration', 300, 'seledascorm');
     }
 
     /**
@@ -67,7 +67,7 @@ class exescorm_redirector_test extends \advanced_testcase {
      * eXeLearning open a project owned by the current user and load the package from get_ode.php.
      */
     public function test_edit_opens_a_project_loaded_from_moodle(): void {
-        $url = exescorm_redirector::get_redirection_url(self::CMID, null, 'edit');
+        $url = seledascorm_redirector::get_redirection_url(self::CMID, null, 'edit');
 
         $this->assertSame('https://exelearning.example.com/new_ode', $url->out_omit_querystring());
         $this->assertNull($url->param('ode_id'));
@@ -81,28 +81,28 @@ class exescorm_redirector_test extends \advanced_testcase {
 
     public function test_default_action_is_an_edit_and_also_opens_a_project_loaded_from_moodle(): void {
         // The modedit hack builds the redirector with the default 'edit' action.
-        $redirector = new exescorm_redirector();
-        $url = $redirector->get_management_url(new moodle_url('/mod/exescorm/view.php', ['id' => self::CMID]));
+        $redirector = new seledascorm_redirector();
+        $url = $redirector->get_management_url(new moodle_url('/mod/seledascorm/view.php', ['id' => self::CMID]));
 
         $this->assertSame('https://exelearning.example.com/new_ode', $url->out_omit_querystring());
         $this->assertNull($url->param('ode_id'));
     }
 
     public function test_add_opens_a_project_loaded_from_moodle(): void {
-        $url = exescorm_redirector::get_redirection_url(self::CMID, null, 'add');
+        $url = seledascorm_redirector::get_redirection_url(self::CMID, null, 'add');
 
         $this->assertSame('https://exelearning.example.com/new_ode', $url->out_omit_querystring());
         $this->assertNull($url->param('ode_id'));
     }
 
     public function test_module_return_url_is_kept_and_gets_the_cmid(): void {
-        $url = exescorm_redirector::get_redirection_url(
+        $url = seledascorm_redirector::get_redirection_url(
             self::CMID,
-            new moodle_url('/mod/exescorm/view.php', ['id' => 1, 'forceview' => 1])
+            new moodle_url('/mod/seledascorm/view.php', ['id' => 1, 'forceview' => 1])
         );
 
         $returnurl = $this->get_payload_returnurl($url);
-        $this->assertStringContainsString('/mod/exescorm/view.php', $returnurl);
+        $this->assertStringContainsString('/mod/seledascorm/view.php', $returnurl);
         $this->assertStringContainsString('id=' . self::CMID, $returnurl);
     }
 
@@ -110,12 +110,12 @@ class exescorm_redirector_test extends \advanced_testcase {
         global $CFG;
 
         $courseurl = new moodle_url('/course/view.php', ['id' => 7]);
-        $url = exescorm_redirector::get_redirection_url(self::CMID, $courseurl);
+        $url = seledascorm_redirector::get_redirection_url(self::CMID, $courseurl);
 
         // eXeLearning only accepts return urls under the module path, so the course page
         // must be reached through returnto.php instead of being sent as is.
         $returnurl = $this->get_payload_returnurl($url);
-        $this->assertStringStartsWith($CFG->wwwroot . '/mod/exescorm/returnto.php', $returnurl);
+        $this->assertStringStartsWith($CFG->wwwroot . '/mod/seledascorm/returnto.php', $returnurl);
         $this->assertStringContainsString('id=' . self::CMID, $returnurl);
         $this->assertStringContainsString(rawurlencode('/course/view.php?id=7'), str_replace('&amp;', '&', $returnurl));
     }
@@ -130,15 +130,15 @@ class exescorm_redirector_test extends \advanced_testcase {
         // No explicit destination. The wrapped url carries no destination at all, which is what
         // makes the return script land the user on the activity's course rather than the site home.
         $wrapped = new moodle_url($this->get_payload_returnurl(
-            exescorm_redirector::get_redirection_url(self::CMID)
+            seledascorm_redirector::get_redirection_url(self::CMID)
         ));
 
-        $this->assertSame($CFG->wwwroot . '/mod/exescorm/returnto.php', $wrapped->out_omit_querystring());
+        $this->assertSame($CFG->wwwroot . '/mod/seledascorm/returnto.php', $wrapped->out_omit_querystring());
         $this->assertSame(self::CMID, (int)$wrapped->param('id'));
-        $this->assertNull($wrapped->param(exescorm_redirector::RETURNTO_PARAM));
+        $this->assertNull($wrapped->param(seledascorm_redirector::RETURNTO_PARAM));
         $this->assertSame(
             course_get_url($course)->out(false),
-            exescorm_redirector::resolve_returnto_url('', $course)->out(false)
+            seledascorm_redirector::resolve_returnto_url('', $course)->out(false)
         );
     }
 
@@ -152,14 +152,14 @@ class exescorm_redirector_test extends \advanced_testcase {
         // A destination outside this Moodle can't be forwarded to, so it is discarded instead of
         // being handed to returnto.php.
         $wrapped = new moodle_url($this->get_payload_returnurl(
-            exescorm_redirector::get_redirection_url(self::CMID, new moodle_url('https://not-this-moodle.invalid/foo'))
+            seledascorm_redirector::get_redirection_url(self::CMID, new moodle_url('https://not-this-moodle.invalid/foo'))
         ));
 
-        $this->assertSame($CFG->wwwroot . '/mod/exescorm/returnto.php', $wrapped->out_omit_querystring());
-        $this->assertNull($wrapped->param(exescorm_redirector::RETURNTO_PARAM));
+        $this->assertSame($CFG->wwwroot . '/mod/seledascorm/returnto.php', $wrapped->out_omit_querystring());
+        $this->assertNull($wrapped->param(seledascorm_redirector::RETURNTO_PARAM));
         $this->assertSame(
             course_get_url($course)->out(false),
-            exescorm_redirector::resolve_returnto_url('', $course)->out(false)
+            seledascorm_redirector::resolve_returnto_url('', $course)->out(false)
         );
     }
 
@@ -167,7 +167,7 @@ class exescorm_redirector_test extends \advanced_testcase {
         global $CFG;
 
         $course = $this->getDataGenerator()->create_course();
-        $resolved = exescorm_redirector::resolve_returnto_url('/course/view.php?id=' . $course->id, $course);
+        $resolved = seledascorm_redirector::resolve_returnto_url('/course/view.php?id=' . $course->id, $course);
 
         $this->assertSame($CFG->wwwroot . '/course/view.php?id=' . $course->id, $resolved->out(false));
     }
@@ -178,7 +178,7 @@ class exescorm_redirector_test extends \advanced_testcase {
         require_once($CFG->dirroot . '/course/lib.php');
 
         $course = $this->getDataGenerator()->create_course();
-        $resolved = exescorm_redirector::resolve_returnto_url('', $course);
+        $resolved = seledascorm_redirector::resolve_returnto_url('', $course);
 
         $this->assertSame(course_get_url($course)->out(false), $resolved->out(false));
     }

@@ -16,7 +16,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot.'/mod/exescorm/locallib.php');
+require_once($CFG->dirroot.'/mod/seledascorm/locallib.php');
 
 // Set some vars to use as default values.
 $userdata = new stdClass();
@@ -28,24 +28,24 @@ if (!isset($currentorg)) {
     $currentorg = '';
 }
 
-if ($scoes = $DB->get_records('exescorm_scoes', array('exescorm' => $exescorm->id), 'sortorder, id')) {
+if ($scoes = $DB->get_records('seledascorm_scoes', array('seledascorm' => $seledascorm->id), 'sortorder, id')) {
     // Drop keys so that it is a simple array.
     $scoes = array_values($scoes);
     foreach ($scoes as $sco) {
         $def->{($sco->id)} = new stdClass();
         $userdata->{($sco->id)} = new stdClass();
-        $def->{($sco->id)} = get_exescorm_default($userdata->{($sco->id)}, $exescorm, $sco->id, $attempt, $mode);
+        $def->{($sco->id)} = get_seledascorm_default($userdata->{($sco->id)}, $seledascorm, $sco->id, $attempt, $mode);
 
         // Reconstitute objectives.
-        $cmiobj->{($sco->id)} = exescorm_reconstitute_array_element($exescorm->version, $userdata->{($sco->id)},
+        $cmiobj->{($sco->id)} = seledascorm_reconstitute_array_element($seledascorm->version, $userdata->{($sco->id)},
                                                                     'cmi.objectives', array('score'));
-        $cmiint->{($sco->id)} = exescorm_reconstitute_array_element($exescorm->version, $userdata->{($sco->id)},
+        $cmiint->{($sco->id)} = seledascorm_reconstitute_array_element($seledascorm->version, $userdata->{($sco->id)},
                                                                     'cmi.interactions', array('objectives', 'correct_responses'));
     }
 }
 
 // If SCORM 1.2 standard mode is disabled allow higher datamodel limits.
-if (intval(get_config("exescorm", "exescormstandard"))) {
+if (intval(get_config("seledascorm", "seledascormstandard"))) {
     $cmistring256 = '^[\\u0000-\\uFFFF]{0,255}$';
     $cmistring4096 = '^[\\u0000-\\uFFFF]{0,4096}$';
 } else {
@@ -53,19 +53,19 @@ if (intval(get_config("exescorm", "exescormstandard"))) {
     $cmistring4096 = $cmistring256;
 }
 
-$exescorm->autocommit = ($exescorm->autocommit === "1") ? true : false;
-$exescorm->masteryoverride = ($exescorm->masteryoverride === "1") ? true : false;
+$seledascorm->autocommit = ($seledascorm->autocommit === "1") ? true : false;
+$seledascorm->masteryoverride = ($seledascorm->masteryoverride === "1") ? true : false;
 $PAGE->requires->js_init_call(
-                                'M.exescorm_api.init',
+                                'M.seledascorm_api.init',
                                 array($def, $cmiobj, $cmiint, $cmistring256, $cmistring4096,
-                                exescorm_debugging($exescorm), $exescorm->auto, $exescorm->id, $CFG->wwwroot,
-                                sesskey(), $scoid, $attempt, $mode, $id, $currentorg, $exescorm->autocommit,
-                                $exescorm->masteryoverride, $exescorm->hidetoc)
+                                seledascorm_debugging($seledascorm), $seledascorm->auto, $seledascorm->id, $CFG->wwwroot,
+                                sesskey(), $scoid, $attempt, $mode, $id, $currentorg, $seledascorm->autocommit,
+                                $seledascorm->masteryoverride, $seledascorm->hidetoc)
                             );
 
 // Pull in the debugging utilities.
-if (exescorm_debugging($exescorm)) {
-    require_once($CFG->dirroot.'/mod/exescorm/datamodels/debug.js.php');
+if (seledascorm_debugging($seledascorm)) {
+    require_once($CFG->dirroot.'/mod/seledascorm/datamodels/debug.js.php');
     echo html_writer::script('AppendToLog("Moodle SCORM 1.2 API Loaded, Activity: '.
-                                $exescorm->name.', SCO: '.$sco->identifier.'", 0);');
+                                $seledascorm->name.', SCO: '.$sco->identifier.'", 0);');
 }

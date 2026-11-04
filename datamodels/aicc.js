@@ -16,11 +16,11 @@
 //
 // SCORM 1.2 API Implementation
 //
-function AICCapi(def, cmiobj, exescormauto, cfgwwwroot, exescormid, scoid, attempt, viewmode, currentorg, sesskey, cmid, autocommit) {
+function AICCapi(def, cmiobj, seledascormauto, cfgwwwroot, seledascormid, scoid, attempt, viewmode, currentorg, sesskey, cmid, autocommit) {
 
-    var prerequrl = cfgwwwroot + "/mod/exescorm/prereqs.php?a=" + exescormid + "&scoid=" + scoid + "&attempt=" + attempt + "&mode=" + viewmode + "&currentorg=" + currentorg + "&sesskey=" + sesskey;
-    var datamodelurl = cfgwwwroot + "/mod/exescorm/datamodel.php";
-    var datamodelurlparams = "id=" + cmid + "&a=" + exescormid + "&sesskey=" + sesskey + "&attempt=" + attempt + "&scoid=" + scoid;
+    var prerequrl = cfgwwwroot + "/mod/seledascorm/prereqs.php?a=" + seledascormid + "&scoid=" + scoid + "&attempt=" + attempt + "&mode=" + viewmode + "&currentorg=" + currentorg + "&sesskey=" + sesskey;
+    var datamodelurl = cfgwwwroot + "/mod/seledascorm/datamodel.php";
+    var datamodelurlparams = "id=" + cmid + "&a=" + seledascormid + "&sesskey=" + sesskey + "&attempt=" + attempt + "&scoid=" + scoid;
 
     // Standard Data Type Definition
     CMIString256 = '^.{0,255}$';
@@ -133,8 +133,8 @@ function AICCapi(def, cmiobj, exescormauto, cfgwwwroot, exescormid, scoid, attem
 
     var cmi, nav;
     function initdatamodel(scoid){
-        prerequrl = cfgwwwroot + "/mod/exescorm/prereqs.php?a=" + exescormid + "&scoid=" + scoid + "&attempt=" + attempt + "&mode=" + viewmode + "&currentorg=" + currentorg + "&sesskey=" + sesskey;
-        datamodelurlparams = "id=" + cmid + "&a=" + exescormid + "&sesskey=" + sesskey + "&attempt=" + attempt + "&scoid=" + scoid;
+        prerequrl = cfgwwwroot + "/mod/seledascorm/prereqs.php?a=" + seledascormid + "&scoid=" + scoid + "&attempt=" + attempt + "&mode=" + viewmode + "&currentorg=" + currentorg + "&sesskey=" + sesskey;
+        datamodelurlparams = "id=" + cmid + "&a=" + seledascormid + "&sesskey=" + sesskey + "&attempt=" + attempt + "&scoid=" + scoid;
 
         //
         // Datamodel inizialization
@@ -176,7 +176,7 @@ function AICCapi(def, cmiobj, exescormauto, cfgwwwroot, exescormid, scoid, attem
     var Initialized = false;
 
     function LMSInitialize (param) {
-        scoid = exescorm_current_node ? exescorm_current_node.scoid : scoid;
+        scoid = seledascorm_current_node ? seledascorm_current_node.scoid : scoid;
         initdatamodel(scoid);
 
         errorCode = "0";
@@ -202,17 +202,17 @@ function AICCapi(def, cmiobj, exescormauto, cfgwwwroot, exescormid, scoid, attem
                 result = StoreData(cmi,true);
                 if (nav.event != '') {
                     if (nav.event == 'continue') {
-                        setTimeout('mod_exescorm_launch_next_sco();',500);
+                        setTimeout('mod_seledascorm_launch_next_sco();',500);
                     } else {
-                        setTimeout('mod_exescorm_launch_prev_sco();',500);
+                        setTimeout('mod_seledascorm_launch_prev_sco();',500);
                     }
                 } else {
-                    if (exescormauto == 1) {
-                        setTimeout('mod_exescorm_launch_next_sco();',500);
+                    if (seledascormauto == 1) {
+                        setTimeout('mod_seledascorm_launch_next_sco();',500);
                     }
                 }
                 // trigger TOC update
-                var callback = M.mod_exescorm.connectPrereqCallback;
+                var callback = M.mod_seledascorm.connectPrereqCallback;
                 YUI().use('io-base', function(Y) {
                     Y.on('io:complete', callback.success, Y);
                     Y.io(prerequrl);
@@ -554,8 +554,8 @@ function AICCapi(def, cmiobj, exescormauto, cfgwwwroot, exescormid, scoid, attem
     this.LMSGetDiagnostic = LMSGetDiagnostic;
 }
 
-M.exescorm_api = {};
+M.seledascorm_api = {};
 
-M.exescorm_api.init = function(Y, def, cmiobj, exescormauto, cfgwwwroot, exescormid, scoid, attempt, viewmode, currentorg, sesskey, cmid, autocommit) {
-    window.API = new AICCapi(def, cmiobj, exescormauto, cfgwwwroot, exescormid, scoid, attempt, viewmode, currentorg, sesskey, cmid, autocommit);
+M.seledascorm_api.init = function(Y, def, cmiobj, seledascormauto, cfgwwwroot, seledascormid, scoid, attempt, viewmode, currentorg, sesskey, cmid, autocommit) {
+    window.API = new AICCapi(def, cmiobj, seledascormauto, cfgwwwroot, seledascormid, scoid, attempt, viewmode, currentorg, sesskey, cmid, autocommit);
 }

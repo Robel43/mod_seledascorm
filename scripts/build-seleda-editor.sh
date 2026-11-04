@@ -4,6 +4,13 @@ set -eu
 ROOT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 SELEDA_REPO_URL=${SELEDA_STUDIO_REPO_URL:-https://github.com/Robel43/Timhirt-Studio.git}
 
+# Timhirt-Studio may be private. CI can provide a fine-grained token with
+# read-only Contents access through SELEDA_STUDIO_TOKEN. Keep the public URL
+# unchanged for local environments that already have Git credentials.
+if [ -n "${SELEDA_STUDIO_TOKEN:-}" ]; then
+    SELEDA_REPO_URL="https://x-access-token:${SELEDA_STUDIO_TOKEN}@github.com/Robel43/Timhirt-Studio.git"
+fi
+
 if [ -n "${SELEDA_STUDIO_REF:-}" ]; then
     SELEDA_REF="$SELEDA_STUDIO_REF"
 elif [ -f "$ROOT_DIR/.seleda-editor-ref" ]; then

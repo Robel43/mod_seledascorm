@@ -9,7 +9,7 @@
  * every amd/build module of the site in a single bundle in production, which
  * would run this file on every page instead of only inside the editor iframe.
  *
- * @package     mod_exescorm
+ * @package     mod_seledascorm
  * @copyright   2025 eXeLearning
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -74,7 +74,7 @@
         }
 
         parentWindow.postMessage({
-            source: 'exescorm-editor',
+            source: 'seledascorm-editor',
             type: type,
             data: data || {},
         }, '*');
@@ -367,7 +367,7 @@
 
         var message = event.data;
 
-        if (message.source === 'exescorm-modal' && message.type === 'save') {
+        if (message.source === 'seledascorm-modal' && message.type === 'save') {
             saveToMoodle();
             return;
         }

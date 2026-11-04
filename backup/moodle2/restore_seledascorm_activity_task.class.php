@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @subpackage backup-moodle2
  * @copyright  2010 onwards Eloy Lafuente (stronk7) {@link http://stronk7.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -23,13 +23,13 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/mod/exescorm/backup/moodle2/restore_exescorm_stepslib.php');
+require_once($CFG->dirroot . '/mod/seledascorm/backup/moodle2/restore_seledascorm_stepslib.php');
 
 /**
  * Exescorm restore task that provides all the settings and steps to perform one
  * complete restore of the activity.
  */
-class restore_exescorm_activity_task extends restore_activity_task {
+class restore_seledascorm_activity_task extends restore_activity_task {
 
     /**
      * Define (add) particular settings this activity can have
@@ -43,7 +43,7 @@ class restore_exescorm_activity_task extends restore_activity_task {
      */
     protected function define_my_steps() {
         // Exescorm only has one structure step.
-        $this->add_step(new restore_exescorm_activity_structure_step('exescorm_structure', 'exescorm.xml'));
+        $this->add_step(new restore_seledascorm_activity_structure_step('seledascorm_structure', 'seledascorm.xml'));
     }
 
     /**
@@ -53,7 +53,7 @@ class restore_exescorm_activity_task extends restore_activity_task {
     public static function define_decode_contents() {
         $contents = array();
 
-        $contents[] = new restore_decode_content('exescorm', array('intro'), 'exescorm');
+        $contents[] = new restore_decode_content('seledascorm', array('intro'), 'seledascorm');
 
         return $contents;
     }
@@ -65,8 +65,8 @@ class restore_exescorm_activity_task extends restore_activity_task {
     public static function define_decode_rules() {
         $rules = array();
 
-        $rules[] = new restore_decode_rule('EXESCORMVIEWBYID', '/mod/exescorm/view.php?id=$1', 'course_module');
-        $rules[] = new restore_decode_rule('EXESCORMINDEX', '/mod/exescorm/index.php?id=$1', 'course');
+        $rules[] = new restore_decode_rule('SELEDASCORMVIEWBYID', '/mod/seledascorm/view.php?id=$1', 'course_module');
+        $rules[] = new restore_decode_rule('SELEDASCORMINDEX', '/mod/seledascorm/index.php?id=$1', 'course');
 
         return $rules;
 
@@ -75,23 +75,23 @@ class restore_exescorm_activity_task extends restore_activity_task {
     /**
      * Define the restore log rules that will be applied
      * by the {@link restore_logs_processor} when restoring
-     * exescorm logs. It must return one array
+     * seledascorm logs. It must return one array
      * of {@link restore_log_rule} objects.
      */
     public static function define_restore_log_rules() {
         $rules = array();
 
-        $rules[] = new restore_log_rule('exescorm', 'add', 'view.php?id={course_module}', '{exescorm}');
-        $rules[] = new restore_log_rule('exescorm', 'update', 'view.php?id={course_module}', '{exescorm}');
-        $rules[] = new restore_log_rule('exescorm',
+        $rules[] = new restore_log_rule('seledascorm', 'add', 'view.php?id={course_module}', '{seledascorm}');
+        $rules[] = new restore_log_rule('seledascorm', 'update', 'view.php?id={course_module}', '{seledascorm}');
+        $rules[] = new restore_log_rule('seledascorm',
                                         'view',
-                                        'player.php?cm={course_module}&scoid={exescorm_sco}',
-                                        '{exescorm}'
+                                        'player.php?cm={course_module}&scoid={seledascorm_sco}',
+                                        '{seledascorm}'
                                     );
-        $rules[] = new restore_log_rule('exescorm', 'pre-view', 'view.php?id={course_module}', '{exescorm}');
-        $rules[] = new restore_log_rule('exescorm', 'report', 'report.php?id={course_module}', '{exescorm}');
-        $rules[] = new restore_log_rule('exescorm', 'launch', 'view.php?id={course_module}', '[result]');
-        $rules[] = new restore_log_rule('exescorm', 'delete attempts', 'report.php?id={course_module}', '[oldattempts]');
+        $rules[] = new restore_log_rule('seledascorm', 'pre-view', 'view.php?id={course_module}', '{seledascorm}');
+        $rules[] = new restore_log_rule('seledascorm', 'report', 'report.php?id={course_module}', '{seledascorm}');
+        $rules[] = new restore_log_rule('seledascorm', 'launch', 'view.php?id={course_module}', '[result]');
+        $rules[] = new restore_log_rule('seledascorm', 'delete attempts', 'report.php?id={course_module}', '[oldattempts]');
 
         return $rules;
     }
@@ -109,7 +109,7 @@ class restore_exescorm_activity_task extends restore_activity_task {
     public static function define_restore_log_rules_for_course() {
         $rules = array();
 
-        $rules[] = new restore_log_rule('exescorm', 'view all', 'index.php?id={course}', null);
+        $rules[] = new restore_log_rule('seledascorm', 'view all', 'index.php?id={course}', null);
 
         return $rules;
     }

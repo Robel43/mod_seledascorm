@@ -17,14 +17,14 @@
 /**
  * Exescorm url manager class.
  *
- * @package     mod_exescorm
- * @category    exescorm
+ * @package     mod_seledascorm
+ * @category    seledascorm
  * @copyright   2023 3&Punt
  * @author      Juan Carrera <juan@treipunt.com>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_exescorm\exeonline;
+namespace mod_seledascorm\exeonline;
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
@@ -39,8 +39,8 @@ class token_manager {
      */
     public static function get_jwt_token(array $payload = []) {
         $iat = time();
-        $exp = get_config('exescorm', 'tokenexpiration');
-        $key = get_config('exescorm', 'hmackey1');
+        $exp = get_config('seledascorm', 'tokenexpiration');
+        $key = get_config('seledascorm', 'hmackey1');
         $payload['iat'] = $iat;
         $payload['exp'] = $iat + $exp;
         return JWT::encode($payload, $key, 'HS256');
@@ -55,7 +55,7 @@ class token_manager {
      */
     public static function validate_jwt_token(string $token) {
         global $CFG;
-        $key = get_config('exescorm', 'hmackey1');
+        $key = get_config('seledascorm', 'hmackey1');
         // Validate JWT.
         try {
             if ($CFG->version < 2022041900) {

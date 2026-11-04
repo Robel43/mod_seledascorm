@@ -15,12 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Admin setting widget for the embedded eXeLearning editor.
+ * Admin status widget for the bundled Seleda editor.
  *
- * Renders a status card with action buttons inside the admin settings page.
- * Network I/O is executed through the plugin's AJAX services. In Moodle
- * Playground, outbound requests are handled by the PHP WASM networking layer
- * configured by the runtime.
+ * Renders a read-only status card. Seleda V1 ships the embedded editor
+ * with the plugin and does not download/replace it independently.
  *
  * @package    mod_exescorm
  * @copyright  2025 eXeLearning
@@ -84,7 +82,7 @@ class admin_setting_embeddededitor extends \admin_setting {
      * @return string Rendered HTML for the widget.
      */
     public function output_html($data, $query = ''): string {
-        global $PAGE, $OUTPUT;
+        global $OUTPUT;
 
         $status = \mod_exescorm\local\embedded_editor_source_resolver::get_status();
 
@@ -96,10 +94,11 @@ class admin_setting_embeddededitor extends \admin_setting {
         $sourcenone = ($status->active_source ===
             \mod_exescorm\local\embedded_editor_source_resolver::SOURCE_NONE);
 
-        // Determine which action buttons are available.
-        $caninstall   = !$status->moodledata_available;
-        $canupdate    = false; // JS will enable this after checking latest version.
-        $canuninstall = $status->moodledata_available;
+        // V1 ships Seleda with the plugin. Independent install/update/remove
+        // actions are disabled so an upstream editor cannot overwrite Seleda.
+        $caninstall = false;
+        $canupdate = false;
+        $canuninstall = false;
 
         // Build template context.
         $context = [
@@ -116,16 +115,6 @@ class admin_setting_embeddededitor extends \admin_setting {
             'can_update'               => $canupdate,
             'can_uninstall'            => $canuninstall,
         ];
-
-        // JS context passed to AMD init.
-        $jscontext = [
-            'sesskey'      => sesskey(),
-            'activesource' => $status->active_source,
-            'caninstall'   => $caninstall,
-            'canuninstall' => $canuninstall,
-        ];
-
-        $PAGE->requires->js_call_amd('mod_exescorm/admin_embedded_editor', 'init', [$jscontext]);
 
         $widgethtml = $OUTPUT->render_from_template('mod_exescorm/admin_embedded_editor', $context);
         $labelhtml = \html_writer::tag('label', s($this->visiblename));

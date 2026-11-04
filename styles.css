@@ -627,3 +627,78 @@
     font-size: 0.9rem;
 }
 
+
+
+/* SELEDA SCORM ALIGNMENT
+ * Product-facing styling only. Technical mod_exescorm selectors are retained
+ * so existing Moodle activities, player scripts and upstream upgrades remain compatible.
+ */
+.path-mod-exescorm {
+    --seleda-primary: #2f6df6;
+    --seleda-primary-dark: #2459d3;
+    --seleda-primary-light: #e3ebff;
+    --seleda-secondary: #12b8aa;
+    --seleda-secondary-dark: #0f968b;
+    --seleda-border: #e3e8ef;
+    --seleda-surface: #f6f8fb;
+    --seleda-text: #182230;
+}
+
+#page-mod-exescorm-player #exescormpage {
+    color: var(--seleda-text);
+}
+
+#page-mod-exescorm-player span#exescorm_nav button {
+    background-color: var(--seleda-primary);
+    border-radius: 8px;
+    transition: background-color .15s ease, box-shadow .15s ease, transform .15s ease;
+}
+
+#page-mod-exescorm-player span#exescorm_nav button:hover:not(:disabled),
+#page-mod-exescorm-player span#exescorm_nav button:focus-visible:not(:disabled) {
+    background-color: var(--seleda-primary-dark);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--seleda-primary) 20%, transparent);
+}
+
+#page-mod-exescorm-player span#exescorm_nav button:disabled {
+    opacity: .48;
+}
+
+#page-mod-exescorm-player .yui3-treeview-selected > .yui3-treeview-row {
+    background-color: var(--seleda-primary-light);
+    border-color: color-mix(in srgb, var(--seleda-primary) 28%, white);
+}
+
+#page-mod-exescorm-player .yui3-treeview-selected:focus > .yui3-treeview-row,
+#page-mod-exescorm-player .yui3-treeview-children[aria-multiselectable="true"] .yui3-treeview-selected > .yui3-treeview-row,
+#page-mod-exescorm-player .yui3-treeview-selected > .yui3-treeview-row:hover {
+    background-color: color-mix(in srgb, var(--seleda-primary-light) 72%, white);
+    border-color: color-mix(in srgb, var(--seleda-primary) 36%, white);
+}
+
+#page-mod-exescorm-player #exescormpage #exescorm_tree {
+    border-right-color: var(--seleda-border);
+}
+
+#page-mod-exescorm-player .tocbox_action-buttons a.btn:hover,
+#page-mod-exescorm-player .tocbox_action-buttons a.btn:focus-visible {
+    color: #fff;
+    background-color: var(--seleda-primary);
+    border-color: var(--seleda-primary);
+}
+
+.exescorm-editor-header {
+    border-bottom-color: var(--seleda-border);
+    box-shadow: inset 0 3px 0 var(--seleda-secondary);
+}
+
+.exescorm-loading-modal__spinner {
+    border-top-color: var(--seleda-secondary);
+}
+
+.path-mod-exescorm .btn-primary {
+    --bs-btn-bg: var(--seleda-primary);
+    --bs-btn-border-color: var(--seleda-primary);
+    --bs-btn-hover-bg: var(--seleda-primary-dark);
+    --bs-btn-hover-border-color: var(--seleda-primary-dark);
+}

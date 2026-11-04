@@ -1,4 +1,4 @@
-# Makefile for mod_exescorm Moodle plugin
+# Makefile for mod_seledascorm Moodle plugin
 
 # Define SED_INPLACE based on the operating system
 ifeq ($(shell uname), Darwin)
@@ -139,7 +139,7 @@ clean-editor:
 # Packaging
 # -------------------------------------------------------
 
-PLUGIN_NAME = mod_exescorm
+PLUGIN_NAME = mod_seledascorm
 
 
 # Create a distributable ZIP package
@@ -156,11 +156,11 @@ package:
 	$(SED_INPLACE) "s/\(plugin->release[[:space:]]*=[[:space:]]*'\)[^']*/\1$(RELEASE)/" version.php
 	@echo "Creating ZIP archive: $(PLUGIN_NAME)-$(RELEASE).zip..."
 	@if command -v rsync > /dev/null 2>&1 && command -v zip > /dev/null 2>&1; then \
-		rm -rf /tmp/exescorm-package; \
-		mkdir -p /tmp/exescorm-package/exescorm; \
-		rsync -av --exclude-from=.distignore ./ /tmp/exescorm-package/exescorm/; \
-		cd /tmp/exescorm-package && zip -qr "$(CURDIR)/$(PLUGIN_NAME)-$(RELEASE).zip" exescorm; \
-		rm -rf /tmp/exescorm-package; \
+		rm -rf /tmp/seledascorm-package; \
+		mkdir -p /tmp/seledascorm-package/seledascorm; \
+		rsync -av --exclude-from=.distignore ./ /tmp/seledascorm-package/seledascorm/; \
+		cd /tmp/seledascorm-package && zip -qr "$(CURDIR)/$(PLUGIN_NAME)-$(RELEASE).zip" seledascorm; \
+		rm -rf /tmp/seledascorm-package; \
 	else \
 		PYTHON=; \
 		for cmd in python3 py python; do \
@@ -179,7 +179,7 @@ package:
 	@# (an unanchored "vendor/" once removed the SCORM 1.2 pipwerks wrapper).
 	@if [ -d $(EDITOR_DIST_PATH) ] && command -v unzip > /dev/null 2>&1; then \
 		CONTENTS=$$(mktemp); \
-		unzip -Z1 "$(PLUGIN_NAME)-$(RELEASE).zip" | sed -n 's#^exescorm/##p' > "$$CONTENTS"; \
+		unzip -Z1 "$(PLUGIN_NAME)-$(RELEASE).zip" | sed -n 's#^seledascorm/##p' > "$$CONTENTS"; \
 		MISSING=$$(find $(EDITOR_DIST_PATH) -type f ! -name .DS_Store | grep -vxF -f "$$CONTENTS"); \
 		rm -f "$$CONTENTS"; \
 		if [ -n "$$MISSING" ]; then \

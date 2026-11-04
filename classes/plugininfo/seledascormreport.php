@@ -17,16 +17,16 @@
 /**
  * Subplugin info class.
  *
- * @package   mod_exescorm
+ * @package   mod_seledascorm
  * @copyright 2013 Petr Skoda {@link http://skodak.org}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace mod_exescorm\plugininfo;
+namespace mod_seledascorm\plugininfo;
 
 use core\plugininfo\base;
 
 
-class exescormreport extends base {
+class seledascormreport extends base {
     public function is_uninstall_allowed() {
         return true;
     }

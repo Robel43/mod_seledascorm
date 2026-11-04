@@ -17,28 +17,28 @@
 /**
  * eXeLearning Cloud url manager class.
  *
- * @package     mod_exescorm
- * @category    exescorm
+ * @package     mod_seledascorm
+ * @category    seledascorm
  * @copyright   2023 3&Punt
  * @author      Juan Carrera <juan@treipunt.com>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_exescorm\exeonline;
+namespace mod_seledascorm\exeonline;
 
 use coding_exception;
 use dml_exception;
-use mod_exescorm\exeonline\token_manager;
+use mod_seledascorm\exeonline\token_manager;
 use moodle_exception;
 use moodle_url;
 use stdClass;
 
-class exescorm_redirector {
+class seledascorm_redirector {
 
     /**
      * Module script eXeLearning sends the browser back to when the final destination is outside the module.
      */
-    private const RETURNTO_SCRIPT = '/mod/exescorm/returnto.php';
+    private const RETURNTO_SCRIPT = '/mod/seledascorm/returnto.php';
 
     /**
      * Query parameter carrying the final destination through RETURNTO_SCRIPT.
@@ -52,7 +52,7 @@ class exescorm_redirector {
      * to Moodle last and then applies its own owner check, so every other teacher who may edit the
      * activity in Moodle gets "Access denied" (exelearning/exelearning#2498). /new_ode always opens a
      * project owned by the current eXeLearning user and loads the package from get_ode.php, so Moodle,
-     * which holds the current package and already checked mod/exescorm:addinstance, stays the
+     * which holds the current package and already checked mod/seledascorm:addinstance, stays the
      * authority on what is edited and by whom.
      */
     private const TARGET = '/new_ode';
@@ -94,7 +94,7 @@ class exescorm_redirector {
     public static function get_redirection_url(int $cmid, moodle_url $returnto = null, string $action = null) {
         global $USER;
         $returnto = $returnto ?? self::$returnto;
-        if ($returnto !== null && strpos($returnto->get_path(), 'mod/exescorm') !== false) {
+        if ($returnto !== null && strpos($returnto->get_path(), 'mod/seledascorm') !== false) {
             // Ensure return url has a valid cmid if it is a module view url.
             $returnto->params(['id' => $cmid]);
         } else {
@@ -103,7 +103,7 @@ class exescorm_redirector {
             $returnto = self::get_returnto_url($cmid, $returnto);
         }
         // Get remote URL from config.
-        $exeonlineurl = get_config('exescorm', 'exeonlinebaseuri');
+        $exeonlineurl = get_config('seledascorm', 'exeonlinebaseuri');
         $payload = [
             'action' => self::TARGET,
             'cmid' => $cmid,
@@ -111,8 +111,8 @@ class exescorm_redirector {
             'returnurl' => $returnto->out(false),
             'userid' => $USER->id,
             'provider' => [
-                'name' => get_config('exescorm', 'providername'),
-                'version' => get_config('exescorm', 'providerversion'),
+                'name' => get_config('seledascorm', 'providername'),
+                'version' => get_config('seledascorm', 'providerversion'),
             ],
         ];
         $jwttoken = token_manager::get_jwt_token($payload);
@@ -129,7 +129,7 @@ class exescorm_redirector {
      * Wraps a destination outside the module into a return url eXeLearning can work with.
      *
      * eXeLearning derives its Moodle callback endpoints (get_ode.php / set_ode.php) by splitting the
-     * return url on the module path, so anything outside /mod/exescorm (the course page used by the
+     * return url on the module path, so anything outside /mod/seledascorm (the course page used by the
      * "Edit on eXeLearning and return to course" button, for instance) aborts the send back with
      * "Could not build platform integration URL from return URL". RETURNTO_SCRIPT does live under the
      * module path, so it is accepted, and it forwards the browser to the real destination.

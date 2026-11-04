@@ -326,7 +326,7 @@ $string['missing_attribute'] = 'Falta l\'atribut {$a->attr} en l\'etiqueta {$a->
 $string['missingparam'] = 'Falta un paràmetre necessari o el valor és incorrecte';
 $string['missing_tag'] = 'Falta l\'etiqueta {$a->tag}';
 $string['mode'] = 'Mode';
-$string['modulename'] = 'Seleda SCORM';
+$string['modulename'] = 'Seleda';
 $string['modulename_help'] = 'Un paquet SCORM creat amb eXeLearning és un conjunt de fitxers empaquetats segons un estàndard consensuat d\'objectes d\'aprenentatge. El mòdul d\'activitat eXeLearning (SCORM) permet pujar i afegir al curs fitxers zip que continguin paquets en format SCORM o AICC.
 
 El contingut es mostra en varies pàgines amb navegació entre elles. Hi ha diverses opcions per mostrar el contingut en finestres emergents, amb índexs, botons de navegació, etc. Les activitats eXeLearning normalment inclouen preguntes, les qualificacions de les quals es desen al llibre de qualificacions.
@@ -336,7 +336,7 @@ Les activitat eXeLearning es poden emprar per:
 * Fer presentacions amb contingut multimèdia i animacions
 * Com una eina per avaluar';
 $string['modulename_link'] = 'mod/mod_exescorm/view';
-$string['modulenameplural'] = 'Seleda SCORM';
+$string['modulenameplural'] = 'Seleda activities';
 $string['nav'] = 'Mostra la navegació';
 $string['nav_help'] = 'Aquest paràmetre especifica si s\'han de mostrar o ocultar els botons de navegació i la seva posició.
 
@@ -394,8 +394,8 @@ $string['player:skipnext'] = 'Següent del mateix nivell';
 $string['player:skipprev'] = 'Anterior del mateix nivell';
 $string['player:toogleFullscreen'] = 'Alternar pantalla completa';
 $string['player:up'] = 'Pujar nivel';
-$string['pluginadministration'] = 'Seleda SCORM';
-$string['pluginname'] = 'Seleda SCORM';
+$string['pluginadministration'] = 'Seleda administration';
+$string['pluginname'] = 'Seleda';
 $string['popup'] = 'Obre els objectes d\'aprenentatge en una altra finestra';
 $string['popuplaunched'] = 'Aquest paquet SCORM ha estat llançat en una finestra emergent, si heu acabat de veure\'l cliqueu aquí per tornar a la pàgina del curs.';
 $string['popupmenu'] = 'En un menú desplegable';

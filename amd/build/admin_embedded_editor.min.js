@@ -20,7 +20,7 @@
  * Playground, outbound requests are handled by the PHP WASM networking layer
  * configured by the runtime.
  *
- * @module     mod_exescorm/admin_embedded_editor
+ * @module     mod_seledascorm/admin_embedded_editor
  * @copyright  2025 eXeLearning
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -41,7 +41,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
      * @returns {jQuery} The container element.
      */
     var getContainer = function() {
-        return $('.mod_exescorm-admin-embedded-editor').first();
+        return $('.mod_seledascorm-admin-embedded-editor').first();
     };
 
     /**
@@ -62,8 +62,8 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
      */
     var getLatestVersionElements = function(container) {
         return {
-            spinnerEl: container.find('.mod_exescorm-latest-version-spinner'),
-            textEl: container.find('.mod_exescorm-latest-version-text'),
+            spinnerEl: container.find('.mod_seledascorm-latest-version-spinner'),
+            textEl: container.find('.mod_seledascorm-latest-version-text'),
         };
     };
 
@@ -83,18 +83,18 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
      * @param {Object} statusData Status object from get_status response.
      */
     var enableButtons = function(container, statusData) {
-        container.find('.mod_exescorm-btn-install').prop('disabled', true).hide();
-        container.find('.mod_exescorm-btn-update').prop('disabled', true).hide();
-        container.find('.mod_exescorm-btn-uninstall').prop('disabled', true).hide();
+        container.find('.mod_seledascorm-btn-install').prop('disabled', true).hide();
+        container.find('.mod_seledascorm-btn-update').prop('disabled', true).hide();
+        container.find('.mod_seledascorm-btn-uninstall').prop('disabled', true).hide();
 
         if (statusData.can_install) {
-            container.find('.mod_exescorm-btn-install').prop('disabled', false).show();
+            container.find('.mod_seledascorm-btn-install').prop('disabled', false).show();
         }
         if (statusData.can_update) {
-            container.find('.mod_exescorm-btn-update').prop('disabled', false).show();
+            container.find('.mod_seledascorm-btn-update').prop('disabled', false).show();
         }
         if (statusData.can_uninstall) {
-            container.find('.mod_exescorm-btn-uninstall').prop('disabled', false).show();
+            container.find('.mod_seledascorm-btn-uninstall').prop('disabled', false).show();
         }
     };
 
@@ -104,8 +104,8 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
      * @param {jQuery} container The widget container.
      */
     var showProgress = function(container) {
-        container.find('.mod_exescorm-progress-container').show();
-        container.find('.mod_exescorm-result-area').hide();
+        container.find('.mod_seledascorm-progress-container').show();
+        container.find('.mod_seledascorm-result-area').hide();
     };
 
     /**
@@ -114,7 +114,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
      * @param {jQuery} container The widget container.
      */
     var hideProgress = function(container) {
-        container.find('.mod_exescorm-progress-container').hide();
+        container.find('.mod_seledascorm-progress-container').hide();
     };
 
     /**
@@ -125,8 +125,8 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
      * @param {string} message Optional message to display next to the spinner.
      */
     var setProgressState = function(container, state, message) {
-        var msgEl = container.find('.mod_exescorm-progress-message');
-        var spinnerEl = container.find('.mod_exescorm-progress-container .spinner-border');
+        var msgEl = container.find('.mod_seledascorm-progress-message');
+        var spinnerEl = container.find('.mod_seledascorm-progress-container .spinner-border');
 
         if (state === 'active') {
             spinnerEl.show();
@@ -169,18 +169,18 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
      * @param {Object} statusData Status object from get_status response.
      */
     var updateStatusSummary = function(container, statusData) {
-        var summaryEl = container.find('.mod_exescorm-status-primary');
+        var summaryEl = container.find('.mod_seledascorm-status-primary');
         if (!summaryEl.length) {
             return;
         }
 
         Str.get_strings([
-            {key: 'editormoodledatasource', component: 'mod_exescorm'},
-            {key: 'editorinstalledat', component: 'mod_exescorm'},
-            {key: 'editorbundledsource', component: 'mod_exescorm'},
-            {key: 'editorbundleddesc', component: 'mod_exescorm'},
-            {key: 'noeditorinstalled', component: 'mod_exescorm'},
-            {key: 'editornotinstalleddesc', component: 'mod_exescorm'},
+            {key: 'editormoodledatasource', component: 'mod_seledascorm'},
+            {key: 'editorinstalledat', component: 'mod_seledascorm'},
+            {key: 'editorbundledsource', component: 'mod_seledascorm'},
+            {key: 'editorbundleddesc', component: 'mod_seledascorm'},
+            {key: 'noeditorinstalled', component: 'mod_seledascorm'},
+            {key: 'editornotinstalleddesc', component: 'mod_seledascorm'},
         ]).then(function(strings) {
             var html = '';
 
@@ -215,7 +215,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
      * @returns {Promise<string>}
      */
     var getLatestVersionLabel = function(version) {
-        return Str.get_string('editorlatestversionongithub', 'mod_exescorm')
+        return Str.get_string('editorlatestversionongithub', 'mod_seledascorm')
             .then(function(prefix) {
                 return prefix + ' v' + version;
             })
@@ -235,9 +235,9 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
             return Promise.resolve(null);
         }
 
-        return Str.get_string('updateavailable', 'mod_exescorm')
+        return Str.get_string('updateavailable', 'mod_seledascorm')
             .catch(function() {
-                return Str.get_string('editorupdateavailable', 'mod_exescorm', statusData.latest_version);
+                return Str.get_string('editorupdateavailable', 'mod_seledascorm', statusData.latest_version);
             })
             .catch(function() {
                 return null;
@@ -294,8 +294,8 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
      * @param {string} type Bootstrap alert type.
      */
     var showResultMessage = function(container, message, type) {
-        var resultArea = container.find('.mod_exescorm-result-area');
-        var msgEl = container.find('.mod_exescorm-result-message');
+        var resultArea = container.find('.mod_seledascorm-result-area');
+        var msgEl = container.find('.mod_seledascorm-result-message');
 
         msgEl.removeClass('alert-success alert-danger alert-warning')
             .addClass('alert-' + type)
@@ -311,7 +311,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
      */
     var callGetStatus = function(checklatest) {
         var requests = Ajax.call([{
-            methodname: 'mod_exescorm_manage_embedded_editor_status',
+            methodname: 'mod_seledascorm_manage_embedded_editor_status',
             args: {checklatest: !!checklatest},
         }]);
         return requests[0];
@@ -325,7 +325,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
      */
     var callExecuteAction = function(action) {
         var requests = Ajax.call([{
-            methodname: 'mod_exescorm_manage_embedded_editor_action',
+            methodname: 'mod_seledascorm_manage_embedded_editor_action',
             args: {action: action},
         }]);
         return requests[0];
@@ -359,7 +359,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
             iterations++;
 
             if (iterations > MAX_POLL_ITERATIONS) {
-                Str.get_string('operationtimedout', 'mod_exescorm').then(function(msg) {
+                Str.get_string('operationtimedout', 'mod_seledascorm').then(function(msg) {
                     setProgressState(container, 'error', msg);
                     showResultMessage(container, msg, 'danger');
                     Notification.addNotification({message: msg, type: 'error'});
@@ -379,7 +379,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
 
             callGetStatus(false).then(function(statusData) {
                 if (statusData.install_stale) {
-                    Str.get_string('installstale', 'mod_exescorm').then(function(msg) {
+                    Str.get_string('installstale', 'mod_seledascorm').then(function(msg) {
                         setProgressState(container, 'error', msg);
                         showResultMessage(container, msg, 'warning');
                         Notification.addNotification({message: msg, type: 'warning'});
@@ -401,7 +401,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
                     return;
                 }
 
-                Str.get_string('stillworking', 'mod_exescorm').then(function(msg) {
+                Str.get_string('stillworking', 'mod_seledascorm').then(function(msg) {
                     setProgressState(container, 'active', msg);
                 }).catch(function() {
                     setProgressState(container, 'active');
@@ -413,7 +413,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
             });
         };
 
-        Str.get_string('operationtakinglong', 'mod_exescorm').then(function(msg) {
+        Str.get_string('operationtakinglong', 'mod_seledascorm').then(function(msg) {
             setProgressState(container, 'active', msg);
         }).catch(function() {
             setProgressState(container, 'active');
@@ -438,8 +438,8 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
         var msgStringKey = (action === 'uninstall') ? 'editoruninstallingmessage' : 'editordownloadingmessage';
 
         Str.get_strings([
-            {key: btnStringKey, component: 'mod_exescorm'},
-            {key: msgStringKey, component: 'mod_exescorm'},
+            {key: btnStringKey, component: 'mod_seledascorm'},
+            {key: msgStringKey, component: 'mod_seledascorm'},
         ]).then(function(strings) {
             clickedBtn.html(strings[0]);
             setProgressState(container, 'active', strings[1]);
@@ -508,8 +508,8 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
     var handleActionClick = function(container, action, runtimeConfig) {
         if (action === 'uninstall') {
             Str.get_strings([
-                {key: 'confirmuninstalltitle', component: 'mod_exescorm'},
-                {key: 'confirmuninstall', component: 'mod_exescorm'},
+                {key: 'confirmuninstalltitle', component: 'mod_seledascorm'},
+                {key: 'confirmuninstall', component: 'mod_seledascorm'},
                 {key: 'yes', component: 'core'},
                 {key: 'no', component: 'core'},
             ]).then(function(strings) {

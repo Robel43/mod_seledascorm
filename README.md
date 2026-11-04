@@ -2,7 +2,7 @@
 
 Seleda is the Moodle 4.5 activity plugin used with **Seleda Studio** to create, edit, publish, launch and track SCORM learning content directly from Moodle.
 
-This repository is a compatibility-preserving customization of upstream `exelearning/mod_exescorm`. The product is Seleda-branded, but the Moodle technical identity remains `mod_exescorm` so existing activities, attempts, grades, completion data, backups and upgrade paths remain intact.
+This repository is a deliberate Seleda architecture fork of upstream `exelearning/mod_exescorm`. V1 now uses its own Moodle technical identity, `mod_seledascorm`, instead of masquerading as the upstream module.
 
 ## Current V1 architecture
 
@@ -26,19 +26,19 @@ Moodle stores editable source + exported SCORM package
 
 The same embedded Seleda bundle is used for both new activity creation and later editing. There is no separate edit architecture.
 
-## Compatibility contract
+## Technical identity and migration boundary
 
-The repository and user-facing product are Seleda-branded, but these upstream technical identifiers are intentionally preserved:
+The Seleda V1 technical identity is:
 
-- plugin component: `mod_exescorm`
-- installation folder: `mod/exescorm`
-- database tables: `exescorm_*`
-- capabilities: `mod/exescorm:*`
+- plugin component: `mod_seledascorm`
+- installation folder: `mod/seledascorm`
+- database tables: `seledascorm_*`
+- capabilities: `mod/seledascorm:*`
 - SCORM 1.2 / 2004 APIs
 - backup and restore identifiers
 - completion and grading integration identifiers
 
-Do **not** rename the plugin folder to `mod/seledascorm`. Doing so would break compatibility with existing Moodle data.
+`mod_seledascorm` is intentionally a different Moodle component from upstream `mod_exescorm`. An existing `mod_exescorm` installation is therefore **not** an automatic in-place upgrade target. Migrating historical activities, attempts, grades, completion records, files, capabilities and backups requires a separate migration procedure.
 
 ## Embedded Seleda Studio
 
@@ -192,6 +192,8 @@ The next edit reopens the updated source rather than starting a blank project.
 
 ## Building the embedded editor
 
+The embedded editor is a **required part of every distributable Seleda plugin ZIP**. Moodle administrators do not download it separately after installation.
+
 The supported Moodle-side build command is:
 
 ```bash
@@ -217,6 +219,12 @@ feature/seleda-embedded-editor
 ```
 
 The generic stock eXeLearning build path has been removed from the active Makefile flow. `build-editor-no-update` remains only as a compatibility alias to the same Seleda build.
+
+### Private Timhirt-Studio access
+
+The embedded profile currently lives in the private `Robel43/Timhirt-Studio` repository. CI/release builds can supply a fine-grained token through the `SELEDA_STUDIO_TOKEN` repository secret. The token only needs read access to repository contents.
+
+`make package RELEASE=X.Y.Z` now depends on `build-editor`; it refuses to produce a distributable ZIP unless the embedded bundle exists.
 
 ## Build integrity checks
 
@@ -269,7 +277,7 @@ extract /static
 write dist/static/
         |
         v
-package mod_exescorm ZIP
+package mod_seledascorm ZIP
 ```
 
 The final Moodle plugin ZIP therefore contains the actual Seleda embedded editor rather than downloading a stock eXeLearning static release.
@@ -335,7 +343,7 @@ The plugin is developed and validated against Moodle 4.5.
 Install the plugin in:
 
 ```text
-{moodle-root}/mod/exescorm
+{moodle-root}/mod/seledascorm
 ```
 
 Then complete the Moodle upgrade from the web interface or run:
@@ -347,13 +355,11 @@ php admin/cli/purge_caches.php
 
 During the New settings stage, configure the Seleda display name and optional logo.
 
-## Updating an existing mod_exescorm installation
+## Migrating from an existing mod_exescorm installation
 
-Back up the existing plugin directory and Moodle database before replacing plugin code.
+Do not replace an existing `mod_exescorm` directory with this plugin as though it were the same Moodle component. Back up the Moodle database and files first. A dedicated migration path is required to move historical `mod_exescorm` data into `mod_seledascorm` storage.
 
-Because the technical component remains `mod_exescorm`, this Seleda fork is intended to upgrade an existing eXeSCORM installation in place while preserving existing content and tracking data.
-
-After replacing the plugin code:
+For a clean Seleda installation:
 
 ```bash
 php admin/cli/upgrade.php
@@ -375,7 +381,7 @@ Verify at minimum:
 
 The readable reporting implementation does not introduce a second grade store.
 
-It reads Moodle's existing `exescorm_scoes_track` records and enriches them with readable Seleda interaction metadata where available.
+It reads Moodle's existing `seledascorm_scoes_track` records and enriches them with readable Seleda interaction metadata where available.
 
 Supported behavior includes:
 
@@ -401,7 +407,7 @@ It checks, among other things:
 
 - PHP syntax
 - branding JavaScript syntax
-- preserved `mod_exescorm` identity
+- preserved `mod_seledascorm` identity
 - Seleda language strings
 - installation branding settings
 - Create/Edit strings
@@ -475,12 +481,10 @@ The implementation guide is intended to become the final technical handover docu
 
 Current upstream base:
 
-- repository: `exelearning/mod_exescorm`
-- internal component: `mod_exescorm`
+- repository: `exelearning/mod_seledascorm`
+- internal component: `mod_seledascorm`
 
-Upstream compatibility fixes should be merged without renaming the technical component.
-
-Seleda-specific changes should remain isolated, documented and reviewable so future upstream synchronization stays manageable.
+Upstream fixes may still be reviewed and ported, but component-specific identifiers must be adapted to `mod_seledascorm`. Seleda-specific changes should remain isolated, documented and reviewable so future upstream synchronization stays manageable.
 
 ## Repository
 

@@ -109,6 +109,14 @@ Current upstream base:
 
 Upstream compatibility fixes should be merged into this fork without renaming the technical plugin identity. Seleda-specific changes should remain isolated and documented so future upstream synchronization stays reviewable.
 
+## Technical implementation documentation
+
+The complete living implementation and handover record is maintained in:
+
+`docs/SELEDA_MOODLE_PLUGIN_IMPLEMENTATION_GUIDE.md`
+
+It documents the embedded editor architecture, installation-stage branding, Create/Edit bridge, Content Block packaging, reporting, validation, release workflow, compatibility rules, and implementation history. Update it whenever a material plugin or embedded-editor change is made.
+
 ## Repository
 
 ```text

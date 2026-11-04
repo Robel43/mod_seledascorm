@@ -90,14 +90,14 @@ $string['completiondetail:completionscore'] = 'Receive a score of {$a} or more';
 $string['completiondetail:allscos'] = 'Do all parts of this activity';
 $string['completionscorerequired'] = 'Require minimum score';
 $string['completionscorerequireddesc'] = 'Minimum score of {$a} is required for completion';
-$string['completionscorerequired_help'] = 'Enabling this setting will require a user to have at least the minimum score entered to be marked complete in this Seleda SCORM activity, as well as any other Activity Completion requirements.';
+$string['completionscorerequired_help'] = 'Enabling this setting will require a user to have at least the minimum score entered to be marked complete in this Seleda activity, as well as any other Activity Completion requirements.';
 $string['completionstatus_passed'] = 'Passed';
 $string['completionstatus_completed'] = 'Completed';
 $string['completionstatusallscos'] = 'Require all scos to return completion status';
 $string['completionstatusallscos_help'] = 'Some SCORM packages contain multiple components or "scos" - when this is enabled all scos within the package must return the relevant lesson_status for this activity to be flagged complete.';
 $string['completionstatusrequired'] = 'Require status';
 $string['completionstatusrequireddesc'] = 'Student must achieve at least one of the following statuses: {$a}';
-$string['completionstatusrequired_help'] = 'Checking one or more statuses will require a user to achieve at least one of the checked statuses in order to be marked complete in this Seleda SCORM activity, as well as any other Activity Completion requirements.';
+$string['completionstatusrequired_help'] = 'Checking one or more statuses will require a user to achieve at least one of the checked statuses in order to be marked complete in this Seleda activity, as well as any other Activity Completion requirements.';
 $string['confirmloosetracks'] = 'WARNING: The package seems to be changed or modified. If the package structure is changed, some users tracks may be lost during update process.';
 $string['contents'] = 'Contents';
 $string['coursepacket'] = 'Course package';
@@ -126,7 +126,7 @@ $string['displaycoursestructure_help'] = 'If enabled, the table of contents is d
 $string['displaycoursestructuredesc'] = 'If enabled, the table of contents is displayed on the Seleda Studio outline page.';
 $string['displaydesc'] = 'Whether to display the Seleda Studio content in a new window.';
 $string['displaysettings'] = 'Display settings';
-$string['dnduploadexescorm'] = 'Add a Seleda Studio SCORM package';
+$string['dnduploadexescorm'] = 'Add a Seleda Studio package';
 $string['domxml'] = 'DOMXML external library';
 $string['editdialogcontent'] = 'You are about to edit this package in Seleda Studio. When you finish editing, you will return to Moodle automatically.';
 $string['editdialogcontent:caution'] = 'If the activity has grades or attempts, they might be lost if you change the content structure or any interactive activity in Seleda Studio.';
@@ -246,8 +246,8 @@ $string['hidebrowsedesc'] = 'Preview mode allows a student to browse an activity
 $string['hideexit'] = 'Hide exit link';
 $string['hidereview'] = 'Hide review button';
 $string['hidetoc'] = 'Display course structure in player';
-$string['hidetoc_help'] = 'How the table of contents is displayed in the Seleda SCORM player';
-$string['hidetocdesc'] = 'This setting specifies how the table of contents is displayed in the Seleda SCORM player.';
+$string['hidetoc_help'] = 'How the table of contents is displayed in the Seleda player';
+$string['hidetocdesc'] = 'This setting specifies how the table of contents is displayed in the Seleda player.';
 $string['EXESCORM_HIGHESTATTEMPT'] = 'Highest attempt';
 $string['chooseapacket'] = 'Choose or update a package';
 $string['identifier'] = 'Question identifier';
@@ -307,8 +307,8 @@ $string['last'] = 'Last accessed on';
 $string['lastaccess'] = 'Last access';
 $string['lastattempt'] = 'Last completed attempt';
 $string['lastattemptlock'] = 'Lock after final attempt';
-$string['lastattemptlock_help'] = 'If enabled, a student is prevented from launching the Seleda SCORM player after using up all their allocated attempts.';
-$string['lastattemptlockdesc'] = 'If enabled, a student is prevented from launching the Seleda SCORM player after using up all their allocated attempts.';
+$string['lastattemptlock_help'] = 'If enabled, a student is prevented from launching the Seleda player after using up all their allocated attempts.';
+$string['lastattemptlockdesc'] = 'If enabled, a student is prevented from launching the Seleda player after using up all their allocated attempts.';
 $string['location'] = 'Show the location bar';
 $string['max'] = 'Max score';
 $string['maximumattempts'] = 'Number of attempts';
@@ -322,17 +322,17 @@ $string['missing_attribute'] = 'Missing attribute {$a->attr} in tag {$a->tag}';
 $string['missingparam'] = 'A required parameter is missing or wrong';
 $string['missing_tag'] = 'Missing tag {$a->tag}';
 $string['mode'] = 'Mode';
-$string['modulename'] = 'Seleda SCORM';
-$string['modulename_help'] = 'An Seleda Studio package is a collection of files which are packaged according to an agreed standard for learning objects. The Seleda SCORM activity module enables Seleda Studio packages to be uploaded as a zip file and added to a course.
+$string['modulename'] = 'Seleda';
+$string['modulename_help'] = 'An Seleda Studio package is a collection of files which are packaged according to an agreed standard for learning objects. The Seleda activity module enables Seleda Studio packages to be uploaded as a zip file and added to a course.
 
-Content is usually displayed over several pages, with navigation between the pages. There are various options for displaying content in a pop-up window, with a table of contents, with navigation buttons etc. Seleda SCORM activities generally include questions, with grades being recorded in the gradebook.
+Content is usually displayed over several pages, with navigation between the pages. There are various options for displaying content in a pop-up window, with a table of contents, with navigation buttons etc. Seleda activities generally include questions, with grades being recorded in the gradebook.
 
-Seleda SCORM activities may be used
+Seleda activities may be used
 
 * For presenting multimedia content and animations
 * As an assessment tool';
 $string['modulename_link'] = 'mod/mod_exescorm/view';
-$string['modulenameplural'] = 'Seleda SCORM activities';
+$string['modulenameplural'] = 'Seleda activities';
 $string['nav'] = 'Show Navigation';
 $string['nav_help'] = 'This setting specifies whether to show or hide the navigation buttons and their position.
 
@@ -344,7 +344,7 @@ There are 3 options:
 $string['navdesc'] = 'This setting specifies whether to show or hide navigation buttons and their position.';
 $string['navpositionleft'] = 'Position of navigation buttons from left in pixels.';
 $string['navpositiontop'] = 'Position of navigation buttons from top in pixels.';
-$string['networkdropped'] = 'The Seleda SCORM player has determined that your Internet connection is unreliable or has been interrupted. If you continue in this Seleda SCORM activity, your progress may not be saved.<br />
+$string['networkdropped'] = 'The Seleda player has determined that your Internet connection is unreliable or has been interrupted. If you continue in this Seleda activity, your progress may not be saved.<br />
 You should exit the activity now, and return when you have a dependable Internet connection.';
 $string['newattempt'] = 'Start a new attempt';
 $string['next'] = 'Continue';
@@ -373,7 +373,7 @@ $string['optionsadv_desc'] = 'If checked the width and height will be listed as 
 $string['organization'] = 'Organisation';
 $string['organizations'] = 'Organisations';
 $string['othersettings'] = 'Additional settings';
-$string['page-mod-exescorm-x'] = 'Any Seleda SCORM module page';
+$string['page-mod-exescorm-x'] = 'Any Seleda module page';
 $string['pagesize'] = 'Page size';
 $string['package'] = 'Package file';
 $string['package_help'] = 'The package file is a zip file containing and Seleda Studio content definition files.';
@@ -390,8 +390,8 @@ $string['player:skipnext'] = 'Next within this level';
 $string['player:skipprev'] = 'Previous within this level';
 $string['player:toogleFullscreen'] = 'Toggle fullscreen';
 $string['player:up'] = 'Level up';
-$string['pluginadministration'] = 'Seleda SCORM administration';
-$string['pluginname'] = 'Seleda SCORM';
+$string['pluginadministration'] = 'Seleda administration';
+$string['pluginname'] = 'Seleda';
 $string['popup'] = 'New window';
 $string['popuplaunched'] = 'This Seleda Studio content has been launched in a popup window. If you have finished viewing this resource, click here to return to the course page.';
 $string['popupmenu'] = 'In a drop-down menu';
@@ -414,7 +414,7 @@ $string['privacy:metadata:scoes_track:value'] = 'The value of the given element'
 $string['privacy:metadata:exescorm_aicc_session'] = 'The session information of the AICC HACP';
 $string['privacy:metadata:exescorm_scoes_track'] = 'The tracked data of the SCOes belonging to the activity';
 $string['privacy:metadata:timemodified'] = 'The time when the tracked element was last modified';
-$string['privacy:metadata:userid'] = 'The ID of the user who accessed the Seleda SCORM activity';
+$string['privacy:metadata:userid'] = 'The ID of the user who accessed the Seleda activity';
 $string['protectpackagedownloads'] = 'Protect package downloads';
 $string['protectpackagedownloads_desc'] = 'If enabled, Seleda Studio packages can be downloaded only if the user has the course:manageactivities capability. If disabled, Seleda Studio packages can always be downloaded.';
 $string['raw'] = 'Raw score';
@@ -517,7 +517,7 @@ $string['unsavedchanges'] = 'You have unsaved changes. Are you sure you want to 
 // Deprecated since Moodle 4.0.
 $string['info'] = 'Info';
 $string['displayactivityname'] = 'Display activity name';
-$string['displayactivityname_help'] = 'Whether or not to display the activity name above the Seleda SCORM player.';
+$string['displayactivityname_help'] = 'Whether or not to display the activity name above the Seleda player.';
 $string['nosourcetoedit'] = 'This activity\'s package does not contain a Seleda Studio source, so it cannot be opened in the embedded editor. It still works as a SCORM package.';
 $string['nosourcetosave'] = 'The exported package does not contain a Seleda Studio source, so it was not saved. The activity keeps its previous package.';
 $string['elpxneedsconversion'] = 'This activity currently contains an .elpx project. Open it in the embedded Seleda Studio editor and save to convert it to a SCORM 1.2 package for playback and tracking.';

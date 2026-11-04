@@ -17,12 +17,12 @@
 /**
  * Tests for the styles upload admin setting.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  2025 eXeLearning
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_exescorm\admin;
+namespace mod_seledascorm\admin;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -33,7 +33,7 @@ require_once($CFG->libdir . '/filelib.php');
 /**
  * Regression tests covering the save flow of admin_setting_stylesupload.
  *
- * @covers \mod_exescorm\admin\admin_setting_stylesupload
+ * @covers \mod_seledascorm\admin\admin_setting_stylesupload
  */
 class admin_setting_stylesupload_test extends \advanced_testcase {
 
@@ -51,7 +51,7 @@ class admin_setting_stylesupload_test extends \advanced_testcase {
      */
     private function build_setting(): admin_setting_stylesupload {
         return new admin_setting_stylesupload(
-            'exescorm/styles_drops',
+            'seledascorm/styles_drops',
             'Style ZIP package',
             'hint',
             'styles_drops',
@@ -114,7 +114,7 @@ class admin_setting_stylesupload_test extends \advanced_testcase {
         // First save: the ZIP is consumed, extracted, and the filearea
         // is left empty by the service.
         $this->assertSame('', $setting->write_setting((string) $draftitemid));
-        $registry = \mod_exescorm\local\styles_service::get_registry();
+        $registry = \mod_seledascorm\local\styles_service::get_registry();
         $this->assertArrayHasKey('mystyle', $registry['uploaded']);
 
         // Second save with nothing attached must not return an error.
@@ -129,7 +129,7 @@ class admin_setting_stylesupload_test extends \advanced_testcase {
      * @return string ZIP bytes.
      */
     private function make_style_zip_contents(string $name): string {
-        $tmp = tempnam(sys_get_temp_dir(), 'exescormstyle') . '.zip';
+        $tmp = tempnam(sys_get_temp_dir(), 'seledascormstyle') . '.zip';
         @unlink($tmp);
         $zip = new \ZipArchive();
         $this->assertTrue($zip->open($tmp, \ZipArchive::CREATE) === true);

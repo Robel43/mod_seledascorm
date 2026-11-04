@@ -49,4 +49,26 @@ test -d "$ROOT_DIR/dist/static/app"
 test -d "$ROOT_DIR/dist/static/files"
 test -d "$ROOT_DIR/dist/static/libs"
 
+# Verify the Seleda-specific V1 Content Blocks and modified editors are present.
+for path in \
+    "$ROOT_DIR/dist/static/files/perm/idevices/base/mcq-feedback" \
+    "$ROOT_DIR/dist/static/files/perm/idevices/base/speaking-practice" \
+    "$ROOT_DIR/dist/static/files/perm/idevices/base/page-navigation" \
+    "$ROOT_DIR/dist/static/files/perm/idevices/base/dragdrop" \
+    "$ROOT_DIR/dist/static/files/perm/idevices/base/beforeafter" \
+    "$ROOT_DIR/dist/static/files/perm/idevices/base/map" \
+    "$ROOT_DIR/dist/static/files/perm/idevices/base/quick-questions" \
+    "$ROOT_DIR/dist/static/files/perm/idevices/base/complete"
+do
+    if [ ! -d "$path" ]; then
+        echo "Missing required Seleda Content Block/editor customization: $path" >&2
+        exit 1
+    fi
+done
+
+if ! grep -RIl -m1 "Seleda Studio" "$ROOT_DIR/dist/static" >/dev/null 2>&1; then
+    echo "Embedded bundle does not contain expected Seleda Studio branding." >&2
+    exit 1
+fi
+
 echo "Embedded Seleda bundle written to $ROOT_DIR/dist/static"

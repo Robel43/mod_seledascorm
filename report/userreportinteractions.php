@@ -26,6 +26,8 @@ require_once("../../../config.php");
 require_once($CFG->dirroot.'/mod/exescorm/locallib.php');
 require_once($CFG->dirroot.'/mod/exescorm/report/reportlib.php');
 require_once($CFG->libdir . '/tablelib.php');
+require_once(__DIR__ . '/timhirt_reporting.php');
+use mod_exescorm\local\timhirt_reporting;
 
 $id = required_param('id', PARAM_INT); // Course Module ID.
 $userid = required_param('user', PARAM_INT); // User ID.
@@ -75,9 +77,14 @@ $event->trigger();
 
 $trackdata = $DB->get_records('exescorm_scoes_track', array('userid' => $user->id, 'exescormid' => $exescorm->id,
     'attempt' => $attempt));
-$usertrack = exescorm_format_interactions($trackdata);
-
-$questioncount = get_exescorm_question_count($exescorm->id);
+$catalogs = [];
+foreach ($trackdata as $track) {
+    if (!array_key_exists($track->scoid, $catalogs)) {
+        $catalogs[$track->scoid] = timhirt_reporting::packagecatalog($contextmodule, $exescorm, (int)$track->scoid);
+    }
+}
+$reportrows = timhirt_reporting::rows($trackdata, $catalogs);
+$PAGE->requires->css(new moodle_url('/mod/exescorm/report/timhirt-report.css'));
 
 $courseshortname = format_string($course->shortname, true,
     array('context' => context_course::instance($course->id)));
@@ -119,59 +126,29 @@ if (!$table->is_downloading($download, $exportfilename)) {
 
 }
 $table->define_baseurl($PAGE->url);
-$table->define_columns(array('id', 'studentanswer', 'correctanswer', 'result', 'calcweight'));
-$table->define_headers(array(get_string('trackid', 'mod_exescorm'), get_string('response', 'mod_exescorm'),
-    get_string('rightanswer', 'mod_exescorm'), get_string('result', 'mod_exescorm'),
-    get_string('calculatedweight', 'mod_exescorm')));
-$table->set_attribute('class', 'generaltable generalbox boxaligncenter boxwidthwide');
-
-$table->show_download_buttons_at(array(TABLE_P_BOTTOM));
+$table->define_columns(['block', 'type', 'question', 'studentanswer', 'correctanswer', 'result', 'calcweight']);
+$table->define_headers(['Content Block', 'Interaction type', 'Question / activity', get_string('response', 'mod_exescorm'),
+    get_string('rightanswer', 'mod_exescorm'), get_string('result', 'mod_exescorm'), get_string('calculatedweight', 'mod_exescorm')]);
+$table->set_attribute('class', 'generaltable generalbox timhirt-readable-report');
+$table->show_download_buttons_at([TABLE_P_BOTTOM]);
 $table->setup();
 
-for ($i = 0; $i < $questioncount; $i++) {
-    $row = array();
-    $element = 'cmi.interactions_'.$i.'.id';
-    if (isset($usertrack->$element)) {
-        $row[] = s($usertrack->$element);
-
-        $element = 'cmi.interactions_'.$i.'.student_response';
-        if (isset($usertrack->$element)) {
-            $row[] = s($usertrack->$element);
-        } else {
-            $row[] = '&nbsp;';
-        }
-
-        $j = 0;
-        $element = 'cmi.interactions_'.$i.'.correct_responses_'.$j.'.pattern';
-        $rightans = '';
-        if (isset($usertrack->$element)) {
-            while (isset($usertrack->$element)) {
-                if ($j > 0) {
-                    $rightans .= ',';
-                }
-                $rightans .= s($usertrack->$element);
-                $j++;
-                $element = 'cmi.interactions_'.$i.'.correct_responses_'.$j.'.pattern';
-            }
-            $row[] = $rightans;
-        } else {
-            $row[] = '&nbsp;';
-        }
-        $element = 'cmi.interactions_'.$i.'.result';
-        $weighting = 'cmi.interactions_'.$i.'.weighting';
-        if (isset($usertrack->$element)) {
-            $row[] = s($usertrack->$element);
-            if ($usertrack->$element == 'correct' &&
-                isset($usertrack->$weighting)) {
-                $row[] = s($usertrack->$weighting);
-            } else {
-                $row[] = '0';
-            }
-        } else {
-            $row[] = '&nbsp;';
-        }
-        $table->add_data($row);
+if (!$table->is_downloading() && array_filter($reportrows, function($row) { return !$row['resolved']; })) {
+    echo $OUTPUT->notification('Some interactions have no matching label metadata. Their original IDs are preserved below.', 'info');
+}
+if (!$table->is_downloading() && array_filter($reportrows, function($row) { return $row['legacy'] && $row['labelSource'] === 'package'; })) {
+    echo $OUTPUT->notification('Some older interactions use labels from the current package. Original wording may be unavailable if that package was edited.', 'info');
+}
+foreach ($reportrows as $row) {
+    $values = [$row['block'], $row['type'], $row['question'], $row['response'], $row['correct'], $row['result'], (string)$row['weight']];
+    $values = array_map(function($value) use ($table) {
+        return $table->is_downloading() ? timhirt_reporting::exportcell($value) : s($value);
+    }, $values);
+    if (!$table->is_downloading()) {
+        $class = $row['result'] === 'Correct' ? 'correct' : ($row['result'] === 'Incorrect' ? 'incorrect' : 'recorded');
+        $values[5] = html_writer::span($values[5], 'timhirt-result timhirt-result-' . $class);
     }
+    $table->add_data($values);
 }
 
 $table->finish_output();
@@ -179,4 +156,3 @@ $table->finish_output();
 if (!$table->is_downloading()) {
     echo $OUTPUT->footer();
 }
-

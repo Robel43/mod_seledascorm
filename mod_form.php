@@ -18,6 +18,7 @@ use mod_exescorm\exeonline\exescorm_redirector;
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/course/moodleform_mod.php');
+require_once($CFG->dirroot.'/mod/exescorm/lib.php');
 require_once($CFG->dirroot.'/mod/exescorm/locallib.php');
 
 class mod_exescorm_mod_form extends moodleform_mod {
@@ -25,6 +26,7 @@ class mod_exescorm_mod_form extends moodleform_mod {
     public function definition() {
         global $CFG, $COURSE, $OUTPUT;
         $cfgexescorm = get_config('exescorm');
+        $brandname = exescorm_get_brand_name();
 
         $mform = $this->_form;
 
@@ -60,9 +62,9 @@ class mod_exescorm_mod_form extends moodleform_mod {
         $defaulttype = EXESCORM_TYPE_LOCAL;
         if (exescorm_embedded_editor_available()) {
             if ($editmode) {
-                $exescormtypes[EXESCORM_TYPE_EMBEDDED] = get_string('typeembeddededit', 'mod_exescorm');
+                $exescormtypes[EXESCORM_TYPE_EMBEDDED] = get_string('editwithbrand', 'mod_exescorm', $brandname);
             } else {
-                $exescormtypes[EXESCORM_TYPE_EMBEDDED] = get_string('typeembedded', 'mod_exescorm');
+                $exescormtypes[EXESCORM_TYPE_EMBEDDED] = get_string('createwithbrand', 'mod_exescorm', $brandname);
                 $defaulttype = EXESCORM_TYPE_EMBEDDED;
             }
         } else if (!empty($cfgexescorm->exeonlinebaseuri)) {

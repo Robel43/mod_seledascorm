@@ -38,7 +38,7 @@ jobs:
           mode: append-to-description
           github-token: ${{ secrets.GITHUB_TOKEN }}
           extra-text: >
-            ℹ️ The embedded eXeLearning-compatible editor is fetched from the shared release and
-            unpacked into the plugin when the playground boots, so the first
-            load may take a few extra seconds. ELPX upload, viewer and preview
-            work normally.
+            ℹ️ This PR Playground installs the source branch to validate the Moodle 4.5 module identity and setup.
+            It deliberately does not download a stock eXeLearning editor. The bundled Seleda editor is validated by
+            the Seleda compatibility/release package workflows, and production installs must use the complete
+            mod_seledascorm release ZIP containing dist/static/.

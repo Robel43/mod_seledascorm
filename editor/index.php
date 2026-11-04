@@ -117,7 +117,7 @@ $brandingconfig = json_encode([
 
 $brandingstyle = '';
 if ($brandlogourlstring !== '') {
-    $cssbrandinglogo = str_replace(['\\\\', '"'], ['\\\\\\\\', '\\"'], $brandlogourlstring);
+    $cssbrandinglogo = str_replace(['\\', '"'], ['\\\\', '\\"'], $brandlogourlstring);
     $brandingstyle = '<style id="mod-exescorm-seleda-branding">'
         . '#load-screen-main,#load-screen-node-content,.load-screen{'
         . 'background-image:url("' . $cssbrandinglogo . '")!important;'

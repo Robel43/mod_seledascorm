@@ -17,13 +17,13 @@
 /**
  * This page displays the user data from a single attempt
  *
- * @package mod_exescorm
+ * @package mod_seledascorm
  * @copyright 1999 onwards Martin Dougiamas {@link http://moodle.com}
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once("../../../config.php");
-require_once($CFG->dirroot.'/mod/exescorm/locallib.php');
+require_once($CFG->dirroot.'/mod/seledascorm/locallib.php');
 require_once($CFG->libdir.'/tablelib.php');
 
 $id = required_param('id', PARAM_INT); // Course Module ID.
@@ -34,16 +34,16 @@ $attempt = optional_param('attempt', 1, PARAM_INT); // Attempt number.
 $download = optional_param('download', '', PARAM_ALPHA);
 
 // Building the url to use for links.+ data details buildup.
-$url = new moodle_url('/mod/exescorm/report/userreporttracks.php', array('id' => $id,
+$url = new moodle_url('/mod/seledascorm/report/userreporttracks.php', array('id' => $id,
     'user' => $userid,
     'attempt' => $attempt,
     'scoid' => $scoid,
     'mode' => $mode));
-$cm = get_coursemodule_from_id('exescorm', $id, 0, false, MUST_EXIST);
+$cm = get_coursemodule_from_id('seledascorm', $id, 0, false, MUST_EXIST);
 $course = get_course($cm->course);
-$exescorm = $DB->get_record('exescorm', array('id' => $cm->instance), '*', MUST_EXIST);
+$seledascorm = $DB->get_record('seledascorm', array('id' => $cm->instance), '*', MUST_EXIST);
 $user = $DB->get_record('user', array('id' => $userid), implode(',', \core_user\fields::get_picture_fields()), MUST_EXIST);
-$selsco = $DB->get_record('exescorm_scoes', array('id' => $scoid), '*', MUST_EXIST);
+$selsco = $DB->get_record('seledascorm_scoes', array('id' => $scoid), '*', MUST_EXIST);
 
 $PAGE->set_url($url);
 // END of url setting + data buildup.
@@ -51,7 +51,7 @@ $PAGE->set_url($url);
 // Checking login +logging +getting context.
 require_login($course, false, $cm);
 $contextmodule = context_module::instance($cm->id);
-require_capability('mod/exescorm:viewreport', $contextmodule);
+require_capability('mod/seledascorm:viewreport', $contextmodule);
 
 // Check user has group access.
 if (!groups_user_groups_visible($course, $userid, $cm)) {
@@ -59,31 +59,31 @@ if (!groups_user_groups_visible($course, $userid, $cm)) {
 }
 
 // Trigger a tracks viewed event.
-$event = \mod_exescorm\event\tracks_viewed::create(array(
+$event = \mod_seledascorm\event\tracks_viewed::create(array(
     'context' => $contextmodule,
     'relateduserid' => $userid,
-    'other' => array('attemptid' => $attempt, 'instanceid' => $exescorm->id, 'scoid' => $scoid, 'mode' => $mode)
+    'other' => array('attemptid' => $attempt, 'instanceid' => $seledascorm->id, 'scoid' => $scoid, 'mode' => $mode)
 ));
 $event->add_record_snapshot('course_modules', $cm);
-$event->add_record_snapshot('exescorm', $exescorm);
+$event->add_record_snapshot('seledascorm', $seledascorm);
 $event->trigger();
 
 // Print the page header.
-$strreport = get_string('report', 'mod_exescorm');
-$strattempt = get_string('attempt', 'mod_exescorm');
+$strreport = get_string('report', 'mod_seledascorm');
+$strattempt = get_string('attempt', 'mod_seledascorm');
 
-$PAGE->set_title("$course->shortname: ".format_string($exescorm->name));
+$PAGE->set_title("$course->shortname: ".format_string($seledascorm->name));
 $PAGE->set_heading($course->fullname);
-$PAGE->navbar->add($strreport, new moodle_url('/mod/exescorm/report.php', array('id' => $cm->id)));
+$PAGE->navbar->add($strreport, new moodle_url('/mod/seledascorm/report.php', array('id' => $cm->id)));
 $PAGE->navbar->add("$strattempt $attempt - ".fullname($user),
-    new moodle_url('/mod/exescorm/report/userreport.php', array('id' => $id, 'user' => $userid, 'attempt' => $attempt)));
-$PAGE->navbar->add($selsco->title . ' - '. get_string('details', 'mod_exescorm'));
+    new moodle_url('/mod/seledascorm/report/userreport.php', array('id' => $id, 'user' => $userid, 'attempt' => $attempt)));
+$PAGE->navbar->add($selsco->title . ' - '. get_string('details', 'mod_seledascorm'));
 // Moodle 4.0+ only.
 if ($CFG->version >= 2022041900) {
-    $PAGE->set_secondary_active_tab('exescormreport');
+    $PAGE->set_secondary_active_tab('seledascormreport');
 }
 
-if ($trackdata = exescorm_get_tracks($selsco->id, $userid, $attempt)) {
+if ($trackdata = seledascorm_get_tracks($selsco->id, $userid, $attempt)) {
     if ($trackdata->status == '') {
         $trackdata->status = 'notattempted';
     }
@@ -95,9 +95,9 @@ if ($trackdata = exescorm_get_tracks($selsco->id, $userid, $attempt)) {
 
 $courseshortname = format_string($course->shortname, true,
     array('context' => context_course::instance($course->id)));
-$exportfilename = $courseshortname . '-' . format_string($exescorm->name, true) . '-' . get_string('details', 'mod_exescorm');
+$exportfilename = $courseshortname . '-' . format_string($seledascorm->name, true) . '-' . get_string('details', 'mod_seledascorm');
 
-$table = new flexible_table('mod_exescorm-userreporttracks');
+$table = new flexible_table('mod_seledascorm-userreporttracks');
 
 if (!$table->is_downloading($download, $exportfilename)) {
     $PAGE->activityheader->set_attrs([
@@ -106,17 +106,17 @@ if (!$table->is_downloading($download, $exportfilename)) {
     ]);
     echo $OUTPUT->header();
     $currenttab = '';
-    $renderer = $PAGE->get_renderer('mod_exescorm');
-    $useractionreport = new \mod_exescorm\output\userreportsactionbar($id, $userid, $attempt, 'attempt', $mode, $scoid);
+    $renderer = $PAGE->get_renderer('mod_seledascorm');
+    $useractionreport = new \mod_seledascorm\output\userreportsactionbar($id, $userid, $attempt, 'attempt', $mode, $scoid);
     echo $renderer->user_report_actionbar($useractionreport);
     echo $OUTPUT->box_start('generalbox boxaligncenter');
     echo $OUTPUT->heading("$strattempt $attempt - ". fullname($user).': '.
-    format_string($selsco->title). ' - '. get_string('details', 'mod_exescorm'), 3);
+    format_string($selsco->title). ' - '. get_string('details', 'mod_seledascorm'), 3);
 }
 $table->define_baseurl($PAGE->url);
 $table->define_columns(array('element', 'value'));
-$table->define_headers(array(get_string('element', 'mod_exescorm'), get_string('value', 'mod_exescorm')));
-$table->set_attribute('class', 'generaltable generalbox boxaligncenter exescormtrackreport');
+$table->define_headers(array(get_string('element', 'mod_seledascorm'), get_string('value', 'mod_seledascorm')));
+$table->set_attribute('class', 'generaltable generalbox boxaligncenter seledascormtrackreport');
 $table->show_download_buttons_at(array(TABLE_P_BOTTOM));
 $table->setup();
 
@@ -157,12 +157,12 @@ foreach ($trackdata as $element => $value) {
         if (empty($string) || $table->is_downloading()) {
             $row[] = s($element);
         } else {
-            $row[] = s($element) . $OUTPUT->help_icon($string, 'mod_exescorm');
+            $row[] = s($element) . $OUTPUT->help_icon($string, 'mod_seledascorm');
         }
         if (strpos($element, '_time') === false) {
             $row[] = s($value);
         } else {
-            $row[] = s(exescorm_format_duration($value));
+            $row[] = s(seledascorm_format_duration($value));
         }
         $table->add_data($row);
     }

@@ -17,17 +17,17 @@
 /**
  * This page displays the user data from a single attempt
  *
- * @package mod_exescorm
+ * @package mod_seledascorm
  * @copyright 1999 onwards Martin Dougiamas {@link http://moodle.com}
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once("../../../config.php");
-require_once($CFG->dirroot.'/mod/exescorm/locallib.php');
-require_once($CFG->dirroot.'/mod/exescorm/report/reportlib.php');
+require_once($CFG->dirroot.'/mod/seledascorm/locallib.php');
+require_once($CFG->dirroot.'/mod/seledascorm/report/reportlib.php');
 require_once($CFG->libdir . '/tablelib.php');
 require_once(__DIR__ . '/timhirt_reporting.php');
-use mod_exescorm\local\timhirt_reporting;
+use mod_seledascorm\local\timhirt_reporting;
 
 $id = required_param('id', PARAM_INT); // Course Module ID.
 $userid = required_param('user', PARAM_INT); // User ID.
@@ -36,21 +36,21 @@ $download = optional_param('download', '', PARAM_ALPHA);
 $mode = optional_param('mode', '', PARAM_ALPHA); // Scorm mode from which reached here.
 
 // Building the url to use for links.+ data details buildup.
-$url = new moodle_url('/mod/exescorm/report/userreportinteractions.php', array('id' => $id,
+$url = new moodle_url('/mod/seledascorm/report/userreportinteractions.php', array('id' => $id,
     'user' => $userid,
     'attempt' => $attempt));
 
-$cm = get_coursemodule_from_id('exescorm', $id, 0, false, MUST_EXIST);
+$cm = get_coursemodule_from_id('seledascorm', $id, 0, false, MUST_EXIST);
 $course = get_course($cm->course);
-$exescorm = $DB->get_record('exescorm', array('id' => $cm->instance), '*', MUST_EXIST);
+$seledascorm = $DB->get_record('seledascorm', array('id' => $cm->instance), '*', MUST_EXIST);
 $user = $DB->get_record('user', array('id' => $userid), implode(',', \core_user\fields::get_picture_fields()), MUST_EXIST);
 // Get list of attempts this user has made.
-$attemptids = exescorm_get_all_attempts($exescorm->id, $userid);
+$attemptids = seledascorm_get_all_attempts($seledascorm->id, $userid);
 
 $PAGE->set_url($url);
 // Moodle 4.0+ only.
 if ($CFG->version >= 2022041900) {
-    $PAGE->set_secondary_active_tab('exescormreport');
+    $PAGE->set_secondary_active_tab('seledascormreport');
 }
 
 // END of url setting + data buildup.
@@ -58,7 +58,7 @@ if ($CFG->version >= 2022041900) {
 // Checking login +logging +getting context.
 require_login($course, false, $cm);
 $contextmodule = context_module::instance($cm->id);
-require_capability('mod/exescorm:viewreport', $contextmodule);
+require_capability('mod/seledascorm:viewreport', $contextmodule);
 
 // Check user has group access.
 if (!groups_user_groups_visible($course, $userid, $cm)) {
@@ -66,43 +66,43 @@ if (!groups_user_groups_visible($course, $userid, $cm)) {
 }
 
 // Trigger a user interactions viewed event.
-$event = \mod_exescorm\event\interactions_viewed::create(array(
+$event = \mod_seledascorm\event\interactions_viewed::create(array(
     'context' => $contextmodule,
     'relateduserid' => $userid,
-    'other' => array('attemptid' => $attempt, 'instanceid' => $exescorm->id)
+    'other' => array('attemptid' => $attempt, 'instanceid' => $seledascorm->id)
 ));
 $event->add_record_snapshot('course_modules', $cm);
-$event->add_record_snapshot('exescorm', $exescorm);
+$event->add_record_snapshot('seledascorm', $seledascorm);
 $event->trigger();
 
-$trackdata = $DB->get_records('exescorm_scoes_track', array('userid' => $user->id, 'exescormid' => $exescorm->id,
+$trackdata = $DB->get_records('seledascorm_scoes_track', array('userid' => $user->id, 'seledascormid' => $seledascorm->id,
     'attempt' => $attempt));
 $catalogs = [];
 foreach ($trackdata as $track) {
     if (!array_key_exists($track->scoid, $catalogs)) {
-        $catalogs[$track->scoid] = timhirt_reporting::packagecatalog($contextmodule, $exescorm, (int)$track->scoid);
+        $catalogs[$track->scoid] = timhirt_reporting::packagecatalog($contextmodule, $seledascorm, (int)$track->scoid);
     }
 }
 $reportrows = timhirt_reporting::rows($trackdata, $catalogs);
-$PAGE->requires->css(new moodle_url('/mod/exescorm/report/timhirt-report.css'));
+$PAGE->requires->css(new moodle_url('/mod/seledascorm/report/timhirt-report.css'));
 
 $courseshortname = format_string($course->shortname, true,
     array('context' => context_course::instance($course->id)));
-$exportfilename = $courseshortname . '-' . format_string($exescorm->name, true) . '-'
-                . get_string('interactions', 'mod_exescorm');
+$exportfilename = $courseshortname . '-' . format_string($seledascorm->name, true) . '-'
+                . get_string('interactions', 'mod_seledascorm');
 
 
 // Set up the table.
-$table = new flexible_table('mod-exescorm-userreport-interactions');
+$table = new flexible_table('mod-seledascorm-userreport-interactions');
 if (!$table->is_downloading($download, $exportfilename)) {
 
     // Print the page header.
-    $strattempt = get_string('attempt', 'mod_exescorm');
-    $strreport = get_string('report', 'mod_exescorm');
+    $strattempt = get_string('attempt', 'mod_seledascorm');
+    $strreport = get_string('report', 'mod_seledascorm');
 
-    $PAGE->set_title("$course->shortname: ".format_string($exescorm->name));
+    $PAGE->set_title("$course->shortname: ".format_string($seledascorm->name));
     $PAGE->set_heading($course->fullname);
-    $PAGE->navbar->add($strreport, new moodle_url('/mod/exescorm/report.php', array('id' => $cm->id)));
+    $PAGE->navbar->add($strreport, new moodle_url('/mod/seledascorm/report.php', array('id' => $cm->id)));
 
     $PAGE->navbar->add(fullname($user). " - $strattempt $attempt");
 
@@ -116,19 +116,19 @@ if (!$table->is_downloading($download, $exportfilename)) {
     // End of Print the page header.
     $currenttab = 'interactions';
 
-    $renderer = $PAGE->get_renderer('mod_exescorm');
-    $useractionreport = new \mod_exescorm\output\userreportsactionbar($id, $userid, $attempt, 'interact', $mode);
+    $renderer = $PAGE->get_renderer('mod_seledascorm');
+    $useractionreport = new \mod_seledascorm\output\userreportsactionbar($id, $userid, $attempt, 'interact', $mode);
     echo $renderer->user_report_actionbar($useractionreport);
 
     // Printing user details.
-    $output = $PAGE->get_renderer('mod_exescorm');
+    $output = $PAGE->get_renderer('mod_seledascorm');
     echo $output->view_user_heading($user, $course, $PAGE->url, $attempt, $attemptids);
 
 }
 $table->define_baseurl($PAGE->url);
 $table->define_columns(['block', 'type', 'question', 'studentanswer', 'correctanswer', 'result', 'calcweight']);
-$table->define_headers(['Content Block', 'Interaction type', 'Question / activity', get_string('response', 'mod_exescorm'),
-    get_string('rightanswer', 'mod_exescorm'), get_string('result', 'mod_exescorm'), get_string('calculatedweight', 'mod_exescorm')]);
+$table->define_headers(['Content Block', 'Interaction type', 'Question / activity', get_string('response', 'mod_seledascorm'),
+    get_string('rightanswer', 'mod_seledascorm'), get_string('result', 'mod_seledascorm'), get_string('calculatedweight', 'mod_seledascorm')]);
 $table->set_attribute('class', 'generaltable generalbox timhirt-readable-report');
 $table->show_download_buttons_at([TABLE_P_BOTTOM]);
 $table->setup();

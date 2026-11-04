@@ -107,49 +107,6 @@ function exescorm_get_brand_logo_url(): ?moodle_url {
     return $url;
 }
 
-/**
- * Serve the administrator-uploaded Seleda branding logo.
- *
- * @param stdClass|null $course Course record supplied by Moodle file API.
- * @param stdClass|null $cm Course module record supplied by Moodle file API.
- * @param context $context File context.
- * @param string $filearea File area.
- * @param array $args Remaining pluginfile path arguments.
- * @param bool $forcedownload Whether download is forced.
- * @param array $options File serving options.
- * @return bool
- */
-function exescorm_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
-    if ($context->contextlevel !== CONTEXT_SYSTEM || $filearea !== 'brandinglogo') {
-        return false;
-    }
-
-    require_login();
-
-    $itemid = (int) array_shift($args);
-    if ($itemid !== 0 || empty($args)) {
-        return false;
-    }
-
-    $filename = array_pop($args);
-    $filepath = $args ? '/' . implode('/', $args) . '/' : '/';
-
-    $fs = get_file_storage();
-    $file = $fs->get_file(
-        $context->id,
-        'mod_exescorm',
-        'brandinglogo',
-        0,
-        $filepath,
-        $filename
-    );
-    if (!$file || $file->is_directory()) {
-        return false;
-    }
-
-    send_stored_file($file, DAYSECS, 0, false, $options);
-}
-
 define('EXESCORM_EVENT_TYPE_CLOSE', 'close');
 
 require_once(__DIR__ . '/deprecatedlib.php');
@@ -1156,6 +1113,34 @@ function exescorm_get_file_info($browser, $areas, $course, $cm, $context, $filea
  */
 function exescorm_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options=array()) {
     global $CFG, $DB;
+
+    // Site branding logo is stored in system context because it belongs to the
+    // Seleda plugin as a whole rather than to a single course activity.
+    if ($context->contextlevel === CONTEXT_SYSTEM && $filearea === 'brandinglogo') {
+        require_login();
+
+        $itemid = (int) array_shift($args);
+        if ($itemid !== 0 || empty($args)) {
+            return false;
+        }
+
+        $filename = array_pop($args);
+        $filepath = $args ? '/' . implode('/', $args) . '/' : '/';
+        $fs = get_file_storage();
+        $file = $fs->get_file(
+            $context->id,
+            'mod_exescorm',
+            'brandinglogo',
+            0,
+            $filepath,
+            $filename
+        );
+        if (!$file || $file->is_directory()) {
+            return false;
+        }
+
+        send_stored_file($file, DAYSECS, 0, false, $options);
+    }
 
     if ($context->contextlevel != CONTEXT_MODULE) {
         return false;

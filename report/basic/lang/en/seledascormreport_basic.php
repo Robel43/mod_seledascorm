@@ -15,14 +15,14 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component 'exescorm_basic' report plugin
+ * Strings for component 'seledascorm_basic' report plugin
  *
- * @package    exescormreport
+ * @package    seledascormreport
  * @subpackage basic
  * @author     Ankit Kumar Agarwal
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $string['pluginname'] = 'Basic report';
-$string['privacy:metadata:preference:exescorm_report_detailed'] = 'Whether to track details in the exescorm basic report';
-$string['privacy:metadata:preference:exescorm_report_pagesize'] = 'Number of users to display in the exescorm reports';
+$string['privacy:metadata:preference:seledascorm_report_detailed'] = 'Whether to track details in the seledascorm basic report';
+$string['privacy:metadata:preference:seledascorm_report_pagesize'] = 'Number of users to display in the seledascorm reports';

@@ -14,23 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-function exescorm_seq_exit_action_rules($seq, $userid) {
+function seledascorm_seq_exit_action_rules($seq, $userid) {
     $sco = $seq->currentactivity;
-    $ancestors = exescorm_get_ancestors($sco);
+    $ancestors = seledascorm_get_ancestors($sco);
     $exittarget = null;
     foreach (array_reverse($ancestors) as $ancestor) {
-        if (exescorm_seq_rules_check($ancestor, 'exit') != null) {
+        if (seledascorm_seq_rules_check($ancestor, 'exit') != null) {
             $exittarget = $ancestor;
             break;
         }
     }
     if ($exittarget != null) {
-        $commons = array_slice($ancestors, 0, exescorm_find_common_ancestor($ancestors, $exittarget));
+        $commons = array_slice($ancestors, 0, seledascorm_find_common_ancestor($ancestors, $exittarget));
 
         // Terminate Descendent Attempts Process.
         if ($commons) {
             foreach ($commons as $ancestor) {
-                exescorm_seq_end_attempt($ancestor, $userid, $seq->attempt);
+                seledascorm_seq_end_attempt($ancestor, $userid, $seq->attempt);
                 $seq->currentactivity = $ancestor;
             }
         }
@@ -38,10 +38,10 @@ function exescorm_seq_exit_action_rules($seq, $userid) {
     return $seq;
 }
 
-function exescorm_seq_post_cond_rules($seq, $userid) {
+function seledascorm_seq_post_cond_rules($seq, $userid) {
     $sco = $seq->currentactivity;
     if (!$seq->suspended) {
-        if ($action = exescorm_seq_rules_check($sco, 'post') != null) {
+        if ($action = seledascorm_seq_rules_check($sco, 'post') != null) {
             switch($action) {
                 case 'retry':
                 case 'continue':
@@ -63,13 +63,13 @@ function exescorm_seq_post_cond_rules($seq, $userid) {
 }
 
 
-function exescorm_seq_evaluate_rollupcond($sco, $conditioncombination, $rollupruleconds, $userid) {
+function seledascorm_seq_evaluate_rollupcond($sco, $conditioncombination, $rollupruleconds, $userid) {
     $bag = Array();
     $con = "";
     $val = false;
     $unk = false;
     foreach ($rollupruleconds as $rolluprulecond) {
-        $condit = exescorm_evaluate_condition($rolluprulecond, $sco, $userid);
+        $condit = seledascorm_evaluate_condition($rolluprulecond, $sco, $userid);
         if ($rolluprulecond->operator == 'not') { // If operator is not, negate the condition.
             if ($rolluprulecond->cond != 'unknown') {
                 if ($condit) {
@@ -114,12 +114,12 @@ function exescorm_seq_evaluate_rollupcond($sco, $conditioncombination, $rollupru
     return $val;
 }
 
-function exescorm_seq_check_child ($sco, $action, $userid) {
+function seledascorm_seq_check_child ($sco, $action, $userid) {
     global $DB;
 
     $included = false;
-    $sco = exescorm_get_sco($sco->id);
-    $r = $DB->get_record('exescorm_scoes_track',
+    $sco = seledascorm_get_sco($sco->id);
+    $r = $DB->get_record('seledascorm_scoes_track',
                         ['scoid' => $sco->id, 'userid' => $userid, 'element' => 'activityattemptcount']);
     if ($action == 'satisfied' || $action == 'notsatisfied') {
         if (!$sco->rollupobjectivesatisfied) {
@@ -127,21 +127,21 @@ function exescorm_seq_check_child ($sco, $action, $userid) {
             if (($action == 'satisfied' && $sco->requiredforsatisfied == 'ifnotsuspended') ||
                 ($action == 'notsatisfied' && $sco->requiredfornotsatisfied == 'ifnotsuspended')) {
 
-                if (!exescorm_seq_is('activityprogressstatus', $sco->id, $userid) ||
-                    ((($r->value) > 0) && !exescorm_seq_is('suspended', $sco->id, $userid))) {
+                if (!seledascorm_seq_is('activityprogressstatus', $sco->id, $userid) ||
+                    ((($r->value) > 0) && !seledascorm_seq_is('suspended', $sco->id, $userid))) {
                     $included = false;
                 }
 
             } else {
                 if (($action == 'satisfied' && $sco->requiredforsatisfied == 'ifattempted') ||
                     ($action == 'notsatisfied' && $sco->requiredfornotsatisfied == 'ifattempted')) {
-                    if (!exescorm_seq_is('activityprogressstatus', $sco->id, $userid) || (($r->value) == 0)) {
+                    if (!seledascorm_seq_is('activityprogressstatus', $sco->id, $userid) || (($r->value) == 0)) {
                         $included = false;
                     }
                 } else {
                     if (($action == 'satisfied' && $sco->requiredforsatisfied == 'ifnotskipped') ||
                         ($action == 'notsatisfied' && $sco->requiredfornotsatisfied == 'ifnotskipped')) {
-                        $rulch = exescorm_seq_rules_check($sco, 'skip');
+                        $rulch = seledascorm_seq_rules_check($sco, 'skip');
                         if ($rulch != null) {
                             $included = false;
                         }
@@ -157,8 +157,8 @@ function exescorm_seq_check_child ($sco, $action, $userid) {
             if (($action == 'completed' && $sco->requiredforcompleted == 'ifnotsuspended') ||
                 ($action == 'incomplete' && $sco->requiredforincomplete == 'ifnotsuspended')) {
 
-                if (!exescorm_seq_is('activityprogressstatus', $sco->id, $userid) ||
-                    ((($r->value) > 0)&& !exescorm_seq_is('suspended', $sco->id, $userid))) {
+                if (!seledascorm_seq_is('activityprogressstatus', $sco->id, $userid) ||
+                    ((($r->value) > 0)&& !seledascorm_seq_is('suspended', $sco->id, $userid))) {
                     $included = false;
                 }
 
@@ -166,14 +166,14 @@ function exescorm_seq_check_child ($sco, $action, $userid) {
 
                 if (($action == 'completed' && $sco->requiredforcompleted == 'ifattempted') ||
                     ($action == 'incomplete' && $sco->requiredforincomplete == 'ifattempted')) {
-                    if (!exescorm_seq_is('activityprogressstatus', $sco->id, $userid) || (($r->value) == 0)) {
+                    if (!seledascorm_seq_is('activityprogressstatus', $sco->id, $userid) || (($r->value) == 0)) {
                         $included = false;
                     }
 
                 } else {
                     if (($action == 'completed' && $sco->requiredforsatisfied == 'ifnotskipped') ||
                         ($action == 'incomplete' && $sco->requiredfornotsatisfied == 'ifnotskipped')) {
-                        $rulch = exescorm_seq_rules_check($sco, 'skip');
+                        $rulch = seledascorm_seq_rules_check($sco, 'skip');
                         if ($rulch != null) {
                             $included = false;
                         }
@@ -185,42 +185,42 @@ function exescorm_seq_check_child ($sco, $action, $userid) {
     return $included;
 }
 
-function exescorm_seq_sequencing ($scoid, $userid, $seq) {
+function seledascorm_seq_sequencing ($scoid, $userid, $seq) {
 
     switch ($seq->sequencing) {
         case 'start':
             // We'll see the parameters we have to send, this should update delivery and end.
-            $seq = exescorm_seq_start_sequencing($scoid, $userid, $seq);
+            $seq = seledascorm_seq_start_sequencing($scoid, $userid, $seq);
             $seq->sequencing = true;
             break;
 
         case 'resumeall':
             // We'll see the parameters we have to send, this should update delivery and end.
-            $seq = exescorm_seq_resume_all_sequencing($scoid, $userid, $seq);
+            $seq = seledascorm_seq_resume_all_sequencing($scoid, $userid, $seq);
             $seq->sequencing = true;
             break;
 
         case 'exit':
             // We'll see the parameters we have to send, this should update delivery and end.
-            $seq = exescorm_seq_exit_sequencing($scoid, $userid, $seq);
+            $seq = seledascorm_seq_exit_sequencing($scoid, $userid, $seq);
             $seq->sequencing = true;
             break;
 
         case 'retry':
             // We'll see the parameters we have to send, this should update delivery and end.
-            $seq = exescorm_seq_retry_sequencing($scoid, $userid, $seq);
+            $seq = seledascorm_seq_retry_sequencing($scoid, $userid, $seq);
             $seq->sequencing = true;
             break;
 
         case 'previous':
             // We'll see the parameters we have to send, this should update delivery and end.
-            $seq = exescorm_seq_previous_sequencing($scoid, $userid, $seq);
+            $seq = seledascorm_seq_previous_sequencing($scoid, $userid, $seq);
             $seq->sequencing = true;
             break;
 
         case 'choice':
             // We'll see the parameters we have to send, this should update delivery and end.
-            $seq = exescorm_seq_choice_sequencing($scoid, $userid, $seq);
+            $seq = seledascorm_seq_choice_sequencing($scoid, $userid, $seq);
             $seq->sequencing = true;
             break;
     }
@@ -234,7 +234,7 @@ function exescorm_seq_sequencing ($scoid, $userid, $seq) {
     return $seq;
 }
 
-function exescorm_seq_start_sequencing($scoid, $userid, $seq) {
+function seledascorm_seq_start_sequencing($scoid, $userid, $seq) {
     global $DB;
 
     if (!empty($seq->currentactivity)) {
@@ -242,20 +242,20 @@ function exescorm_seq_start_sequencing($scoid, $userid, $seq) {
         $seq->exception = 'SB.2.5-1';
         return $seq;
     }
-    $sco = $DB->get_record('exescorm_scoes', array('scoid' => $scoid, 'userid' => $userid));
-    if (($sco->parent == '/') && exescorm_is_leaf($sco)) { // If the activity is the root and is leaf.
+    $sco = $DB->get_record('seledascorm_scoes', array('scoid' => $scoid, 'userid' => $userid));
+    if (($sco->parent == '/') && seledascorm_is_leaf($sco)) { // If the activity is the root and is leaf.
         $seq->delivery = $sco;
     } else {
-        $ancestors = exescorm_get_ancestors($sco);
+        $ancestors = seledascorm_get_ancestors($sco);
         $ancestorsroot = array_reverse($ancestors);
-        $res = exescorm_seq_flow($ancestorsroot[0], 'forward', $seq, true, $userid);
+        $res = seledascorm_seq_flow($ancestorsroot[0], 'forward', $seq, true, $userid);
         if ($res) {
             return $res;
         }
     }
 }
 
-function exescorm_seq_resume_all_sequencing($scoid, $userid, $seq) {
+function seledascorm_seq_resume_all_sequencing($scoid, $userid, $seq) {
     global $DB;
 
     if (!empty($seq->currentactivity)) {
@@ -263,17 +263,17 @@ function exescorm_seq_resume_all_sequencing($scoid, $userid, $seq) {
         $seq->exception = 'SB.2.6-1';
         return $seq;
     }
-    $track = $DB->get_record('exescorm_scoes_track', ['scoid' => $scoid, 'userid' => $userid, 'element' => 'suspendedactivity']);
+    $track = $DB->get_record('seledascorm_scoes_track', ['scoid' => $scoid, 'userid' => $userid, 'element' => 'suspendedactivity']);
     if (!$track) {
         $seq->delivery = null;
         $seq->exception = 'SB.2.6-2';
         return $seq;
     }
     // We assign the sco to the delivery.
-    $seq->delivery = $DB->get_record('exescorm_scoes', array('scoid' => $scoid, 'userid' => $userid));
+    $seq->delivery = $DB->get_record('seledascorm_scoes', array('scoid' => $scoid, 'userid' => $userid));
 }
 
-function exescorm_seq_continue_sequencing($scoid, $userid, $seq) {
+function seledascorm_seq_continue_sequencing($scoid, $userid, $seq) {
     if (empty($seq->currentactivity)) {
         $seq->delivery = null;
         $seq->exception = 'SB.2.7-1';
@@ -282,7 +282,7 @@ function exescorm_seq_continue_sequencing($scoid, $userid, $seq) {
     $currentact = $seq->currentactivity;
     if ($currentact->parent != '/') {
         // If the activity is the root and is leaf.
-        $parent = exescorm_get_parent ($currentact);
+        $parent = seledascorm_get_parent ($currentact);
 
         if (!isset($parent->flow) || ($parent->flow == false)) {
             $seq->delivery = null;
@@ -290,14 +290,14 @@ function exescorm_seq_continue_sequencing($scoid, $userid, $seq) {
             return $seq;
         }
 
-        $res = exescorm_seq_flow($currentact, 'forward', $seq, false, $userid);
+        $res = seledascorm_seq_flow($currentact, 'forward', $seq, false, $userid);
         if ($res) {
             return $res;
         }
     }
 }
 
-function exescorm_seq_previous_sequencing($scoid, $userid, $seq) {
+function seledascorm_seq_previous_sequencing($scoid, $userid, $seq) {
     if (empty($seq->currentactivity)) {
         $seq->delivery = null;
         $seq->exception = 'SB.2.8-1';
@@ -306,21 +306,21 @@ function exescorm_seq_previous_sequencing($scoid, $userid, $seq) {
 
     $currentact = $seq->currentactivity;
     if ($currentact->parent != '/') { // If the activity is the root and is leaf.
-        $parent = exescorm_get_parent ($currentact);
+        $parent = seledascorm_get_parent ($currentact);
         if (!isset($parent->flow) || ($parent->flow == false)) {
             $seq->delivery = null;
             $seq->exception = 'SB.2.8-2';
             return $seq;
         }
 
-        $res = exescorm_seq_flow($currentact, 'backward', $seq, false, $userid);
+        $res = seledascorm_seq_flow($currentact, 'backward', $seq, false, $userid);
         if ($res) {
             return $res;
         }
     }
 }
 
-function exescorm_seq_exit_sequencing($scoid, $userid, $seq) {
+function seledascorm_seq_exit_sequencing($scoid, $userid, $seq) {
     if (empty($seq->currentactivity)) {
         $seq->delivery = null;
         $seq->exception = 'SB.2.11-1';
@@ -342,7 +342,7 @@ function exescorm_seq_exit_sequencing($scoid, $userid, $seq) {
     return $seq;
 }
 
-function exescorm_seq_retry_sequencing($scoid, $userid, $seq) {
+function seledascorm_seq_retry_sequencing($scoid, $userid, $seq) {
     if (empty($seq->currentactivity)) {
         $seq->delivery = null;
         $seq->exception = 'SB.2.10-1';
@@ -354,8 +354,8 @@ function exescorm_seq_retry_sequencing($scoid, $userid, $seq) {
         return $seq;
     }
 
-    if (!exescorm_is_leaf($seq->currentactivity)) {
-        $res = exescorm_seq_flow($seq->currentactivity, 'forward', $seq, true, $userid);
+    if (!seledascorm_is_leaf($seq->currentactivity)) {
+        $res = seledascorm_seq_flow($seq->currentactivity, 'forward', $seq, true, $userid);
         if ($res != null) {
             return $res;
         } else {
@@ -371,7 +371,7 @@ function exescorm_seq_retry_sequencing($scoid, $userid, $seq) {
 
 }
 
-function exescorm_seq_choice_sequencing($sco, $userid, $seq) {
+function seledascorm_seq_choice_sequencing($sco, $userid, $seq) {
 
     $avchildren = Array ();
     $comancestor = null;
@@ -383,13 +383,13 @@ function exescorm_seq_choice_sequencing($sco, $userid, $seq) {
         return $seq;
     }
 
-    $ancestors = exescorm_get_ancestors($sco);
+    $ancestors = seledascorm_get_ancestors($sco);
     $arrpath = array_reverse($ancestors);
     array_push ($arrpath, $sco); // Path from the root to the target.
 
     foreach ($arrpath as $activity) {
         if ($activity->parent != '/') {
-            $avchildren = exescorm_get_available_children (exescorm_get_parent($activity));
+            $avchildren = seledascorm_get_available_children (seledascorm_get_parent($activity));
             $position = array_search($avchildren, $activity);
             if ($position !== false) {
                 $seq->delivery = null;
@@ -398,7 +398,7 @@ function exescorm_seq_choice_sequencing($sco, $userid, $seq) {
             }
         }
 
-        if (exescorm_seq_rules_check($activity, 'hidefromchoice' != null)) {
+        if (seledascorm_seq_rules_check($activity, 'hidefromchoice' != null)) {
             $seq->delivery = null;
             $seq->exception = 'SB.2.9-3';
             return $seq;
@@ -406,7 +406,7 @@ function exescorm_seq_choice_sequencing($sco, $userid, $seq) {
     }
 
     if ($sco->parent != '/') {
-        $parent = exescorm_sco_get_parent ($sco);
+        $parent = seledascorm_sco_get_parent ($sco);
         if ( isset($parent->choice) && ($parent->choice == false)) {
             $seq->delivery = null;
             $seq->exception = 'SB.2.9-4';
@@ -415,7 +415,7 @@ function exescorm_seq_choice_sequencing($sco, $userid, $seq) {
     }
 
     if ($seq->currentactivity != null) {
-        $commonpos = exescorm_find_common_ancestor($ancestors, $seq->currentactivity);
+        $commonpos = seledascorm_find_common_ancestor($ancestors, $seq->currentactivity);
         $comancestor = $arrpath[$commonpos];
     } else {
         $comancestor = $arrpath[0];
@@ -426,7 +426,7 @@ function exescorm_seq_choice_sequencing($sco, $userid, $seq) {
         throw new \coding_exception('Unexpected state encountered');
     }
 
-    $sib = exescorm_get_siblings($seq->currentactivity);
+    $sib = seledascorm_get_siblings($seq->currentactivity);
     $pos = array_search($sib, $sco);
 
     if ($pos !== false) {
@@ -437,7 +437,7 @@ function exescorm_seq_choice_sequencing($sco, $userid, $seq) {
             return $seq;
         }
 
-        $children = exescorm_get_children (exescorm_get_parent ($sco));
+        $children = seledascorm_get_children (seledascorm_get_parent ($sco));
         $pos1 = array_search($children, $sco);
         $pos2 = array_search($seq->currentactivity, $sco);
         if ($pos1 > $pos2) {
@@ -447,7 +447,7 @@ function exescorm_seq_choice_sequencing($sco, $userid, $seq) {
         }
 
         foreach ($siblings as $sibling) {
-            $seq = exescorm_seq_choice_activity_traversal($sibling, $userid, $seq, $traverse);
+            $seq = seledascorm_seq_choice_activity_traversal($sibling, $userid, $seq, $traverse);
             if (!$seq->reachable) {
                 $seq->delivery = null;
                 return $seq;
@@ -458,7 +458,7 @@ function exescorm_seq_choice_sequencing($sco, $userid, $seq) {
     }
 
     if ($seq->currentactivity == null || $seq->currentactivity == $comancestor) {
-        $commonpos = exescorm_find_common_ancestor($ancestors, $seq->currentactivity);
+        $commonpos = seledascorm_find_common_ancestor($ancestors, $seq->currentactivity);
         // Path from the common ancestor to the target activity.
         $comtarget = array_slice($ancestors, 1, $commonpos - 1);
         $comtarget = array_reverse($comtarget);
@@ -469,13 +469,13 @@ function exescorm_seq_choice_sequencing($sco, $userid, $seq) {
             return $seq;
         }
         foreach ($comtarget as $act) {
-            $seq = exescorm_seq_choice_activity_traversal($act, $userid, $seq, 'forward');
+            $seq = seledascorm_seq_choice_activity_traversal($act, $userid, $seq, 'forward');
             if (!$seq->reachable) {
                 $seq->delivery = null;
                 return $seq;
             }
-            $act = exescorm_get_sco ($act->id);
-            if (exescorm_seq_is('active', $act->id, $userid) && ($act->id != $comancestor->id && $act->preventactivation)) {
+            $act = seledascorm_get_sco ($act->id);
+            if (seledascorm_seq_is('active', $act->id, $userid) && ($act->id != $comancestor->id && $act->preventactivation)) {
                 $seq->delivery = null;
                 $seq->exception = 'SB.2.9-6';
                 return $seq;
@@ -487,7 +487,7 @@ function exescorm_seq_choice_sequencing($sco, $userid, $seq) {
 
     if ($comancestor->id == $sco->id) {
 
-        $ancestorscurrent = exescorm_get_ancestors($seq->currentactivity);
+        $ancestorscurrent = seledascorm_get_ancestors($seq->currentactivity);
         $possco = array_search($ancestorscurrent, $sco);
         // Path from the current activity to the target.
         $curtarget = array_slice($ancestorscurrent, 0, $possco);
@@ -513,8 +513,8 @@ function exescorm_seq_choice_sequencing($sco, $userid, $seq) {
     }
 
     if (array_search($ancestors, $comancestor) !== false) {
-        $ancestorscurrent = exescorm_get_ancestors($seq->currentactivity);
-        $commonpos = exescorm_find_common_ancestor($ancestors, $sco);
+        $ancestorscurrent = seledascorm_get_ancestors($seq->currentactivity);
+        $commonpos = seledascorm_find_common_ancestor($ancestors, $sco);
         $curcommon = array_slice($ancestorscurrent, 0, $commonpos - 1);
         if (empty($curcommon)) {
             $seq->delivery = null;
@@ -524,7 +524,7 @@ function exescorm_seq_choice_sequencing($sco, $userid, $seq) {
 
         $constrained = null;
         foreach ($curcommon as $acti) {
-            $acti = exescorm_get_sco($acti->id);
+            $acti = seledascorm_get_sco($acti->id);
             if (isset($acti->choiceexit) && ($acti->choiceexit == false)) {
                     $seq->delivery = null;
                     $seq->exception = 'SB.2.9-7';
@@ -537,17 +537,17 @@ function exescorm_seq_choice_sequencing($sco, $userid, $seq) {
             }
         }
         if ($constrained != null) {
-            $fwdir = exescorm_get_preorder($constrained);
+            $fwdir = seledascorm_get_preorder($constrained);
 
             if (array_search($fwdir, $sco) !== false) {
                 $traverse = 'forward';
             } else {
                 $traverse = 'backward';
             }
-            $seq = exescorm_seq_choice_flow($constrained, $traverse, $seq);
+            $seq = seledascorm_seq_choice_flow($constrained, $traverse, $seq);
             $actconsider = $seq->identifiedactivity;
             $avdescendents = Array();
-            $avdescendents = exescorm_get_available_descendents($actconsider);
+            $avdescendents = seledascorm_get_available_descendents($actconsider);
             if (array_search ($avdescendents, $sco) !== false && $sco->id != $actconsider->id && $constrained->id != $sco->id ) {
                 $seq->delivery = null;
                 $seq->exception = 'SB.2.9-8';
@@ -556,7 +556,7 @@ function exescorm_seq_choice_sequencing($sco, $userid, $seq) {
             // CONTINUE 11.5.5 !
         }
 
-        $commonpos = exescorm_find_common_ancestor($ancestors, $seq->currentactivity);
+        $commonpos = seledascorm_find_common_ancestor($ancestors, $seq->currentactivity);
         $comtarget = array_slice($ancestors, 1, $commonpos - 1);// Path from the common ancestor to the target activity.
         $comtarget = array_reverse($comtarget);
 
@@ -566,17 +566,17 @@ function exescorm_seq_choice_sequencing($sco, $userid, $seq) {
             return $seq;
         }
 
-        $fwdir = exescorm_get_preorder($seq->currentactivity);
+        $fwdir = seledascorm_get_preorder($seq->currentactivity);
 
         if (array_search($fwdir, $sco) !== false) {
             foreach ($comtarget as $act) {
-                $seq = exescorm_seq_choice_activity_traversal($act, $userid, $seq, 'forward');
+                $seq = seledascorm_seq_choice_activity_traversal($act, $userid, $seq, 'forward');
                 if (!$seq->reachable) {
                     $seq->delivery = null;
                     return $seq;
                 }
-                $act = exescorm_get_sco($act->id);
-                if (exescorm_seq_is('active', $act->id, $userid) && ($act->id != $comancestor->id &&
+                $act = seledascorm_get_sco($act->id);
+                if (seledascorm_seq_is('active', $act->id, $userid) && ($act->id != $comancestor->id &&
                         ($act->preventactivation == true))) {
                     $seq->delivery = null;
                     $seq->exception = 'SB.2.9-6';
@@ -586,8 +586,8 @@ function exescorm_seq_choice_sequencing($sco, $userid, $seq) {
 
         } else {
             foreach ($comtarget as $act) {
-                $act = exescorm_get_sco($act->id);
-                if (exescorm_seq_is('active', $act->id, $userid) &&
+                $act = seledascorm_get_sco($act->id);
+                if (seledascorm_seq_is('active', $act->id, $userid) &&
                     $act->id != $comancestor->id && $act->preventactivation == true
                 ) {
                     $seq->delivery = null;
@@ -600,16 +600,16 @@ function exescorm_seq_choice_sequencing($sco, $userid, $seq) {
         throw new \coding_exception('Unexpected state encountered');
     }
 
-    if (exescorm_is_leaf ($sco)) {
+    if (seledascorm_is_leaf ($sco)) {
         $seq->delivery = $sco;
         $seq->exception = 'SB.2.9-6';
         return $seq;
     }
 
-    $seq = exescorm_seq_flow($sco, 'forward', $seq, true, $userid);
+    $seq = seledascorm_seq_flow($sco, 'forward', $seq, true, $userid);
     if ($seq->deliverable == false) {
-        exescorm_terminate_descendent_attempts($comancestor, $userid, $seq);
-        exescorm_seq_end_attempt($comancestor, $userid, $seq->attempt);
+        seledascorm_terminate_descendent_attempts($comancestor, $userid, $seq);
+        seledascorm_seq_end_attempt($comancestor, $userid, $seq->attempt);
         $seq->currentactivity = $sco;
         $seq->delivery = null;
         $seq->exception = 'SB.2.9-9';
@@ -620,8 +620,8 @@ function exescorm_seq_choice_sequencing($sco, $userid, $seq) {
 
 }
 
-function exescorm_seq_choice_flow ($constrained, $traverse, $seq) {
-    $seq = exescorm_seq_choice_flow_tree ($constrained, $traverse, $seq);
+function seledascorm_seq_choice_flow ($constrained, $traverse, $seq) {
+    $seq = seledascorm_seq_choice_flow_tree ($constrained, $traverse, $seq);
     if ($seq->identifiedactivity == null) {
         $seq->identifiedactivity = $constrained;
         return $seq;
@@ -630,11 +630,11 @@ function exescorm_seq_choice_flow ($constrained, $traverse, $seq) {
     }
 }
 
-function exescorm_seq_choice_flow_tree ($constrained, $traverse, $seq) {
+function seledascorm_seq_choice_flow_tree ($constrained, $traverse, $seq) {
     $islast = false;
-    $parent = exescorm_get_parent ($constrained);
+    $parent = seledascorm_get_parent ($constrained);
     if ($traverse == 'forward') {
-        $preord = exescorm_get_preorder($constrained);
+        $preord = seledascorm_get_preorder($constrained);
         if (count($preorder) == 0 || (count($preorder) == 0 && $preorder[0]->id = $constrained->id)) {
             // TODO: undefined.
             $islast = true; // The function is the last activity available.
@@ -643,9 +643,9 @@ function exescorm_seq_choice_flow_tree ($constrained, $traverse, $seq) {
             $seq->nextactivity = null;
             return $seq;
         }
-        $avchildren = exescorm_get_available_children($parent); // Available children.
+        $avchildren = seledascorm_get_available_children($parent); // Available children.
         if ($avchildren[count($avchildren) - 1]->id == $constrained->id) {
-            $seq = exescorm_seq_choice_flow_tree ($parent, 'forward', $seq);
+            $seq = seledascorm_seq_choice_flow_tree ($parent, 'forward', $seq);
             return $seq;
         } else {
             $i = 0;
@@ -666,9 +666,9 @@ function exescorm_seq_choice_flow_tree ($constrained, $traverse, $seq) {
             return $seq;
         }
 
-        $avchildren = exescorm_get_available_children($parent); // Available children.
+        $avchildren = seledascorm_get_available_children($parent); // Available children.
         if ($avchildren[0]->id == $constrained->id) {
-            $seq = exescorm_seq_choice_flow_tree ($parent, 'backward', $seq);
+            $seq = seledascorm_seq_choice_flow_tree ($parent, 'backward', $seq);
             return $seq;
         } else {
             $i = count($avchildren) - 1;
@@ -684,9 +684,9 @@ function exescorm_seq_choice_flow_tree ($constrained, $traverse, $seq) {
     }
 }
 
-function exescorm_seq_choice_activity_traversal($activity, $userid, $seq, $direction) {
+function seledascorm_seq_choice_activity_traversal($activity, $userid, $seq, $direction) {
     if ($direction == 'forward') {
-        $act = exescorm_seq_rules_check($activity, 'stopforwardtraversal');
+        $act = seledascorm_seq_rules_check($activity, 'stopforwardtraversal');
 
         if ($act != null) {
             $seq->reachable = false;
@@ -698,7 +698,7 @@ function exescorm_seq_choice_activity_traversal($activity, $userid, $seq, $direc
     }
 
     if ($direction == 'backward') {
-        $parentsco = exescorm_get_parent($activity);
+        $parentsco = seledascorm_get_parent($activity);
         if ($parentsco != null) {
             if (isset($parentsco->forwardonly) && ($parentsco->forwardonly == true)) {
                 $seq->reachable = false;
@@ -717,14 +717,14 @@ function exescorm_seq_choice_activity_traversal($activity, $userid, $seq, $direc
 
 // Delivery Request Process.
 
-function exescorm_sequencing_delivery($scoid, $userid, $seq) {
+function seledascorm_sequencing_delivery($scoid, $userid, $seq) {
 
-    if (!exescorm_is_leaf($seq->delivery)) {
+    if (!seledascorm_is_leaf($seq->delivery)) {
         $seq->deliveryvalid = false;
         $seq->exception = 'DB.1.1-1';
         return $seq;
     }
-    $ancestors = exescorm_get_ancestors($seq->delivery);
+    $ancestors = seledascorm_get_ancestors($seq->delivery);
     $arrpath = array_reverse($ancestors);
     array_push ($arrpath, $seq->delivery); // Path from the root to the target.
 
@@ -735,7 +735,7 @@ function exescorm_sequencing_delivery($scoid, $userid, $seq) {
     }
 
     foreach ($arrpath as $activity) {
-        if (exescorm_check_activity($activity, $userid)) {
+        if (seledascorm_check_activity($activity, $userid)) {
             $seq->deliveryvalid = false;
             $seq->exception = 'DB.1.1-3';
             return $seq;
@@ -747,121 +747,121 @@ function exescorm_sequencing_delivery($scoid, $userid, $seq) {
 
 }
 
-function exescorm_content_delivery_environment($seq, $userid) {
+function seledascorm_content_delivery_environment($seq, $userid) {
     global $DB;
 
     $act = $seq->currentactivity;
-    if (exescorm_seq_is('active', $act->id, $userid)) {
+    if (seledascorm_seq_is('active', $act->id, $userid)) {
         $seq->exception = 'DB.2-1';
         return $seq;
     }
-    $track = $DB->get_record('exescorm_scoes_track', array('scoid' => $act->id,
+    $track = $DB->get_record('seledascorm_scoes_track', array('scoid' => $act->id,
                                                         'userid' => $userid,
                                                         'element' => 'suspendedactivity'));
     if ($track != null) {
-        $seq = exescorm_clear_suspended_activity($seq->delivery, $seq, $userid);
+        $seq = seledascorm_clear_suspended_activity($seq->delivery, $seq, $userid);
 
     }
-    $seq = exescorm_terminate_descendent_attempts ($seq->delivery, $userid, $seq);
-    $ancestors = exescorm_get_ancestors($seq->delivery);
+    $seq = seledascorm_terminate_descendent_attempts ($seq->delivery, $userid, $seq);
+    $ancestors = seledascorm_get_ancestors($seq->delivery);
     $arrpath = array_reverse($ancestors);
     array_push ($arrpath, $seq->delivery);
     foreach ($arrpath as $activity) {
-        if (!exescorm_seq_is('active', $activity->id, $userid)) {
+        if (!seledascorm_seq_is('active', $activity->id, $userid)) {
             if (!isset($activity->tracked) || ($activity->tracked == 1)) {
-                if (!exescorm_seq_is('suspended', $activity->id, $userid)) {
-                    $r = $DB->get_record('exescorm_scoes_track', array('scoid' => $activity->id,
+                if (!seledascorm_seq_is('suspended', $activity->id, $userid)) {
+                    $r = $DB->get_record('seledascorm_scoes_track', array('scoid' => $activity->id,
                                                                     'userid' => $userid,
                                                                     'element' => 'activityattemptcount'));
                     $r->value = ($r->value) + 1;
-                    $DB->update_record('exescorm_scoes_track', $r);
+                    $DB->update_record('seledascorm_scoes_track', $r);
                     if ($r->value == 1) {
-                        exescorm_seq_set('activityprogressstatus', $activity->id, $userid, 'true');
+                        seledascorm_seq_set('activityprogressstatus', $activity->id, $userid, 'true');
                     }
-                    exescorm_insert_track($userid, $activity->exescorm,
+                    seledascorm_insert_track($userid, $activity->seledascorm,
                                             $activity->id, 0, 'objectiveprogressstatus', 'false');
-                    exescorm_insert_track($userid, $activity->exescorm,
+                    seledascorm_insert_track($userid, $activity->seledascorm,
                                             $activity->id, 0, 'objectivesatisfiedstatus', 'false');
-                    exescorm_insert_track($userid, $activity->exescorm,
+                    seledascorm_insert_track($userid, $activity->seledascorm,
                                             $activity->id, 0, 'objectivemeasurestatus', 'false');
-                    exescorm_insert_track($userid, $activity->exescorm,
+                    seledascorm_insert_track($userid, $activity->seledascorm,
                                             $activity->id, 0, 'objectivenormalizedmeasure', 0.0);
 
-                    exescorm_insert_track($userid, $activity->exescorm,
+                    seledascorm_insert_track($userid, $activity->seledascorm,
                                             $activity->id, 0, 'attemptprogressstatus', 'false');
-                    exescorm_insert_track($userid, $activity->exescorm,
+                    seledascorm_insert_track($userid, $activity->seledascorm,
                                             $activity->id, 0, 'attemptcompletionstatus', 'false');
-                    exescorm_insert_track($userid, $activity->exescorm,
+                    seledascorm_insert_track($userid, $activity->seledascorm,
                                             $activity->id, 0, 'attemptabsoluteduration', 0.0);
-                    exescorm_insert_track($userid, $activity->exescorm,
+                    seledascorm_insert_track($userid, $activity->seledascorm,
                                             $activity->id, 0, 'attemptexperiencedduration', 0.0);
-                    exescorm_insert_track($userid, $activity->exescorm,
+                    seledascorm_insert_track($userid, $activity->seledascorm,
                                             $activity->id, 0, 'attemptcompletionamount', 0.0);
                 }
             }
-            exescorm_seq_set('active', $activity->id, $userid, 'true');
+            seledascorm_seq_set('active', $activity->id, $userid, 'true');
         }
     }
     $seq->delivery = $seq->currentactivity;
-    exescorm_seq_set('suspendedactivity', $activity->id, $userid, 'false');
+    seledascorm_seq_set('suspendedactivity', $activity->id, $userid, 'false');
 
     // ONCE THE DELIVERY BEGINS (How should I check that?).
 
     if (isset($activity->tracked) || ($activity->tracked == 0)) {
         // How should I track the info and what should I do to not record the information for the activity during delivery?
-        $atabsdur = $DB->get_record('exescorm_scoes_track', array('scoid' => $activity->id,
+        $atabsdur = $DB->get_record('seledascorm_scoes_track', array('scoid' => $activity->id,
                                                                 'userid' => $userid,
                                                                 'element' => 'attemptabsoluteduration'));
-        $atexpdur = $DB->get_record('exescorm_scoes_track', array('scoid' => $activity->id,
+        $atexpdur = $DB->get_record('seledascorm_scoes_track', array('scoid' => $activity->id,
                                                                 'userid' => $userid,
                                                                 'element' => 'attemptexperiencedduration'));
     }
     return $seq;
 }
 
-function exescorm_clear_suspended_activity($act, $seq, $userid) {
+function seledascorm_clear_suspended_activity($act, $seq, $userid) {
     global $DB;
     $currentact = $seq->currentactivity;
-    $track = $DB->get_record('exescorm_scoes_track', array('scoid' => $currentact->id,
+    $track = $DB->get_record('seledascorm_scoes_track', array('scoid' => $currentact->id,
                                                         'userid' => $userid,
                                                         'element' => 'suspendedactivity'));
     if ($track != null) {
-        $ancestors = exescorm_get_ancestors($act);
-        $commonpos = exescorm_find_common_ancestor($ancestors, $currentact);
+        $ancestors = seledascorm_get_ancestors($act);
+        $commonpos = seledascorm_find_common_ancestor($ancestors, $currentact);
         if ($commonpos !== false) {
             if ($activitypath = array_slice($ancestors, 0, $commonpos)) {
                 if (!empty($activitypath)) {
 
                     foreach ($activitypath as $activity) {
-                        if (exescorm_is_leaf($activity)) {
-                            exescorm_seq_set('suspended', $activity->id, $userid, false);
+                        if (seledascorm_is_leaf($activity)) {
+                            seledascorm_seq_set('suspended', $activity->id, $userid, false);
                         } else {
-                            $children = exescorm_get_children($activity);
+                            $children = seledascorm_get_children($activity);
                             $bool = false;
                             foreach ($children as $child) {
-                                if (exescorm_seq_is('suspended', $child->id, $userid)) {
+                                if (seledascorm_seq_is('suspended', $child->id, $userid)) {
                                     $bool = true;
                                 }
                             }
                             if (!$bool) {
-                                exescorm_seq_set('suspended', $activity->id, $userid, false);
+                                seledascorm_seq_set('suspended', $activity->id, $userid, false);
                             }
                         }
                     }
                 }
             }
         }
-        exescorm_seq_set('suspendedactivity', $act->id, $userid, false);
+        seledascorm_seq_set('suspendedactivity', $act->id, $userid, false);
     }
 }
 
-function exescorm_select_children_process($scoid, $userid) {
+function seledascorm_select_children_process($scoid, $userid) {
     global $DB;
 
-    $sco = exescorm_get_sco($scoid);
-    if (!exescorm_is_leaf($sco)) {
-        if (!exescorm_seq_is('suspended', $scoid, $userid) && !exescorm_seq_is('active', $scoid, $userid)) {
-            $r = $DB->get_record('exescorm_scoes_track', array('scoid' => $scoid,
+    $sco = seledascorm_get_sco($scoid);
+    if (!seledascorm_is_leaf($sco)) {
+        if (!seledascorm_seq_is('suspended', $scoid, $userid) && !seledascorm_seq_is('active', $scoid, $userid)) {
+            $r = $DB->get_record('seledascorm_scoes_track', array('scoid' => $scoid,
                                                             'userid' => $userid,
                                                             'element' => 'selectiontiming'));
 
@@ -871,14 +871,14 @@ function exescorm_select_children_process($scoid, $userid) {
                 break;
 
                 case 'once':
-                    if (!exescorm_seq_is('activityprogressstatus', $scoid, $userid)) {
-                        if (exescorm_seq_is('selectioncountsstatus', $scoid, $userid)) {
+                    if (!seledascorm_seq_is('activityprogressstatus', $scoid, $userid)) {
+                        if (seledascorm_seq_is('selectioncountsstatus', $scoid, $userid)) {
                             $childlist = '';
-                            $res = $DB->get_record('exescorm_scoes_track', array('scoid' => $scoid,
+                            $res = $DB->get_record('seledascorm_scoes_track', array('scoid' => $scoid,
                                                                                 'userid' => $userid,
                                                                                 'element' => 'selectioncount'));
                             $i = ($res->value) - 1;
-                            $children = exescorm_get_children($sco);
+                            $children = seledascorm_get_children($sco);
 
                             while ($i >= 0) {
                                 $pos = array_rand($children);
@@ -888,8 +888,8 @@ function exescorm_select_children_process($scoid, $userid) {
                             }
                             sort($childlist);
                             $clist = serialize($childlist);
-                            exescorm_seq_set('availablechildren', $scoid, $userid, false);
-                            exescorm_seq_set('availablechildren', $scoid, $userid, $clist);
+                            seledascorm_seq_set('availablechildren', $scoid, $userid, false);
+                            seledascorm_seq_set('availablechildren', $scoid, $userid, $clist);
                         }
                     }
                 break;
@@ -898,13 +898,13 @@ function exescorm_select_children_process($scoid, $userid) {
     }
 }
 
-function exescorm_randomize_children_process($scoid, $userid) {
+function seledascorm_randomize_children_process($scoid, $userid) {
     global $DB;
 
-    $sco = exescorm_get_sco($scoid);
-    if (!exescorm_is_leaf($sco)) {
-        if (!exescorm_seq_is('suspended', $scoid, $userid) && !exescorm_seq_is('active', $scoid, $userid)) {
-            $r = $DB->get_record('exescorm_scoes_track', array('scoid' => $scoid,
+    $sco = seledascorm_get_sco($scoid);
+    if (!seledascorm_is_leaf($sco)) {
+        if (!seledascorm_seq_is('suspended', $scoid, $userid) && !seledascorm_seq_is('active', $scoid, $userid)) {
+            $r = $DB->get_record('seledascorm_scoes_track', array('scoid' => $scoid,
                                                             'userid' => $userid,
                                                             'element' => 'randomizationtiming'));
 
@@ -914,10 +914,10 @@ function exescorm_randomize_children_process($scoid, $userid) {
 
                 case 'oneachnewattempt':
                 case 'once':
-                    if (!exescorm_seq_is('activityprogressstatus', $scoid, $userid)) {
-                        if (exescorm_seq_is('randomizechildren', $scoid, $userid)) {
+                    if (!seledascorm_seq_is('activityprogressstatus', $scoid, $userid)) {
+                        if (seledascorm_seq_is('randomizechildren', $scoid, $userid)) {
                             $childlist = array();
-                            $res = exescorm_get_available_children($sco);
+                            $res = seledascorm_get_available_children($sco);
                             $i = count($res) - 1;
                             $children = $res->value;
 
@@ -929,8 +929,8 @@ function exescorm_randomize_children_process($scoid, $userid) {
                             }
 
                             $clist = serialize ($childlist);
-                            exescorm_seq_set('availablechildren', $scoid, $userid, false);
-                            exescorm_seq_set('availablechildren', $scoid, $userid, $clist);
+                            seledascorm_seq_set('availablechildren', $scoid, $userid, false);
+                            seledascorm_seq_set('availablechildren', $scoid, $userid, $clist);
                         }
                     }
                 break;
@@ -939,21 +939,21 @@ function exescorm_randomize_children_process($scoid, $userid) {
     }
 }
 
-function exescorm_terminate_descendent_attempts($activity, $userid, $seq) {
-    $ancestors = exescorm_get_ancestors($seq->currentactivity);
-    $commonpos = exescorm_find_common_ancestor($ancestors, $activity);
+function seledascorm_terminate_descendent_attempts($activity, $userid, $seq) {
+    $ancestors = seledascorm_get_ancestors($seq->currentactivity);
+    $commonpos = seledascorm_find_common_ancestor($ancestors, $activity);
     if ($commonpos !== false) {
         if ($activitypath = array_slice($ancestors, 1, $commonpos - 2)) {
             if (!empty($activitypath)) {
                 foreach ($activitypath as $sco) {
-                    exescorm_seq_end_attempt($sco, $userid, $seq->attempt);
+                    seledascorm_seq_end_attempt($sco, $userid, $seq->attempt);
                 }
             }
         }
     }
 }
 
-function exescorm_sequencing_exception($seq) {
+function seledascorm_sequencing_exception($seq) {
     global $OUTPUT;
     if ($seq->exception != null) {
         switch ($seq->exception) {

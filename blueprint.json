@@ -14,7 +14,7 @@
         "adminUser": "{{ADMIN_USER}}",
         "adminPass": "{{ADMIN_PASS}}",
         "adminEmail": "{{ADMIN_EMAIL}}",
-        "siteName": "eXeLearning SCORM Demo",
+        "siteName": "Seleda SCORM Demo",
         "locale": "es",
         "timezone": "Europe/Madrid"
       }
@@ -24,7 +24,7 @@
       "step": "installMoodlePlugin",
       "pluginType": "mod",
       "pluginName": "exescorm",
-      "url": "https://github.com/exelearning/mod_exescorm/archive/refs/heads/main.zip"
+      "url": "https://github.com/Robel43/mod_seledascorm/archive/refs/heads/main.zip"
     },
     {
       "step": "unzip",
@@ -77,10 +77,10 @@
     { "step": "createCategory", "name": "Test Courses" },
     {
       "step": "createCourse",
-      "fullname": "eXeLearning SCORM Test Course",
+      "fullname": "Seleda SCORM Test Course",
       "shortname": "EXESCORM01",
       "category": "Test Courses",
-      "summary": "Test course for the eXeLearning SCORM plugin."
+      "summary": "Test course for the Seleda SCORM plugin."
     },
     {
       "step": "createUser",
@@ -113,7 +113,7 @@
       "course": "EXESCORM01",
       "section": 1,
       "name": "Test Content",
-      "intro": "Sample eXeLearning SCORM content for testing.",
+      "intro": "Sample Seleda SCORM content for testing.",
       "exescormtype": "local",
       "reference": "test-content.elpx",
       "display": 1,
@@ -133,7 +133,7 @@
       "course": "EXESCORM01",
       "section": 1,
       "name": "Propiedades",
-      "intro": "Example content demonstrating eXeLearning properties.",
+      "intro": "Example content demonstrating Seleda Studio properties.",
       "exescormtype": "local",
       "reference": "propiedades.elpx",
       "display": 1,

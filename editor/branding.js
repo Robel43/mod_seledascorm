@@ -6,7 +6,7 @@
  * embedded authoring UI; learner content and editable lesson text are not
  * rewritten.
  *
- * @package mod_exescorm
+ * @package mod_seledascorm
  */
 (function() {
     'use strict';

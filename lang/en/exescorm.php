@@ -21,6 +21,14 @@
  * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+$string['brandingsettings'] = 'Branding';
+$string['brandingsettings_desc'] = 'Choose the name and logo used by the embedded authoring workspace on this Moodle site. These settings are shown during the first plugin setup and can be changed later.';
+$string['brandname'] = 'Display name';
+$string['brandname_desc'] = 'Name shown in Create/Edit actions and throughout the embedded authoring workspace. The default is Seleda.';
+$string['brandlogo'] = 'Logo';
+$string['brandlogo_desc'] = 'Upload the primary logo used by the embedded authoring workspace, including the loading screen and product-logo locations. If no image is uploaded, the bundled Seleda logo is used.';
+$string['createwithbrand'] = 'Create with {$a}';
+$string['editwithbrand'] = 'Edit with {$a}';
 $string['toc'] = 'TOC';
 $string['navigation'] = 'Navigation';
 $string['contenttitle'] = 'Content';

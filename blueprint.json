@@ -1,6 +1,9 @@
 {
   "$schema": "https://raw.githubusercontent.com/ateeducacion/moodle-playground/refs/heads/main/assets/blueprints/blueprint-schema.json",
-  "preferredVersions": { "php": "8.3", "moodle": "4.5" },
+  "preferredVersions": {
+    "php": "8.3",
+    "moodle": "4.5"
+  },
   "landingPage": "/course/view.php?id=2",
   "constants": {
     "ADMIN_USER": "admin",
@@ -19,7 +22,10 @@
         "timezone": "Europe/Madrid"
       }
     },
-    { "step": "login", "username": "{{ADMIN_USER}}" },
+    {
+      "step": "login",
+      "username": "{{ADMIN_USER}}"
+    },
     {
       "step": "installMoodlePlugin",
       "pluginType": "mod",
@@ -27,54 +33,261 @@
       "url": "https://github.com/Robel43/mod_seledascorm/archive/refs/heads/main.zip"
     },
     {
-      "step": "unzip",
-      "comment": "Auto-load the eXeLearning static editor so the playground boots with a working editor. Fetches the shared editor release asset once through the github-proxy (CORS) and extracts it into the plugin's bundled dir. The asset wraps everything in a 'static/' folder, so extracting into 'dist' yields 'dist/static/...', which embedded_editor_source_resolver serves via its 'bundled' precedence (moodledata -> bundled -> none). Pinned to match .editor-version for deterministic previews. embedded_editor_installer stays for production/offline installs.",
-      "destination": "{{MOODLE_DIRROOT}}/mod/seledascorm/dist",
-      "data": { "url": "https://github-proxy.exelearning.dev/?repo=exelearning/exelearning&release=v4.0.6&asset=exelearning-static-v4.0.6.zip" }
+      "step": "setConfig",
+      "name": "editormode",
+      "value": "embedded",
+      "plugin": "seledascorm"
     },
-    { "step": "setConfig", "name": "editormode", "value": "embedded", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "providername", "value": "Moodle", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "providerversion", "value": "4.5", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "sendtemplate", "value": "0", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "mandatoryfileslist", "value": "/^content(v\\d+)?\\.xml$/", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "forbiddenfileslist", "value": "/.*\\.php$/", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "displaycoursestructure", "value": "0", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "popup", "value": "0", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "framewidth", "value": "100", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "frameheight", "value": "500", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "winoptgrp_adv", "value": "1", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "skipview", "value": "2", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "hidebrowse", "value": "0", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "hidetoc", "value": "0", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "nav", "value": "1", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "navpositionleft", "value": "-100", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "navpositiontop", "value": "-100", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "collapsetocwinsize", "value": "767", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "displayattemptstatus", "value": "1", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "grademethod", "value": "1", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "maxgrade", "value": "100", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "maxattempt", "value": "0", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "whatgrade", "value": "0", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "forcecompleted", "value": "0", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "forcenewattempt", "value": "0", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "autocommit", "value": "0", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "masteryoverride", "value": "1", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "lastattemptlock", "value": "0", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "auto", "value": "0", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "updatefreq", "value": "0", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "seledascormstandard", "value": "0", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "allowtypeexternal", "value": "0", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "allowtypelocalsync", "value": "0", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "allowtypeexternalaicc", "value": "0", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "allowaicchacp", "value": "0", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "aicchacptimeout", "value": "30", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "aicchacpkeepsessiondata", "value": "1", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "aiccuserid", "value": "1", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "forcejavascript", "value": "1", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "allowapidebug", "value": "0", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "apidebugmask", "value": ".*", "plugin": "seledascorm" },
-    { "step": "setConfig", "name": "protectpackagedownloads", "value": "0", "plugin": "seledascorm" },
-    { "step": "createCategory", "name": "Test Courses" },
+    {
+      "step": "setConfig",
+      "name": "providername",
+      "value": "Moodle",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "providerversion",
+      "value": "4.5",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "sendtemplate",
+      "value": "0",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "mandatoryfileslist",
+      "value": "/^content(v\\d+)?\\.xml$/",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "forbiddenfileslist",
+      "value": "/.*\\.php$/",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "displaycoursestructure",
+      "value": "0",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "popup",
+      "value": "0",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "framewidth",
+      "value": "100",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "frameheight",
+      "value": "500",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "winoptgrp_adv",
+      "value": "1",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "skipview",
+      "value": "2",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "hidebrowse",
+      "value": "0",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "hidetoc",
+      "value": "0",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "nav",
+      "value": "1",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "navpositionleft",
+      "value": "-100",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "navpositiontop",
+      "value": "-100",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "collapsetocwinsize",
+      "value": "767",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "displayattemptstatus",
+      "value": "1",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "grademethod",
+      "value": "1",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "maxgrade",
+      "value": "100",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "maxattempt",
+      "value": "0",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "whatgrade",
+      "value": "0",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "forcecompleted",
+      "value": "0",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "forcenewattempt",
+      "value": "0",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "autocommit",
+      "value": "0",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "masteryoverride",
+      "value": "1",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "lastattemptlock",
+      "value": "0",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "auto",
+      "value": "0",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "updatefreq",
+      "value": "0",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "seledascormstandard",
+      "value": "0",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "allowtypeexternal",
+      "value": "0",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "allowtypelocalsync",
+      "value": "0",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "allowtypeexternalaicc",
+      "value": "0",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "allowaicchacp",
+      "value": "0",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "aicchacptimeout",
+      "value": "30",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "aicchacpkeepsessiondata",
+      "value": "1",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "aiccuserid",
+      "value": "1",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "forcejavascript",
+      "value": "1",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "allowapidebug",
+      "value": "0",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "apidebugmask",
+      "value": ".*",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "setConfig",
+      "name": "protectpackagedownloads",
+      "value": "0",
+      "plugin": "seledascorm"
+    },
+    {
+      "step": "createCategory",
+      "name": "Test Courses"
+    },
     {
       "step": "createCourse",
       "fullname": "Seleda Test Course",
@@ -147,6 +360,9 @@
         }
       ]
     },
-    { "step": "setLandingPage", "path": "/course/view.php?id=2" }
+    {
+      "step": "setLandingPage",
+      "path": "/course/view.php?id=2"
+    }
   ]
 }

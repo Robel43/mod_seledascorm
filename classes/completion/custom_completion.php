@@ -16,21 +16,21 @@
 
 declare(strict_types=1);
 
-namespace mod_exescorm\completion;
+namespace mod_seledascorm\completion;
 
 defined('MOODLE_INTERNAL') || die();
 
 use core_completion\activity_custom_completion;
 
-require_once($CFG->dirroot.'/mod/exescorm/locallib.php');
+require_once($CFG->dirroot.'/mod/seledascorm/locallib.php');
 
 /**
- * Activity custom completion subclass for the exescorm activity.
+ * Activity custom completion subclass for the seledascorm activity.
  *
- * Contains the class for defining mod_exescorm's custom completion rules
- * and fetching a exescorm instance's completion statuses for a user.
+ * Contains the class for defining mod_seledascorm's custom completion rules
+ * and fetching a seledascorm instance's completion statuses for a user.
  *
- * @package mod_exescorm
+ * @package mod_seledascorm
  * @copyright Michael Hawkins <michaelh@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -49,8 +49,8 @@ class custom_completion extends activity_custom_completion {
 
         // Base query used when fetching user's tracks data.
         $basequery = "SELECT id, scoid, element, value
-                        FROM {exescorm_scoes_track}
-                       WHERE exescormid = ?
+                        FROM {seledascorm_scoes_track}
+                       WHERE seledascormid = ?
                          AND userid = ?";
 
         switch ($rule) {
@@ -66,7 +66,7 @@ class custom_completion extends activity_custom_completion {
                 $tracks = $DB->get_records_sql($query, [$this->cm->instance, $this->userid]);
 
                 // Get available status list.
-                $statuses = array_flip(\exescorm_status_options());
+                $statuses = array_flip(\seledascorm_status_options());
 
                 $requiredcompletionstatusid = $this->cm->customdata['customcompletionrules']['completionstatusrequired'] ?? 0;
                 $isanystatus = ($requiredcompletionstatusid == array_sum($statuses));
@@ -119,7 +119,7 @@ class custom_completion extends activity_custom_completion {
                 $tracks = $DB->get_records_sql($query, [$this->cm->instance, $this->userid]);
 
                 // Get available status list.
-                $statuses = array_flip(\exescorm_status_options());
+                $statuses = array_flip(\seledascorm_status_options());
 
                 // Make a list of all sco IDs.
                 $scoids = [];
@@ -130,7 +130,7 @@ class custom_completion extends activity_custom_completion {
                 }
 
                 // Iterate over all scos and ensure each has a lesson_status.
-                $scos = $DB->get_records('exescorm_scoes', ['exescorm' => $this->cm->instance, 'exescormtype' => 'sco']);
+                $scos = $DB->get_records('seledascorm_scoes', ['seledascorm' => $this->cm->instance, 'seledascormtype' => 'sco']);
 
                 foreach ($scos as $sco) {
                     // If we find a sco without a lesson status, this condition is not completed.
@@ -148,10 +148,10 @@ class custom_completion extends activity_custom_completion {
 
         // If not yet meeting the requirement and no attempts remain to complete it, mark it as failed.
         if ($status === COMPLETION_INCOMPLETE) {
-            $exescorm = $DB->get_record('exescorm', ['id' => $this->cm->instance]);
-            $attemptcount = exescorm_get_attempt_count($this->userid, $exescorm);
+            $seledascorm = $DB->get_record('seledascorm', ['id' => $this->cm->instance]);
+            $attemptcount = seledascorm_get_attempt_count($this->userid, $seledascorm);
 
-            if ($exescorm->maxattempt > 0 && $attemptcount >= $exescorm->maxattempt) {
+            if ($seledascorm->maxattempt > 0 && $attemptcount >= $seledascorm->maxattempt) {
                 $status = COMPLETION_COMPLETE_FAIL;
             }
         }
@@ -181,7 +181,7 @@ class custom_completion extends activity_custom_completion {
         $scorerequired = $this->cm->customdata['customcompletionrules']['completionscorerequired'] ?? 0;
 
         // Prepare completion status requirements string.
-        $statusstrings = \exescorm_status_options();
+        $statusstrings = \seledascorm_status_options();
         $completionstatusid = $this->cm->customdata['customcompletionrules']['completionstatusrequired'] ?? 0;
 
         if (array_key_exists($completionstatusid, $statusstrings)) {
@@ -193,9 +193,9 @@ class custom_completion extends activity_custom_completion {
         }
 
         return [
-            'completionstatusrequired' => get_string("completiondetail:completionstatus{$statusrequired}", 'mod_exescorm'),
-            'completionscorerequired' => get_string('completiondetail:completionscore', 'mod_exescorm', $scorerequired),
-            'completionstatusallscos' => get_string('completiondetail:allscos', 'mod_exescorm'),
+            'completionstatusrequired' => get_string("completiondetail:completionstatus{$statusrequired}", 'mod_seledascorm'),
+            'completionscorerequired' => get_string('completiondetail:completionscore', 'mod_seledascorm', $scorerequired),
+            'completionstatusallscos' => get_string('completiondetail:allscos', 'mod_seledascorm'),
         ];
     }
 

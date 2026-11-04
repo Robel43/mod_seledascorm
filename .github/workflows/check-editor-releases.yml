@@ -1,8 +1,13 @@
 ---
-name: Check Embedded Editor Compatibility
+name: Check Embedded Seleda Compatibility
 
 on:
   workflow_dispatch:
+    inputs:
+      seleda_ref:
+        description: "Seleda Studio ref to test (defaults to .seleda-editor-ref)"
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -13,44 +18,31 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Compare embedded editor with latest upstream release
-        id: check
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Resolve Seleda Studio ref
         run: |
-          LATEST=$(gh api repos/exelearning/exelearning/releases/latest --jq '.tag_name' 2>/dev/null || echo "")
-          CURRENT=$(cat .editor-version 2>/dev/null || echo "")
-          echo "Current embedded fallback: $CURRENT"
-          echo "Latest upstream editor: $LATEST"
-          if [ -z "$LATEST" ] || [ "$LATEST" = "$CURRENT" ]; then
-            echo "build=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "build=true" >> "$GITHUB_OUTPUT"
-            echo "tag=$LATEST" >> "$GITHUB_OUTPUT"
+          INPUT_REF="${{ github.event.inputs.seleda_ref }}"
+          if [ -z "$INPUT_REF" ]; then
+            INPUT_REF="$(cat .seleda-editor-ref)"
           fi
+          echo "SELEDA_STUDIO_REF=$INPUT_REF" >> "$GITHUB_ENV"
+          echo "APP_VERSION=compat-$INPUT_REF" >> "$GITHUB_ENV"
+          echo "Testing embedded Seleda ref: $INPUT_REF"
 
-      - name: Setup Bun
-        if: steps.check.outputs.build == 'true'
-        uses: oven-sh/setup-bun@v2
+      - name: Build embedded Seleda editor
+        run: sh scripts/build-seleda-editor.sh
 
-      - name: Build compatibility package
-        if: steps.check.outputs.build == 'true'
-        env:
-          EXELEARNING_EDITOR_REPO_URL: https://github.com/exelearning/exelearning.git
-          EXELEARNING_EDITOR_REF: ${{ steps.check.outputs.tag }}
-          EXELEARNING_EDITOR_REF_TYPE: tag
-          APP_VERSION: ${{ steps.check.outputs.tag }}
+      - name: Verify embedded bundle
         run: |
-          make build-editor
-          make package RELEASE=embedded-check-${{ steps.check.outputs.tag }}
+          test -f dist/static/index.html
+          test -d dist/static/app
+          test -d dist/static/files
+          test -d dist/static/libs
+
+      - name: Create compatibility package
+        run: make package RELEASE=embedded-seleda-check
 
       - name: Upload compatibility package
-        if: steps.check.outputs.build == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: seleda-scorm-embedded-check-${{ steps.check.outputs.tag }}
-          path: mod_exescorm-embedded-check-${{ steps.check.outputs.tag }}.zip
-
-      - name: No upstream change
-        if: steps.check.outputs.build != 'true'
-        run: echo "No newer upstream embedded editor needs compatibility review."
+          name: seleda-scorm-embedded-seleda-check
+          path: mod_exescorm-embedded-seleda-check.zip

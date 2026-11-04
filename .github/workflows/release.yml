@@ -47,9 +47,6 @@ jobs:
             echo "APP_VERSION=${INPUT_RELEASE}" >> $GITHUB_ENV
           fi
 
-      - name: Build embedded Seleda editor
-        run: sh scripts/build-seleda-editor.sh
-
       - name: Create package
         run: make package RELEASE=${RELEASE_TAG}
 
@@ -57,12 +54,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: seleda-scorm-${{ env.RELEASE_TAG }}
-          path: mod_exescorm-${{ env.RELEASE_TAG }}.zip
+          path: mod_seledascorm-${{ env.RELEASE_TAG }}.zip
 
       - name: Upload ZIP to release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
-          files: mod_exescorm-${{ env.RELEASE_TAG }}.zip
+          files: mod_seledascorm-${{ env.RELEASE_TAG }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -2,12 +2,12 @@
 
 ## Unreleased – Seleda alignment
 
-- Brand the Moodle-facing activity as **Seleda SCORM** and remote authoring as **Seleda Studio** while retaining the internal `mod_exescorm` component for compatibility.
+- Brand the Moodle-facing activity as **Seleda** and remote authoring as **Seleda Studio** while retaining the internal `mod_exescorm` component for compatibility.
 - Integrate Seleda readable interaction reporting into learner-attempt and activity-wide Interactions reports.
 - Preserve attempt-time label metadata during SCORM commits so reports can show human-readable questions, learner responses, correct responses, results and calculated weight.
-- Add Seleda blue/teal visual alignment to the SCORM player without changing upstream player identifiers or SCORM APIs.
+- Add Seleda blue/teal visual alignment to the player without changing upstream player identifiers or SCORM APIs.
 - Keep the embedded editor explicitly identified as the upstream eXeLearning-compatible fallback rather than presenting it as the customized Seleda Studio build.
-- Preserve upstream Moodle 4.2+ / 5.x compatibility and existing activity, grade, completion, backup and restore data.
+- Target Moodle 4.5 while preserving existing activity, grade, completion, backup and restore data.
 
 ---
 

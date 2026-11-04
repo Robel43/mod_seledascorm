@@ -18,7 +18,7 @@
  * Embedded editor source resolver for mod_exescorm.
  *
  * Single source of truth for determining which embedded editor source is active.
- * Implements a precedence policy: moodledata → bundled → none.
+ * Implements the Seleda V1 precedence policy: bundled → moodledata → none.
  *
  * @package    mod_exescorm
  * @copyright  2025 eXeLearning
@@ -31,8 +31,8 @@ namespace mod_exescorm\local;
  * Resolves which embedded editor source should be used at runtime.
  *
  * Sources are checked in order:
- * 1. Admin-installed editor in moodledata (highest priority).
- * 2. Bundled editor inside the plugin dist/static/ directory.
+ * 1. Bundled Seleda editor inside the plugin dist/static/ directory (highest priority).
+ * 2. Legacy admin-installed editor in moodledata (fallback only).
  * If neither is available the embedded editor is not usable.
  */
 class embedded_editor_source_resolver {
@@ -130,17 +130,20 @@ class embedded_editor_source_resolver {
     /**
      * Determine which source is active according to the precedence policy.
      *
-     * Precedence: moodledata → bundled → none.
+     * Precedence: bundled → moodledata → none.
      *
      * @return string One of the SOURCE_* constants.
      */
     public static function get_active_source(): string {
-        if (self::validate_editor_dir(self::get_moodledata_dir())) {
-            return self::SOURCE_MOODLEDATA;
-        }
-
+        // Seleda V1 always prefers the plugin-bundled editor. This prevents a
+        // legacy admin-installed upstream eXeLearning editor from silently
+        // replacing the Seleda authoring workspace after a plugin upgrade.
         if (self::validate_editor_dir(self::get_bundled_dir())) {
             return self::SOURCE_BUNDLED;
+        }
+
+        if (self::validate_editor_dir(self::get_moodledata_dir())) {
+            return self::SOURCE_MOODLEDATA;
         }
 
         return self::SOURCE_NONE;

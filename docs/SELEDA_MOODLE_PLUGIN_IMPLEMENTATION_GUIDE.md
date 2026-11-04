@@ -7,8 +7,8 @@ This document is the living technical record for the Seleda Moodle 4.5 activity 
 The plugin is maintained in:
 
 - Repository: `Robel43/mod_seledascorm`
-- Technical Moodle component: `mod_exescorm`
-- Installation directory: `mod/exescorm`
+- Technical Moodle component: `mod_seledascorm`
+- Installation directory: `mod/seledascorm`
 - V1 development branch: `feature/seleda-alignment`
 
 The embedded authoring application is built from:
@@ -23,21 +23,21 @@ This guide must be updated whenever a material architectural, build, runtime, re
 
 ## 2. Compatibility contract
 
-The user-facing product is Seleda, but the Moodle plugin deliberately keeps the upstream eXeSCORM technical identity.
+Seleda V1 deliberately uses its own Moodle technical identity rather than retaining the upstream eXeSCORM component name.
 
 Preserved identifiers include:
 
-- component: `mod_exescorm`
-- install folder: `mod/exescorm`
-- database tables: `exescorm_*`
-- capabilities: `mod/exescorm:*`
+- component: `mod_seledascorm`
+- install folder: `mod/seledascorm`
+- database tables: `seledascorm_*`
+- capabilities: `mod/seledascorm:*`
 - SCORM API identifiers
 - backup and restore identifiers
 - completion and grade integration identifiers
 
-This is required to preserve compatibility with existing activities, learner attempts, grades, completion data, backups, and Moodle upgrades.
+This is a deliberate architecture break from upstream `mod_exescorm`. Historical `mod_exescorm` data is not automatically migrated; a separate migration procedure is required for existing sites.
 
-The activity chooser name remains statically `Seleda`. Site-specific branding is applied to plugin-owned screens and actions rather than attempting to rewrite Moodle-cached activity module language strings.
+The activity chooser name is `Seleda`, backed by component `mod_seledascorm`. Site-specific branding is applied to plugin-owned screens and actions.
 
 ---
 
@@ -190,7 +190,7 @@ The ref can be overridden for controlled testing through `SELEDA_STUDIO_REF`.
 
 ---
 
-## 7. Makefile rule
+## 7. Makefile and mandatory editor packaging
 
 The previous Makefile contained a generic upstream eXeLearning build path. That path was removed from the active editor build flow because it could generate a stock editor that did not contain Seleda customizations.
 
@@ -210,7 +210,7 @@ sh scripts/build-seleda-editor.sh
 
 The legacy `fetch-editor-source` target no longer downloads stock eXeLearning. It explains that source selection is controlled by the Seleda builder and `.seleda-editor-ref`.
 
-This creates one authoritative editor build path.
+This creates one authoritative editor build path. `make package RELEASE=X.Y.Z` depends on `build-editor` and must not produce a distributable ZIP unless the bundled editor exists under `dist/static/`.
 
 ---
 
@@ -224,14 +224,14 @@ On first installation, or when the settings are first introduced during upgrade,
 
 **Display name**
 
-- setting: `mod_exescorm/brandname`
+- setting: `mod_seledascorm/brandname`
 - required
 - default: `Seleda`
 - type: text
 
 **Logo**
 
-- setting: `mod_exescorm/brandlogo`
+- setting: `mod_seledascorm/brandlogo`
 - optional
 - maximum files: 1
 - accepted types:
@@ -444,7 +444,7 @@ It checks, among other things:
 
 - PHP syntax on modified files
 - JavaScript syntax for branding logic
-- preserved `mod_exescorm` identity
+- preserved `mod_seledascorm` identity
 - Seleda activity terminology
 - branding settings
 - Create/Edit strings
@@ -557,6 +557,14 @@ Changed the manual compatibility workflow so it tests a Seleda Studio embedded r
 
 Removed the active generic upstream editor build path. `make build-editor` now always delegates to `scripts/build-seleda-editor.sh`. Legacy aliases cannot independently build stock eXeLearning.
 
+### 2026-11-04 — Deliberate component rename
+
+Changed the Moodle technical identity from `mod_exescorm` to `mod_seledascorm`, including install folder, callbacks, namespaces, capabilities, database/storage identifiers, report subplugin component names, language component names, backup/restore class names, editor URLs, build/package names, and validation rules. This is intentionally not an automatic in-place upgrade of an existing `mod_exescorm` installation.
+
+### 2026-11-04 — Bundled editor enforcement
+
+Changed packaging so a distributable `mod_seledascorm` ZIP builds the embedded Seleda editor first and fails if `dist/static/index.html`, `app/`, `files/`, or `libs/` are absent. Added optional `SELEDA_STUDIO_TOKEN` support for authenticated reads from the private Timhirt-Studio repository.
+
 ### 2026-11-04 — Content Block completeness checks
 
 Added explicit build-time verification for all V1 Seleda Content Blocks and modified editors:
@@ -593,7 +601,7 @@ Before V1 merge/release, verify at minimum:
 - resave replaces the Moodle package correctly
 - SCORM 1.2 tracking remains functional
 - readable interaction reporting remains functional
-- existing mod_exescorm activities survive upgrade
+- clean `mod_seledascorm` installation succeeds; migration from legacy `mod_exescorm` is tested separately if required
 - backup/restore remains functional
 - final release ZIP contains complete `dist/static/`
 - Question Bank and standalone administration services are absent from embedded V1

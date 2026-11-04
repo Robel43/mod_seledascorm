@@ -17,22 +17,22 @@
 /**
  * Unit tests for the manage_embedded_editor external functions.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @category   external
  * @copyright  2025 eXeLearning
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_exescorm\external;
+namespace mod_seledascorm\external;
 
 defined('MOODLE_INTERNAL') || die();
 
-use mod_exescorm\local\embedded_editor_installer;
+use mod_seledascorm\local\embedded_editor_installer;
 
 /**
  * Tests for manage_embedded_editor external API.
  *
- * @covers \mod_exescorm\external\manage_embedded_editor
+ * @covers \mod_seledascorm\external\manage_embedded_editor
  */
 class manage_embedded_editor_test extends \advanced_testcase {
 
@@ -76,14 +76,14 @@ class manage_embedded_editor_test extends \advanced_testcase {
     }
 
     /**
-     * Test that execute_action requires mod/exescorm:manageembeddededitor capability.
+     * Test that execute_action requires mod/seledascorm:manageembeddededitor capability.
      *
      * A regular user without the capability should get required_capability_exception.
      */
     public function test_execute_action_requires_manageembeddededitor_capability(): void {
         $this->resetAfterTest(true);
 
-        // Create a user without mod/exescorm:manageembeddededitor.
+        // Create a user without mod/seledascorm:manageembeddededitor.
         $user = $this->getDataGenerator()->create_user();
         $this->setUser($user);
 
@@ -101,11 +101,11 @@ class manage_embedded_editor_test extends \advanced_testcase {
 
         $this->resetAfterTest(true);
 
-        // Create a user and assign only mod/exescorm:manageembeddededitor (not moodle/site:config).
+        // Create a user and assign only mod/seledascorm:manageembeddededitor (not moodle/site:config).
         $user = $this->getDataGenerator()->create_user();
         $roleid = $this->getDataGenerator()->create_role();
         $systemcontext = \context_system::instance();
-        assign_capability('mod/exescorm:manageembeddededitor', CAP_ALLOW, $roleid, $systemcontext->id, true);
+        assign_capability('mod/seledascorm:manageembeddededitor', CAP_ALLOW, $roleid, $systemcontext->id, true);
         role_assign($roleid, $user->id, $systemcontext->id);
         $this->setUser($user);
 
@@ -123,7 +123,7 @@ class manage_embedded_editor_test extends \advanced_testcase {
         $this->resetAfterTest(true);
         $this->setAdminUser();
 
-        set_config(embedded_editor_installer::CONFIG_INSTALLING, time(), 'exescorm');
+        set_config(embedded_editor_installer::CONFIG_INSTALLING, time(), 'seledascorm');
 
         $result = manage_embedded_editor::get_status(false);
 
@@ -142,7 +142,7 @@ class manage_embedded_editor_test extends \advanced_testcase {
         $this->setAdminUser();
 
         // Set a timestamp well beyond the timeout (300s).
-        set_config(embedded_editor_installer::CONFIG_INSTALLING, time() - 400, 'exescorm');
+        set_config(embedded_editor_installer::CONFIG_INSTALLING, time() - 400, 'seledascorm');
 
         $result = manage_embedded_editor::get_status(false);
 

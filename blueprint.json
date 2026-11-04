@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/ateeducacion/moodle-playground/refs/heads/main/assets/blueprints/blueprint-schema.json",
-  "preferredVersions": { "php": "8.3", "moodle": "5.0" },
+  "preferredVersions": { "php": "8.3", "moodle": "4.5" },
   "landingPage": "/course/view.php?id=2",
   "constants": {
     "ADMIN_USER": "admin",
@@ -14,7 +14,7 @@
         "adminUser": "{{ADMIN_USER}}",
         "adminPass": "{{ADMIN_PASS}}",
         "adminEmail": "{{ADMIN_EMAIL}}",
-        "siteName": "Seleda SCORM Demo",
+        "siteName": "Seleda Demo",
         "locale": "es",
         "timezone": "Europe/Madrid"
       }
@@ -34,7 +34,7 @@
     },
     { "step": "setConfig", "name": "editormode", "value": "embedded", "plugin": "exescorm" },
     { "step": "setConfig", "name": "providername", "value": "Moodle", "plugin": "exescorm" },
-    { "step": "setConfig", "name": "providerversion", "value": "5.0", "plugin": "exescorm" },
+    { "step": "setConfig", "name": "providerversion", "value": "4.5", "plugin": "exescorm" },
     { "step": "setConfig", "name": "sendtemplate", "value": "0", "plugin": "exescorm" },
     { "step": "setConfig", "name": "mandatoryfileslist", "value": "/^content(v\\d+)?\\.xml$/", "plugin": "exescorm" },
     { "step": "setConfig", "name": "forbiddenfileslist", "value": "/.*\\.php$/", "plugin": "exescorm" },
@@ -77,10 +77,10 @@
     { "step": "createCategory", "name": "Test Courses" },
     {
       "step": "createCourse",
-      "fullname": "Seleda SCORM Test Course",
+      "fullname": "Seleda Test Course",
       "shortname": "EXESCORM01",
       "category": "Test Courses",
-      "summary": "Test course for the Seleda SCORM plugin."
+      "summary": "Test course for the Seleda Moodle activity plugin."
     },
     {
       "step": "createUser",
@@ -113,7 +113,7 @@
       "course": "EXESCORM01",
       "section": 1,
       "name": "Test Content",
-      "intro": "Sample Seleda SCORM content for testing.",
+      "intro": "Sample Seleda content for testing.",
       "exescormtype": "local",
       "reference": "test-content.elpx",
       "display": 1,

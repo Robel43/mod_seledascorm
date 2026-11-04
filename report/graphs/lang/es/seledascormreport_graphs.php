@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component 'exescorm_basic' report plugin
+ * Strings for component 'seledascorm_basic' report plugin
  *
- * @package    exescormreport_graphs
+ * @package    seledascormreport_graphs
  * @copyright  2012 Ankit Kumar Agarwal
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

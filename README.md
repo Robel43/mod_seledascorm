@@ -26,6 +26,17 @@ This fork layers Seleda-specific behavior on top of the upstream plugin:
 - attempt-time label snapshots so later package edits do not silently rewrite historical report wording when metadata is available
 - safe fallback to original SCORM identifiers when readable labels cannot be resolved
 
+## Installation branding
+
+On first installation (and when these settings are first introduced on upgrade), Moodle 4.5 presents the plugin's **New settings** page. The Seleda branding fields are placed first:
+
+- **Display name** — required, defaults to `Seleda`.
+- **Logo** — optional; PNG, JPG, WebP and SVG are supported. When omitted, the bundled Seleda logo is used.
+
+The configured display name is used by plugin-owned authoring actions such as **Create with {name}** and **Edit with {name}**, and by the embedded editor's product title. The configured logo is injected into the embedded editor at runtime and is used for the loading screen and product-logo surfaces such as About/error views.
+
+Moodle's core activity-type label and technical component remain statically **Seleda** / `mod_exescorm`. Moodle caches language-pack plugin names, so site-specific branding is deliberately applied to plugin-owned UI rather than rewriting core language caches.
+
 ## Editor modes
 
 Administrators choose the editor mode under:
@@ -36,9 +47,11 @@ Administrators choose the editor mode under:
 
 The recommended Seleda deployment connects Moodle to a Seleda Studio server using the existing eXeLearning-compatible remote-editor protocol. Existing configuration keys such as `exeonlinebaseuri` are retained for compatibility.
 
-### Embedded eXeLearning-compatible editor
+### Embedded Seleda
 
-The plugin also retains the upstream embedded-editor path. This is an **upstream eXeLearning-compatible editor**, not the customized Seleda Studio Docker build. Keeping that distinction explicit avoids presenting upstream editor assets as Seleda-branded software.
+The default editor mode is the **embedded Seleda Studio authoring workspace**. Release packages build this static editor from the Seleda customization profile and bundle it under `dist/static/`, so both **Create with Seleda** and **Edit with Seleda** work without an external Seleda server.
+
+The embedded V1 intentionally excludes standalone Administration/account services and Question Bank. Those are server-side concerns; Question Bank is reserved for V2.
 
 ## Moodle compatibility
 

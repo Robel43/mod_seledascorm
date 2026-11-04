@@ -18,7 +18,7 @@
  * Embedded editor source resolver for mod_seledascorm.
  *
  * Single source of truth for determining which embedded editor source is active.
- * Implements the Seleda V1 precedence policy: bundled → moodledata → none.
+ * Implements the Seleda V1 policy: bundled editor only.
  *
  * @package    mod_seledascorm
  * @copyright  2025 eXeLearning
@@ -30,10 +30,8 @@ namespace mod_seledascorm\local;
 /**
  * Resolves which embedded editor source should be used at runtime.
  *
- * Sources are checked in order:
- * 1. Bundled Seleda editor inside the plugin dist/static/ directory (highest priority).
- * 2. Legacy admin-installed editor in moodledata (fallback only).
- * If neither is available the embedded editor is not usable.
+ * The bundled Seleda editor inside the plugin dist/static/ directory is the only
+ * supported V1 source. Legacy moodledata-installed editors are never activated.
  */
 class embedded_editor_source_resolver {
 
@@ -96,15 +94,15 @@ class embedded_editor_source_resolver {
             return false;
         }
 
-        // At least one expected asset directory must exist.
+        // Every core static asset directory must exist; a partial bundle is invalid.
         $dir = rtrim($dir, '/');
         foreach (self::EXPECTED_ASSET_DIRS as $assetdir) {
-            if (is_dir($dir . '/' . $assetdir)) {
-                return true;
+            if (!is_dir($dir . '/' . $assetdir)) {
+                return false;
             }
         }
 
-        return false;
+        return true;
     }
 
     /**
@@ -130,7 +128,7 @@ class embedded_editor_source_resolver {
     /**
      * Determine which source is active according to the precedence policy.
      *
-     * Precedence: bundled → moodledata → none.
+     * V1 policy: bundled → none.
      *
      * @return string One of the SOURCE_* constants.
      */
@@ -140,10 +138,6 @@ class embedded_editor_source_resolver {
         // replacing the Seleda authoring workspace after a plugin upgrade.
         if (self::validate_editor_dir(self::get_bundled_dir())) {
             return self::SOURCE_BUNDLED;
-        }
-
-        if (self::validate_editor_dir(self::get_moodledata_dir())) {
-            return self::SOURCE_MOODLEDATA;
         }
 
         return self::SOURCE_NONE;

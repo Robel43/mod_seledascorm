@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Creates a distributable ZIP for mod_exescorm, respecting .distignore."""
+"""Creates a distributable ZIP for mod_seledascorm, respecting .distignore."""
 import sys
 import os
 import zipfile
@@ -44,7 +44,7 @@ def main():
             for f in files:
                 rel = f'{rel_root}/{f}' if rel_root != '.' else f
                 if not is_excluded(rel):
-                    zf.write(os.path.join(root, f), f'exescorm/{rel}')
+                    zf.write(os.path.join(root, f), f'seledascorm/{rel}')
 
 
 if __name__ == '__main__':

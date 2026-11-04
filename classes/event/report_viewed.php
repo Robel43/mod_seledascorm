@@ -15,26 +15,26 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The mod_exescorm report viewed event.
+ * The mod_seledascorm report viewed event.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  2013 onwards Ankit Agarwal
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_exescorm\event;
+namespace mod_seledascorm\event;
 
 /**
- * The mod_exescorm report viewed event class.
+ * The mod_seledascorm report viewed event class.
  *
  * @property-read array $other {
  *      Extra information about event properties.
  *
- *      - int exescormid: The ID of the exescorm.
+ *      - int seledascormid: The ID of the seledascorm.
  *      - string mode: Mode of the report viewed.
  * }
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @since      Moodle 2.7
  * @copyright  2013 onwards Ankit Agarwal
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -55,7 +55,7 @@ class report_viewed extends \core\event\base {
      * @return string
      */
     public function get_description() {
-        return "The user with id '$this->userid' viewed the exescorm report '{$this->other['mode']}' for the exescorm with " .
+        return "The user with id '$this->userid' viewed the seledascorm report '{$this->other['mode']}' for the seledascorm with " .
             "course module id '$this->contextinstanceid'.";
     }
 
@@ -65,7 +65,7 @@ class report_viewed extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('eventreportviewed', 'mod_exescorm');
+        return get_string('eventreportviewed', 'mod_seledascorm');
     }
 
     /**
@@ -74,7 +74,7 @@ class report_viewed extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url('/mod/exescorm/report.php', ['id' => $this->contextinstanceid, 'mode' => $this->other['mode'], ]);
+        return new \moodle_url('/mod/seledascorm/report.php', ['id' => $this->contextinstanceid, 'mode' => $this->other['mode'], ]);
     }
 
     /**
@@ -92,8 +92,8 @@ class report_viewed extends \core\event\base {
     protected function validate_data() {
         parent::validate_data();
 
-        if (empty($this->other['exescormid'])) {
-            throw new \coding_exception('The \'exescormid\' value must be set in other.');
+        if (empty($this->other['seledascormid'])) {
+            throw new \coding_exception('The \'seledascormid\' value must be set in other.');
         }
 
         if (empty($this->other['mode'])) {
@@ -103,7 +103,7 @@ class report_viewed extends \core\event\base {
 
     public static function get_other_mapping() {
         $othermapped = array();
-        $othermapped['exescormid'] = array('db' => 'exescorm', 'restore' => 'exescorm');
+        $othermapped['seledascormid'] = array('db' => 'seledascorm', 'restore' => 'seledascorm');
 
         return $othermapped;
     }

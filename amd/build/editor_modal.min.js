@@ -20,7 +20,7 @@
  * a save button and a close button. Handles postMessage communication
  * with the editor bridge running inside the iframe.
  *
- * @module      mod_exescorm/editor_modal
+ * @module      mod_seledascorm/editor_modal
  * @copyright   2025 eXeLearning
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -62,7 +62,7 @@ define(['core/str', 'core/log', 'core/prefetch'], function(Str, Log, Prefetch) {
      * Prefetch language strings used by the modal.
      */
     var prefetchStrings = function() {
-        Prefetch.prefetchStrings('mod_exescorm', [
+        Prefetch.prefetchStrings('mod_seledascorm', [
             'editembedded', 'saving', 'savedsuccess', 'savetomoodle', 'savingwait', 'unsavedchanges',
         ]);
         Prefetch.prefetchStrings('core', ['closebuttontitle']);
@@ -72,7 +72,7 @@ define(['core/str', 'core/log', 'core/prefetch'], function(Str, Log, Prefetch) {
         if (!saveBtn) {
             return Promise.resolve();
         }
-        var component = key === 'closebuttontitle' ? 'core' : 'mod_exescorm';
+        var component = key === 'closebuttontitle' ? 'core' : 'mod_seledascorm';
         return getString(key, component).then(function(text) {
             saveBtn.innerHTML = '<i class="fa fa-graduation-cap mr-1" aria-hidden="true"></i> ' + text;
         }).catch(function() {
@@ -83,20 +83,20 @@ define(['core/str', 'core/log', 'core/prefetch'], function(Str, Log, Prefetch) {
     var createLoadingModal = function() {
         var targetDocument = hostDocument || document;
         var modal = targetDocument.createElement('div');
-        modal.className = 'exescorm-loading-modal';
-        modal.id = 'exescorm-loading-modal';
+        modal.className = 'seledascorm-loading-modal';
+        modal.id = 'seledascorm-loading-modal';
 
         return Promise.all([
-            getString('saving', 'mod_exescorm').catch(function() { return 'Saving...'; }),
-            getString('savingwait', 'mod_exescorm').catch(function() {
+            getString('saving', 'mod_seledascorm').catch(function() { return 'Saving...'; }),
+            getString('savingwait', 'mod_seledascorm').catch(function() {
                 return 'Please wait while the file is being saved.';
             }),
         ]).then(function(strings) {
             modal.innerHTML =
-                '<div class="exescorm-loading-modal__content">' +
-                '<div class="exescorm-loading-modal__spinner"></div>' +
-                '<h3 class="exescorm-loading-modal__title">' + strings[0] + '</h3>' +
-                '<p class="exescorm-loading-modal__message">' + strings[1] + '</p>' +
+                '<div class="seledascorm-loading-modal__content">' +
+                '<div class="seledascorm-loading-modal__spinner"></div>' +
+                '<h3 class="seledascorm-loading-modal__title">' + strings[0] + '</h3>' +
+                '<p class="seledascorm-loading-modal__message">' + strings[1] + '</p>' +
                 '</div>';
             targetDocument.body.appendChild(modal);
             return modal;
@@ -131,7 +131,7 @@ define(['core/str', 'core/log', 'core/prefetch'], function(Str, Log, Prefetch) {
         if (!hasUnsavedChanges) {
             return Promise.resolve(false);
         }
-        return getString('unsavedchanges', 'mod_exescorm').catch(function() {
+        return getString('unsavedchanges', 'mod_seledascorm').catch(function() {
             return 'You have unsaved changes. Are you sure you want to close?';
         }).then(function(message) {
             return !window.confirm(message);
@@ -154,7 +154,7 @@ define(['core/str', 'core/log', 'core/prefetch'], function(Str, Log, Prefetch) {
             return showLoadingModal();
         }).then(function() {
             iframe.contentWindow.postMessage({
-                source: 'exescorm-modal',
+                source: 'seledascorm-modal',
                 type: 'save',
             }, '*');
         });
@@ -231,7 +231,7 @@ define(['core/str', 'core/log', 'core/prefetch'], function(Str, Log, Prefetch) {
         }
 
         // Handle bridge messages.
-        if (event.data.source !== 'exescorm-editor') {
+        if (event.data.source !== 'seledascorm-editor') {
             return;
         }
 
@@ -296,25 +296,25 @@ define(['core/str', 'core/log', 'core/prefetch'], function(Str, Log, Prefetch) {
 
         // Create the overlay container.
         overlay = document.createElement('div');
-        overlay.id = 'exescorm-editor-overlay';
-        overlay.className = 'exescorm-editor-overlay';
+        overlay.id = 'seledascorm-editor-overlay';
+        overlay.className = 'seledascorm-editor-overlay';
 
         // Build the header bar.
         var header = document.createElement('div');
-        header.className = 'exescorm-editor-header';
+        header.className = 'seledascorm-editor-header';
 
         var title = document.createElement('span');
-        title.className = 'exescorm-editor-title';
+        title.className = 'seledascorm-editor-title';
         title.textContent = activityName || '';
         header.appendChild(title);
 
         var buttonGroup = document.createElement('div');
-        buttonGroup.className = 'exescorm-editor-buttons';
+        buttonGroup.className = 'seledascorm-editor-buttons';
 
         // Save button.
         saveBtn = document.createElement('button');
         saveBtn.className = 'btn btn-primary mr-2';
-        saveBtn.id = 'exescorm-editor-save';
+        saveBtn.id = 'seledascorm-editor-save';
         saveBtn.disabled = true;
         setSaveLabel('savetomoodle', 'Save to Moodle');
         saveBtn.addEventListener('click', triggerSave);
@@ -322,7 +322,7 @@ define(['core/str', 'core/log', 'core/prefetch'], function(Str, Log, Prefetch) {
         // Close button.
         var closeBtn = document.createElement('button');
         closeBtn.className = 'btn btn-secondary';
-        closeBtn.id = 'exescorm-editor-close';
+        closeBtn.id = 'seledascorm-editor-close';
         getString('closebuttontitle', 'core').then(function(text) {
             closeBtn.textContent = text;
         }).catch(function() {
@@ -339,7 +339,7 @@ define(['core/str', 'core/log', 'core/prefetch'], function(Str, Log, Prefetch) {
 
         // Create the iframe.
         iframe = document.createElement('iframe');
-        iframe.className = 'exescorm-editor-iframe';
+        iframe.className = 'seledascorm-editor-iframe';
         iframe.src = editorUrl;
         iframe.setAttribute('allow', 'fullscreen');
         iframe.setAttribute('frameborder', '0');
@@ -366,7 +366,7 @@ define(['core/str', 'core/log', 'core/prefetch'], function(Str, Log, Prefetch) {
 
             // Delegate click events for embedded editor buttons.
             document.addEventListener('click', function(e) {
-                var btn = e.target.closest('[data-action="mod_exescorm/editor-open"]');
+                var btn = e.target.closest('[data-action="mod_seledascorm/editor-open"]');
                 if (btn) {
                     e.preventDefault();
                     var cmid = btn.dataset.cmid;

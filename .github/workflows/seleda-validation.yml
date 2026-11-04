@@ -22,6 +22,12 @@ jobs:
 
       - name: Lint Seleda-modified PHP
         run: |
+          php -l lib.php
+          php -l settings.php
+          php -l mod_form.php
+          php -l view.php
+          php -l editor/index.php
+          php -l editor/save.php
           php -l datamodel.php
           php -l report/userreportinteractions.php
           php -l report/timhirt_reporting.php
@@ -32,6 +38,10 @@ jobs:
           php -l lang/eu/exescorm.php
           php -l lang/gl/exescorm.php
 
+      - name: Check embedded branding JavaScript
+        run: |
+          node --check editor/branding.js
+
       - name: Verify compatibility identity
         run: |
           grep -F "\$plugin->component = 'mod_exescorm';" version.php
@@ -39,6 +49,13 @@ jobs:
           test -f report/timhirt_reporting.php
           grep -F "timhirt_reporting::snapshot" datamodel.php
           grep -F "timhirt_reporting::rows" report/userreportinteractions.php
+          grep -F "mod_exescorm/brandname" settings.php
+          grep -F "mod_exescorm/brandlogo" settings.php
+          grep -F "function exescorm_get_brand_name()" lib.php
+          grep -F "function exescorm_get_brand_logo_url()" lib.php
+          grep -F "__MOODLE_SELEDA_BRANDING__" editor/index.php
+          grep -F "Create with {$a}" lang/en/exescorm.php
+          grep -F "Edit with {$a}" lang/en/exescorm.php
 
       - name: Verify Seleda player alignment
         run: |

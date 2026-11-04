@@ -1,6 +1,6 @@
-# Seleda SCORM for Moodle
+# Seleda for Moodle
 
-Seleda SCORM is the Moodle activity plugin used with **Seleda Studio** for publishing, launching and tracking SCORM learning packages. It is maintained as a compatibility-preserving customization of upstream `exelearning/mod_exescorm`.
+Seleda is the Moodle activity plugin used with **Seleda Studio** for publishing, launching and tracking SCORM learning packages. It is maintained as a compatibility-preserving customization of upstream `exelearning/mod_exescorm`.
 
 ## Compatibility contract
 
@@ -17,7 +17,7 @@ This is intentional. Renaming those internal identifiers would break existing ac
 
 This fork layers Seleda-specific behavior on top of the upstream plugin:
 
-- **Seleda SCORM** course/activity terminology
+- **Seleda** course/activity terminology
 - **Seleda Studio** remote-authoring terminology
 - Seleda blue/teal player styling aligned with the Studio visual identity
 - readable interaction reporting for Seleda's shared LMS reporting contract
@@ -30,7 +30,7 @@ This fork layers Seleda-specific behavior on top of the upstream plugin:
 
 Administrators choose the editor mode under:
 
-`Site administration > Plugins > Activity modules > Seleda SCORM > Editor mode`
+`Site administration > Plugins > Activity modules > Seleda > Editor mode`
 
 ### Seleda Studio server
 
@@ -42,7 +42,7 @@ The plugin also retains the upstream embedded-editor path. This is an **upstream
 
 ## Moodle compatibility
 
-The upstream base supports Moodle **4.2+** through current Moodle 5.x releases. Seleda customizations are designed to preserve that support boundary and the upstream plugin data model.
+This fork targets **Moodle 4.5**. Its minimum Moodle requirement is set to the Moodle 4.5 branch version (`2024100700`) so validation and deployment stay aligned with the production environment.
 
 ## Installation
 
@@ -74,7 +74,7 @@ php admin/cli/purge_caches.php
 
 Verify at minimum:
 
-1. existing Seleda SCORM activities open;
+1. existing Seleda activities open;
 2. previous learner attempts and grades remain visible;
 3. completion status is unchanged;
 4. a fresh Seleda Studio SCORM 1.2 export reports score and status;

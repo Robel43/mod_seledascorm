@@ -15,19 +15,19 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The mod_exescorm instance list viewed event.
+ * The mod_seledascorm instance list viewed event.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  2013 Ankit Agarwal
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_exescorm\event;
+namespace mod_seledascorm\event;
 
 /**
- * The mod_exescorm instance list viewed event class.
+ * The mod_seledascorm instance list viewed event class.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @since      Moodle 2.7
  * @copyright  2013 Ankit Agarwal
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later

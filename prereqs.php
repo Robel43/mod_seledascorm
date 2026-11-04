@@ -17,7 +17,7 @@
 // This page is called via AJAX to repopulte the TOC when LMSFinish() is called.
 
 require_once('../../config.php');
-require_once($CFG->dirroot.'/mod/exescorm/locallib.php');
+require_once($CFG->dirroot.'/mod/seledascorm/locallib.php');
 
 $id = optional_param('id', '', PARAM_INT);                  // Course Module ID, or...
 $a = optional_param('a', '', PARAM_INT);                    // Exescorm ID.
@@ -27,23 +27,23 @@ $mode = optional_param('mode', 'normal', PARAM_ALPHA);      // Navigation mode.
 $currentorg = optional_param('currentorg', '', PARAM_RAW);  // Selected organization.
 
 if (!empty($id)) {
-    if (! $cm = get_coursemodule_from_id('exescorm', $id)) {
+    if (! $cm = get_coursemodule_from_id('seledascorm', $id)) {
         throw new \moodle_exception('invalidcoursemodule');
     }
     if (! $course = $DB->get_record("course", array("id" => $cm->course))) {
         throw new \moodle_exception('coursemisconf');
     }
-    if (! $exescorm = $DB->get_record("exescorm", array("id" => $cm->instance))) {
+    if (! $seledascorm = $DB->get_record("seledascorm", array("id" => $cm->instance))) {
         throw new \moodle_exception('invalidcoursemodule');
     }
 } else if (!empty($a)) {
-    if (! $exescorm = $DB->get_record("exescorm", array("id" => $a))) {
+    if (! $seledascorm = $DB->get_record("seledascorm", array("id" => $a))) {
         throw new \moodle_exception('invalidcoursemodule');
     }
-    if (! $course = $DB->get_record("course", array("id" => $exescorm->course))) {
+    if (! $course = $DB->get_record("course", array("id" => $seledascorm->course))) {
         throw new \moodle_exception('coursemisconf');
     }
-    if (! $cm = get_coursemodule_from_instance("exescorm", $exescorm->id, $course->id)) {
+    if (! $cm = get_coursemodule_from_instance("seledascorm", $seledascorm->id, $course->id)) {
         throw new \moodle_exception('invalidcoursemodule');
     }
 } else {
@@ -52,27 +52,27 @@ if (!empty($id)) {
 
 // PARAM_RAW is used for $currentorg, validate it against records stored in the table.
 if (!empty($currentorg)) {
-    if (!$DB->record_exists('exescorm_scoes', array('exescorm' => $exescorm->id, 'identifier' => $currentorg))) {
+    if (!$DB->record_exists('seledascorm_scoes', array('seledascorm' => $seledascorm->id, 'identifier' => $currentorg))) {
         $currentorg = '';
     }
 }
 
-$PAGE->set_url('/mod/exescorm/prereqs.php', array('scoid' => $scoid, 'attempt' => $attempt, 'id' => $cm->id));
+$PAGE->set_url('/mod/seledascorm/prereqs.php', array('scoid' => $scoid, 'attempt' => $attempt, 'id' => $cm->id));
 
 require_login($course, false, $cm);
 
-$exescorm->version = strtolower(clean_param($exescorm->version, PARAM_SAFEDIR));   // Just to be safe.
-if (!file_exists($CFG->dirroot.'/mod/exescorm/datamodels/'.$exescorm->version.'lib.php')) {
-    $exescorm->version = 'SCORM_12';
+$seledascorm->version = strtolower(clean_param($seledascorm->version, PARAM_SAFEDIR));   // Just to be safe.
+if (!file_exists($CFG->dirroot.'/mod/seledascorm/datamodels/'.$seledascorm->version.'lib.php')) {
+    $seledascorm->version = 'SCORM_12';
 }
-require_once($CFG->dirroot.'/mod/exescorm/datamodels/'.$exescorm->version.'lib.php');
+require_once($CFG->dirroot.'/mod/seledascorm/datamodels/'.$seledascorm->version.'lib.php');
 
 
 if (confirm_sesskey() && (!empty($scoid))) {
     $result = true;
     $request = null;
-    if (has_capability('mod/exescorm:savetrack', context_module::instance($cm->id))) {
-        $result = exescorm_get_toc($USER, $exescorm, $cm->id, EXESCORM_TOCJSLINK, $currentorg,
+    if (has_capability('mod/seledascorm:savetrack', context_module::instance($cm->id))) {
+        $result = seledascorm_get_toc($USER, $seledascorm, $cm->id, SELEDASCORM_TOCJSLINK, $currentorg,
                                     $scoid, $mode, $attempt, true, false);
         echo $result->toc;
     }

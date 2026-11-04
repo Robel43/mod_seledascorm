@@ -16,7 +16,7 @@
 
 /**
  * Returns an array of reports to which are currently readable.
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @author     Ankit Kumar Agarwal
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -26,17 +26,17 @@
  * @param context context level to check caps against
  * @return array list of valid reports present
  */
-function exescorm_report_list($context) {
+function seledascorm_report_list($context) {
     global $CFG;
     static $reportlist;
     if (!empty($reportlist)) {
         return $reportlist;
     }
-    $installed = core_component::get_plugin_list('exescormreport');
+    $installed = core_component::get_plugin_list('seledascormreport');
     foreach ($installed as $reportname => $notused) {
 
         // Moodle 2.8+ style of autoloaded classes.
-        $classname = "exescormreport_$reportname\\report";
+        $classname = "seledascormreport_$reportname\\report";
         if (class_exists($classname)) {
             $report = new $classname();
 
@@ -47,11 +47,11 @@ function exescorm_report_list($context) {
         }
 
         // Legacy style of naming classes.
-        $pluginfile = $CFG->dirroot.'/mod/exescorm/report/'.$reportname.'/report.php';
+        $pluginfile = $CFG->dirroot.'/mod/seledascorm/report/'.$reportname.'/report.php';
         if (is_readable($pluginfile)) {
             debugging("Please use autoloaded classnames for your plugin. Refer MDL-46469 for details", DEBUG_DEVELOPER);
             include_once($pluginfile);
-            $reportclassname = "exescorm_{$reportname}_report";
+            $reportclassname = "seledascorm_{$reportname}_report";
             if (class_exists($reportclassname)) {
                 $report = new $reportclassname();
 
@@ -69,15 +69,15 @@ function exescorm_report_list($context) {
  * @param int Scorm ID
  * @return int an integer representing the question count
  */
-function get_exescorm_question_count($exescormid) {
+function get_seledascorm_question_count($seledascormid) {
     global $DB;
     $count = 0;
     $params = array();
-    $select = "exescormid = ? AND ";
+    $select = "seledascormid = ? AND ";
     $select .= $DB->sql_like("element", "?", false);
-    $params[] = $exescormid;
+    $params[] = $seledascormid;
     $params[] = "cmi.interactions_%.id";
-    $rs = $DB->get_recordset_select("exescorm_scoes_track", $select, $params, 'element');
+    $rs = $DB->get_recordset_select("seledascorm_scoes_track", $select, $params, 'element');
     $keywords = array("cmi.interactions_", ".id");
     if ($rs->valid()) {
         foreach ($rs as $record) {

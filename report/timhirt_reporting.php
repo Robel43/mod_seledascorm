@@ -1,6 +1,6 @@
 <?php
-// Seleda shared reporting for mod_exescorm. GPL-3.0-or-later.
-namespace mod_exescorm\local;
+// Seleda shared reporting for mod_seledascorm. GPL-3.0-or-later.
+namespace mod_seledascorm\local;
 defined('MOODLE_INTERNAL') || die();
 
 /** Versioned, block-independent labels and attempt-scoped response decoding. */
@@ -108,38 +108,38 @@ final class timhirt_reporting {
     }
 
     /** Read only Moodle-managed local package files, never fetch external URLs. */
-    public static function packagecatalog($context, $exescorm, int $scoid): array {
+    public static function packagecatalog($context, $seledascorm, int $scoid): array {
         global $DB;
-        $sco = $DB->get_record('exescorm_scoes', ['id' => $scoid, 'exescorm' => $exescorm->id]);
+        $sco = $DB->get_record('seledascorm_scoes', ['id' => $scoid, 'seledascorm' => $seledascorm->id]);
         if (!$sco || empty($sco->launch)) { return []; }
         $launch = rawurldecode(preg_split('/[?#]/', $sco->launch, 2)[0]);
         if (preg_match('#^[a-z][a-z0-9+.-]*:|^[/\\\\]|(^|/)\.\.(/|$)#i', $launch)) { return []; }
         $launch = preg_replace('#^\./#', '', $launch);
         $directory = dirname($launch);
         $filepath = $directory === '.' ? '/' : '/' . trim($directory, '/') . '/';
-        $file = get_file_storage()->get_file($context->id, 'mod_exescorm', 'content', 0, $filepath, basename($launch));
+        $file = get_file_storage()->get_file($context->id, 'mod_seledascorm', 'content', 0, $filepath, basename($launch));
         if (!$file || $file->get_filesize() > 10485760) { return []; }
         return self::catalog($file->get_content());
     }
 
     /** Metadata uses the existing tracking table; no grade or schema changes. */
-    public static function snapshot($context, $exescorm, int $scoid, int $userid, int $attempt): void {
+    public static function snapshot($context, $seledascorm, int $scoid, int $userid, int $attempt): void {
         global $DB;
-        $where = ['userid' => $userid, 'exescormid' => $exescorm->id, 'scoid' => $scoid,
+        $where = ['userid' => $userid, 'seledascormid' => $seledascorm->id, 'scoid' => $scoid,
             'attempt' => $attempt, 'element' => self::SNAPSHOT];
-        $existing = $DB->get_record('exescorm_scoes_track', $where);
+        $existing = $DB->get_record('seledascorm_scoes_track', $where);
         $previous = $existing ? json_decode($existing->value, true) : [];
         if (!is_array($previous)) { $previous = []; }
-        if (($previous['_package_revision'] ?? null) === (int)$exescorm->revision) { return; }
-        $catalog = self::packagecatalog($context, $exescorm, $scoid);
+        if (($previous['_package_revision'] ?? null) === (int)$seledascorm->revision) { return; }
+        $catalog = self::packagecatalog($context, $seledascorm, $scoid);
         if (!$catalog) { return; }
         $merged = $previous + $catalog;
-        $merged['_package_revision'] = (int)$exescorm->revision;
+        $merged['_package_revision'] = (int)$seledascorm->revision;
         $value = json_encode($merged, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         if ($value === false || strlen($value) > 1048576 || ($existing && $existing->value === $value)) { return; }
         $record = (object)($where + ['value' => $value, 'timemodified' => time()]);
-        if ($existing) { $record->id = $existing->id; $DB->update_record('exescorm_scoes_track', $record); }
-        else { $DB->insert_record('exescorm_scoes_track', $record); }
+        if ($existing) { $record->id = $existing->id; $DB->update_record('seledascorm_scoes_track', $record); }
+        else { $DB->insert_record('seledascorm_scoes_track', $record); }
     }
 
     private static function label(string $id, array $labels): string {

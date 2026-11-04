@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 require_once('../../config.php');
-require_once($CFG->dirroot.'/mod/exescorm/locallib.php');
+require_once($CFG->dirroot.'/mod/seledascorm/locallib.php');
 
 $id = optional_param('id', '', PARAM_INT);    // Course Module ID, or...
 $a = optional_param('a', '', PARAM_INT);     // Exescorm ID.
@@ -24,30 +24,30 @@ $scoid = required_param('scoid', PARAM_INT);     // Sco ID.
 $delayseconds = 2;  // Delay time before sco launch, used to give time to browser to define API.
 
 if (!empty($id)) {
-    if (! $cm = get_coursemodule_from_id('exescorm', $id)) {
+    if (! $cm = get_coursemodule_from_id('seledascorm', $id)) {
         throw new \moodle_exception('invalidcoursemodule');
     }
     if (! $course = $DB->get_record('course', array('id' => $cm->course))) {
         throw new \moodle_exception('coursemisconf');
     }
-    if (! $exescorm = $DB->get_record('exescorm', array('id' => $cm->instance))) {
+    if (! $seledascorm = $DB->get_record('seledascorm', array('id' => $cm->instance))) {
         throw new \moodle_exception('invalidcoursemodule');
     }
 } else if (!empty($a)) {
-    if (! $exescorm = $DB->get_record('exescorm', array('id' => $a))) {
+    if (! $seledascorm = $DB->get_record('seledascorm', array('id' => $a))) {
         throw new \moodle_exception('coursemisconf');
     }
-    if (! $course = $DB->get_record('course', array('id' => $exescorm->course))) {
+    if (! $course = $DB->get_record('course', array('id' => $seledascorm->course))) {
         throw new \moodle_exception('coursemisconf');
     }
-    if (! $cm = get_coursemodule_from_instance('exescorm', $exescorm->id, $course->id)) {
+    if (! $cm = get_coursemodule_from_instance('seledascorm', $seledascorm->id, $course->id)) {
         throw new \moodle_exception('invalidcoursemodule');
     }
 } else {
     throw new \moodle_exception('missingparameter');
 }
 
-$PAGE->set_url('/mod/exescorm/loadSCO.php', array('scoid' => $scoid, 'id' => $cm->id));
+$PAGE->set_url('/mod/seledascorm/loadSCO.php', array('scoid' => $scoid, 'id' => $cm->id));
 
 if (!isloggedin()) { // Prevent login page from being shown in iframe.
     // Using simple html instead of exceptions here as shown inside iframe/object.
@@ -60,38 +60,38 @@ if (!isloggedin()) { // Prevent login page from being shown in iframe.
 
 require_login($course, false, $cm, false); // Call require_login anyway to set up globals correctly.
 
-// Check if EXESCORM is available.
-exescorm_require_available($exescorm);
+// Check if SELEDASCORM is available.
+seledascorm_require_available($seledascorm);
 
 $context = context_module::instance($cm->id);
 
 // Forge SCO URL.
-list($sco, $scolaunchurl) = exescorm_get_sco_and_launch_url($exescorm, $scoid, $context);
+list($sco, $scolaunchurl) = seledascorm_get_sco_and_launch_url($seledascorm, $scoid, $context);
 
-if ($sco->exescormtype == 'asset') {
-    $attempt = exescorm_get_last_attempt($exescorm->id, $USER->id);
-    $element = (exescorm_version_check($exescorm->version, EXESCORM_SCORM_13)) ? 'cmi.completion_status' : 'cmi.core.lesson_status';
+if ($sco->seledascormtype == 'asset') {
+    $attempt = seledascorm_get_last_attempt($seledascorm->id, $USER->id);
+    $element = (seledascorm_version_check($seledascorm->version, SELEDASCORM_SCORM_13)) ? 'cmi.completion_status' : 'cmi.core.lesson_status';
     $value = 'completed';
-    exescorm_insert_track($USER->id, $exescorm->id, $sco->id, $attempt, $element, $value);
+    seledascorm_insert_track($USER->id, $seledascorm->id, $sco->id, $attempt, $element, $value);
 }
 
 // Trigger the SCO launched event.
-exescorm_launch_sco($exescorm, $sco, $cm, $context, $scolaunchurl);
+seledascorm_launch_sco($seledascorm, $sco, $cm, $context, $scolaunchurl);
 
 header('Content-Type: text/html; charset=UTF-8');
 
-if ($sco->exescormtype == 'asset') {
+if ($sco->seledascormtype == 'asset') {
     // HTTP 302 Found => Moved Temporarily.
     header('Location: ' . $scolaunchurl);
     // Provide a short feedback in case of slow network connection.
     echo html_writer::start_tag('html');
-    echo html_writer::tag('body', html_writer::tag('p', get_string('activitypleasewait', 'mod_exescorm')));
+    echo html_writer::tag('body', html_writer::tag('p', get_string('activitypleasewait', 'mod_seledascorm')));
     echo html_writer::end_tag('html');
     exit;
 }
 
 // We expect a SCO: select which API are we looking for.
-$lmsapi = (exescorm_version_check($exescorm->version, EXESCORM_SCORM_12) || empty($exescorm->version)) ? 'API' : 'API_1484_11';
+$lmsapi = (seledascorm_version_check($seledascorm->version, SELEDASCORM_SCORM_12) || empty($seledascorm->version)) ? 'API' : 'API_1484_11';
 
 echo html_writer::start_tag('html');
 echo html_writer::start_tag('head');
@@ -139,10 +139,10 @@ echo html_writer::tag('title', 'LoadSCO');
             location = "<?php echo $scolaunchurl ?>";
         }
         else {
-            document.body.innerHTML = "<p><?php echo get_string('activityloading', 'mod_exescorm');?>" +
+            document.body.innerHTML = "<p><?php echo get_string('activityloading', 'mod_seledascorm');?>" +
                                         "<span id='countdown'><?php echo $delayseconds ?></span> " +
                                         "<?php echo get_string('numseconds', 'moodle', '');?>. &nbsp; " +
-                                        "<?php echo addslashes($OUTPUT->pix_icon('wait', '', 'exescorm')); ?></p>";
+                                        "<?php echo addslashes($OUTPUT->pix_icon('wait', '', 'seledascorm')); ?></p>";
             var e = document.getElementById("countdown");
             var cSeconds = parseInt(e.innerHTML);
             var timer = setInterval(function() {
@@ -151,7 +151,7 @@ echo html_writer::tag('title', 'LoadSCO');
                                             } else {
                                                 clearInterval(timer);
                                                 document.body.innerHTML =
-                                                    "<p><?php echo get_string('activitypleasewait', 'mod_exescorm');?></p>";
+                                                    "<p><?php echo get_string('activitypleasewait', 'mod_seledascorm');?></p>";
                                                 location = "<?php echo $scolaunchurl ?>";
                                             }
                                         }, 1000);
@@ -165,7 +165,7 @@ echo html_writer::tag('title', 'LoadSCO');
 <?php
 echo html_writer::end_tag('head');
 echo html_writer::tag('body',
-                        html_writer::tag('p', get_string('activitypleasewait', 'mod_exescorm')),
+                        html_writer::tag('p', get_string('activitypleasewait', 'mod_seledascorm')),
                         ['onload' => "doredirect();"]
                     );
 echo html_writer::end_tag('html');

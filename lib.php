@@ -1139,6 +1139,9 @@ function exescorm_pluginfile($course, $cm, $context, $filearea, $args, $forcedow
             return false;
         }
 
+        // Branding images are uploaded by a site administrator and are rendered
+        // as image/background assets inside the same-origin embedded editor.
+        $options['dontforcesvgdownload'] = true;
         send_stored_file($file, DAYSECS, 0, false, $options);
     }
 

@@ -321,7 +321,7 @@ $string['missing_attribute'] = 'Falta atributo ({$a->attr}) en marca {$a->tag}';
 $string['missingparam'] = 'Un parámetro requerido falta o es incorrecto';
 $string['missing_tag'] = 'Falta marca {$a->tag}';
 $string['mode'] = 'Modo';
-$string['modulename'] = 'eXeLearning (SCORM)';
+$string['modulename'] = 'Seleda SCORM';
 $string['modulename_help'] = 'Un SCORM creado con eXeLearning es un conjunto de archivos que se empaquetan conforme a una norma estándar para los objetos de aprendizaje. El módulo de actividad eXeLearning (SCORM) permite crear y editar estos SCORM.
 
 El contenido se muestra normalmente en varias páginas, con navegación entre las páginas. Hay varias opciones para la visualización de los contenidos, con ventanas pop-up, en tablas de contenidos, con botones de navegación, etc. Los contenidos de eXeLearning muchas veces incluyen preguntas calificables, que se registra en el libro de calificaciones.
@@ -331,7 +331,7 @@ Las actividades eXeLearning se puede usar
 * Para la presentación de contenidos multimedia y animaciones
 * Como herramienta de evaluación';
 $string['modulename_link'] = 'mod/mod_exescorm/view';
-$string['modulenameplural'] = 'Contenidos eXeLearning (SCORM)';
+$string['modulenameplural'] = 'Seleda SCORM';
 $string['nav'] = 'Mostrar navegación';
 $string['nav_help'] = 'Este ajuste especifica si se han de mostrar/ocultar los botones de navegación y su posición.
 
@@ -389,8 +389,8 @@ $string['player:skipnext'] = 'Siguiente del mismo nivel';
 $string['player:skipprev'] = 'Anterior del mismo nivel';
 $string['player:toogleFullscreen'] = 'Alternar pantalla completa';
 $string['player:up'] = 'Subir nivel';
-$string['pluginadministration'] = 'Administración del contenido eXeLearning';
-$string['pluginname'] = 'eXeLearning (SCORM)';
+$string['pluginadministration'] = 'Seleda SCORM';
+$string['pluginname'] = 'Seleda SCORM';
 $string['popup'] = 'Abrir Objetos de Aprendizaje en una ventana nueva';
 $string['popuplaunched'] = 'Este contenido se ha abierto en una nueva ventana. Si has terminado de ver este recurso, haz clic aquí para regresar a la página del curso.';
 $string['popupmenu'] = 'En un menú desplegable';

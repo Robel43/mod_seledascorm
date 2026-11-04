@@ -15,21 +15,21 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Privacy Subsystem implementation for exescormreport_interactions.
+ * Privacy Subsystem implementation for seledascormreport_interactions.
  *
- * @package    exescormreport_interactions
+ * @package    seledascormreport_interactions
  * @copyright  2018 Sara Arjona <sara@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace exescormreport_interactions\privacy;
+namespace seledascormreport_interactions\privacy;
 
 use \core_privacy\local\metadata\collection;
 use \core_privacy\local\request\transform;
 use \core_privacy\local\request\writer;
 
 /**
- * Privacy Subsystem for exescormreport_interactions.
+ * Privacy Subsystem for seledascormreport_interactions.
  *
  * @copyright  2018 Sara Arjona <sara@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -45,25 +45,25 @@ class provider implements
      * @return collection A listing of user data stored through this system.
      */
     public static function get_metadata(collection $collection) : collection {
-        // User preferences shared between different exescorm reports.
-        $collection->add_user_preference('exescorm_report_pagesize', 'privacy:metadata:preference:exescorm_report_pagesize');
+        // User preferences shared between different seledascorm reports.
+        $collection->add_user_preference('seledascorm_report_pagesize', 'privacy:metadata:preference:seledascorm_report_pagesize');
 
-        // User preferences specific for this exescorm report.
+        // User preferences specific for this seledascorm report.
         $collection->add_user_preference(
-            'exescorm_report_interactions_qtext',
-            'privacy:metadata:preference:exescorm_report_interactions_qtext'
+            'seledascorm_report_interactions_qtext',
+            'privacy:metadata:preference:seledascorm_report_interactions_qtext'
         );
         $collection->add_user_preference(
-            'exescorm_report_interactions_resp',
-            'privacy:metadata:preference:exescorm_report_interactions_resp'
+            'seledascorm_report_interactions_resp',
+            'privacy:metadata:preference:seledascorm_report_interactions_resp'
         );
         $collection->add_user_preference(
-            'exescorm_report_interactions_right',
-            'privacy:metadata:preference:exescorm_report_interactions_right'
+            'seledascorm_report_interactions_right',
+            'privacy:metadata:preference:seledascorm_report_interactions_right'
         );
         $collection->add_user_preference(
-            'exescorm_report_interactions_result',
-            'privacy:metadata:preference:exescorm_report_interactions_result'
+            'seledascorm_report_interactions_result',
+            'privacy:metadata:preference:seledascorm_report_interactions_result'
         );
 
         return $collection;
@@ -75,11 +75,11 @@ class provider implements
      * @param  int $userid The userid of the user whose data is to be exported.
      */
     public static function export_user_preferences(int $userid) {
-        static::get_and_export_user_preference($userid, 'exescorm_report_pagesize');
-        static::get_and_export_user_preference($userid, 'exescorm_report_interactions_qtext', true);
-        static::get_and_export_user_preference($userid, 'exescorm_report_interactions_resp', true);
-        static::get_and_export_user_preference($userid, 'exescorm_report_interactions_right', true);
-        static::get_and_export_user_preference($userid, 'exescorm_report_interactions_result', true);
+        static::get_and_export_user_preference($userid, 'seledascorm_report_pagesize');
+        static::get_and_export_user_preference($userid, 'seledascorm_report_interactions_qtext', true);
+        static::get_and_export_user_preference($userid, 'seledascorm_report_interactions_resp', true);
+        static::get_and_export_user_preference($userid, 'seledascorm_report_interactions_right', true);
+        static::get_and_export_user_preference($userid, 'seledascorm_report_interactions_result', true);
     }
 
     /**
@@ -98,10 +98,10 @@ class provider implements
                 $transformedvalue = $prefvalue;
             }
             writer::export_user_preference(
-                'exescormreport_interactions',
+                'seledascormreport_interactions',
                 $userpreference,
                 $transformedvalue,
-                get_string('privacy:metadata:preference:'.$userpreference, 'exescormreport_interactions')
+                get_string('privacy:metadata:preference:'.$userpreference, 'seledascormreport_interactions')
             );
         }
     }

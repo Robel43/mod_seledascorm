@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component 'exescorm_interactions' report plugin
+ * Strings for component 'seledascorm_interactions' report plugin
  *
- * @package   exescormreport
+ * @package   seledascormreport
  * @subpackage interactions
  * @author    Dan Marsden and Ankit Kumar Agarwal
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later

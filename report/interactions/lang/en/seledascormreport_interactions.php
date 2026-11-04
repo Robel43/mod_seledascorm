@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component 'exescorm_interactions' report plugin
+ * Strings for component 'seledascorm_interactions' report plugin
  *
- * @package   exescormreport
+ * @package   seledascormreport
  * @subpackage interactions
  * @author    Dan Marsden and Ankit Kumar Agarwal
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -26,11 +26,11 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'Interactions report';
-$string['privacy:metadata:preference:exescorm_report_interactions_qtext'] = 'Whether to display the summary of questions in the exescorm interactions report';
-$string['privacy:metadata:preference:exescorm_report_interactions_resp'] = 'Whether to display the summary of responses in the exescorm interactions report';
-$string['privacy:metadata:preference:exescorm_report_interactions_result'] = 'Whether to display the summary of results in the exescorm interactions report';
-$string['privacy:metadata:preference:exescorm_report_interactions_right'] = 'Whether to display the summary of right anwers in the exescorm interactions report';
-$string['privacy:metadata:preference:exescorm_report_pagesize'] = 'Number of users to display in the exescorm reports';
+$string['privacy:metadata:preference:seledascorm_report_interactions_qtext'] = 'Whether to display the summary of questions in the seledascorm interactions report';
+$string['privacy:metadata:preference:seledascorm_report_interactions_resp'] = 'Whether to display the summary of responses in the seledascorm interactions report';
+$string['privacy:metadata:preference:seledascorm_report_interactions_result'] = 'Whether to display the summary of results in the seledascorm interactions report';
+$string['privacy:metadata:preference:seledascorm_report_interactions_right'] = 'Whether to display the summary of right anwers in the seledascorm interactions report';
+$string['privacy:metadata:preference:seledascorm_report_pagesize'] = 'Number of users to display in the seledascorm reports';
 $string['questionx'] = 'Question {$a}';
 $string['responsex'] = 'Response {$a}';
 $string['rightanswerx'] = 'Right answer {$a}';

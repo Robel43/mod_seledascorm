@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Defines backup_exescorm_activity_task class
+ * Defines backup_seledascorm_activity_task class
  *
- * @package     mod_exescorm
+ * @package     mod_seledascorm
  * @category    backup
  * @copyright   2010 onwards Eloy Lafuente (stronk7) {@link http://stronk7.com}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -25,12 +25,12 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/mod/exescorm/backup/moodle2/backup_exescorm_stepslib.php');
+require_once($CFG->dirroot . '/mod/seledascorm/backup/moodle2/backup_seledascorm_stepslib.php');
 
 /**
- * Provides the steps to perform one complete backup of the EXESCORM instance
+ * Provides the steps to perform one complete backup of the SELEDASCORM instance
  */
-class backup_exescorm_activity_task extends backup_activity_task {
+class backup_seledascorm_activity_task extends backup_activity_task {
 
     /**
      * No specific settings for this activity
@@ -39,10 +39,10 @@ class backup_exescorm_activity_task extends backup_activity_task {
     }
 
     /**
-     * Defines a backup step to store the instance data in the exescorm.xml file
+     * Defines a backup step to store the instance data in the seledascorm.xml file
      */
     protected function define_my_steps() {
-        $this->add_step(new backup_exescorm_activity_structure_step('exescorm_structure', 'exescorm.xml'));
+        $this->add_step(new backup_seledascorm_activity_structure_step('seledascorm_structure', 'seledascorm.xml'));
     }
 
     /**
@@ -56,13 +56,13 @@ class backup_exescorm_activity_task extends backup_activity_task {
 
         $base = preg_quote($CFG->wwwroot, "/");
 
-        // Link to the list of exescorms.
-        $search = "/(".$base."\/mod\/exescorm\/index.php\?id\=)([0-9]+)/";
-        $content = preg_replace($search, '$@EXESCORMINDEX*$2@$', $content);
+        // Link to the list of seledascorms.
+        $search = "/(".$base."\/mod\/seledascorm\/index.php\?id\=)([0-9]+)/";
+        $content = preg_replace($search, '$@SELEDASCORMINDEX*$2@$', $content);
 
-        // Link to exescorm view by moduleid.
-        $search = "/(".$base."\/mod\/exescorm\/view.php\?id\=)([0-9]+)/";
-        $content = preg_replace($search, '$@EXESCORMVIEWBYID*$2@$', $content);
+        // Link to seledascorm view by moduleid.
+        $search = "/(".$base."\/mod\/seledascorm\/view.php\?id\=)([0-9]+)/";
+        $content = preg_replace($search, '$@SELEDASCORMVIEWBYID*$2@$', $content);
 
         return $content;
     }

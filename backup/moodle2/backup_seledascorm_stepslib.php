@@ -15,20 +15,20 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @subpackage backup-moodle2
  * @copyright  2010 onwards Eloy Lafuente (stronk7) {@link http://stronk7.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 /**
- * Define all the backup steps that will be used by the backup_exescorm_activity_task
+ * Define all the backup steps that will be used by the backup_seledascorm_activity_task
  */
 
 /**
- * Define the complete exescorm structure for backup, with file and id annotations
+ * Define the complete seledascorm structure for backup, with file and id annotations
  */
-class backup_exescorm_activity_structure_step extends backup_activity_structure_step {
+class backup_seledascorm_activity_structure_step extends backup_activity_structure_step {
 
     protected function define_structure() {
 
@@ -36,8 +36,8 @@ class backup_exescorm_activity_structure_step extends backup_activity_structure_
         $userinfo = $this->get_setting_value('userinfo');
 
         // Define each element separated.
-        $exescorm = new backup_nested_element('exescorm', array('id'), array(
-            'name', 'exescormtype', 'reference', 'intro',
+        $seledascorm = new backup_nested_element('seledascorm', array('id'), array(
+            'name', 'seledascormtype', 'reference', 'intro',
             'introformat', 'version', 'maxgrade', 'grademethod',
             'whatgrade', 'maxattempt', 'forcecompleted', 'forcenewattempt',
             'lastattemptlock', 'masteryoverride', 'displayattemptstatus', 'displaycoursestructure',
@@ -54,7 +54,7 @@ class backup_exescorm_activity_structure_step extends backup_activity_structure_
 
         $sco = new backup_nested_element('sco', array('id'), array(
             'manifest', 'organization', 'parent', 'identifier',
-            'launch', 'exescormtype', 'title', 'sortorder'));
+            'launch', 'seledascormtype', 'title', 'sortorder'));
 
         $scodatas = new backup_nested_element('sco_datas');
 
@@ -100,7 +100,7 @@ class backup_exescorm_activity_structure_step extends backup_activity_structure_
             'timemodified'));
 
         // Build the tree.
-        $exescorm->add_child($scoes);
+        $seledascorm->add_child($scoes);
         $scoes->add_child($sco);
 
         $sco->add_child($scodatas);
@@ -128,35 +128,35 @@ class backup_exescorm_activity_structure_step extends backup_activity_structure_
         $scotracks->add_child($scotrack);
 
         // Define sources.
-        $exescorm->set_source_table('exescorm', array('id' => backup::VAR_ACTIVITYID));
+        $seledascorm->set_source_table('seledascorm', array('id' => backup::VAR_ACTIVITYID));
 
-        // Order is important for several EXESCORM calls (especially exescorm_scoes)
+        // Order is important for several SELEDASCORM calls (especially seledascorm_scoes)
         // in the following calls to set_source_table.
-        $sco->set_source_table('exescorm_scoes', array('exescorm' => backup::VAR_PARENTID), 'sortorder, id');
-        $scodata->set_source_table('exescorm_scoes_data', array('scoid' => backup::VAR_PARENTID), 'id ASC');
-        $seqrulecond->set_source_table('exescorm_seq_ruleconds', array('scoid' => backup::VAR_PARENTID), 'id ASC');
+        $sco->set_source_table('seledascorm_scoes', array('seledascorm' => backup::VAR_PARENTID), 'sortorder, id');
+        $scodata->set_source_table('seledascorm_scoes_data', array('scoid' => backup::VAR_PARENTID), 'id ASC');
+        $seqrulecond->set_source_table('seledascorm_seq_ruleconds', array('scoid' => backup::VAR_PARENTID), 'id ASC');
         $seqrulecondsdata->set_source_table(
-            'exescorm_seq_rulecond', array('ruleconditionsid' => backup::VAR_PARENTID), 'id ASC'
+            'seledascorm_seq_rulecond', array('ruleconditionsid' => backup::VAR_PARENTID), 'id ASC'
         );
-        $seqrolluprule->set_source_table('exescorm_seq_rolluprule', array('scoid' => backup::VAR_PARENTID), 'id ASC');
-        $seqrolluprulecond->set_source_table('exescorm_seq_rllprlcond', array('rollupruleid' => backup::VAR_PARENTID), 'id ASC');
-        $seqobjective->set_source_table('exescorm_seq_objective', array('scoid' => backup::VAR_PARENTID), 'id ASC');
-        $seqmapinfo->set_source_table('exescorm_seq_mapinfo', array('objectiveid' => backup::VAR_PARENTID), 'id ASC');
+        $seqrolluprule->set_source_table('seledascorm_seq_rolluprule', array('scoid' => backup::VAR_PARENTID), 'id ASC');
+        $seqrolluprulecond->set_source_table('seledascorm_seq_rllprlcond', array('rollupruleid' => backup::VAR_PARENTID), 'id ASC');
+        $seqobjective->set_source_table('seledascorm_seq_objective', array('scoid' => backup::VAR_PARENTID), 'id ASC');
+        $seqmapinfo->set_source_table('seledascorm_seq_mapinfo', array('objectiveid' => backup::VAR_PARENTID), 'id ASC');
 
         // All the rest of elements only happen if we are including user info.
         if ($userinfo) {
-            $scotrack->set_source_table('exescorm_scoes_track', array('scoid' => backup::VAR_PARENTID), 'id ASC');
+            $scotrack->set_source_table('seledascorm_scoes_track', array('scoid' => backup::VAR_PARENTID), 'id ASC');
         }
 
         // Define id annotations.
         $scotrack->annotate_ids('user', 'userid');
 
         // Define file annotations.
-        $exescorm->annotate_files('mod_exescorm', 'intro', null); // This file area hasn't itemid.
-        $exescorm->annotate_files('mod_exescorm', 'content', null); // This file area hasn't itemid.
-        $exescorm->annotate_files('mod_exescorm', 'package', null); // This file area hasn't itemid.
+        $seledascorm->annotate_files('mod_seledascorm', 'intro', null); // This file area hasn't itemid.
+        $seledascorm->annotate_files('mod_seledascorm', 'content', null); // This file area hasn't itemid.
+        $seledascorm->annotate_files('mod_seledascorm', 'package', null); // This file area hasn't itemid.
 
-        // Return the root element (exescorm), wrapped into standard activity structure.
-        return $this->prepare_activity_structure($exescorm);
+        // Return the root element (seledascorm), wrapped into standard activity structure.
+        return $this->prepare_activity_structure($seledascorm);
     }
 }

@@ -321,7 +321,7 @@ $string['missing_attribute'] = 'Falta atributo ({$a->attr}) en marca {$a->tag}';
 $string['missingparam'] = 'Un parámetro requirido falta ou é incorrecto';
 $string['missing_tag'] = 'Falta marca {$a->tag}';
 $string['mode'] = 'Modo';
-$string['modulename'] = 'eXeLearning (SCORM)';
+$string['modulename'] = 'Seleda SCORM';
 $string['modulename_help'] = 'Un SCORM creado con eXeLearning é un conxunto de ficheiros que se empaquetan conforme a unha norma estándar para os obxectos de aprendizaxe. O módulo de actividade eXeLearning (SCORM) permite crear e editar estes SCORM.
 
 O contido amósase normalmente en varias páxinas, con navegación entre as páxinas. Hai varias opcións para a visualización dos contidos, con xanelas emerxentes, en táboas de contidos, con botóns de navegación etc. Os contidos de eXeLearning moitas veces inclúen preguntas cualificables, que se rexistran no libro de cualificacións.
@@ -331,7 +331,7 @@ As actividades eXeLearning pódense usar:
 * Para a presentación de contidos multimedia e animacións.
 * Como ferramenta de avaliación.';
 $string['modulename_link'] = 'mod/mod_exescorm/view';
-$string['modulenameplural'] = 'Contidos eXeLearning (SCORM)';
+$string['modulenameplural'] = 'Seleda SCORM';
 $string['nav'] = 'Amosar navegación';
 $string['nav_help'] = 'Este axuste especifica se se amosarán ou ocultarán os botóns de navegación e a súa posición.
 
@@ -389,8 +389,8 @@ $string['player:skipnext'] = 'Seguinte do mesmo nivel';
 $string['player:skipprev'] = 'Anterior do mesmo nivel';
 $string['player:toogleFullscreen'] = 'Alternar pantalla completa';
 $string['player:up'] = 'Subir nivel';
-$string['pluginadministration'] = 'Administración do contido eXeLearning';
-$string['pluginname'] = 'eXeLearning (SCORM)';
+$string['pluginadministration'] = 'Seleda SCORM';
+$string['pluginname'] = 'Seleda SCORM';
 $string['popup'] = 'Abrir Obxectos de Aprendizaxe nunha xanela nova';
 $string['popuplaunched'] = 'Este contido abriuse nunha nova xanela. Se rematou de ver este recurso, faga clic aquí para regresar á páxina do curso.';
 $string['popupmenu'] = 'Nun menú despregable';

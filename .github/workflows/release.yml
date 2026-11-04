@@ -45,11 +45,12 @@ jobs:
           if [ "${{ github.event_name }}" = "release" ]; then
             RAW_TAG="${GITHUB_REF##*/}"
             VERSION_TAG="${RAW_TAG#v}"
+            EDITOR_TAG="$(cat .editor-version)"
             echo "RELEASE_TAG=${VERSION_TAG}" >> $GITHUB_ENV
             echo "EXELEARNING_EDITOR_REPO_URL=https://github.com/exelearning/exelearning.git" >> $GITHUB_ENV
-            # Build the editor from the matching editor tag so the embedded
-            # editor reports the final release version (not a nightly/alpha build).
-            echo "EXELEARNING_EDITOR_REF=v${VERSION_TAG}" >> $GITHUB_ENV
+            # Seleda SCORM has its own release version. The optional embedded
+            # fallback remains independently pinned in .editor-version.
+            echo "EXELEARNING_EDITOR_REF=${EDITOR_TAG}" >> $GITHUB_ENV
             echo "EXELEARNING_EDITOR_REF_TYPE=tag" >> $GITHUB_ENV
           else
             INPUT_RELEASE="${{ github.event.inputs.release_tag }}"
@@ -71,7 +72,7 @@ jobs:
       - name: Upload ZIP as workflow artifact
         uses: actions/upload-artifact@v4
         with:
-          name: mod_exescorm-${{ env.RELEASE_TAG }}
+          name: seleda-scorm-${{ env.RELEASE_TAG }}
           path: mod_exescorm-${{ env.RELEASE_TAG }}.zip
 
       - name: Upload ZIP to release

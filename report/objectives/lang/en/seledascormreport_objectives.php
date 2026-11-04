@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component 'exescorm_objectives' report plugin
+ * Strings for component 'seledascorm_objectives' report plugin
  *
- * @package   exescormreport_objectives
+ * @package   seledascormreport_objectives
  * @author    Dan Marsden <dan@danmarsden.com>
  * @copyright 2013 Dan Marsden
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -25,10 +25,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['objectivescore'] = 'Mostrar puntuación del objetivo';
-$string['objectivex'] = 'Objetivo {$a}';
-$string['pluginname'] = 'Informe de objetivos';
-$string['privacy:metadata:preference:scorm_report_objectives_score'] = 'Si mostrar el puntaje objetivo en el informe SCORM';
-$string['privacy:metadata:preference:scorm_report_pagesize'] = 'Número de usuarios para mostrar en los informes SCORM';
-$string['score'] = 'puntuación';
-$string['status'] = 'estado';
+$string['pluginname'] = 'Objectives report';
+$string['privacy:metadata:preference:seledascorm_report_objectives_score'] = 'Whether to display the objective score in the  report';
+$string['privacy:metadata:preference:seledascorm_report_pagesize'] = 'Number of users to display in the  reports';
+$string['objectivex'] = 'Objective {$a}';
+$string['objectivescore'] = 'Show objective score';
+$string['score'] = 'score';
+$string['status'] = 'status';

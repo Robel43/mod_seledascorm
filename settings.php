@@ -47,7 +47,7 @@ if ($ADMIN->fulltree) {
     ];
     $settings->add(new admin_setting_configselect('exescorm/editormode',
         get_string('editormode', 'mod_exescorm'), $editormodedesc,
-        'online', $editormodes));
+        'embedded', $editormodes));
 
     $settings->add(new \mod_exescorm\admin\admin_setting_embeddededitor(
         get_string('embeddededitorstatus', 'mod_exescorm'),

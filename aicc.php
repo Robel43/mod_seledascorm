@@ -24,9 +24,9 @@ header("Cache-Control: no-cache");
 header("Pragma: no-cache");
 
 require_once('../../config.php');
-require_once($CFG->dirroot.'/mod/exescorm/lib.php');
-require_once($CFG->dirroot.'/mod/exescorm/locallib.php');
-require_once($CFG->dirroot.'/mod/exescorm/datamodels/aicclib.php');
+require_once($CFG->dirroot.'/mod/seledascorm/lib.php');
+require_once($CFG->dirroot.'/mod/seledascorm/locallib.php');
+require_once($CFG->dirroot.'/mod/seledascorm/datamodels/aicclib.php');
 
 foreach ($_POST as $key => $value) {
     $tempkey = strtolower($key);
@@ -37,53 +37,53 @@ $command = required_param('command', PARAM_ALPHA);
 $sessionid = required_param('session_id', PARAM_ALPHANUM);
 $aiccdata = optional_param('aicc_data', '', PARAM_RAW);
 
-$cfgexescorm = get_config('exescorm');
+$cfgseledascorm = get_config('seledascorm');
 
-$url = new moodle_url('/mod/exescorm/aicc.php', array('command' => $command, 'session_id' => $sessionid));
+$url = new moodle_url('/mod/seledascorm/aicc.php', array('command' => $command, 'session_id' => $sessionid));
 if ($aiccdata !== 0) {
     $url->param('aicc_data', $aiccdata);
 }
 $PAGE->set_url($url);
 
-if (empty($cfgexescorm->allowaicchacp)) {
+if (empty($cfgseledascorm->allowaicchacp)) {
     require_login();
     if (!confirm_sesskey($sessionid)) {
         throw new \moodle_exception('invalidsesskey');
     }
     $aiccuser = $USER;
-    $exescormsession = $SESSION->exescorm;
+    $seledascormsession = $SESSION->seledascorm;
 } else {
-    $exescormsession = exescorm_aicc_confirm_hacp_session($sessionid);
-    if (empty($exescormsession)) {
-        throw new \moodle_exception('invalidhacpsession', 'exescorm');
+    $seledascormsession = seledascorm_aicc_confirm_hacp_session($sessionid);
+    if (empty($seledascormsession)) {
+        throw new \moodle_exception('invalidhacpsession', 'seledascorm');
     }
-    $aiccuser = $DB->get_record('user', array('id' => $exescormsession->userid), 'id,username,lastname,firstname', MUST_EXIST);
+    $aiccuser = $DB->get_record('user', array('id' => $seledascormsession->userid), 'id,username,lastname,firstname', MUST_EXIST);
 }
 
 if (!empty($command)) {
     $command = strtolower($command);
 
-    if (isset($exescormsession->scoid)) {
-        $scoid = $exescormsession->scoid;
+    if (isset($seledascormsession->scoid)) {
+        $scoid = $seledascormsession->scoid;
     } else {
         throw new \moodle_exception('cannotcallscript');
     }
     $mode = 'normal';
-    if (isset($exescormsession->exescormmode)) {
-        $mode = $exescormsession->exescormmode;
+    if (isset($seledascormsession->seledascormmode)) {
+        $mode = $seledascormsession->seledascormmode;
     }
     $status = 'Not Initialized';
-    if (isset($exescormsession->exescormstatus)) {
-        $status = $exescormsession->exescormstatus;
+    if (isset($seledascormsession->seledascormstatus)) {
+        $status = $seledascormsession->seledascormstatus;
     }
-    if (isset($exescormsession->attempt)) {
-        $attempt = $exescormsession->attempt;
+    if (isset($seledascormsession->attempt)) {
+        $attempt = $seledascormsession->attempt;
     } else {
         $attempt = 1;
     }
 
-    if ($sco = exescorm_get_sco($scoid, EXESCORM_SCO_ONLY)) {
-        if (!$exescorm = $DB->get_record('exescorm', array('id' => $sco->exescorm))) {
+    if ($sco = seledascorm_get_sco($scoid, SELEDASCORM_SCO_ONLY)) {
+        if (!$seledascorm = $DB->get_record('seledascorm', array('id' => $sco->seledascorm))) {
             throw new \moodle_exception('cannotcallscript');
         }
     } else {
@@ -96,26 +96,26 @@ if (!empty($command)) {
                  . "\r\nAICC sessionid: $sessionid"
                  . "\r\nAICC command: $command"
                  . "\r\nAICC aiccdata:\r\n$aiccdata";
-    exescorm_debug_log_write("aicc", "HACP Request:\r\n$aiccrequest", $scoid);
+    seledascorm_debug_log_write("aicc", "HACP Request:\r\n$aiccrequest", $scoid);
     ob_start();
 
-    if ($exescorm = $DB->get_record('exescorm', array('id' => $sco->exescorm))) {
+    if ($seledascorm = $DB->get_record('seledascorm', array('id' => $sco->seledascorm))) {
         switch ($command) {
             case 'getparam':
                 if ($status == 'Not Initialized') {
-                    $exescormsession->exescormstatus = 'Running';
+                    $seledascormsession->seledascormstatus = 'Running';
                     $status = 'Running';
                 }
                 if ($status != 'Running') {
                     echo "error=101\r\nerror_text=Terminated\r\n";
                 } else {
-                    if ($usertrack = exescorm_get_tracks($scoid, $aiccuser->id, $attempt)) {
+                    if ($usertrack = seledascorm_get_tracks($scoid, $aiccuser->id, $attempt)) {
                         $userdata = $usertrack;
                     } else {
                         $userdata->status = '';
                         $userdata->score_raw = '';
                     }
-                    $aiccuserid = get_config('exescorm', 'aiccuserid');
+                    $aiccuserid = get_config('seledascorm', 'aiccuserid');
                     if (!empty($aiccuserid)) {
                         $userdata->student_id = $aiccuser->id;
                     } else {
@@ -129,7 +129,7 @@ if (!empty($command)) {
                         $userdata->credit = 'no-credit';
                     }
 
-                    if ($sco = exescorm_get_sco($scoid)) {
+                    if ($sco = seledascorm_get_sco($scoid)) {
                         $userdata->course_id = $sco->identifier;
                         $userdata->datafromlms = isset($sco->datafromlms) ? $sco->datafromlms : '';
                         $userdata->mastery_score = isset($sco->mastery_score) && is_numeric($sco->mastery_score) ?
@@ -160,10 +160,10 @@ if (!empty($command)) {
                         }
                         if (isset($userdata->{'cmi.core.lesson_status'})) {
                             echo 'Lesson_Status='.$userdata->{'cmi.core.lesson_status'}.$userdata->entry."\r\n";
-                            $exescormsession->exescorm_lessonstatus = $userdata->{'cmi.core.lesson_status'};
+                            $seledascormsession->seledascorm_lessonstatus = $userdata->{'cmi.core.lesson_status'};
                         } else {
                             echo 'Lesson_Status=not attempted'.$userdata->entry."\r\n";
-                            $exescormsession->exescorm_lessonstatus = 'not attempted';
+                            $seledascormsession->seledascorm_lessonstatus = 'not attempted';
                         }
                         if (isset($userdata->{'cmi.core.score.raw'})) {
                             $max = '';
@@ -196,21 +196,21 @@ if (!empty($command)) {
                         echo 'Max_Time_Allowed='.$userdata->max_time_allowed."\r\n";
                         echo 'Time_Limit_Action='.$userdata->time_limit_action."\r\n";
                     } else {
-                        throw new \moodle_exception('cannotfindsco', 'exescorm');
+                        throw new \moodle_exception('cannotfindsco', 'seledascorm');
                     }
                 }
             break;
             case 'putparam':
                 if ($status == 'Running') {
-                    if (! $cm = get_coursemodule_from_instance("exescorm", $exescorm->id, $exescorm->course)) {
+                    if (! $cm = get_coursemodule_from_instance("seledascorm", $seledascorm->id, $seledascorm->course)) {
                         echo "error=1\r\nerror_text=Unknown\r\n"; // No one must see this error message if not hacked.
                     }
-                    $savetrack = has_capability('mod/exescorm:savetrack', context_module::instance($cm->id), $aiccuser->id);
+                    $savetrack = has_capability('mod/seledascorm:savetrack', context_module::instance($cm->id), $aiccuser->id);
                     if (!empty($aiccdata) && $savetrack) {
                         $initlessonstatus = 'not attempted';
                         $lessonstatus = 'not attempted';
-                        if (isset($exescormsession->exescorm_lessonstatus)) {
-                            $initlessonstatus = $exescormsession->exescorm_lessonstatus;
+                        if (isset($seledascormsession->seledascorm_lessonstatus)) {
+                            $initlessonstatus = $seledascormsession->seledascorm_lessonstatus;
                         }
                         $score = '';
                         $datamodel['lesson_location'] = 'cmi.core.lesson_location';
@@ -229,7 +229,7 @@ if (!empty($command)) {
                                     $element = $datamodel[$element];
                                     switch ($element) {
                                         case 'cmi.core.lesson_location':
-                                            $id = exescorm_insert_track($aiccuser->id, $exescorm->id, $sco->id,
+                                            $id = seledascorm_insert_track($aiccuser->id, $seledascorm->id, $sco->id,
                                                                         $attempt, $element, $value);
                                         break;
                                         case 'cmi.core.lesson_status':
@@ -266,14 +266,14 @@ if (!empty($command)) {
                                             }
                                             if (empty($value) || isset($exites[$value])) {
                                                 $subelement = 'cmi.core.exit';
-                                                $id = exescorm_insert_track($aiccuser->id, $exescorm->id, $sco->id,
+                                                $id = seledascorm_insert_track($aiccuser->id, $seledascorm->id, $sco->id,
                                                                             $attempt, $subelement, $value);
                                             }
                                             $value = trim(strtolower($values[0]));
                                             $value = $value[0];
                                             if (isset($statuses[$value]) && ($mode == 'normal')) {
                                                 $value = $statuses[$value];
-                                                $id = exescorm_insert_track($aiccuser->id, $exescorm->id, $sco->id,
+                                                $id = seledascorm_insert_track($aiccuser->id, $seledascorm->id, $sco->id,
                                                                             $attempt, $element, $value);
                                             }
                                             $lessonstatus = $value;
@@ -283,12 +283,12 @@ if (!empty($command)) {
                                             if ((count($values) > 1) && ($values[1] >= $values[0]) && is_numeric($values[1])) {
                                                 $subelement = 'cmi.core.score.max';
                                                 $value = trim($values[1]);
-                                                $id = exescorm_insert_track($aiccuser->id, $exescorm->id, $sco->id,
+                                                $id = seledascorm_insert_track($aiccuser->id, $seledascorm->id, $sco->id,
                                                                             $attempt, $subelement, $value);
                                                 if ((count($values) == 3) && ($values[2] <= $values[0]) && is_numeric($values[2])) {
                                                     $subelement = 'cmi.core.score.min';
                                                     $value = trim($values[2]);
-                                                    $id = exescorm_insert_track($aiccuser->id, $exescorm->id, $sco->id,
+                                                    $id = seledascorm_insert_track($aiccuser->id, $seledascorm->id, $sco->id,
                                                                                 $attempt, $subelement, $value);
                                                 }
                                             }
@@ -296,13 +296,13 @@ if (!empty($command)) {
                                             $value = '';
                                             if (is_numeric($values[0])) {
                                                 $value = trim($values[0]);
-                                                $id = exescorm_insert_track($aiccuser->id, $exescorm->id, $sco->id,
+                                                $id = seledascorm_insert_track($aiccuser->id, $seledascorm->id, $sco->id,
                                                                             $attempt, $element, $value);
                                             }
                                             $score = $value;
                                         break;
                                         case 'cmi.core.session_time':
-                                             $exescormsession->sessiontime = $value;
+                                             $seledascormsession->sessiontime = $value;
                                         break;
                                     }
                                 }
@@ -315,9 +315,9 @@ if (!empty($command)) {
                                         next($datarows);
                                     }
                                     $value = rawurlencode($value);
-                                    $id = exescorm_insert_track(
+                                    $id = seledascorm_insert_track(
                                             $aiccuser->id,
-                                            $exescorm->id,
+                                            $seledascorm->id,
                                             $sco->id,
                                             $attempt,
                                             $element,
@@ -328,11 +328,11 @@ if (!empty($command)) {
                         }
                         if (($mode == 'browse') && ($initlessonstatus == 'not attempted')) {
                             $lessonstatus = 'browsed';
-                            $id = exescorm_insert_track($aiccuser->id, $exescorm->id, $sco->id,
+                            $id = seledascorm_insert_track($aiccuser->id, $seledascorm->id, $sco->id,
                                                         $attempt, 'cmi.core.lesson_status', 'browsed');
                         }
                         if ($mode == 'normal') {
-                            if ($sco = exescorm_get_sco($scoid)) {
+                            if ($sco = seledascorm_get_sco($scoid)) {
                                 if (isset($sco->mastery_score) && is_numeric($sco->mastery_score)) {
                                     if ($score != '') { // Score is correctly initialized w/ an empty string, see above.
                                         if ($score >= trim($sco->mastery_score)) {
@@ -342,7 +342,7 @@ if (!empty($command)) {
                                         }
                                     }
                                 }
-                                $id = exescorm_insert_track($aiccuser->id, $exescorm->id, $sco->id,
+                                $id = seledascorm_insert_track($aiccuser->id, $seledascorm->id, $sco->id,
                                                             $attempt, 'cmi.core.lesson_status', $lessonstatus);
                             }
                         }
@@ -401,32 +401,32 @@ if (!empty($command)) {
             break;
             case 'exitau':
                 if ($status == 'Running') {
-                    if (isset($exescormsession->sessiontime) && ($exescormsession->sessiontime != '')) {
-                        if ($track = $DB->get_record('exescorm_scoes_track', array("userid" => $aiccuser->id,
-                                                                                "exescormid" => $exescorm->id,
+                    if (isset($seledascormsession->sessiontime) && ($seledascormsession->sessiontime != '')) {
+                        if ($track = $DB->get_record('seledascorm_scoes_track', array("userid" => $aiccuser->id,
+                                                                                "seledascormid" => $seledascorm->id,
                                                                                 "scoid" => $sco->id,
                                                                                 "attempt" => $attempt,
                                                                                 "element" => 'cmi.core.total_time'))) {
                             // Add session_time to total_time.
-                            $value = exescorm_add_time($track->value, $exescormsession->sessiontime);
+                            $value = seledascorm_add_time($track->value, $seledascormsession->sessiontime);
                             $track->value = $value;
                             $track->timemodified = time();
-                            $DB->update_record('exescorm_scoes_track', $track);
+                            $DB->update_record('seledascorm_scoes_track', $track);
                         } else {
                             $track = new stdClass();
                             $track->userid = $aiccuser->id;
-                            $track->exescormid = $exescorm->id;
+                            $track->seledascormid = $seledascorm->id;
                             $track->scoid = $sco->id;
                             $track->element = 'cmi.core.total_time';
-                            $track->value = $exescormsession->sessiontime;
+                            $track->value = $seledascormsession->sessiontime;
                             $track->attempt = $attempt;
                             $track->timemodified = time();
-                            $id = $DB->insert_record('exescorm_scoes_track', $track);
+                            $id = $DB->insert_record('seledascorm_scoes_track', $track);
                         }
-                        exescorm_update_grades($exescorm, $aiccuser->id);
+                        seledascorm_update_grades($seledascorm, $aiccuser->id);
                     }
-                    $exescormsession->exescormstatus = 'Terminated';
-                    $exescormsession->session_time = '';
+                    $seledascormsession->seledascormstatus = 'Terminated';
+                    $seledascormsession->session_time = '';
                     echo "error=0\r\nerror_text=Successful\r\n";
                 } else if ($status == 'Terminated') {
                     echo "error=1\r\nerror_text=Terminated\r\n";
@@ -446,13 +446,13 @@ if (!empty($command)) {
         echo "error=3\r\nerror_text=Invalid Session ID\r\n";
     }
 }
-if (empty($cfgexescorm->allowaicchacp)) {
-    $SESSION->exescorm = $exescormsession;
+if (empty($cfgseledascorm->allowaicchacp)) {
+    $SESSION->seledascorm = $seledascormsession;
 } else {
-    $exescormsession->timemodified = time();
-    $DB->update_record('exescorm_aicc_session', $exescormsession);
+    $seledascormsession->timemodified = time();
+    $DB->update_record('seledascorm_aicc_session', $seledascormsession);
 }
 
 $aiccresponse = ob_get_contents();
-exescorm_debug_log_write("aicc", "HACP Response:\r\n$aiccresponse", $scoid);
+seledascorm_debug_log_write("aicc", "HACP Response:\r\n$aiccresponse", $scoid);
 ob_end_flush();

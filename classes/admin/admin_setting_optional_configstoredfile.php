@@ -17,12 +17,12 @@
 /**
  * Optional variant of Moodle's stored-file admin setting.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  2025 eXeLearning
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_exescorm\admin;
+namespace mod_seledascorm\admin;
 
 /**
  * Optional stored-file admin setting that is safe to leave empty.

@@ -1,24 +1,11 @@
 <?php
 // This file is part of Moodle - http://moodle.org/
-//
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Embedded editor source resolver for mod_seledascorm.
+ * Bundled embedded Seleda editor resolver.
  *
- * Single source of truth for determining which embedded editor source is active.
- * Implements the Seleda V1 policy: bundled editor only.
+ * Seleda V1 has exactly one supported embedded-editor source:
+ * mod/seledascorm/dist/static inside the installed plugin.
  *
  * @package    mod_seledascorm
  * @copyright  2025 eXeLearning
@@ -27,48 +14,20 @@
 
 namespace mod_seledascorm\local;
 
-/**
- * Resolves which embedded editor source should be used at runtime.
- *
- * The bundled Seleda editor inside the plugin dist/static/ directory is the only
- * supported V1 source. Legacy moodledata-installed editors are never activated.
- */
 class embedded_editor_source_resolver {
-
-    /** @var string Active source is the admin-installed copy in moodledata. */
-    const SOURCE_MOODLEDATA = 'moodledata';
-
     /** @var string Active source is the bundled copy inside the plugin. */
-    const SOURCE_BUNDLED = 'bundled';
+    public const SOURCE_BUNDLED = 'bundled';
 
-    /** @var string No usable source found. */
-    const SOURCE_NONE = 'none';
+    /** @var string No usable bundled editor was found. */
+    public const SOURCE_NONE = 'none';
 
-    /** @var string Subdirectory under dataroot for admin-installed editor. */
-    const MOODLEDATA_SUBDIR = 'mod_seledascorm/embedded_editor';
-
-    /**
-     * Directories expected in a valid static editor bundle.
-     * At least one must exist alongside index.html.
-     *
-     * @var string[]
-     */
-    const EXPECTED_ASSET_DIRS = ['app', 'libs', 'files'];
+    /** @var string[] Directories required in a complete static editor bundle. */
+    private const EXPECTED_ASSET_DIRS = ['app', 'libs', 'files'];
 
     /**
-     * Get the moodledata directory for the admin-installed editor.
+     * Return the bundled editor directory inside the plugin.
      *
-     * @return string Absolute path.
-     */
-    public static function get_moodledata_dir(): string {
-        global $CFG;
-        return $CFG->dataroot . '/' . self::MOODLEDATA_SUBDIR;
-    }
-
-    /**
-     * Get the bundled editor directory inside the plugin.
-     *
-     * @return string Absolute path.
+     * @return string
      */
     public static function get_bundled_dir(): string {
         global $CFG;
@@ -76,26 +35,21 @@ class embedded_editor_source_resolver {
     }
 
     /**
-     * Validate that a directory contains a usable static editor installation.
+     * Validate a complete embedded Seleda bundle.
      *
-     * Checks that index.html exists and is readable, and that at least one
-     * of the expected asset directories (app, libs, files) is present.
-     *
-     * @param string $dir Absolute path to the editor directory.
-     * @return bool True if the directory passes integrity checks.
+     * @param string $dir Absolute editor directory.
+     * @return bool
      */
     public static function validate_editor_dir(string $dir): bool {
         if (!is_dir($dir)) {
             return false;
         }
 
-        $indexpath = rtrim($dir, '/') . '/index.html';
-        if (!is_file($indexpath) || !is_readable($indexpath)) {
+        $dir = rtrim($dir, '/');
+        if (!is_file($dir . '/index.html') || !is_readable($dir . '/index.html')) {
             return false;
         }
 
-        // Every core static asset directory must exist; a partial bundle is invalid.
-        $dir = rtrim($dir, '/');
         foreach (self::EXPECTED_ASSET_DIRS as $assetdir) {
             if (!is_dir($dir . '/' . $assetdir)) {
                 return false;
@@ -106,107 +60,56 @@ class embedded_editor_source_resolver {
     }
 
     /**
-     * Get the installed version of the moodledata editor, if known.
+     * Return the active source.
      *
-     * @return string|null Version string or null if not recorded.
-     */
-    public static function get_moodledata_version(): ?string {
-        $version = get_config('seledascorm', 'embedded_editor_version');
-        return ($version !== false && $version !== '') ? $version : null;
-    }
-
-    /**
-     * Get the installation timestamp of the moodledata editor, if known.
-     *
-     * @return string|null Datetime string or null if not recorded.
-     */
-    public static function get_moodledata_installed_at(): ?string {
-        $installedat = get_config('seledascorm', 'embedded_editor_installed_at');
-        return ($installedat !== false && $installedat !== '') ? $installedat : null;
-    }
-
-    /**
-     * Determine which source is active according to the precedence policy.
-     *
-     * V1 policy: bundled → none.
-     *
-     * @return string One of the SOURCE_* constants.
+     * @return string
      */
     public static function get_active_source(): string {
-        // Seleda V1 always prefers the plugin-bundled editor. This prevents a
-        // legacy admin-installed upstream eXeLearning editor from silently
-        // replacing the Seleda authoring workspace after a plugin upgrade.
-        if (self::validate_editor_dir(self::get_bundled_dir())) {
-            return self::SOURCE_BUNDLED;
-        }
-
-        return self::SOURCE_NONE;
+        return self::validate_editor_dir(self::get_bundled_dir())
+            ? self::SOURCE_BUNDLED
+            : self::SOURCE_NONE;
     }
 
     /**
-     * Get the filesystem path for the active local editor source.
+     * Return the active bundled editor directory.
      *
-     * @return string|null Absolute path to the active editor directory, or null if no source is available.
+     * @return string|null
      */
     public static function get_active_dir(): ?string {
-        $source = self::get_active_source();
-
-        switch ($source) {
-            case self::SOURCE_MOODLEDATA:
-                return self::get_moodledata_dir();
-            case self::SOURCE_BUNDLED:
-                return self::get_bundled_dir();
-            default:
-                return null;
-        }
+        return self::get_active_source() === self::SOURCE_BUNDLED
+            ? self::get_bundled_dir()
+            : null;
     }
 
     /**
-     * Check whether any local editor source (moodledata or bundled) is available.
+     * Check whether the bundled editor is available.
      *
-     * @return bool True if at least one local source passes validation.
+     * @return bool
      */
     public static function has_local_source(): bool {
         return self::get_active_dir() !== null;
     }
 
     /**
-     * Get the source used to read the editor index HTML.
+     * Return the bundled editor index.
      *
-     * Returns a filesystem path when a local source is available, or null otherwise.
-     *
-     * @return string|null Path to index.html, or null if no source is available.
+     * @return string|null
      */
     public static function get_index_source(): ?string {
-        $activedir = self::get_active_dir();
-        if ($activedir !== null) {
-            return $activedir . '/index.html';
-        }
-
-        return null;
+        $dir = self::get_active_dir();
+        return $dir === null ? null : $dir . '/index.html';
     }
 
     /**
-     * Build a comprehensive status object for the admin UI.
+     * Return status data for the read-only Moodle settings card.
      *
-     * @return \stdClass Status information with all relevant fields.
+     * @return \stdClass
      */
     public static function get_status(): \stdClass {
         $status = new \stdClass();
-
         $status->active_source = self::get_active_source();
-        $status->active_dir = self::get_active_dir();
-
-        // Moodledata source.
-        $status->moodledata_dir = self::get_moodledata_dir();
-        $status->moodledata_available = self::validate_editor_dir($status->moodledata_dir);
-        $status->moodledata_version = self::get_moodledata_version();
-        $status->moodledata_installed_at = self::get_moodledata_installed_at();
-
-        // Bundled source.
         $status->bundled_dir = self::get_bundled_dir();
         $status->bundled_available = self::validate_editor_dir($status->bundled_dir);
-
         return $status;
     }
 }

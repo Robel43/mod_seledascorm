@@ -321,7 +321,6 @@ if (file_exists($CFG->dirroot.'/mod/seledascorm/datamodels/'.$seledascorm->versi
 \core\session\manager::keepalive('networkdropped', 'mod_seledascorm', 30, 10);
 
 $PAGE->requires->js_call_amd('mod_seledascorm/fullscreen', 'init');
-$PAGE->requires->js_call_amd('mod_seledascorm/editor_modal', 'init');
 
 echo $OUTPUT->footer();
 

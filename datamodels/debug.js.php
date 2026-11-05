@@ -56,7 +56,7 @@ function getCookie (cookie_name){
 
 // retrieve the logging flag from a Cookie
 function getLoggingActive () {
-    var loggingActive = getCookie('EXESCORMLoggingActive');
+    var loggingActive = getCookie('SELEDASCORMLoggingActive');
     if (!loggingActive) {
         loggingActive = 'A';
     }
@@ -65,7 +65,7 @@ function getLoggingActive () {
 
 // set the logging flag in a cookie
 function setLoggingActive (flag) {
-    new cookie("EXESCORMLoggingActive", flag, 365, "/").set();
+    new cookie("SELEDASCORMLoggingActive", flag, 365, "/").set();
 }
 
 // toggle the logging
@@ -73,11 +73,11 @@ function toggleLog () {
     if (getLoggingActive() == "A") {
         AppendToLog("Moodle Logging Deactivated", 0);
         setLoggingActive('N');
-        logButton.innerHTML = '-><?php echo addslashes_js(get_string('exescormloggingoff', 'mod_exescorm')); ?>';
+        logButton.innerHTML = '-><?php echo addslashes_js(get_string('seledascormloggingoff', 'mod_seledascorm')); ?>';
     } else {
         setLoggingActive('A');
         AppendToLog("Moodle Logging Activated", 0);
-        logButton.innerHTML = '<?php echo addslashes_js(get_string('exescormloggingon', 'mod_exescorm')); ?>';
+        logButton.innerHTML = '<?php echo addslashes_js(get_string('seledascormloggingon', 'mod_seledascorm')); ?>';
         logPopUpWindow.focus();
     }
 }
@@ -86,13 +86,13 @@ function toggleLog () {
 var logString = "";
 var logRow = 0;
 var logPopUpWindow = "N";
-var debugEXESCORMVersion = '<?php echo $exescorm->version; ?>';
+var debugSELEDASCORMVersion = '<?php echo $seledascorm->version; ?>';
 <?php
-$lmsprefix = (exescorm_version_check($exescorm->version, EXESCORM_SCORM_12) || empty($exescorm->version)) ? 'LMS' : '';
-$lmsapi = (exescorm_version_check($exescorm->version, EXESCORM_SCORM_12) || empty($exescorm->version)) ? 'API' : 'API_1484_11';
+$lmsprefix = (seledascorm_version_check($seledascorm->version, SELEDASCORM_SCORM_12) || empty($seledascorm->version)) ? 'LMS' : '';
+$lmsapi = (seledascorm_version_check($seledascorm->version, SELEDASCORM_SCORM_12) || empty($seledascorm->version)) ? 'API' : 'API_1484_11';
 
 $lmselements = array();
-if (exescorm_version_check($exescorm->version, EXESCORM_SCORM_12) || empty($exescorm->version)) {
+if (seledascorm_version_check($seledascorm->version, SELEDASCORM_SCORM_12) || empty($seledascorm->version)) {
     $lmselements = array(   'cmi.core._children',
                             'cmi.core.student_id',
                             'cmi.core.student_name',
@@ -232,7 +232,7 @@ function UpdateLog(s) {
         + '.error {background-color: ffffff; color: red; width: 100%;}\n'
         + '<\/style>'
         + '<script>\n'
-        + 'var LMSVersion = \'<?php echo $exescorm->version; ?>\';\n'
+        + 'var LMSVersion = \'<?php echo $seledascorm->version; ?>\';\n'
         + ' \n'
         + 'function checkLMSVersion() {  \n'
         + '    if (this.document.body.childNodes.length > 0) { \n'
@@ -242,7 +242,7 @@ function UpdateLog(s) {
         + '    }; \n'
         + '    alert(\'LMS Version: \' + this.document.body.lastChild.id + \n'
         + '          \' does not equal: \' + LMSVersion +  \n'
-        + '          \' so API calls will fail - did navigate to another EXESCORM package?\'); \n'
+        + '          \' so API calls will fail - did navigate to another SELEDASCORM package?\'); \n'
         + '    return false; \n'
         + '} \n'
         + ' \n'
@@ -586,9 +586,9 @@ function UpdateLog(s) {
         + '</script>\n'
         + '<\/head><body STYLE="background-color: ffffff; color: black"'
         + 'marginwidth="0" leftmargin="0" hspace="0">'
-        + '<h1>EXESCORM Debugging interface</h1>'
-        + '<h2>EXESCORM Version Detected: <?php echo $exescorm->version; ?></h2>'
-        + '<input type="hidden" id="mod-exescorm-logstate" name="mod-exescorm-logstate" value="A" \/>'
+        + '<h1>SELEDASCORM Debugging interface</h1>'
+        + '<h2>SELEDASCORM Version Detected: <?php echo $seledascorm->version; ?></h2>'
+        + '<input type="hidden" id="mod-seledascorm-logstate" name="mod-seledascorm-logstate" value="A" \/>'
         + '<form name="initForm" onsubmit="return false;">'
         + '   <table width="100%" border="0">'
         + '      <tr>'
@@ -661,10 +661,10 @@ foreach ($lmselements as $element) {
         + '             id="commitButton"'
         + '             name="commitButton">'
         + '            <input type="button"'
-        + '             value="<?php echo exescorm_version_check($exescorm->version, EXESCORM_SCORM_12) ?
+        + '             value="<?php echo seledascorm_version_check($seledascorm->version, SELEDASCORM_SCORM_12) ?
                                             'LMSFinish' : 'Terminate'; ?>()  "'
         + '             onclick="try'
-        + '             <?php echo exescorm_version_check($exescorm->version, EXESCORM_SCORM_12) ?
+        + '             <?php echo seledascorm_version_check($seledascorm->version, SELEDASCORM_SCORM_12) ?
                                             'LMSFinish' : 'LMSTerminate'; ?>();"'
         + '             id="finishButton"'
         + '             name="finishButton">'
@@ -678,7 +678,7 @@ foreach ($lmselements as $element) {
         + '      </tr>'
         + '   </table>'
         + '</form>'
-        + '<h3 id="mod-exescorm-marker">EXESCORM API Activity Log<\/h3>';
+        + '<h3 id="mod-seledascorm-marker">SELEDASCORM API Activity Log<\/h3>';
 
     // Is logging active?
     if (getLoggingActive() != "A") {
@@ -691,10 +691,10 @@ foreach ($lmselements as $element) {
         popupdoc = logPopUpWindow.document;
         popupdoc.body.innerHTML += s;
     } else {
-        logPopUpWindow = open( '', 'exescormlogpopupwindow', '' );
+        logPopUpWindow = open( '', 'seledascormlogpopupwindow', '' );
         popupdoc = logPopUpWindow.document;
         // Is logging active?
-        var marker = safeGetElement(popupdoc, 'mod-exescorm-marker');
+        var marker = safeGetElement(popupdoc, 'mod-seledascorm-marker');
         if (marker) {
             popupdoc.body.innerHTML += s;
         } else {
@@ -703,7 +703,7 @@ foreach ($lmselements as $element) {
             popupdoc.write(logString);
             popupdoc.write('<\/body><\/html>')
             popupdoc.close();
-            popupdoc.title = 'EXESCORM API Activity Log';
+            popupdoc.title = 'SELEDASCORM API Activity Log';
             logPopUpWindow.focus();
         }
     }
@@ -724,10 +724,10 @@ function AppendToLog(s, rc) {
     }
     var now = new Date();
     now.setTime( now.getTime() );
-    s = '<div ' + sStyle + ' id="<?php echo $exescorm->version; ?>">' + now.toGMTString() + ': ' + s + '<\/div>';
+    s = '<div ' + sStyle + ' id="<?php echo $seledascorm->version; ?>">' + now.toGMTString() + ': ' + s + '<\/div>';
     UpdateLog(s);
     // switch colours for a new section of work
-    if (s.match(/Commit|Loaded|Initialize|Terminate|Finish|Moodle EXESCORM|Moodle Logging/)) {
+    if (s.match(/Commit|Loaded|Initialize|Terminate|Finish|Moodle SELEDASCORM|Moodle Logging/)) {
         logRow++;
     }
 }
@@ -746,12 +746,12 @@ function LogAPICall(func, nam, val, rc) {
     if (func.match(/GetValue/)) {
         s += ' - ' + val;
     }
-    s += ' => ' + String(rc) + "   scoid = " + exescorm_current_node.scoid;
+    s += ' => ' + String(rc) + "   scoid = " + seledascorm_current_node.scoid;
     AppendToLog(s, rc);
 <?php
-if (exescorm_debugging($exescorm) && ($sco->exescormtype == 'asset')) {
+if (seledascorm_debugging($seledascorm) && ($sco->seledascormtype == 'asset')) {
 ?>
-    hint = 'Item <?php echo $sco->identifier; ?> has been defined as an Asset: it should never call the EXESCORM API';
+    hint = 'Item <?php echo $sco->identifier; ?> has been defined as an Asset: it should never call the SELEDASCORM API';
     AppendToLog(hint, 101);
     <?php
 }
@@ -760,17 +760,17 @@ if (exescorm_debugging($exescorm) && ($sco->exescormtype == 'asset')) {
 
 
 // Add in a JS controlled link for toggling the Debug logging
-if (!document.getElementById('mod-exescorm-log-toggle')) {
+if (!document.getElementById('mod-seledascorm-log-toggle')) {
     var logButton = document.createElement('a');
-    logButton.id = 'mod-exescorm-log-toggle';
+    logButton.id = 'mod-seledascorm-log-toggle';
     logButton.name = 'logToggle';
     logButton.href = 'javascript:toggleLog();';
     if (getLoggingActive() == "A") {
-        logButton.innerHTML = '<?php echo addslashes_js(get_string('exescormloggingon', 'mod_exescorm')); ?>';
+        logButton.innerHTML = '<?php echo addslashes_js(get_string('seledascormloggingon', 'mod_seledascorm')); ?>';
     } else {
-        logButton.innerHTML = '<?php echo addslashes_js(get_string('exescormloggingoff', 'mod_exescorm')); ?>';
+        logButton.innerHTML = '<?php echo addslashes_js(get_string('seledascormloggingoff', 'mod_seledascorm')); ?>';
     }
-    var content = safeGetElement(document, 'exescormpage');
+    var content = safeGetElement(document, 'seledascormpage');
     content.insertBefore(logButton, content.firstChild);
 }
 -->

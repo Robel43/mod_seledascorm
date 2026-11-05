@@ -1,0 +1,8 @@
+.timhirt-readable-report { width: 100%; table-layout: auto; }
+.timhirt-readable-report th, .timhirt-readable-report td { vertical-align: top; padding: 1rem; white-space: normal; overflow-wrap: anywhere; }
+.timhirt-readable-report td:nth-child(3) { min-width: 16rem; max-width: 36rem; font-weight: 600; }
+.timhirt-readable-report td:nth-child(4), .timhirt-readable-report td:nth-child(5) { min-width: 10rem; max-width: 26rem; }
+.timhirt-result { display: inline-block; padding: .3rem .65rem; border-radius: .35rem; font-weight: 700; }
+.timhirt-result-correct { background: #e3f3e7; color: #18562b; }
+.timhirt-result-incorrect { background: #fde7e7; color: #8b2020; }
+.timhirt-result-recorded { background: #edf1f8; color: #334866; }

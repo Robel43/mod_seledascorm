@@ -1,4 +1,4 @@
-# Makefile for mod_exescorm Moodle plugin
+# Makefile for mod_seledascorm Moodle plugin
 
 # Define SED_INPLACE based on the operating system
 ifeq ($(shell uname), Darwin)
@@ -110,90 +110,28 @@ phpmd:
 behat:
 	composer behat
 # -------------------------------------------------------
-# Embedded static editor build targets
+# Embedded Seleda editor build targets
 # -------------------------------------------------------
 
-EDITOR_SUBMODULE_PATH = exelearning
 EDITOR_DIST_PATH = dist/static
-EDITOR_REPO_DEFAULT = https://github.com/exelearning/exelearning.git
-EDITOR_REF_DEFAULT = main
 
-# Check if bun is installed
-check-bun:
-	@command -v bun > /dev/null 2>&1 || (echo "Error: bun is not installed. Please install bun: https://bun.sh" && exit 1)
+# Build the exact Seleda Studio embedded profile used by Moodle releases.
+# This intentionally does NOT provide a generic upstream eXeLearning build
+# path. The source/ref is resolved by scripts/build-seleda-editor.sh from
+# SELEDA_STUDIO_REPO_URL / SELEDA_STUDIO_REF or .seleda-editor-ref.
+build-editor: check-docker
+	sh scripts/build-seleda-editor.sh
 
-# Fetch editor source code from remote repository (branch/tag, shallow clone)
-fetch-editor-source:
-	@set -e; \
-	get_env() { \
-		if [ -f .env ]; then \
-			grep -E "^$$1=" .env | tail -n1 | cut -d '=' -f2-; \
-		fi; \
-	}; \
-	REPO_URL="$${EXELEARNING_EDITOR_REPO_URL:-$$(get_env EXELEARNING_EDITOR_REPO_URL)}"; \
-	REF="$${EXELEARNING_EDITOR_REF:-$$(get_env EXELEARNING_EDITOR_REF)}"; \
-	REF_TYPE="$${EXELEARNING_EDITOR_REF_TYPE:-$$(get_env EXELEARNING_EDITOR_REF_TYPE)}"; \
-	if [ -z "$$REPO_URL" ]; then REPO_URL="$(EDITOR_REPO_DEFAULT)"; fi; \
-	if [ -z "$$REF" ]; then REF="$${EXELEARNING_EDITOR_DEFAULT_BRANCH:-$$(get_env EXELEARNING_EDITOR_DEFAULT_BRANCH)}"; fi; \
-	if [ -z "$$REF" ]; then REF="$(EDITOR_REF_DEFAULT)"; fi; \
-	if [ -z "$$REF_TYPE" ]; then REF_TYPE="auto"; fi; \
-	echo "Fetching editor source from $$REPO_URL (ref=$$REF, type=$$REF_TYPE)"; \
-	rm -rf $(EDITOR_SUBMODULE_PATH); \
-	git init -q $(EDITOR_SUBMODULE_PATH); \
-	git -C $(EDITOR_SUBMODULE_PATH) remote add origin "$$REPO_URL"; \
-	case "$$REF_TYPE" in \
-		tag) \
-			git -C $(EDITOR_SUBMODULE_PATH) fetch --depth 1 origin "refs/tags/$$REF:refs/tags/$$REF"; \
-			git -C $(EDITOR_SUBMODULE_PATH) checkout -q "tags/$$REF"; \
-			;; \
-		branch) \
-			git -C $(EDITOR_SUBMODULE_PATH) fetch --depth 1 origin "$$REF"; \
-			git -C $(EDITOR_SUBMODULE_PATH) checkout -q FETCH_HEAD; \
-			;; \
-		auto) \
-			if git -C $(EDITOR_SUBMODULE_PATH) fetch --depth 1 origin "refs/tags/$$REF:refs/tags/$$REF" > /dev/null 2>&1; then \
-				echo "Resolved $$REF as tag"; \
-				git -C $(EDITOR_SUBMODULE_PATH) checkout -q "tags/$$REF"; \
-			else \
-				echo "Resolved $$REF as branch"; \
-				git -C $(EDITOR_SUBMODULE_PATH) fetch --depth 1 origin "$$REF"; \
-				git -C $(EDITOR_SUBMODULE_PATH) checkout -q FETCH_HEAD; \
-			fi; \
-			;; \
-		*) \
-			echo "Error: EXELEARNING_EDITOR_REF_TYPE must be one of: auto, branch, tag"; \
-			exit 1; \
-			;; \
-	esac
-
-# Build static editor to dist/static/
-build-editor: check-bun fetch-editor-source
-	@# Resolve the version to embed in the editor build. The editor's build script
-	@# (scripts/build-static-bundle.ts) reads APP_VERSION/VERSION; without it the
-	@# build falls back to package.json (0.0.0-alpha). Resolution order:
-	@#   APP_VERSION -> VERSION -> EXELEARNING_EDITOR_REF (env or .env) ->
-	@#   exact git tag of the checked-out editor -> empty (dev default -> alpha)
-	@set -e; \
-	get_env() { \
-		if [ -f .env ]; then \
-			grep -E "^$$1=" .env | tail -n1 | cut -d '=' -f2-; \
-		fi; \
-	}; \
-	APP_VER="$${APP_VERSION:-$${VERSION:-$${EXELEARNING_EDITOR_REF:-$$(get_env EXELEARNING_EDITOR_REF)}}}"; \
-	if [ -z "$$APP_VER" ] || [ "$$APP_VER" = "main" ] || [ "$$APP_VER" = "master" ]; then \
-		EXACT_TAG="$$(git -C $(EDITOR_SUBMODULE_PATH) describe --tags --exact-match 2>/dev/null || true)"; \
-		if [ -n "$$EXACT_TAG" ]; then APP_VER="$$EXACT_TAG"; fi; \
-	fi; \
-	echo "Editor version input: $${APP_VER:-(default -> alpha)}"; \
-	cd $(EDITOR_SUBMODULE_PATH) && bun install && APP_VERSION="$$APP_VER" bun run build:static
-	@mkdir -p $(EDITOR_DIST_PATH)
-	@rm -rf $(EDITOR_DIST_PATH)/*
-	cp -r $(EDITOR_SUBMODULE_PATH)/dist/static/* $(EDITOR_DIST_PATH)/
-
-# Backward-compatible alias
+# Backward-compatible alias. It is deliberately routed through Seleda too.
 build-editor-no-update: build-editor
 
-# Remove build artifacts
+# Legacy target retained as a safe alias for developer muscle memory.
+# It must never fetch/build stock eXeLearning independently.
+fetch-editor-source:
+	@echo "Seleda V1 does not fetch a generic editor source."
+	@echo "Use 'make build-editor'; source is controlled by .seleda-editor-ref."
+
+# Remove build artifacts.
 clean-editor:
 	rm -rf $(EDITOR_DIST_PATH)
 
@@ -201,28 +139,32 @@ clean-editor:
 # Packaging
 # -------------------------------------------------------
 
-PLUGIN_NAME = mod_exescorm
-
+PLUGIN_NAME = mod_seledascorm
+VERSION_SUFFIX ?= 05
 
 # Create a distributable ZIP package
 # Usage: make package RELEASE=0.0.2
 # VERSION (YYYYMMDDXX) is auto-generated from current date
-package:
+package: build-editor
 	@if [ -z "$(RELEASE)" ]; then \
 		echo "Error: RELEASE not specified. Use 'make package RELEASE=0.0.2'"; \
 		exit 1; \
 	fi
-	$(eval DATE_VERSION := $(shell date +%Y%m%d)00)
+	$(eval DATE_VERSION := $(shell date +%Y%m%d)$(VERSION_SUFFIX))
+	@test -f $(EDITOR_DIST_PATH)/index.html || (echo "Error: bundled Seleda editor is missing from $(EDITOR_DIST_PATH)." && exit 1)
+	@test -d $(EDITOR_DIST_PATH)/app || (echo "Error: bundled Seleda editor app/ is missing." && exit 1)
+	@test -d $(EDITOR_DIST_PATH)/files || (echo "Error: bundled Seleda editor files/ is missing." && exit 1)
+	@test -d $(EDITOR_DIST_PATH)/libs || (echo "Error: bundled Seleda editor libs/ is missing." && exit 1)
 	@echo "Packaging release $(RELEASE) (version $(DATE_VERSION))..."
 	$(SED_INPLACE) "s/\(plugin->version[[:space:]]*=[[:space:]]*\)[0-9]*/\1$(DATE_VERSION)/" version.php
 	$(SED_INPLACE) "s/\(plugin->release[[:space:]]*=[[:space:]]*'\)[^']*/\1$(RELEASE)/" version.php
 	@echo "Creating ZIP archive: $(PLUGIN_NAME)-$(RELEASE).zip..."
 	@if command -v rsync > /dev/null 2>&1 && command -v zip > /dev/null 2>&1; then \
-		rm -rf /tmp/exescorm-package; \
-		mkdir -p /tmp/exescorm-package/exescorm; \
-		rsync -av --exclude-from=.distignore ./ /tmp/exescorm-package/exescorm/; \
-		cd /tmp/exescorm-package && zip -qr "$(CURDIR)/$(PLUGIN_NAME)-$(RELEASE).zip" exescorm; \
-		rm -rf /tmp/exescorm-package; \
+		rm -rf /tmp/seledascorm-package; \
+		mkdir -p /tmp/seledascorm-package/seledascorm; \
+		rsync -av --exclude-from=.distignore ./ /tmp/seledascorm-package/seledascorm/; \
+		cd /tmp/seledascorm-package && zip -qr "$(CURDIR)/$(PLUGIN_NAME)-$(RELEASE).zip" seledascorm; \
+		rm -rf /tmp/seledascorm-package; \
 	else \
 		PYTHON=; \
 		for cmd in python3 py python; do \
@@ -241,7 +183,7 @@ package:
 	@# (an unanchored "vendor/" once removed the SCORM 1.2 pipwerks wrapper).
 	@if [ -d $(EDITOR_DIST_PATH) ] && command -v unzip > /dev/null 2>&1; then \
 		CONTENTS=$$(mktemp); \
-		unzip -Z1 "$(PLUGIN_NAME)-$(RELEASE).zip" | sed -n 's#^exescorm/##p' > "$$CONTENTS"; \
+		unzip -Z1 "$(PLUGIN_NAME)-$(RELEASE).zip" | sed -n 's#^seledascorm/##p' > "$$CONTENTS"; \
 		MISSING=$$(find $(EDITOR_DIST_PATH) -type f ! -name .DS_Store | grep -vxF -f "$$CONTENTS"); \
 		rm -f "$$CONTENTS"; \
 		if [ -n "$$MISSING" ]; then \
@@ -270,10 +212,10 @@ help:
 	@echo "  test                   - Run tests using Composer"
 	@echo "  phpmd                  - Run PHP Mess Detector using Composer"
 	@echo "  behat                  - Run Behat tests using Composer"
-	@echo "  build-editor           - Build embedded static editor"
-	@echo "  build-editor-no-update - Alias of build-editor"
+	@echo "  build-editor           - Build the embedded Seleda Studio editor into dist/static"
+	@echo "  build-editor-no-update - Safe alias of build-editor (also Seleda)"
 	@echo "  clean-editor           - Remove editor build artifacts"
-	@echo "  fetch-editor-source    - Download editor source from configured repo/ref"
+	@echo "  fetch-editor-source    - Explains Seleda source control; does not fetch stock eXeLearning"
 	@echo "  package                - Create distributable ZIP (RELEASE=X.Y.Z required)"
 	@echo "  help                   - Display this help with available commands"
 

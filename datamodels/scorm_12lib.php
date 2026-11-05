@@ -19,23 +19,23 @@
  * Sets up $userdata array and default values for SCORM 1.2 .
  *
  * @param stdClass $userdata an empty stdClass variable that should be set up with user values
- * @param object $exescorm package record
+ * @param object $seledascorm package record
  * @param string $scoid SCO Id
  * @param string $attempt attempt number for the user
- * @param string $mode exescorm display mode type
+ * @param string $mode seledascorm display mode type
  * @return array The default values that should be used for SCORM 1.2 package
  */
-function get_exescorm_default (&$userdata, $exescorm, $scoid, $attempt, $mode) {
+function get_seledascorm_default (&$userdata, $seledascorm, $scoid, $attempt, $mode) {
     global $USER;
 
     $userdata->student_id = $USER->username;
-    if (empty(get_config('exescorm', 'exescormstandard'))) {
+    if (empty(get_config('seledascorm', 'seledascormstandard'))) {
         $userdata->student_name = fullname($USER);
     } else {
         $userdata->student_name = $USER->lastname .', '. $USER->firstname;
     }
 
-    if ($usertrack = exescorm_get_tracks($scoid, $USER->id, $attempt)) {
+    if ($usertrack = seledascorm_get_tracks($scoid, $USER->id, $attempt)) {
         foreach ($usertrack as $key => $value) {
             $userdata->$key = $value;
         }
@@ -44,15 +44,15 @@ function get_exescorm_default (&$userdata, $exescorm, $scoid, $attempt, $mode) {
         $userdata->score_raw = '';
     }
 
-    if ($scodatas = exescorm_get_sco($scoid, EXESCORM_SCO_DATA)) {
+    if ($scodatas = seledascorm_get_sco($scoid, SELEDASCORM_SCO_DATA)) {
         foreach ($scodatas as $key => $value) {
             $userdata->$key = $value;
         }
     } else {
-        throw new \moodle_exception('cannotfindsco', 'exescorm');
+        throw new \moodle_exception('cannotfindsco', 'seledascorm');
     }
-    if (!$sco = exescorm_get_sco($scoid)) {
-        throw new \moodle_exception('cannotfindsco', 'exescorm');
+    if (!$sco = seledascorm_get_sco($scoid)) {
+        throw new \moodle_exception('cannotfindsco', 'seledascorm');
     }
 
     if (isset($userdata->status)) {
@@ -83,24 +83,24 @@ function get_exescorm_default (&$userdata, $exescorm, $scoid, $attempt, $mode) {
     $def['cmi.core.credit'] = $userdata->credit;
     $def['cmi.core.entry'] = $userdata->entry;
     $def['cmi.core.lesson_mode'] = $userdata->mode;
-    $def['cmi.launch_data'] = exescorm_isset($userdata, 'datafromlms');
-    $def['cmi.student_data.mastery_score'] = exescorm_isset($userdata, 'masteryscore');
-    $def['cmi.student_data.max_time_allowed'] = exescorm_isset($userdata, 'maxtimeallowed');
-    $def['cmi.student_data.time_limit_action'] = exescorm_isset($userdata, 'timelimitaction');
-    $def['cmi.core.total_time'] = exescorm_isset($userdata, 'cmi.core.total_time', '00:00:00');
+    $def['cmi.launch_data'] = seledascorm_isset($userdata, 'datafromlms');
+    $def['cmi.student_data.mastery_score'] = seledascorm_isset($userdata, 'masteryscore');
+    $def['cmi.student_data.max_time_allowed'] = seledascorm_isset($userdata, 'maxtimeallowed');
+    $def['cmi.student_data.time_limit_action'] = seledascorm_isset($userdata, 'timelimitaction');
+    $def['cmi.core.total_time'] = seledascorm_isset($userdata, 'cmi.core.total_time', '00:00:00');
 
     // Now handle standard userdata items.
-    $def['cmi.core.lesson_location'] = exescorm_isset($userdata, 'cmi.core.lesson_location');
-    $def['cmi.core.lesson_status'] = exescorm_isset($userdata, 'cmi.core.lesson_status');
-    $def['cmi.core.score.raw'] = exescorm_isset($userdata, 'cmi.core.score.raw');
-    $def['cmi.core.score.max'] = exescorm_isset($userdata, 'cmi.core.score.max');
-    $def['cmi.core.score.min'] = exescorm_isset($userdata, 'cmi.core.score.min');
-    $def['cmi.core.exit'] = exescorm_isset($userdata, 'cmi.core.exit');
-    $def['cmi.suspend_data'] = exescorm_isset($userdata, 'cmi.suspend_data');
-    $def['cmi.comments'] = exescorm_isset($userdata, 'cmi.comments');
-    $def['cmi.student_preference.language'] = exescorm_isset($userdata, 'cmi.student_preference.language');
-    $def['cmi.student_preference.audio'] = exescorm_isset($userdata, 'cmi.student_preference.audio', '0');
-    $def['cmi.student_preference.speed'] = exescorm_isset($userdata, 'cmi.student_preference.speed', '0');
-    $def['cmi.student_preference.text'] = exescorm_isset($userdata, 'cmi.student_preference.text', '0');
+    $def['cmi.core.lesson_location'] = seledascorm_isset($userdata, 'cmi.core.lesson_location');
+    $def['cmi.core.lesson_status'] = seledascorm_isset($userdata, 'cmi.core.lesson_status');
+    $def['cmi.core.score.raw'] = seledascorm_isset($userdata, 'cmi.core.score.raw');
+    $def['cmi.core.score.max'] = seledascorm_isset($userdata, 'cmi.core.score.max');
+    $def['cmi.core.score.min'] = seledascorm_isset($userdata, 'cmi.core.score.min');
+    $def['cmi.core.exit'] = seledascorm_isset($userdata, 'cmi.core.exit');
+    $def['cmi.suspend_data'] = seledascorm_isset($userdata, 'cmi.suspend_data');
+    $def['cmi.comments'] = seledascorm_isset($userdata, 'cmi.comments');
+    $def['cmi.student_preference.language'] = seledascorm_isset($userdata, 'cmi.student_preference.language');
+    $def['cmi.student_preference.audio'] = seledascorm_isset($userdata, 'cmi.student_preference.audio', '0');
+    $def['cmi.student_preference.speed'] = seledascorm_isset($userdata, 'cmi.student_preference.speed', '0');
+    $def['cmi.student_preference.text'] = seledascorm_isset($userdata, 'cmi.student_preference.text', '0');
     return $def;
 }

@@ -17,14 +17,14 @@
 /**
  * Tests for the uploaded styles list admin setting.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  2026 eXeLearning
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_exescorm\admin;
+namespace mod_seledascorm\admin;
 
-use mod_exescorm\local\styles_service;
+use mod_seledascorm\local\styles_service;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -34,7 +34,7 @@ require_once($CFG->libdir . '/adminlib.php');
 /**
  * Regression tests covering the disable flow of admin_setting_stylesuploaded.
  *
- * @covers \mod_exescorm\admin\admin_setting_stylesuploaded
+ * @covers \mod_seledascorm\admin\admin_setting_stylesuploaded
  */
 class admin_setting_stylesuploaded_test extends \advanced_testcase {
 
@@ -73,7 +73,7 @@ class admin_setting_stylesuploaded_test extends \advanced_testcase {
      */
     public function test_write_setting_with_empty_array_disables_all(): void {
         $slug = $this->seed_uploaded_style();
-        $setting = new admin_setting_stylesuploaded('exescorm/styles_uploaded');
+        $setting = new admin_setting_stylesuploaded('seledascorm/styles_uploaded');
 
         $setting->write_setting([]);
 
@@ -88,7 +88,7 @@ class admin_setting_stylesuploaded_test extends \advanced_testcase {
      */
     public function test_write_setting_with_null_disables_all(): void {
         $slug = $this->seed_uploaded_style();
-        $setting = new admin_setting_stylesuploaded('exescorm/styles_uploaded');
+        $setting = new admin_setting_stylesuploaded('seledascorm/styles_uploaded');
 
         $setting->write_setting(null);
 
@@ -102,7 +102,7 @@ class admin_setting_stylesuploaded_test extends \advanced_testcase {
      */
     public function test_write_setting_ignores_sentinel_key(): void {
         $slug = $this->seed_uploaded_style();
-        $setting = new admin_setting_stylesuploaded('exescorm/styles_uploaded');
+        $setting = new admin_setting_stylesuploaded('seledascorm/styles_uploaded');
 
         $setting->write_setting(['__sentinel' => '1', $slug => '1']);
 
@@ -118,12 +118,12 @@ class admin_setting_stylesuploaded_test extends \advanced_testcase {
      */
     public function test_output_html_includes_form_sentinel(): void {
         $this->seed_uploaded_style();
-        $setting = new admin_setting_stylesuploaded('exescorm/styles_uploaded');
+        $setting = new admin_setting_stylesuploaded('seledascorm/styles_uploaded');
 
         $html = $setting->output_html(null);
 
         $this->assertStringContainsString(
-            'name="s_exescorm_styles_uploaded[__sentinel]"',
+            'name="s_seledascorm_styles_uploaded[__sentinel]"',
             $html
         );
     }

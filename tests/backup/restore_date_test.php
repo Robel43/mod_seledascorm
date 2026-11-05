@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace mod_exescorm\backup;
+namespace mod_seledascorm\backup;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -24,7 +24,7 @@ require_once($CFG->libdir . "/phpunit/classes/restore_date_testcase.php");
 /**
  * Restore date tests.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  2017 onwards Ankit Agarwal <ankit.agrr@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -35,23 +35,23 @@ class restore_date_test extends \restore_date_testcase {
 
         $time = 10000;
 
-        list($course, $exescorm) = $this->create_course_and_module('exescorm', ['timeopen' => $time, 'timeclose' => $time]);
-        $scoes = exescorm_get_scoes($exescorm->id);
+        list($course, $seledascorm) = $this->create_course_and_module('seledascorm', ['timeopen' => $time, 'timeclose' => $time]);
+        $scoes = seledascorm_get_scoes($seledascorm->id);
         $sco = array_shift($scoes);
-        exescorm_insert_track($USER->id, $exescorm->id, $sco->id, 4, 'cmi.core.score.raw', 10);
+        seledascorm_insert_track($USER->id, $seledascorm->id, $sco->id, 4, 'cmi.core.score.raw', 10);
 
         // We do not want second differences to fail our test because of execution delays.
-        $DB->set_field('exescorm_scoes_track', 'timemodified', $time);
+        $DB->set_field('seledascorm_scoes_track', 'timemodified', $time);
 
         // Do backup and restore.
         $newcourseid = $this->backup_and_restore($course);
-        $newexescorm = $DB->get_record('exescorm', ['course' => $newcourseid]);
+        $newseledascorm = $DB->get_record('seledascorm', ['course' => $newcourseid]);
 
-        $this->assertFieldsNotRolledForward($exescorm, $newexescorm, ['timemodified']);
+        $this->assertFieldsNotRolledForward($seledascorm, $newseledascorm, ['timemodified']);
         $props = ['timeopen', 'timeclose'];
-        $this->assertFieldsRolledForward($exescorm, $newexescorm, $props);
+        $this->assertFieldsRolledForward($seledascorm, $newseledascorm, $props);
 
-        $tracks = $DB->get_records('exescorm_scoes_track', ['exescormid' => $newexescorm->id]);
+        $tracks = $DB->get_records('seledascorm_scoes_track', ['seledascormid' => $newseledascorm->id]);
         foreach ($tracks as $track) {
             $this->assertEquals($time, $track->timemodified);
         }

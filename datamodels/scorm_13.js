@@ -19,11 +19,11 @@
 //
 // SCORM 1.3 API Implementation
 //
-function scormAPI1_3(def, cmiobj, cmiint, cmicommentsuser, cmicommentslms, exescormdebugging, exescormauto, exescormid, cfgwwwroot, sesskey, scoid, attempt, viewmode, cmid, currentorg, autocommit) {
+function scormAPI1_3(def, cmiobj, cmiint, cmicommentsuser, cmicommentslms, seledascormdebugging, seledascormauto, seledascormid, cfgwwwroot, sesskey, scoid, attempt, viewmode, cmid, currentorg, autocommit) {
 
-    var prerequrl = cfgwwwroot + "/mod/exescorm/prereqs.php?a=" + exescormid + "&scoid=" + scoid + "&attempt=" + attempt + "&mode=" + viewmode + "&currentorg=" + currentorg + "&sesskey=" + sesskey;
-    var datamodelurl = cfgwwwroot + "/mod/exescorm/datamodel.php";
-    var datamodelurlparams = "id=" + cmid + "&a=" + exescormid + "&sesskey=" + sesskey + "&attempt=" + attempt + "&scoid=" + scoid;
+    var prerequrl = cfgwwwroot + "/mod/seledascorm/prereqs.php?a=" + seledascormid + "&scoid=" + scoid + "&attempt=" + attempt + "&mode=" + viewmode + "&currentorg=" + currentorg + "&sesskey=" + sesskey;
+    var datamodelurl = cfgwwwroot + "/mod/seledascorm/datamodel.php";
+    var datamodelurlparams = "id=" + cmid + "&a=" + seledascormid + "&sesskey=" + sesskey + "&attempt=" + attempt + "&scoid=" + scoid;
 
     // Standard Data Type Definition
 
@@ -224,8 +224,8 @@ function scormAPI1_3(def, cmiobj, cmiint, cmicommentsuser, cmicommentslms, exesc
     var cmi, adl;
     function initdatamodel(scoid){
 
-        prerequrl = cfgwwwroot + "/mod/exescorm/prereqs.php?a=" + exescormid + "&scoid=" + scoid + "&attempt=" + attempt + "&mode=" + viewmode + "&currentorg=" + currentorg + "&sesskey=" + sesskey;
-        datamodelurlparams = "id=" + cmid + "&a=" + exescormid + "&sesskey=" + sesskey + "&attempt=" + attempt + "&scoid=" + scoid;
+        prerequrl = cfgwwwroot + "/mod/seledascorm/prereqs.php?a=" + seledascormid + "&scoid=" + scoid + "&attempt=" + attempt + "&mode=" + viewmode + "&currentorg=" + currentorg + "&sesskey=" + sesskey;
+        datamodelurlparams = "id=" + cmid + "&a=" + seledascormid + "&sesskey=" + sesskey + "&attempt=" + attempt + "&scoid=" + scoid;
 
         //
         // Datamodel inizialization
@@ -276,7 +276,7 @@ function scormAPI1_3(def, cmiobj, cmiint, cmicommentsuser, cmicommentslms, exesc
     var errorCode = "0";
 
     function Initialize (param) {
-        scoid = exescorm_current_node ? exescorm_current_node.scoid : scoid;
+        scoid = seledascorm_current_node ? seledascorm_current_node.scoid : scoid;
         initdatamodel(scoid);
 
         errorCode = "0";
@@ -284,7 +284,7 @@ function scormAPI1_3(def, cmiobj, cmiint, cmicommentsuser, cmicommentslms, exesc
             if ((!Initialized) && (!Terminated)) {
                 Initialized = true;
                 errorCode = "0";
-                if (exescormdebugging) {
+                if (seledascormdebugging) {
                     LogAPICall("Initialize", param, "", errorCode);
                 }
                 return "true";
@@ -298,7 +298,7 @@ function scormAPI1_3(def, cmiobj, cmiint, cmicommentsuser, cmicommentslms, exesc
         } else {
             errorCode = "201";
         }
-        if (exescormdebugging) {
+        if (seledascormdebugging) {
             LogAPICall("Initialize", param, "", errorCode);
         }
         return "false";
@@ -309,12 +309,12 @@ function scormAPI1_3(def, cmiobj, cmiint, cmicommentsuser, cmicommentslms, exesc
         if (param == "") {
             if ((Initialized) && (!Terminated)) {
                 var AJAXResult = StoreData(cmi,true);
-                if (exescormdebugging) {
+                if (seledascormdebugging) {
                     LogAPICall("Terminate", "AJAXResult", AJAXResult, 0);
                 }
                 result = ('true' == AJAXResult) ? 'true' : 'false';
                 errorCode = ('true' == result) ? '0' : '101'; // General exception for any AJAX fault.
-                if (exescormdebugging) {
+                if (seledascormdebugging) {
                     LogAPICall("Terminate", "result", result, errorCode);
                 }
                 if ('true' == result) {
@@ -323,10 +323,10 @@ function scormAPI1_3(def, cmiobj, cmiint, cmicommentsuser, cmicommentslms, exesc
                     if (adl.nav.request != '_none_') {
                         switch (adl.nav.request) {
                             case 'continue':
-                                setTimeout('mod_exescorm_launch_next_sco();',500);
+                                setTimeout('mod_seledascorm_launch_next_sco();',500);
                             break;
                             case 'previous':
-                                setTimeout('mod_exescorm_launch_prev_sco();',500);
+                                setTimeout('mod_seledascorm_launch_prev_sco();',500);
                             break;
                             case 'choice':
                             break;
@@ -340,12 +340,12 @@ function scormAPI1_3(def, cmiobj, cmiint, cmicommentsuser, cmicommentslms, exesc
                             break;
                         }
                     } else {
-                        if (exescormauto == 1) {
-                            setTimeout('mod_exescorm_launch_next_sco();',500);
+                        if (seledascormauto == 1) {
+                            setTimeout('mod_seledascorm_launch_next_sco();',500);
                         }
                     }
                     // trigger TOC update
-                    var callback = M.mod_exescorm.connectPrereqCallback;
+                    var callback = M.mod_seledascorm.connectPrereqCallback;
                     YUI().use('io-base', function(Y) {
                         Y.on('io:complete', callback.success, Y);
                         Y.io(prerequrl);
@@ -364,7 +364,7 @@ function scormAPI1_3(def, cmiobj, cmiint, cmicommentsuser, cmicommentslms, exesc
         } else {
             errorCode = "201";
         }
-        if (exescormdebugging) {
+        if (seledascormdebugging) {
             LogAPICall("Terminate", param, "", errorCode);
         }
         return "false";
@@ -394,7 +394,7 @@ function scormAPI1_3(def, cmiobj, cmiint, cmicommentsuser, cmicommentslms, exesc
 
                             if ((typeof eval(subelement) != "undefined") && (eval(subelement) != null)) {
                                 errorCode = "0";
-                                if (exescormdebugging) {
+                                if (seledascormdebugging) {
                                     LogAPICall("GetValue", element, eval(element), 0);
                                 }
                                 return eval(element);
@@ -457,7 +457,7 @@ function scormAPI1_3(def, cmiobj, cmiint, cmicommentsuser, cmicommentslms, exesc
                 errorCode = "122";
             }
         }
-        if (exescormdebugging) {
+        if (seledascormdebugging) {
             LogAPICall("GetValue", element, "", errorCode);
         }
         return "";
@@ -754,7 +754,7 @@ function scormAPI1_3(def, cmiobj, cmiint, cmicommentsuser, cmicommentslms, exesc
                                         if ((ranges[1] == '*') || (value <= ranges[1])) {
                                             eval(element + '=value;');
                                             errorCode = "0";
-                                            if (exescormdebugging) {
+                                            if (seledascormdebugging) {
                                                 LogAPICall("SetValue", element, value, errorCode);
                                             }
                                             return "true";
@@ -767,7 +767,7 @@ function scormAPI1_3(def, cmiobj, cmiint, cmicommentsuser, cmicommentslms, exesc
                                 } else {
                                     eval(element + '=value;');
                                     errorCode = "0";
-                                    if (exescormdebugging) {
+                                    if (seledascormdebugging) {
                                         LogAPICall("SetValue", element, value, errorCode);
                                     }
                                     return "true";
@@ -792,7 +792,7 @@ function scormAPI1_3(def, cmiobj, cmiint, cmicommentsuser, cmicommentslms, exesc
                 errorCode = "132";
             }
         }
-        if (exescormdebugging) {
+        if (seledascormdebugging) {
             LogAPICall("SetValue", element, value, errorCode);
         }
         return "false";
@@ -910,12 +910,12 @@ function scormAPI1_3(def, cmiobj, cmiint, cmicommentsuser, cmicommentslms, exesc
         if (param == "") {
             if ((Initialized) && (!Terminated)) {
                 var AJAXResult = StoreData(cmi,false);
-                if (exescormdebugging) {
+                if (seledascormdebugging) {
                     LogAPICall("Commit", "AJAXResult", AJAXResult, 0);
                 }
                 var result = ('true' == AJAXResult) ? 'true' : 'false';
                 errorCode = ('true' == result) ? '0' : '101'; // General exception for any AJAX fault
-                if (exescormdebugging) {
+                if (seledascormdebugging) {
                     LogAPICall("Commit", "result", result, errorCode);
                 }
                 if ('false' == result) {
@@ -932,14 +932,14 @@ function scormAPI1_3(def, cmiobj, cmiint, cmicommentsuser, cmicommentslms, exesc
         } else {
             errorCode = "201";
         }
-        if (exescormdebugging) {
+        if (seledascormdebugging) {
             LogAPICall("Commit", param, "", errorCode);
         }
         return "false";
     }
 
     function GetLastError () {
-        if (exescormdebugging) {
+        if (seledascormdebugging) {
             LogAPICall("GetLastError", "", "", errorCode);
         }
         return errorCode;
@@ -1028,12 +1028,12 @@ function scormAPI1_3(def, cmiobj, cmiint, cmicommentsuser, cmicommentslms, exesc
                     errorString = "Data Model Dependency Not Established";
                 break;
             }
-            if (exescormdebugging) {
+            if (seledascormdebugging) {
                 LogAPICall("GetErrorString", param,  errorString, 0);
             }
             return errorString;
         } else {
-            if (exescormdebugging) {
+            if (seledascormdebugging) {
                 LogAPICall("GetErrorString", param,  "No error string found!", 0);
             }
             return "";
@@ -1042,12 +1042,12 @@ function scormAPI1_3(def, cmiobj, cmiint, cmicommentsuser, cmicommentslms, exesc
 
     function GetDiagnostic (param) {
         if (diagnostic != "") {
-            if (exescormdebugging) {
+            if (seledascormdebugging) {
                 LogAPICall("GetDiagnostic", param, diagnostic, 0);
             }
             return diagnostic;
         }
-        if (exescormdebugging) {
+        if (seledascormdebugging) {
             LogAPICall("GetDiagnostic", param, param, 0);
         }
         return param;
@@ -1241,8 +1241,8 @@ function scormAPI1_3(def, cmiobj, cmiint, cmicommentsuser, cmicommentslms, exesc
     this.version = '1.0';
 }
 
-M.exescorm_api = {};
+M.seledascorm_api = {};
 
-M.exescorm_api.init = function(Y, def, cmiobj, cmiint, cmicommentsuser, cmicommentslms, exescormdebugging, exescormauto, exescormid, cfgwwwroot, sesskey, scoid, attempt, viewmode, cmid, currentorg, autocommit) {
-    window.API_1484_11 = new scormAPI1_3(def, cmiobj, cmiint, cmicommentsuser, cmicommentslms, exescormdebugging, exescormauto, exescormid, cfgwwwroot, sesskey, scoid, attempt, viewmode, cmid, currentorg, autocommit);
+M.seledascorm_api.init = function(Y, def, cmiobj, cmiint, cmicommentsuser, cmicommentslms, seledascormdebugging, seledascormauto, seledascormid, cfgwwwroot, sesskey, scoid, attempt, viewmode, cmid, currentorg, autocommit) {
+    window.API_1484_11 = new scormAPI1_3(def, cmiobj, cmiint, cmicommentsuser, cmicommentslms, seledascormdebugging, seledascormauto, seledascormid, cfgwwwroot, sesskey, scoid, attempt, viewmode, cmid, currentorg, autocommit);
 }

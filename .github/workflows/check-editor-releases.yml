@@ -1,105 +1,50 @@
 ---
-name: Check Editor Releases
+name: Check Embedded Seleda Compatibility
 
 on:
-  schedule:
-    - cron: "0 8 * * *" # Daily at 8:00 UTC
   workflow_dispatch:
+    inputs:
+      seleda_ref:
+        description: "Seleda Studio ref to test (defaults to .seleda-editor-ref)"
+        required: false
+        default: ""
 
 permissions:
-  contents: write
-  actions: write
+  contents: read
 
 jobs:
   check_and_build:
     runs-on: ubuntu-latest
+    env:
+      SELEDA_STUDIO_TOKEN: ${{ secrets.SELEDA_STUDIO_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Get latest exelearning release
-        id: check
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Resolve Seleda Studio ref
         run: |
-          # Fetch latest release from exelearning/exelearning
-          LATEST=$(gh api repos/exelearning/exelearning/releases/latest --jq '.tag_name' 2>/dev/null || echo "")
-          if [ -z "$LATEST" ]; then
-            echo "No release found"
-            echo "found=false" >> $GITHUB_OUTPUT
-            exit 0
+          INPUT_REF="${{ github.event.inputs.seleda_ref }}"
+          if [ -z "$INPUT_REF" ]; then
+            INPUT_REF="$(cat .seleda-editor-ref)"
           fi
-          echo "Latest editor release: $LATEST"
-          echo "tag=$LATEST" >> $GITHUB_OUTPUT
+          echo "SELEDA_STUDIO_REF=$INPUT_REF" >> "$GITHUB_ENV"
+          echo "APP_VERSION=compat-$INPUT_REF" >> "$GITHUB_ENV"
+          echo "Testing embedded Seleda ref: $INPUT_REF"
 
-          # Check if we already built this version
-          MARKER_FILE=".editor-version"
-          CURRENT=""
-          if [ -f "$MARKER_FILE" ]; then
-            CURRENT=$(cat "$MARKER_FILE")
-          fi
-          echo "Current built version: $CURRENT"
+      - name: Build embedded Seleda editor
+        run: sh scripts/build-seleda-editor.sh
 
-          if [ "$LATEST" = "$CURRENT" ]; then
-            echo "Already up to date"
-            echo "found=false" >> $GITHUB_OUTPUT
-          else
-            echo "New version available"
-            echo "found=true" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Setup Bun
-        if: steps.check.outputs.found == 'true'
-        uses: oven-sh/setup-bun@v2
-
-      - name: Build static editor
-        if: steps.check.outputs.found == 'true'
-        env:
-          EXELEARNING_EDITOR_REPO_URL: https://github.com/exelearning/exelearning.git
-          EXELEARNING_EDITOR_REF: ${{ steps.check.outputs.tag }}
-          EXELEARNING_EDITOR_REF_TYPE: tag
-          # Embed the final release version in the editor build (not 0.0.0-alpha).
-          APP_VERSION: ${{ steps.check.outputs.tag }}
-        run: make build-editor
-
-      - name: Compute version
-        if: steps.check.outputs.found == 'true'
-        id: version
+      - name: Verify embedded bundle
         run: |
-          TAG="${{ steps.check.outputs.tag }}"
-          VERSION="${TAG#v}"
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          test -f dist/static/index.html
+          test -d dist/static/app
+          test -d dist/static/files
+          test -d dist/static/libs
 
-      - name: Create package
-        if: steps.check.outputs.found == 'true'
-        run: make package RELEASE=${{ steps.version.outputs.version }}
+      - name: Create compatibility package
+        run: make package RELEASE=embedded-seleda-check
 
-      - name: Update editor version marker
-        if: steps.check.outputs.found == 'true'
-        run: |
-          TAG="${{ steps.check.outputs.tag }}"
-          echo "$TAG" > .editor-version
-          # Keep the playground blueprint's editor URL in sync with .editor-version,
-          # otherwise the preview stays pinned to the hardcoded version.
-          sed -i -E \
-            -e "s#(release=)v[0-9][0-9A-Za-z.-]*#\1$TAG#g" \
-            -e "s#(releases/download/)v[0-9][0-9A-Za-z.-]*#\1$TAG#g" \
-            -e "s#(exelearning-static-)v[0-9][0-9A-Za-z.-]*(\.zip)#\1$TAG\2#g" \
-            blueprint.json
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .editor-version blueprint.json
-          git commit -m "Update editor version to $TAG"
-          git push
-
-      - name: Create GitHub Release
-        if: steps.check.outputs.found == 'true'
-        uses: softprops/action-gh-release@v2
+      - name: Upload compatibility package
+        uses: actions/upload-artifact@v4
         with:
-          tag_name: ${{ steps.version.outputs.tag }}
-          name: "${{ steps.version.outputs.tag }}"
-          body: |
-            Automated build with eXeLearning editor ${{ steps.version.outputs.tag }}.
-          files: mod_exescorm-${{ steps.version.outputs.version }}.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: seleda-scorm-embedded-seleda-check
+          path: mod_seledascorm-embedded-seleda-check.zip

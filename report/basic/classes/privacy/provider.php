@@ -15,21 +15,21 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Privacy Subsystem implementation for exescormreport_basic.
+ * Privacy Subsystem implementation for seledascormreport_basic.
  *
- * @package    exescormreport_basic
+ * @package    seledascormreport_basic
  * @copyright  2018 Sara Arjona <sara@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace exescormreport_basic\privacy;
+namespace seledascormreport_basic\privacy;
 
 use \core_privacy\local\metadata\collection;
 use \core_privacy\local\request\transform;
 use \core_privacy\local\request\writer;
 
 /**
- * Privacy Subsystem for exescormreport_basic.
+ * Privacy Subsystem for seledascormreport_basic.
  *
  * @copyright  2018 Sara Arjona <sara@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -45,11 +45,11 @@ class provider implements
      * @return collection A listing of user data stored through this system.
      */
     public static function get_metadata(collection $collection) : collection {
-        // User preferences shared between different exescorm reports.
-        $collection->add_user_preference('exescorm_report_pagesize', 'privacy:metadata:preference:exescorm_report_pagesize');
+        // User preferences shared between different seledascorm reports.
+        $collection->add_user_preference('seledascorm_report_pagesize', 'privacy:metadata:preference:seledascorm_report_pagesize');
 
-        // User preferences specific for this exescorm report.
-        $collection->add_user_preference('exescorm_report_detailed', 'privacy:metadata:preference:exescorm_report_detailed');
+        // User preferences specific for this seledascorm report.
+        $collection->add_user_preference('seledascorm_report_detailed', 'privacy:metadata:preference:seledascorm_report_detailed');
 
         return $collection;
     }
@@ -60,8 +60,8 @@ class provider implements
      * @param  int $userid The userid of the user whose data is to be exported.
      */
     public static function export_user_preferences(int $userid) {
-        static::get_and_export_user_preference($userid, 'exescorm_report_pagesize');
-        static::get_and_export_user_preference($userid, 'exescorm_report_detailed', true);
+        static::get_and_export_user_preference($userid, 'seledascorm_report_pagesize');
+        static::get_and_export_user_preference($userid, 'seledascorm_report_detailed', true);
     }
 
     /**
@@ -80,10 +80,10 @@ class provider implements
                 $transformedvalue = $prefvalue;
             }
             writer::export_user_preference(
-                'exescormreport_basic',
+                'seledascormreport_basic',
                 $userpreference,
                 $transformedvalue,
-                get_string('privacy:metadata:preference:'.$userpreference, 'exescormreport_basic')
+                get_string('privacy:metadata:preference:'.$userpreference, 'seledascormreport_basic')
             );
         }
     }

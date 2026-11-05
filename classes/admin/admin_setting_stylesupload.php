@@ -17,16 +17,16 @@
 /**
  * Admin setting that accepts style ZIP uploads and auto-installs them.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  2025 eXeLearning
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_exescorm\admin;
+namespace mod_seledascorm\admin;
 
 defined('MOODLE_INTERNAL') || die();
 
-use mod_exescorm\local\styles_service;
+use mod_seledascorm\local\styles_service;
 
 /**
  * Inline filemanager setting for the Styles admin section.
@@ -46,12 +46,12 @@ class admin_setting_stylesupload extends \admin_setting_configstoredfile {
      * @var string Component that owns the style upload filearea.
      *
      * `admin_setting_configstoredfile` derives the component from the
-     * first segment of the setting name ('exescorm/styles_drops' →
-     * 'exescorm') and uses it when moving the draft into the plugin
+     * first segment of the setting name ('seledascorm/styles_drops' →
+     * 'seledascorm') and uses it when moving the draft into the plugin
      * file area, so we must read from the same component here or the
      * saved ZIP stays invisible to the registry walker.
      */
-    public const COMPONENT = 'exescorm';
+    public const COMPONENT = 'seledascorm';
 
     /** @var string Filearea used to receive drops before extraction. */
     public const FILEAREA = 'styles_drops';
@@ -108,7 +108,7 @@ class admin_setting_stylesupload extends \admin_setting_configstoredfile {
         $summary = $this->consume_pending_uploads();
         foreach ($summary['installed'] as $title) {
             \core\notification::success(
-                get_string('stylesupload_success', 'mod_exescorm', $title)
+                get_string('stylesupload_success', 'mod_seledascorm', $title)
             );
         }
         foreach ($summary['errors'] as $error) {

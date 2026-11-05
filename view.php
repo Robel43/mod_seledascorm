@@ -15,8 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 require_once("../../config.php");
-require_once($CFG->dirroot.'/mod/exescorm/lib.php');
-require_once($CFG->dirroot.'/mod/exescorm/locallib.php');
+require_once($CFG->dirroot.'/mod/seledascorm/lib.php');
+require_once($CFG->dirroot.'/mod/seledascorm/locallib.php');
 require_once($CFG->dirroot.'/course/lib.php');
 
 $id = optional_param('id', '', PARAM_INT);       // Course Module ID, or...
@@ -26,35 +26,35 @@ $action = optional_param('action', '', PARAM_ALPHA);
 $preventskip = optional_param('preventskip', '', PARAM_INT); // Prevent Skip view, set by javascript redirects.
 
 if (!empty($id)) {
-    if (! $cm = get_coursemodule_from_id('exescorm', $id, 0, true)) {
+    if (! $cm = get_coursemodule_from_id('seledascorm', $id, 0, true)) {
         throw new \moodle_exception('invalidcoursemodule');
     }
     if (! $course = $DB->get_record("course", array("id" => $cm->course))) {
         throw new \moodle_exception('coursemisconf');
     }
-    if (! $exescorm = $DB->get_record("exescorm", array("id" => $cm->instance))) {
+    if (! $seledascorm = $DB->get_record("seledascorm", array("id" => $cm->instance))) {
         throw new \moodle_exception('invalidcoursemodule');
     }
 } else if (!empty($a)) {
-    if (! $exescorm = $DB->get_record("exescorm", array("id" => $a))) {
+    if (! $seledascorm = $DB->get_record("seledascorm", array("id" => $a))) {
         throw new \moodle_exception('invalidcoursemodule');
     }
-    if (! $course = $DB->get_record("course", array("id" => $exescorm->course))) {
+    if (! $course = $DB->get_record("course", array("id" => $seledascorm->course))) {
         throw new \moodle_exception('coursemisconf');
     }
-    if (! $cm = get_coursemodule_from_instance("exescorm", $exescorm->id, $course->id, true)) {
+    if (! $cm = get_coursemodule_from_instance("seledascorm", $seledascorm->id, $course->id, true)) {
         throw new \moodle_exception('invalidcoursemodule');
     }
 } else {
     throw new \moodle_exception('missingparameter');
 }
 
-$url = new moodle_url('/mod/exescorm/view.php', array('id' => $cm->id));
+$url = new moodle_url('/mod/seledascorm/view.php', array('id' => $cm->id));
 if ($organization !== '') {
     $url->param('organization', $organization);
 }
 $PAGE->set_url($url);
-$forcejs = get_config('exescorm', 'forcejavascript');
+$forcejs = get_config('seledascorm', 'forcejavascript');
 if (!empty($forcejs)) {
     $PAGE->add_body_class('forcejavascript');
 }
@@ -65,19 +65,19 @@ $context = context_course::instance($course->id);
 $contextmodule = context_module::instance($cm->id);
 
 // Check if package is an .elpx file (eXeLearning project, not yet converted to SCORM).
-$iselpx = !empty($exescorm->reference) && strtolower(pathinfo($exescorm->reference, PATHINFO_EXTENSION)) === 'elpx';
+$iselpx = !empty($seledascorm->reference) && strtolower(pathinfo($seledascorm->reference, PATHINFO_EXTENSION)) === 'elpx';
 
 $launch = false; // Does this automatically trigger a launch based on skipview.
-if (!empty($exescorm->popup) && !$iselpx) {
+if (!empty($seledascorm->popup) && !$iselpx) {
     $scoid = 0;
     $orgidentifier = '';
 
-    $result = exescorm_get_toc($USER, $exescorm, $cm->id, EXESCORM_TOCFULLURL);
+    $result = seledascorm_get_toc($USER, $seledascorm, $cm->id, SELEDASCORM_TOCFULLURL);
     // Set last incomplete sco to launch first.
     if (!empty($result->sco->id)) {
         $sco = $result->sco;
     } else {
-        $sco = exescorm_get_sco($exescorm->launch, EXESCORM_SCO_ONLY);
+        $sco = seledascorm_get_sco($seledascorm->launch, SELEDASCORM_SCO_ONLY);
     }
     if (!empty($sco)) {
         $scoid = $sco->id;
@@ -88,12 +88,12 @@ if (!empty($exescorm->popup) && !$iselpx) {
         }
     }
 
-    if (empty($preventskip) && $exescorm->skipview >= EXESCORM_SKIPVIEW_FIRST &&
-        has_capability('mod/exescorm:skipview', $contextmodule) &&
-        !has_capability('mod/exescorm:viewreport', $contextmodule)) { // Don't skip users with the capability to view reports.
+    if (empty($preventskip) && $seledascorm->skipview >= SELEDASCORM_SKIPVIEW_FIRST &&
+        has_capability('mod/seledascorm:skipview', $contextmodule) &&
+        !has_capability('mod/seledascorm:viewreport', $contextmodule)) { // Don't skip users with the capability to view reports.
 
         // Do we launch immediately and redirect the parent back ?
-        if ($exescorm->skipview == EXESCORM_SKIPVIEW_ALWAYS || !exescorm_has_tracks($exescorm->id, $USER->id)) {
+        if ($seledascorm->skipview == SELEDASCORM_SKIPVIEW_ALWAYS || !seledascorm_has_tracks($seledascorm->id, $USER->id)) {
             $launch = true;
         }
     }
@@ -105,34 +105,34 @@ if (!empty($exescorm->popup) && !$iselpx) {
     } else {
         $courseurl = course_get_url($course, $cm->sectionnum)->out(false);
     }
-    $PAGE->requires->data_for_js('exescormplayerdata', Array('launch' => $launch,
+    $PAGE->requires->data_for_js('seledascormplayerdata', Array('launch' => $launch,
                                                            'currentorg' => $orgidentifier,
                                                            'sco' => $scoid,
-                                                           'exescorm' => $exescorm->id,
+                                                           'seledascorm' => $seledascorm->id,
                                                            'courseurl' => $courseurl,
-                                                           'cwidth' => $exescorm->width,
-                                                           'cheight' => $exescorm->height,
-                                                           'popupoptions' => $exescorm->options), true);
-    $PAGE->requires->string_for_js('popupsblocked', 'mod_exescorm');
-    $PAGE->requires->string_for_js('popuplaunched', 'mod_exescorm');
-    $PAGE->requires->js('/mod/exescorm/view.js', true);
+                                                           'cwidth' => $seledascorm->width,
+                                                           'cheight' => $seledascorm->height,
+                                                           'popupoptions' => $seledascorm->options), true);
+    $PAGE->requires->string_for_js('popupsblocked', 'mod_seledascorm');
+    $PAGE->requires->string_for_js('popuplaunched', 'mod_seledascorm');
+    $PAGE->requires->js('/mod/seledascorm/view.js', true);
 }
 
-if (isset($SESSION->exescorm)) {
-    unset($SESSION->exescorm);
+if (isset($SESSION->seledascorm)) {
+    unset($SESSION->seledascorm);
 }
 
-$strexescorms = get_string("modulenameplural", "mod_exescorm");
-$strexescorm = get_string("modulename", "mod_exescorm");
+$strseledascorms = get_string("modulenameplural", "mod_seledascorm");
+$strseledascorm = get_string("modulename", "mod_seledascorm");
 
 $shortname = format_string($course->shortname, true, array('context' => $context));
-$pagetitle = strip_tags($shortname.': '.format_string($exescorm->name));
+$pagetitle = strip_tags($shortname.': '.format_string($seledascorm->name));
 
 // Trigger module viewed event.
-exescorm_view($exescorm, $course, $cm, $contextmodule);
+seledascorm_view($seledascorm, $course, $cm, $contextmodule);
 
-if (empty($preventskip) && empty($launch) && !$iselpx && (has_capability('mod/exescorm:skipview', $contextmodule))) {
-    exescorm_simple_play($exescorm, $USER, $contextmodule, $cm->id);
+if (empty($preventskip) && empty($launch) && !$iselpx && (has_capability('mod/seledascorm:skipview', $contextmodule))) {
+    seledascorm_simple_play($seledascorm, $USER, $contextmodule, $cm->id);
 }
 
 // Print the page header.
@@ -142,7 +142,7 @@ $PAGE->set_heading($course->fullname);
 // Let the module handle the display.
 if ($CFG->version >= 2022041900) { // Moodle 4+.
     if (!empty($action) && $action == 'delete' && confirm_sesskey() &&
-        has_capability('mod/exescorm:deleteownresponses', $contextmodule)
+        has_capability('mod/seledascorm:deleteownresponses', $contextmodule)
     ) {
         $PAGE->activityheader->disable();
     } else {
@@ -150,74 +150,72 @@ if ($CFG->version >= 2022041900) { // Moodle 4+.
     }
 }
 echo $OUTPUT->header();
-if (!empty($action) && confirm_sesskey() && has_capability('mod/exescorm:deleteownresponses', $contextmodule)) {
+if (!empty($action) && confirm_sesskey() && has_capability('mod/seledascorm:deleteownresponses', $contextmodule)) {
     if ($action == 'delete') {
         $confirmurl = new moodle_url($PAGE->url, array('action' => 'deleteconfirm'));
-        echo $OUTPUT->confirm(get_string('deleteuserattemptcheck', 'mod_exescorm'), $confirmurl, $PAGE->url);
+        echo $OUTPUT->confirm(get_string('deleteuserattemptcheck', 'mod_seledascorm'), $confirmurl, $PAGE->url);
         echo $OUTPUT->footer();
         exit;
     } else if ($action == 'deleteconfirm') {
         // Delete this users attempts.
-        $DB->delete_records('exescorm_scoes_track', array('userid' => $USER->id, 'exescormid' => $exescorm->id));
-        exescorm_update_grades($exescorm, $USER->id, true);
-        echo $OUTPUT->notification(get_string('exescormresponsedeleted', 'mod_exescorm'), 'notifysuccess');
+        $DB->delete_records('seledascorm_scoes_track', array('userid' => $USER->id, 'seledascormid' => $seledascorm->id));
+        seledascorm_update_grades($seledascorm, $USER->id, true);
+        echo $OUTPUT->notification(get_string('seledascormresponsedeleted', 'mod_seledascorm'), 'notifysuccess');
     }
 }
 if ($CFG->version < 2022041900) { // Moodle prior to 4.
-    echo $OUTPUT->heading(format_string($exescorm->name));
+    echo $OUTPUT->heading(format_string($seledascorm->name));
     $currenttab = 'info';
-    require($CFG->dirroot . '/mod/exescorm/tabs.php');
+    require($CFG->dirroot . '/mod/seledascorm/tabs.php');
 }
 // Print the main part of the page.
 $attemptstatus = '';
-if (empty($launch) && !$iselpx && ($exescorm->displayattemptstatus == EXESCORM_DISPLAY_ATTEMPTSTATUS_ALL ||
-         $exescorm->displayattemptstatus == EXESCORM_DISPLAY_ATTEMPTSTATUS_ENTRY)) {
-    $attemptstatus = exescorm_get_attempt_status($USER, $exescorm, $cm);
+if (empty($launch) && !$iselpx && ($seledascorm->displayattemptstatus == SELEDASCORM_DISPLAY_ATTEMPTSTATUS_ALL ||
+         $seledascorm->displayattemptstatus == SELEDASCORM_DISPLAY_ATTEMPTSTATUS_ENTRY)) {
+    $attemptstatus = seledascorm_get_attempt_status($USER, $seledascorm, $cm);
 }
-echo $OUTPUT->box(format_module_intro('exescorm', $exescorm, $cm->id), '', 'intro');
+echo $OUTPUT->box(format_module_intro('seledascorm', $seledascorm, $cm->id), '', 'intro');
 
 // Show embedded editor button if available and user has capability.
 // Show for embedded type OR when the package is an .elpx file (needs editor to convert to SCORM).
-if (($exescorm->exescormtype === EXESCORM_TYPE_EMBEDDED || $iselpx)
-    && exescorm_embedded_editor_available()
+if (($seledascorm->seledascormtype === SELEDASCORM_TYPE_EMBEDDED || $iselpx)
+    && seledascorm_embedded_editor_available()
     && has_capability('moodle/course:update', context_course::instance($course->id))) {
-    $editorurl = new moodle_url('/mod/exescorm/editor/index.php', [
+    $editorurl = new moodle_url('/mod/seledascorm/editor/index.php', [
         'id' => $cm->id,
         'sesskey' => sesskey(),
     ]);
     echo html_writer::start_div('d-flex mb-2');
-    echo html_writer::tag('button', get_string('editembedded', 'mod_exescorm'), [
-        'type' => 'button',
-        'class' => 'btn btn-primary',
-        'data-action' => 'mod_exescorm/editor-open',
-        'data-cmid' => $cm->id,
-        'data-editorurl' => $editorurl->out(false),
-        'data-activityname' => format_string($exescorm->name),
-    ]);
+    echo html_writer::link($editorurl,
+        get_string('editwithbrand', 'mod_seledascorm', seledascorm_get_brand_name()), [
+            'class' => 'btn btn-primary',
+            'data-cmid' => $cm->id,
+            'data-editorurl' => $editorurl->out(false),
+            'data-activityname' => format_string($seledascorm->name),
+        ]);
     echo html_writer::end_div();
-    $PAGE->requires->js_call_amd('mod_exescorm/editor_modal', 'init');
 }
 
 if ($iselpx) {
-    echo $OUTPUT->notification(get_string('elpxneedsconversion', 'mod_exescorm'), 'warning');
+    echo $OUTPUT->notification(get_string('elpxneedsconversion', 'mod_seledascorm'), 'warning');
 }
 
-// Check if EXESCORM available. No need to display warnings because activity dates are displayed at the top of the page.
-list($available, $warnings) = exescorm_get_availability_status($exescorm);
+// Check if SELEDASCORM available. No need to display warnings because activity dates are displayed at the top of the page.
+list($available, $warnings) = seledascorm_get_availability_status($seledascorm);
 
 if ($available && empty($launch) && !$iselpx) {
-    exescorm_print_launch($USER, $exescorm, 'view.php?id='.$cm->id, $cm);
+    seledascorm_print_launch($USER, $seledascorm, 'view.php?id='.$cm->id, $cm);
 }
 
 echo $OUTPUT->box($attemptstatus);
 
 if (!empty($forcejs)) {
-    $message = $OUTPUT->box(get_string("forcejavascriptmessage", "mod_exescorm"), "forcejavascriptmessage");
+    $message = $OUTPUT->box(get_string("forcejavascriptmessage", "mod_seledascorm"), "forcejavascriptmessage");
     echo html_writer::tag('noscript', $message);
 }
 
-if (!empty($exescorm->popup)) {
-    $PAGE->requires->js_init_call('M.mod_exescormform.init');
+if (!empty($seledascorm->popup)) {
+    $PAGE->requires->js_init_call('M.mod_seledascormform.init');
 }
 
 echo $OUTPUT->footer();

@@ -15,11 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Sets up the tabs used by the exescorm pages based on the users capabilities.
+ * Sets up the tabs used by the seledascorm pages based on the users capabilities.
  *
  * @author Dan Marsden and others.
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
- * @package mod_exescorm
+ * @package mod_seledascorm
  */
 
 
@@ -27,14 +27,14 @@ require_once("../../config.php");
 
 require_login();
 
-if (empty($exescorm)) {
-    throw new moodle_exception('cannotaccess', 'mod_exescorm');
+if (empty($seledascorm)) {
+    throw new moodle_exception('cannotaccess', 'mod_seledascorm');
 }
 if (!isset($currenttab)) {
     $currenttab = '';
 }
 if (!isset($cm)) {
-    $cm = get_coursemodule_from_instance('exescorm', $exescorm->id);
+    $cm = get_coursemodule_from_instance('seledascorm', $seledascorm->id);
 }
 
 $contextmodule = context_module::instance($cm->id);
@@ -44,11 +44,11 @@ $row = array();
 $inactive = array();
 $activated = array();
 
-if (has_capability('mod/exescorm:savetrack', $contextmodule)) {
-    $row[] = new tabobject('info', "$CFG->wwwroot/mod/exescorm/view.php?id=$cm->id", get_string('modulename', 'mod_exescorm'));
+if (has_capability('mod/seledascorm:savetrack', $contextmodule)) {
+    $row[] = new tabobject('info', "$CFG->wwwroot/mod/seledascorm/view.php?id=$cm->id", get_string('modulename', 'mod_seledascorm'));
 }
-if (has_capability('mod/exescorm:viewreport', $contextmodule)) {
-    $row[] = new tabobject('reports', "$CFG->wwwroot/mod/exescorm/report.php?id=$cm->id", get_string('reports', 'mod_exescorm'));
+if (has_capability('mod/seledascorm:viewreport', $contextmodule)) {
+    $row[] = new tabobject('reports', "$CFG->wwwroot/mod/seledascorm/report.php?id=$cm->id", get_string('reports', 'mod_seledascorm'));
 }
 
 if (!($currenttab == 'info' && count($row) == 1)) {
@@ -58,8 +58,8 @@ if (!($currenttab == 'info' && count($row) == 1)) {
 if ($currenttab == 'reports' && !empty($reportlist) && count($reportlist) > 1) {
     $row2 = array();
     foreach ($reportlist as $rep) {
-        $row2[] = new tabobject('exescorm_'.$rep, $CFG->wwwroot."/mod/exescorm/report.php?id=$cm->id&mode=$rep",
-                                get_string('pluginname', 'exescormreport_'.$rep));
+        $row2[] = new tabobject('seledascorm_'.$rep, $CFG->wwwroot."/mod/seledascorm/report.php?id=$cm->id&mode=$rep",
+                                get_string('pluginname', 'seledascormreport_'.$rep));
     }
     $tabs[] = $row2;
 }

@@ -18,16 +18,16 @@
  * Admin setting that renders uploaded styles as enable/disable checkboxes
  * and per-row delete links.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  2025 eXeLearning
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_exescorm\admin;
+namespace mod_seledascorm\admin;
 
 defined('MOODLE_INTERNAL') || die();
 
-use mod_exescorm\local\styles_service;
+use mod_seledascorm\local\styles_service;
 
 /**
  * Per-uploaded-style enable/disable checkboxes + delete buttons.
@@ -42,8 +42,8 @@ class admin_setting_stylesuploaded extends \admin_setting {
     public function __construct(string $name) {
         parent::__construct(
             $name,
-            get_string('stylesuploaded', 'mod_exescorm'),
-            get_string('stylesuploaded_hint', 'mod_exescorm'),
+            get_string('stylesuploaded', 'mod_seledascorm'),
+            get_string('stylesuploaded_hint', 'mod_seledascorm'),
             []
         );
     }
@@ -72,7 +72,7 @@ class admin_setting_stylesuploaded extends \admin_setting {
         $uploaded = styles_service::list_uploaded_styles();
         if (empty($uploaded)) {
             $html = \html_writer::tag('p',
-                get_string('stylesuploaded_empty', 'mod_exescorm'),
+                get_string('stylesuploaded_empty', 'mod_seledascorm'),
                 ['class' => 'text-muted']
             );
             return format_admin_setting($this, $this->visiblename, $html, $this->description);
@@ -85,19 +85,19 @@ class admin_setting_stylesuploaded extends \admin_setting {
             $version = !empty($style['version'])
                 ? ' <span class="text-muted small">v' . s($style['version']) . '</span>'
                 : '';
-            $deleteurl = new \moodle_url('/mod/exescorm/admin/styles.php', [
+            $deleteurl = new \moodle_url('/mod/seledascorm/admin/styles.php', [
                 'action'  => 'delete',
                 'slug'    => $slug,
                 'sesskey' => sesskey(),
             ]);
             $deletelink = \html_writer::link(
                 $deleteurl,
-                get_string('stylesdelete', 'mod_exescorm'),
+                get_string('stylesdelete', 'mod_seledascorm'),
                 [
                     'class' => 'btn btn-link text-danger p-0 ml-2',
                     'style' => 'margin-left:.75em;',
                     'onclick' => "return confirm('"
-                        . addslashes_js(get_string('stylesdelete_confirm', 'mod_exescorm'))
+                        . addslashes_js(get_string('stylesdelete_confirm', 'mod_seledascorm'))
                         . "');",
                 ]
             );
@@ -118,7 +118,7 @@ class admin_setting_stylesuploaded extends \admin_setting {
         $sentinel = '<input type="hidden" name="' . s($this->get_full_name())
             . '[__sentinel]" value="1">';
         $html = $sentinel
-            . '<ul class="mod_exescorm-styles-uploaded list-unstyled" '
+            . '<ul class="mod_seledascorm-styles-uploaded list-unstyled" '
             . 'style="list-style:none;padding:0;margin:0;">' . $rows . '</ul>';
         return format_admin_setting($this, $this->visiblename, $html, $this->description);
     }

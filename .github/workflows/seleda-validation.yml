@@ -1,0 +1,146 @@
+---
+name: Seleda SCORM Validation
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+
+      - name: Lint Seleda-modified PHP
+        run: |
+          php -l lib.php
+          php -l settings.php
+          php -l mod_form.php
+          php -l view.php
+          php -l editor/index.php
+          php -l editor/save.php
+          php -l datamodel.php
+          php -l report/userreportinteractions.php
+          php -l report/timhirt_reporting.php
+          php -l report/interactions/classes/report.php
+          php -l lang/en/seledascorm.php
+          php -l lang/es/seledascorm.php
+          php -l lang/ca/seledascorm.php
+          php -l lang/eu/seledascorm.php
+          php -l lang/gl/seledascorm.php
+
+      - name: Check embedded branding JavaScript
+        run: |
+          node --check editor/branding.js
+
+      - name: Verify compatibility identity
+        run: |
+          grep -F "\$plugin->component = 'mod_seledascorm';" version.php
+          grep -F "\$string['modulename'] = 'Seleda';" lang/en/seledascorm.php
+          test -f report/timhirt_reporting.php
+          grep -F "timhirt_reporting::snapshot" datamodel.php
+          grep -F "timhirt_reporting::rows" report/userreportinteractions.php
+          grep -F "mod_seledascorm/brandname" settings.php
+          grep -F "mod_seledascorm/brandlogo" settings.php
+          grep -F "function seledascorm_get_brand_name()" lib.php
+          grep -F "function seledascorm_get_brand_logo_url()" lib.php
+          grep -F "__MOODLE_SELEDA_BRANDING__" editor/index.php
+          grep -F 'Create with {$a}' lang/en/seledascorm.php
+          grep -F 'Edit with {$a}' lang/en/seledascorm.php
+
+      - name: Reject legacy Moodle component identity
+        run: |
+          ! grep -R "mod_exescorm" version.php settings.php lib.php mod_form.php editor classes --include='*.php'
+          ! grep -R "/mod/exescorm" version.php settings.php lib.php mod_form.php editor classes --include='*.php'
+
+      - name: Verify bundled-only editor architecture
+        run: |
+          test ! -f classes/local/embedded_editor_installer.php
+          test ! -f classes/external/manage_embedded_editor.php
+          test ! -f amd/src/admin_embedded_editor.js
+          test ! -f amd/build/admin_embedded_editor.min.js
+          ! grep -F "mod_seledascorm_manage_embedded_editor_action" db/services.php
+          ! grep -F "mod_seledascorm_manage_embedded_editor_status" db/services.php
+          grep -F "mod/seledascorm/dist/static" classes/local/embedded_editor_source_resolver.php
+          grep -F "SOURCE_BUNDLED" classes/local/embedded_editor_source_resolver.php
+          ! grep -F "SOURCE_MOODLEDATA" classes/local/embedded_editor_source_resolver.php
+
+      - name: Verify Seleda player CSS and direct editor links
+        run: |
+          grep -F "#page-mod-seledascorm-player #seledascormpage" styles.css
+          grep -F "[[pix:mod_seledascorm|fullscreen]]" styles.css
+          ! grep -F "page-mod-exescorm" styles.css
+          grep -F "SELEDA V1 PLAYER LAYOUT OVERRIDE" styles.css
+          grep -F "#page-mod-seledascorm-player #seledascorm_layout" styles.css
+          grep -F "display: flex !important;" styles.css
+          grep -F "#page-mod-seledascorm-player #seledascorm_content" styles.css
+          grep -F "html_writer::link($editorurl" view.php
+          grep -F 'href="{{{editorurl}}}"' templates/player_editexitbar.mustache
+          ! grep -F 'data-action="mod_seledascorm/editor-open"' view.php
+          ! grep -F 'data-action="mod_seledascorm/editor-open"' templates/player_editexitbar.mustache
+          ! grep -F "mod_seledascorm/editor_modal" player.php
+
+      - name: Verify direct embedded asset delivery
+        run: |
+          grep -F "/mod/seledascorm/dist/static" editor/index.php
+          ! grep -F "/mod/seledascorm/editor/static.php/" editor/index.php
+          grep -F "editorBaseUrl" editor/index.php
+          grep -F "saveUrl" editor/index.php
+          grep -F "packageUrl" editor/index.php
+
+      - name: Verify Seleda player alignment
+        run: |
+          grep -F "SELEDA SCORM ALIGNMENT" styles.css
+          grep -F "\$plugin->requires = 2024100700; // Moodle 4.5+." version.php
+          grep -F '"moodle": "4.5"' blueprint.json
+          grep -F -- "--seleda-primary: #2f6df6;" styles.css
+          grep -F -- "--seleda-secondary: #12b8aa;" styles.css
+
+
+  package-with-embedded-editor:
+    runs-on: ubuntu-latest
+    env:
+      SELEDA_STUDIO_TOKEN: ${{ secrets.SELEDA_STUDIO_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect private Seleda Studio access
+        id: seleda_access
+        run: |
+          if [ -n "$SELEDA_STUDIO_TOKEN" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::SELEDA_STUDIO_TOKEN is not configured. Source validation can continue, but the complete plugin ZIP cannot be rebuilt in this PR run."
+          fi
+
+      - name: Build complete mod_seledascorm package
+        if: steps.seleda_access.outputs.available == 'true'
+        run: make package RELEASE=pr-${GITHUB_SHA::7}
+
+      - name: Verify packaged component and embedded editor
+        if: steps.seleda_access.outputs.available == 'true'
+        run: |
+          ZIP="mod_seledascorm-pr-${GITHUB_SHA::7}.zip"
+          test -f "$ZIP"
+          unzip -l "$ZIP" | grep -F "seledascorm/version.php"
+          unzip -l "$ZIP" | grep -F "seledascorm/dist/static/index.html"
+          unzip -l "$ZIP" | grep -F "seledascorm/dist/static/app/"
+          unzip -l "$ZIP" | grep -F "seledascorm/dist/static/files/"
+          unzip -l "$ZIP" | grep -F "seledascorm/dist/static/libs/"
+
+      - name: Upload complete Moodle plugin package
+        if: steps.seleda_access.outputs.available == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mod_seledascorm-pr-${{ github.sha }}
+          path: mod_seledascorm-pr-*.zip

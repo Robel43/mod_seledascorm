@@ -17,17 +17,17 @@
 /**
  * Activity base class.
  *
- * @package   mod_exescorm
+ * @package   mod_seledascorm
  * @copyright 2017 onwards Ankit Agarwal <ankit.agrr@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_exescorm\analytics\indicator;
+namespace mod_seledascorm\analytics\indicator;
 
 /**
  * Activity base class.
  *
- * @package   mod_exescorm
+ * @package   mod_seledascorm
  * @copyright 2017 onwards Ankit Agarwal <ankit.agrr@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -40,7 +40,7 @@ abstract class activity_base extends \core_analytics\local\indicator\community_o
      */
     protected function feedback_viewed_events() {
         // Any view after the data graded counts as feedback viewed.
-        return array('\mod_exescorm\event\course_module_viewed');
+        return array('\mod_seledascorm\event\course_module_viewed');
     }
 
     /**

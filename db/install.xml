@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/exescorm/db" VERSION="20220127" COMMENT="XMLDB file for Moodle mod/exescorm"
+<XMLDB PATH="mod/seledascorm/db" VERSION="20220127" COMMENT="XMLDB file for Moodle mod/seledascorm"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
-    <TABLE NAME="exescorm" COMMENT="each table is one EXESCORM module and its configuration">
+    <TABLE NAME="seledascorm" COMMENT="each table is one SELEDASCORM module and its configuration">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="exescormtype" TYPE="char" LENGTH="50" NOTNULL="true" DEFAULT="local" SEQUENCE="false" COMMENT="local, external or repository"/>
+        <FIELD NAME="seledascormtype" TYPE="char" LENGTH="50" NOTNULL="true" DEFAULT="local" SEQUENCE="false" COMMENT="local, external or repository"/>
         <FIELD NAME="reference" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="intro" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
@@ -56,25 +56,25 @@
         <INDEX NAME="course" UNIQUE="false" FIELDS="course"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="exescorm_scoes" COMMENT="each SCO part of the EXESCORM module">
+    <TABLE NAME="seledascorm_scoes" COMMENT="each SCO part of the SELEDASCORM module">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="exescorm" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="seledascorm" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="manifest" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="organization" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="parent" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="identifier" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="launch" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="exescormtype" TYPE="char" LENGTH="5" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="seledascormtype" TYPE="char" LENGTH="5" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="order of scoes"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="exescorm" TYPE="foreign" FIELDS="exescorm" REFTABLE="exescorm" REFFIELDS="id"/>
+        <KEY NAME="seledascorm" TYPE="foreign" FIELDS="seledascorm" REFTABLE="seledascorm" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="exescorm_scoes_data" COMMENT="Contains variable data get from packages">
+    <TABLE NAME="seledascorm_scoes_data" COMMENT="Contains variable data get from packages">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="scoid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
@@ -83,14 +83,14 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="exescorm_scoes_data_scoid" TYPE="foreign" FIELDS="scoid" REFTABLE="exescorm_scoes" REFFIELDS="id" COMMENT="The relative sco"/>
+        <KEY NAME="seledascorm_scoes_data_scoid" TYPE="foreign" FIELDS="scoid" REFTABLE="seledascorm_scoes" REFFIELDS="id" COMMENT="The relative sco"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="exescorm_scoes_track" COMMENT="to track SCOes">
+    <TABLE NAME="seledascorm_scoes_track" COMMENT="to track SCOes">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="exescormid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="seledascormid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="scoid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="attempt" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
         <FIELD NAME="element" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
@@ -99,15 +99,15 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="exescormid" TYPE="foreign" FIELDS="exescormid" REFTABLE="exescorm" REFFIELDS="id"/>
-        <KEY NAME="scoid" TYPE="foreign" FIELDS="scoid" REFTABLE="exescorm_scoes" REFFIELDS="id"/>
+        <KEY NAME="seledascormid" TYPE="foreign" FIELDS="seledascormid" REFTABLE="seledascorm" REFFIELDS="id"/>
+        <KEY NAME="scoid" TYPE="foreign" FIELDS="scoid" REFTABLE="seledascorm_scoes" REFFIELDS="id"/>
       </KEYS>
       <INDEXES>
-        <INDEX NAME="userid-exescormid-scoid-attempt-element" UNIQUE="true" FIELDS="userid, exescormid, scoid, attempt, element"/>
+        <INDEX NAME="userid-seledascormid-scoid-attempt-element" UNIQUE="true" FIELDS="userid, seledascormid, scoid, attempt, element"/>
         <INDEX NAME="userid" UNIQUE="false" FIELDS="userid"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="exescorm_seq_objective" COMMENT="EXESCORM2004 objective description">
+    <TABLE NAME="seledascorm_seq_objective" COMMENT="SELEDASCORM2004 objective description">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="scoid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
@@ -118,11 +118,11 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="exescorm_objective_uniq" TYPE="unique" FIELDS="scoid, id"/>
-        <KEY NAME="exescorm_objective_scoid" TYPE="foreign" FIELDS="scoid" REFTABLE="exescorm_scoes" REFFIELDS="id" COMMENT="The relative sco"/>
+        <KEY NAME="seledascorm_objective_uniq" TYPE="unique" FIELDS="scoid, id"/>
+        <KEY NAME="seledascorm_objective_scoid" TYPE="foreign" FIELDS="scoid" REFTABLE="seledascorm_scoes" REFFIELDS="id" COMMENT="The relative sco"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="exescorm_seq_mapinfo" COMMENT="EXESCORM2004 objective mapinfo description">
+    <TABLE NAME="seledascorm_seq_mapinfo" COMMENT="SELEDASCORM2004 objective mapinfo description">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="scoid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
@@ -135,12 +135,12 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="exescorm_mapinfo_uniq" TYPE="unique" FIELDS="scoid, id, objectiveid"/>
-        <KEY NAME="exescorm_mapinfo_scoid" TYPE="foreign" FIELDS="scoid" REFTABLE="exescorm_scoes" REFFIELDS="id" COMMENT="The relative sco"/>
-        <KEY NAME="exescorm_mapinfo_objectiveid" TYPE="foreign" FIELDS="objectiveid" REFTABLE="exescorm_seq_objective" REFFIELDS="id" COMMENT="The relative objective"/>
+        <KEY NAME="seledascorm_mapinfo_uniq" TYPE="unique" FIELDS="scoid, id, objectiveid"/>
+        <KEY NAME="seledascorm_mapinfo_scoid" TYPE="foreign" FIELDS="scoid" REFTABLE="seledascorm_scoes" REFFIELDS="id" COMMENT="The relative sco"/>
+        <KEY NAME="seledascorm_mapinfo_objectiveid" TYPE="foreign" FIELDS="objectiveid" REFTABLE="seledascorm_seq_objective" REFFIELDS="id" COMMENT="The relative objective"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="exescorm_seq_ruleconds" COMMENT="EXESCORM2004 rule conditions">
+    <TABLE NAME="seledascorm_seq_ruleconds" COMMENT="SELEDASCORM2004 rule conditions">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="scoid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
@@ -150,11 +150,11 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="exescorm_ruleconds_un" TYPE="unique" FIELDS="scoid, id"/>
-        <KEY NAME="exescorm_ruleconds_scoid" TYPE="foreign" FIELDS="scoid" REFTABLE="exescorm_scoes" REFFIELDS="id" COMMENT="The relative sco"/>
+        <KEY NAME="seledascorm_ruleconds_un" TYPE="unique" FIELDS="scoid, id"/>
+        <KEY NAME="seledascorm_ruleconds_scoid" TYPE="foreign" FIELDS="scoid" REFTABLE="seledascorm_scoes" REFFIELDS="id" COMMENT="The relative sco"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="exescorm_seq_rulecond" COMMENT="EXESCORM2004 rule condition">
+    <TABLE NAME="seledascorm_seq_rulecond" COMMENT="SELEDASCORM2004 rule condition">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="scoid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
@@ -166,12 +166,12 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="exescorm_rulecond_uniq" TYPE="unique" FIELDS="id, scoid, ruleconditionsid"/>
-        <KEY NAME="exescorm_rulecond_scoid" TYPE="foreign" FIELDS="scoid" REFTABLE="exescorm_scoes" REFFIELDS="id" COMMENT="The relative sco"/>
-        <KEY NAME="exescorm_rulecond_ruleconditionsid" TYPE="foreign" FIELDS="ruleconditionsid" REFTABLE="exescorm_seq_ruleconds" REFFIELDS="id" COMMENT="The relative rulecondition"/>
+        <KEY NAME="seledascorm_rulecond_uniq" TYPE="unique" FIELDS="id, scoid, ruleconditionsid"/>
+        <KEY NAME="seledascorm_rulecond_scoid" TYPE="foreign" FIELDS="scoid" REFTABLE="seledascorm_scoes" REFFIELDS="id" COMMENT="The relative sco"/>
+        <KEY NAME="seledascorm_rulecond_ruleconditionsid" TYPE="foreign" FIELDS="ruleconditionsid" REFTABLE="seledascorm_seq_ruleconds" REFFIELDS="id" COMMENT="The relative rulecondition"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="exescorm_seq_rolluprule" COMMENT="EXESCORM2004 sequencing rule">
+    <TABLE NAME="seledascorm_seq_rolluprule" COMMENT="SELEDASCORM2004 sequencing rule">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="scoid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
@@ -183,11 +183,11 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="exescorm_rolluprule_uniq" TYPE="unique" FIELDS="scoid, id"/>
-        <KEY NAME="exescorm_rolluprule_scoid" TYPE="foreign" FIELDS="scoid" REFTABLE="exescorm_scoes" REFFIELDS="id" COMMENT="The relative sco"/>
+        <KEY NAME="seledascorm_rolluprule_uniq" TYPE="unique" FIELDS="scoid, id"/>
+        <KEY NAME="seledascorm_rolluprule_scoid" TYPE="foreign" FIELDS="scoid" REFTABLE="seledascorm_scoes" REFFIELDS="id" COMMENT="The relative sco"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="exescorm_seq_rllprlcond" COMMENT="EXESCORM2004 sequencing rule (rolluprulecond)">
+    <TABLE NAME="seledascorm_seq_rllprlcond" COMMENT="SELEDASCORM2004 sequencing rule (rolluprulecond)">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="scoid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
@@ -197,20 +197,20 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="exescorm_rulluprulecond_uniq" TYPE="unique" FIELDS="scoid, rollupruleid, id"/>
-        <KEY NAME="exescorm_rllprlcond_scoid" TYPE="foreign" FIELDS="scoid" REFTABLE="exescorm_scoes" REFFIELDS="id" COMMENT="The relative sco"/>
-        <KEY NAME="exescorm_rllprlcond_rolluprule" TYPE="foreign" FIELDS="rollupruleid" REFTABLE="exescorm_seq_rolluprule" REFFIELDS="id" COMMENT="The relative rolluprule"/>
+        <KEY NAME="seledascorm_rulluprulecond_uniq" TYPE="unique" FIELDS="scoid, rollupruleid, id"/>
+        <KEY NAME="seledascorm_rllprlcond_scoid" TYPE="foreign" FIELDS="scoid" REFTABLE="seledascorm_scoes" REFFIELDS="id" COMMENT="The relative sco"/>
+        <KEY NAME="seledascorm_rllprlcond_rolluprule" TYPE="foreign" FIELDS="rollupruleid" REFTABLE="seledascorm_seq_rolluprule" REFFIELDS="id" COMMENT="The relative rolluprule"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="exescorm_aicc_session" COMMENT="Used by AICC HACP to store session information">
+    <TABLE NAME="seledascorm_aicc_session" COMMENT="Used by AICC HACP to store session information">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="id from user table"/>
-        <FIELD NAME="exescormid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="id from exescorm table"/>
+        <FIELD NAME="seledascormid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="id from seledascorm table"/>
         <FIELD NAME="hacpsession" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="sessionid used to authenticate AICC HACP communication"/>
-        <FIELD NAME="scoid" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="id from exescorm_scoes table"/>
-        <FIELD NAME="exescormmode" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="exescormstatus" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="scoid" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="id from seledascorm_scoes table"/>
+        <FIELD NAME="seledascormmode" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="seledascormstatus" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="attempt" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="lessonstatus" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="sessiontime" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
@@ -219,7 +219,7 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="exescormid" TYPE="foreign" FIELDS="exescormid" REFTABLE="exescorm" REFFIELDS="id"/>
+        <KEY NAME="seledascormid" TYPE="foreign" FIELDS="seledascormid" REFTABLE="seledascorm" REFFIELDS="id"/>
         <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
       </KEYS>
     </TABLE>

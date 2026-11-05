@@ -16,7 +16,7 @@
 /**
  * Confirmation modal for editing ExeScorm activities.
  *
- * @module mod_exescorm/edit_confirmation
+ * @module mod_seledascorm/edit_confirmation
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @copyright 3iPunt <https://www.tresipunt.com/>
  */
@@ -26,7 +26,7 @@ define(['core/str', 'core/modal_factory', 'core/modal_events'], function(Str, Mo
      * Initialize the edit confirmation functionality.
      */
     var init = function() {
-        var editButtons = document.querySelectorAll('[data-action="edit-exescorm"]');
+        var editButtons = document.querySelectorAll('[data-action="edit-seledascorm"]');
 
         editButtons.forEach(function(button) {
             button.addEventListener('click', function(e) {
@@ -47,9 +47,9 @@ define(['core/str', 'core/modal_factory', 'core/modal_events'], function(Str, Mo
             Str.get_string('edit', 'core'),
             Str.get_string('yes', 'core'),
             Str.get_string('cancel', 'core'),
-            Str.get_string('editdialogcontent', 'mod_exescorm'),
-            Str.get_string('editdialogcontent:caution', 'mod_exescorm'),
-            Str.get_string('editdialogcontent:continue', 'mod_exescorm'),
+            Str.get_string('editdialogcontent', 'mod_seledascorm'),
+            Str.get_string('editdialogcontent:caution', 'mod_seledascorm'),
+            Str.get_string('editdialogcontent:continue', 'mod_seledascorm'),
         ]).then(function(strings) {
             // Center the body content using a div with text-center class.
             var warnIcon = '<i class="fa fa-circle-exclamation text-danger"></i> ';

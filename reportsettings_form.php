@@ -17,29 +17,29 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once("$CFG->libdir/formslib.php");
-class mod_exescorm_report_settings extends moodleform {
+class mod_seledascorm_report_settings extends moodleform {
 
     public function definition() {
         global $COURSE;
         $mform =& $this->_form;
         // -------------------------------------------------------------------------------
-        $mform->addElement('header', 'preferencespage', get_string('preferencespage', 'mod_exescorm'));
+        $mform->addElement('header', 'preferencespage', get_string('preferencespage', 'mod_seledascorm'));
 
         $options = array();
         if ($COURSE->id != SITEID) {
-            $options[EXESCORM_REPORT_ATTEMPTS_ALL_STUDENTS] = get_string('optallstudents', 'mod_exescorm');
-            $options[EXESCORM_REPORT_ATTEMPTS_STUDENTS_WITH] = get_string('optattemptsonly', 'mod_exescorm');
-            $options[EXESCORM_REPORT_ATTEMPTS_STUDENTS_WITH_NO] = get_string('optnoattemptsonly', 'mod_exescorm');
+            $options[SELEDASCORM_REPORT_ATTEMPTS_ALL_STUDENTS] = get_string('optallstudents', 'mod_seledascorm');
+            $options[SELEDASCORM_REPORT_ATTEMPTS_STUDENTS_WITH] = get_string('optattemptsonly', 'mod_seledascorm');
+            $options[SELEDASCORM_REPORT_ATTEMPTS_STUDENTS_WITH_NO] = get_string('optnoattemptsonly', 'mod_seledascorm');
         }
-        $mform->addElement('select', 'attemptsmode', get_string('show', 'mod_exescorm'), $options);
+        $mform->addElement('select', 'attemptsmode', get_string('show', 'mod_seledascorm'), $options);
 
         // -------------------------------------------------------------------------------
-        $mform->addElement('header', 'preferencesuser', get_string('preferencesuser', 'mod_exescorm'));
+        $mform->addElement('header', 'preferencesuser', get_string('preferencesuser', 'mod_seledascorm'));
 
-        $mform->addElement('text', 'pagesize', get_string('pagesize', 'mod_exescorm'));
+        $mform->addElement('text', 'pagesize', get_string('pagesize', 'mod_seledascorm'));
         $mform->setType('pagesize', PARAM_INT);
 
-        $mform->addElement('selectyesno', 'detailedrep', get_string('details', 'mod_exescorm'));
+        $mform->addElement('selectyesno', 'detailedrep', get_string('details', 'mod_seledascorm'));
 
         $this->add_action_buttons(false, get_string('savepreferences'));
     }

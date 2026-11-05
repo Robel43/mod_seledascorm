@@ -17,21 +17,21 @@
 /**
  * Admin setting that renders built-in styles as a list of checkboxes.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  2025 eXeLearning
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_exescorm\admin;
+namespace mod_seledascorm\admin;
 
 defined('MOODLE_INTERNAL') || die();
 
-use mod_exescorm\local\styles_service;
+use mod_seledascorm\local\styles_service;
 
 /**
  * Per-built-in style enable/disable checkboxes, inline in the plugin
  * settings page. Source of truth stays in the styles registry
- * (`config_plugin(exescorm).styles_registry`), so the widget reads state
+ * (`config_plugin(seledascorm).styles_registry`), so the widget reads state
  * from it at render time and writes back through the service.
  */
 class admin_setting_stylesbuiltins extends \admin_setting {
@@ -42,8 +42,8 @@ class admin_setting_stylesbuiltins extends \admin_setting {
     public function __construct(string $name) {
         parent::__construct(
             $name,
-            get_string('stylesbuiltin', 'mod_exescorm'),
-            get_string('stylesbuiltin_hint', 'mod_exescorm'),
+            get_string('stylesbuiltin', 'mod_seledascorm'),
+            get_string('stylesbuiltin_hint', 'mod_seledascorm'),
             []
         );
     }
@@ -95,7 +95,7 @@ class admin_setting_stylesbuiltins extends \admin_setting {
         $builtins = styles_service::list_builtin_themes();
         if (empty($builtins)) {
             $html = \html_writer::tag('p',
-                get_string('stylesbuiltin_empty', 'mod_exescorm'),
+                get_string('stylesbuiltin_empty', 'mod_seledascorm'),
                 ['class' => 'text-muted']
             );
             return format_admin_setting($this, $this->visiblename, $html, $this->description);
@@ -124,7 +124,7 @@ class admin_setting_stylesbuiltins extends \admin_setting {
         $sentinel = '<input type="hidden" name="' . s($this->get_full_name())
             . '[__sentinel]" value="1">';
         $html = $sentinel
-            . '<ul class="mod_exescorm-styles-builtins list-unstyled" '
+            . '<ul class="mod_seledascorm-styles-builtins list-unstyled" '
             . 'style="list-style:none;padding:0;margin:0;">' . $rows . '</ul>';
         return format_admin_setting($this, $this->visiblename, $html, $this->description);
     }

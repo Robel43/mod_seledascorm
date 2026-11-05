@@ -15,17 +15,17 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The mod_exescorm attempt deleted event.
+ * The mod_seledascorm attempt deleted event.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  2013 onwards Ankit Agarwal
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_exescorm\event;
+namespace mod_seledascorm\event;
 
 /**
- * The mod_exescorm attempt deleted event class.
+ * The mod_seledascorm attempt deleted event class.
  *
  * @property-read array $other {
  *      Extra information about event properties.
@@ -33,7 +33,7 @@ namespace mod_exescorm\event;
  *      - int attemptid: Attempt id.
  * }
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @since      Moodle 2.7
  * @copyright  2013 onwards Ankit Agarwal
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -55,7 +55,7 @@ class attempt_deleted extends \core\event\base {
      */
     public function get_description() {
         return "The user with id '$this->userid' deleted the attempt with id '{$this->other['attemptid']}' " .
-            "for the exescorm activity with course module id '$this->contextinstanceid'.";
+            "for the seledascorm activity with course module id '$this->contextinstanceid'.";
     }
 
     /**
@@ -64,7 +64,7 @@ class attempt_deleted extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('eventattemptdeleted', 'mod_exescorm');
+        return get_string('eventattemptdeleted', 'mod_seledascorm');
     }
 
     /**
@@ -73,7 +73,7 @@ class attempt_deleted extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url('/mod/exescorm/report.php', array('id' => $this->contextinstanceid));
+        return new \moodle_url('/mod/seledascorm/report.php', array('id' => $this->contextinstanceid));
     }
 
     /**

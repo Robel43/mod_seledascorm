@@ -15,19 +15,19 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The mod_exescorm course module viewed event.
+ * The mod_seledascorm course module viewed event.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  2013 onwards Ankit Agarwal
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_exescorm\event;
+namespace mod_seledascorm\event;
 
 /**
- * The mod_exescorm course module viewed event class.
+ * The mod_seledascorm course module viewed event class.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @since      Moodle 2.7
  * @copyright  2013 onwards Ankit Agarwal
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -40,7 +40,7 @@ class course_module_viewed extends \core\event\course_module_viewed {
     protected function init() {
         $this->data['crud'] = 'r';
         $this->data['edulevel'] = self::LEVEL_PARTICIPATING;
-        $this->data['objecttable'] = 'exescorm';
+        $this->data['objecttable'] = 'seledascorm';
     }
 
     /**
@@ -49,6 +49,6 @@ class course_module_viewed extends \core\event\course_module_viewed {
      * @return array
      */
     public static function get_objectid_mapping() {
-        return array('db' => 'exescorm', 'restore' => 'exescorm');
+        return array('db' => 'seledascorm', 'restore' => 'seledascorm');
     }
 }

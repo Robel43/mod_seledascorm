@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 require_once('../../config.php');
-require_once($CFG->dirroot.'/mod/exescorm/locallib.php');
+require_once($CFG->dirroot.'/mod/seledascorm/locallib.php');
 
 $id = optional_param('id', '', PARAM_INT);       // Course Module ID, or...
 $a = optional_param('a', '', PARAM_INT);         // Exescorm ID.
@@ -23,52 +23,52 @@ $scoid = required_param('scoid', PARAM_INT);  // Sco ID.
 $attempt = required_param('attempt', PARAM_INT);  // Attempt number.
 
 if (!empty($id)) {
-    if (! $cm = get_coursemodule_from_id('exescorm', $id)) {
+    if (! $cm = get_coursemodule_from_id('seledascorm', $id)) {
         throw new \moodle_exception('invalidcoursemodule');
     }
     if (! $course = $DB->get_record("course", array("id" => $cm->course))) {
         throw new \moodle_exception('coursemisconf');
     }
-    if (! $exescorm = $DB->get_record("exescorm", array("id" => $cm->instance))) {
+    if (! $seledascorm = $DB->get_record("seledascorm", array("id" => $cm->instance))) {
         throw new \moodle_exception('invalidcoursemodule');
     }
 } else if (!empty($a)) {
-    if (! $exescorm = $DB->get_record("exescorm", array("id" => $a))) {
+    if (! $seledascorm = $DB->get_record("seledascorm", array("id" => $a))) {
         throw new \moodle_exception('invalidcoursemodule');
     }
-    if (! $course = $DB->get_record("course", array("id" => $exescorm->course))) {
+    if (! $course = $DB->get_record("course", array("id" => $seledascorm->course))) {
         throw new \moodle_exception('coursemisconf');
     }
-    if (! $cm = get_coursemodule_from_instance("exescorm", $exescorm->id, $course->id)) {
+    if (! $cm = get_coursemodule_from_instance("seledascorm", $seledascorm->id, $course->id)) {
         throw new \moodle_exception('invalidcoursemodule');
     }
 } else {
     throw new \moodle_exception('missingparameter');
 }
 
-$PAGE->set_url('/mod/exescorm/datamodel.php', ['scoid' => $scoid, 'attempt' => $attempt, 'id' => $cm->id]);
+$PAGE->set_url('/mod/seledascorm/datamodel.php', ['scoid' => $scoid, 'attempt' => $attempt, 'id' => $cm->id]);
 
 require_login($course, false, $cm);
 
 if (confirm_sesskey() && (!empty($scoid))) {
     $result = true;
     $request = null;
-    if (has_capability('mod/exescorm:savetrack', context_module::instance($cm->id))) {
+    if (has_capability('mod/seledascorm:savetrack', context_module::instance($cm->id))) {
         // Preload all current tracking data.
-        $trackdata = $DB->get_records('exescorm_scoes_track',
-                                    ['userid' => $USER->id, 'exescormid' => $exescorm->id, 'scoid' => $scoid,
+        $trackdata = $DB->get_records('seledascorm_scoes_track',
+                                    ['userid' => $USER->id, 'seledascormid' => $seledascorm->id, 'scoid' => $scoid,
                                     'attempt' => $attempt], '', 'element, id, value, timemodified'
                                 );
         foreach (data_submitted() as $element => $value) {
             $element = str_replace('__', '.', $element);
             if (substr($element, 0, 3) == 'cmi') {
                 $netelement = preg_replace('/\.N(\d+)\./', "\.\$1\.", $element);
-                $result = exescorm_insert_track($USER->id, $exescorm->id, $scoid, $attempt, $element, $value,
-                            $exescorm->forcecompleted, $trackdata) && $result;
+                $result = seledascorm_insert_track($USER->id, $seledascorm->id, $scoid, $attempt, $element, $value,
+                            $seledascorm->forcecompleted, $trackdata) && $result;
             }
             if (substr($element, 0, 15) == 'adl.nav.request') {
                 // SCORM 2004 Sequencing Request.
-                require_once($CFG->dirroot.'/mod/exescorm/datamodels/scorm_13lib.php');
+                require_once($CFG->dirroot.'/mod/seledascorm/datamodels/scorm_13lib.php');
 
                 $search = array('@continue@', '@previous@', '@\{target=(\S+)\}choice@', '@exit@',
                                     '@exitAll@', '@abandon@', '@abandonAll@');
@@ -77,7 +77,7 @@ if (confirm_sesskey() && (!empty($scoid))) {
 
                 if ($action != $value) {
                     // Evaluating navigation request.
-                    $valid = exescorm_seq_overall ($scoid, $USER->id, $action, $attempt);
+                    $valid = seledascorm_seq_overall ($scoid, $USER->id, $action, $attempt);
                     $valid = 'true';
 
                     // Set valid request.
@@ -89,6 +89,14 @@ if (confirm_sesskey() && (!empty($scoid))) {
                     }
                 }
             }
+        }
+        // Seleda: preserve label metadata with this learner/SCO/attempt.
+        require_once(__DIR__ . '/report/timhirt_reporting.php');
+        try {
+            \mod_seledascorm\local\timhirt_reporting::snapshot(context_module::instance($cm->id), $seledascorm, (int)$scoid, (int)$USER->id, (int)$attempt);
+        } catch (\Throwable $error) {
+            // A metadata problem must never corrupt the SCORM commit response.
+            error_log('[Seleda reporting] Could not preserve the attempt label catalog.');
         }
     }
     if ($result) {

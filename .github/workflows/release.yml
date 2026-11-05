@@ -10,23 +10,10 @@ on:
         description: "Release label for package name (e.g. 1.2.3 or 1.2.3-beta)"
         required: false
         default: ""
-      editor_repo_url:
-        description: "Editor source repository URL"
+      seleda_ref:
+        description: "Seleda Studio ref to embed (branch, tag, or commit)"
         required: false
-        default: "https://github.com/exelearning/exelearning.git"
-      editor_ref:
-        description: "Editor ref value (main, branch name, or tag)"
-        required: false
-        default: "main"
-      editor_ref_type:
-        description: "Type of editor ref"
-        required: false
-        default: "auto"
-        type: choice
-        options:
-          - auto
-          - branch
-          - tag
+        default: ""
 
 permissions:
   contents: write
@@ -34,36 +21,40 @@ permissions:
 jobs:
   build_and_upload:
     runs-on: ubuntu-latest
+    env:
+      SELEDA_STUDIO_TOKEN: ${{ secrets.SELEDA_STUDIO_TOKEN }}
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
 
       - name: Set environment variables
         run: |
           if [ "${{ github.event_name }}" = "release" ]; then
             RAW_TAG="${GITHUB_REF##*/}"
             VERSION_TAG="${RAW_TAG#v}"
+            SELEDA_REF="$(cat .seleda-editor-ref)"
             echo "RELEASE_TAG=${VERSION_TAG}" >> $GITHUB_ENV
-            echo "EXELEARNING_EDITOR_REPO_URL=https://github.com/exelearning/exelearning.git" >> $GITHUB_ENV
-            # Build the editor from the matching editor tag so the embedded
-            # editor reports the final release version (not a nightly/alpha build).
-            echo "EXELEARNING_EDITOR_REF=v${VERSION_TAG}" >> $GITHUB_ENV
-            echo "EXELEARNING_EDITOR_REF_TYPE=tag" >> $GITHUB_ENV
+            echo "SELEDA_STUDIO_REF=${SELEDA_REF}" >> $GITHUB_ENV
+            echo "APP_VERSION=${VERSION_TAG}" >> $GITHUB_ENV
           else
             INPUT_RELEASE="${{ github.event.inputs.release_tag }}"
             if [ -z "$INPUT_RELEASE" ]; then
               INPUT_RELEASE="manual-$(date +%Y%m%d)-${GITHUB_SHA::7}"
             fi
+            INPUT_SELEDA_REF="${{ github.event.inputs.seleda_ref }}"
+            if [ -z "$INPUT_SELEDA_REF" ]; then
+              INPUT_SELEDA_REF="$(cat .seleda-editor-ref)"
+            fi
             echo "RELEASE_TAG=${INPUT_RELEASE}" >> $GITHUB_ENV
-            echo "EXELEARNING_EDITOR_REPO_URL=${{ github.event.inputs.editor_repo_url }}" >> $GITHUB_ENV
-            echo "EXELEARNING_EDITOR_REF=${{ github.event.inputs.editor_ref }}" >> $GITHUB_ENV
-            echo "EXELEARNING_EDITOR_REF_TYPE=${{ github.event.inputs.editor_ref_type }}" >> $GITHUB_ENV
+            echo "SELEDA_STUDIO_REF=${INPUT_SELEDA_REF}" >> $GITHUB_ENV
+            echo "APP_VERSION=${INPUT_RELEASE}" >> $GITHUB_ENV
           fi
 
-      - name: Build static editor
-        run: make build-editor
+      - name: Require Seleda Studio source access
+        run: |
+          if [ -z "$SELEDA_STUDIO_TOKEN" ]; then
+            echo "SELEDA_STUDIO_TOKEN is required because every release must bundle the private Seleda Studio embedded profile." >&2
+            exit 1
+          fi
 
       - name: Create package
         run: make package RELEASE=${RELEASE_TAG}
@@ -71,13 +62,13 @@ jobs:
       - name: Upload ZIP as workflow artifact
         uses: actions/upload-artifact@v4
         with:
-          name: mod_exescorm-${{ env.RELEASE_TAG }}
-          path: mod_exescorm-${{ env.RELEASE_TAG }}.zip
+          name: seleda-scorm-${{ env.RELEASE_TAG }}
+          path: mod_seledascorm-${{ env.RELEASE_TAG }}.zip
 
       - name: Upload ZIP to release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
-          files: mod_exescorm-${{ env.RELEASE_TAG }}.zip
+          files: mod_seledascorm-${{ env.RELEASE_TAG }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

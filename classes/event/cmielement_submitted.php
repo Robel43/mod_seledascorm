@@ -15,17 +15,17 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The mod_exescorm generic CMI element submitted event.
+ * The mod_seledascorm generic CMI element submitted event.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  2016 onwards Matteo Scaramuccia
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_exescorm\event;
+namespace mod_seledascorm\event;
 
 /**
- * The mod_exescorm generic CMI element submitted event class.
+ * The mod_seledascorm generic CMI element submitted event class.
  *
  * @property-read array $other {
  *      Extra information about event properties.
@@ -35,7 +35,7 @@ namespace mod_exescorm\event;
  *      - string cmivalue: CMI value.
  * }
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @since      Moodle 3.1
  * @copyright  2016 onwards Matteo Scaramuccia
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -48,7 +48,7 @@ abstract class cmielement_submitted extends \core\event\base {
     protected function init() {
         $this->data['crud'] = 'u';
         $this->data['edulevel'] = self::LEVEL_PARTICIPATING;
-        $this->data['objecttable'] = 'exescorm_scoes_track';
+        $this->data['objecttable'] = 'seledascorm_scoes_track';
     }
 
     /**
@@ -60,7 +60,7 @@ abstract class cmielement_submitted extends \core\event\base {
         return "The user with the id '$this->userid' submitted the element '{$this->other['cmielement']}' " .
                 "with the value of '{$this->other['cmivalue']}' " .
                 "for the attempt with the id '{$this->other['attemptid']}' " .
-                "for a exescorm activity with the course module id '$this->contextinstanceid'.";
+                "for a seledascorm activity with the course module id '$this->contextinstanceid'.";
     }
 
     /**
@@ -69,7 +69,7 @@ abstract class cmielement_submitted extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url('/mod/exescorm/report/userreport.php',
+        return new \moodle_url('/mod/seledascorm/report/userreport.php',
                 array('id' => $this->contextinstanceid, 'user' => $this->userid, 'attempt' => $this->other['attemptid']));
     }
 

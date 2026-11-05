@@ -15,26 +15,26 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The mod_exescorm tracks user report viewed event.
+ * The mod_seledascorm tracks user report viewed event.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  2013 onwards Ankit Agarwal
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_exescorm\event;
+namespace mod_seledascorm\event;
 
 /**
- * The mod_exescorm tracks user report viewed event class.
+ * The mod_seledascorm tracks user report viewed event class.
  *
  * @property-read array $other {
  *      Extra information about event properties.
  *
  *      - int attemptid: Attempt id.
- *      - int instanceid: Instance id of the exescorm activity.
+ *      - int instanceid: Instance id of the seledascorm activity.
  * }
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @since      Moodle 2.7
  * @copyright  2013 onwards Ankit Agarwal
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -55,7 +55,7 @@ class user_report_viewed extends \core\event\base {
      * @return string
      */
     public function get_description() {
-        return "The user with id '$this->userid' viewed the exescorm user report for the user with id '$this->relateduserid'.";
+        return "The user with id '$this->userid' viewed the seledascorm user report for the user with id '$this->relateduserid'.";
     }
 
     /**
@@ -64,7 +64,7 @@ class user_report_viewed extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('eventuserreportviewed', 'mod_exescorm');
+        return get_string('eventuserreportviewed', 'mod_seledascorm');
     }
 
     /**
@@ -78,7 +78,7 @@ class user_report_viewed extends \core\event\base {
             'user' => $this->relateduserid,
             'attempt' => $this->other['attemptid']
         );
-        return new \moodle_url('/mod/exescorm/userreport.php', $params);
+        return new \moodle_url('/mod/seledascorm/userreport.php', $params);
     }
 
     /**
@@ -109,7 +109,7 @@ class user_report_viewed extends \core\event\base {
 
     public static function get_other_mapping() {
         $othermapped = array();
-        $othermapped['instanceid'] = array('db' => 'exescorm', 'restore' => 'exescorm');
+        $othermapped['instanceid'] = array('db' => 'seledascorm', 'restore' => 'seledascorm');
 
         return $othermapped;
     }

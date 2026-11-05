@@ -1,15 +1,15 @@
-M.mod_exescormform = {};
-M.mod_exescormform.init = function(Y) {
-    var exescormform = Y.one('#exescormviewform');
-    var cwidth = exescormplayerdata.cwidth;
-    var cheight = exescormplayerdata.cheight;
-    var poptions = exescormplayerdata.popupoptions;
-    var launch = exescormplayerdata.launch;
-    var currentorg = exescormplayerdata.currentorg;
-    var sco = exescormplayerdata.sco;
-    var exescorm = exescormplayerdata.exescorm;
-    var launch_url = M.cfg.wwwroot + "/mod/exescorm/player.php?a=" + exescorm + "&currentorg=" + currentorg + "&scoid=" + sco + "&sesskey=" + M.cfg.sesskey + "&display=popup";
-    var course_url = exescormplayerdata.courseurl;
+M.mod_seledascormform = {};
+M.mod_seledascormform.init = function(Y) {
+    var seledascormform = Y.one('#seledascormviewform');
+    var cwidth = seledascormplayerdata.cwidth;
+    var cheight = seledascormplayerdata.cheight;
+    var poptions = seledascormplayerdata.popupoptions;
+    var launch = seledascormplayerdata.launch;
+    var currentorg = seledascormplayerdata.currentorg;
+    var sco = seledascormplayerdata.sco;
+    var seledascorm = seledascormplayerdata.seledascorm;
+    var launch_url = M.cfg.wwwroot + "/mod/seledascorm/player.php?a=" + seledascorm + "&currentorg=" + currentorg + "&scoid=" + sco + "&sesskey=" + M.cfg.sesskey + "&display=popup";
+    var course_url = seledascormplayerdata.courseurl;
     var winobj = null;
 
     poptions = poptions + ',resizable=yes'; // Added for IE (MDL-32506).
@@ -27,23 +27,23 @@ M.mod_exescormform.init = function(Y) {
     }
 
     // Hide the form and toc if it exists - we don't want to allow multiple submissions when a window is open.
-    var exescormload = function () {
-        if (exescormform) {
-            exescormform.hide();
+    var seledascormload = function () {
+        if (seledascormform) {
+            seledascormform.hide();
         }
 
-        var exescormtoc = Y.one('#toc');
-        if (exescormtoc) {
-            exescormtoc.hide();
+        var seledascormtoc = Y.one('#toc');
+        if (seledascormtoc) {
+            seledascormtoc.hide();
         }
         // Hide the intro and display a message to the user if the window is closed.
-        var exescormintro = Y.one('#intro');
-        exescormintro.setHTML('<a href="' + course_url + '">' + M.util.get_string('popuplaunched', 'mod_exescorm') + '</a>');
+        var seledascormintro = Y.one('#intro');
+        seledascormintro.setHTML('<a href="' + course_url + '">' + M.util.get_string('popuplaunched', 'mod_seledascorm') + '</a>');
     }
 
     // When pop-up is closed return to course homepage.
-    var exescormunload = function () {
-        // Onunload is called multiple times in the EXESCORM window - we only want to handle when it is actually closed.
+    var seledascormunload = function () {
+        // Onunload is called multiple times in the SELEDASCORM window - we only want to handle when it is actually closed.
         setTimeout(function() {
             if (winobj.closed) {
                 window.location = course_url;
@@ -51,15 +51,15 @@ M.mod_exescormform.init = function(Y) {
         }, 800)
     }
 
-    var exescormredirect = function (winobj) {
-        Y.on('load', exescormload, winobj);
-        Y.on('unload', exescormunload, winobj);
+    var seledascormredirect = function (winobj) {
+        Y.on('load', seledascormload, winobj);
+        Y.on('unload', seledascormunload, winobj);
         // Check to make sure pop-up has been launched - if not display a warning,
         // this shouldn't happen as the pop-up here is launched on user action but good to make sure.
         setTimeout(function() {
             if (!winobj) {
-                var exescormintro = Y.one('#intro');
-                exescormintro.setHTML(M.util.get_string('popupsblocked', 'mod_exescorm'));
+                var seledascormintro = Y.one('#intro');
+                seledascormintro.setHTML(M.util.get_string('popupsblocked', 'mod_seledascorm'));
             }}, 800);
     }
 
@@ -71,7 +71,7 @@ M.mod_exescormform.init = function(Y) {
             launch_url += '&mode=normal';
         }
 
-        var newattempt = Y.one('#exescormviewform #a');
+        var newattempt = Y.one('#seledascormviewform #a');
         launch_url += (newattempt && newattempt.get('checked') ? '&newattempt=on' : '');
     }
 
@@ -79,16 +79,16 @@ M.mod_exescormform.init = function(Y) {
         setlaunchoptions();
         winobj = window.open(launch_url,'Popup', poptions);
         this.target = 'Popup';
-        exescormredirect(winobj);
+        seledascormredirect(winobj);
         winobj.opener = null;
     }
     // Listen for view form submit and generate popup on user interaction.
-    if (exescormform) {
-        exescormform.delegate('click', function(e) {
+    if (seledascormform) {
+        seledascormform.delegate('click', function(e) {
             setlaunchoptions(e.currentTarget.getAttribute('value'));
             winobj = window.open(launch_url, 'Popup', poptions);
             this.target = 'Popup';
-            exescormredirect(winobj);
+            seledascormredirect(winobj);
             winobj.opener = null;
             e.preventDefault();
         }, 'button[name=mode]');

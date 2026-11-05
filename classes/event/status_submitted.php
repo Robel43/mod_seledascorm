@@ -15,17 +15,17 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The mod_exescorm status submitted event.
+ * The mod_seledascorm status submitted event.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  2016 onwards Matteo Scaramuccia
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_exescorm\event;
+namespace mod_seledascorm\event;
 
 /**
- * The mod_exescorm status submitted event class.
+ * The mod_seledascorm status submitted event class.
  *
  * @property-read array $other {
  *      Extra information about event properties.
@@ -35,7 +35,7 @@ namespace mod_exescorm\event;
  *      - string cmivalue: CMI value.
  * }
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @since      Moodle 3.1
  * @copyright  2016 onwards Matteo Scaramuccia
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -48,7 +48,7 @@ class status_submitted extends cmielement_submitted {
      * @return string
      */
     public static function get_name() {
-        return get_string('eventstatussubmitted', 'mod_exescorm');
+        return get_string('eventstatussubmitted', 'mod_seledascorm');
     }
 
     /**

@@ -15,27 +15,27 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The mod_exescorm tracks viewed event.
+ * The mod_seledascorm tracks viewed event.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  2013 onwards Ankit Agarwal
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_exescorm\event;
+namespace mod_seledascorm\event;
 
 /**
- * The mod_exescorm tracks viewed event class.
+ * The mod_seledascorm tracks viewed event class.
  *
  * @property-read array $other {
  *      Extra information about event properties.
  *
  *      - int attemptid: Attempt id.
- *      - int instanceid: Instance id of the exescorm activity.
+ *      - int instanceid: Instance id of the seledascorm activity.
  *      - int scoid: Sco Id for which the trackes are viewed.
  * }
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @since      Moodle 2.7
  * @copyright  2013 onwards Ankit Agarwal
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -57,7 +57,7 @@ class tracks_viewed extends \core\event\base {
      */
     public function get_description() {
         return "The user with id '$this->userid' viewed the tracks for the user with id '$this->relateduserid' " .
-            "for the exescorm activity with course module id '$this->contextinstanceid'.";
+            "for the seledascorm activity with course module id '$this->contextinstanceid'.";
     }
 
     /**
@@ -66,7 +66,7 @@ class tracks_viewed extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('eventtracksviewed', 'mod_exescorm');
+        return get_string('eventtracksviewed', 'mod_seledascorm');
     }
 
     /**
@@ -81,7 +81,7 @@ class tracks_viewed extends \core\event\base {
             'attempt' => $this->other['attemptid'],
             'scoid' => $this->other['scoid']
         );
-        return new \moodle_url('/mod/exescorm/userreporttracks.php', $params);
+        return new \moodle_url('/mod/seledascorm/userreporttracks.php', $params);
     }
 
     /**
@@ -115,8 +115,8 @@ class tracks_viewed extends \core\event\base {
 
     public static function get_other_mapping() {
         $othermapped = array();
-        $othermapped['instanceid'] = array('db' => 'exescorm', 'restore' => 'exescorm');
-        $othermapped['scoid'] = array('db' => 'exescorm_scoes', 'restore' => 'exescorm_scoe');
+        $othermapped['instanceid'] = array('db' => 'seledascorm', 'restore' => 'seledascorm');
+        $othermapped['scoid'] = array('db' => 'seledascorm_scoes', 'restore' => 'seledascorm_scoe');
 
         return $othermapped;
     }

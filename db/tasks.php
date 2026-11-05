@@ -17,7 +17,7 @@
 /**
  * Definition of Forum scheduled tasks.
  *
- * @package   mod_exescorm
+ * @package   mod_seledascorm
  * @category  task
  * @copyright 2017 Abhishek kumar <ganitgenius@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $tasks = [
     [
-        'classname' => 'mod_exescorm\task\cron_task',
+        'classname' => 'mod_seledascorm\task\cron_task',
         'blocking' => 0,
         'minute' => '*/5',
         'hour' => '*',

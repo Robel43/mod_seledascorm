@@ -17,7 +17,7 @@
 /**
  * Definition of log events
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @category   log
  * @copyright  2010 Petr Skoda (http://skodak.org)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -26,8 +26,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 $logs = [
-    ['module' => 'exescorm', 'action' => 'view', 'mtable' => 'exescorm', 'field' => 'name'],
-    ['module' => 'exescorm', 'action' => 'review', 'mtable' => 'exescorm', 'field' => 'name'],
-    ['module' => 'exescorm', 'action' => 'update', 'mtable' => 'exescorm', 'field' => 'name'],
-    ['module' => 'exescorm', 'action' => 'add', 'mtable' => 'exescorm', 'field' => 'name'],
+    ['module' => 'seledascorm', 'action' => 'view', 'mtable' => 'seledascorm', 'field' => 'name'],
+    ['module' => 'seledascorm', 'action' => 'review', 'mtable' => 'seledascorm', 'field' => 'name'],
+    ['module' => 'seledascorm', 'action' => 'update', 'mtable' => 'seledascorm', 'field' => 'name'],
+    ['module' => 'seledascorm', 'action' => 'add', 'mtable' => 'seledascorm', 'field' => 'name'],
 ];

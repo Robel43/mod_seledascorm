@@ -16,9 +16,9 @@
 
 
 /**
- * Defines the version of exescormreport_graphs
+ * Defines the version of seledascormreport_graphs
  *
- * @package   exescormreport_graphs
+ * @package   seledascormreport_graphs
  * @copyright 2012 Ankit Kumar Agarwal
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -29,4 +29,4 @@ $plugin->version = 2022112800;                 // The current plugin version (Da
 // $plugin->requires = 2022111800;    // Requires this Moodle version 4.1.
 $plugin->requires = 2020061500;    // Moodle 3.9.
 // $plugin->requires = 2021051700;    // Moodle 3.11.
-$plugin->component = 'exescormreport_graphs';       // Full name of the plugin (used for diagnostics).
+$plugin->component = 'seledascormreport_graphs';       // Full name of the plugin (used for diagnostics).

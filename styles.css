@@ -1,39 +1,39 @@
-.path-mod-exescorm .top {
+.path-mod-seledascorm .top {
     vertical-align: top;
 }
 
-.path-mod-exescorm .exescorm-left {
+.path-mod-seledascorm .seledascorm-left {
     text-align: left;
 }
 
-.path-mod-exescorm .exescorm-right {
+.path-mod-seledascorm .seledascorm-right {
     text-align: right;
 }
 
-.path-mod-exescorm .scoframe {
+.path-mod-seledascorm .scoframe {
     position: relative;
     width: 100%;
     height: 100%;
 }
 
-.ios #exescormpage #exescorm_content {
+.ios #seledascormpage #seledascorm_content {
     -webkit-overflow-scrolling: touch;
     overflow: scroll;
 }
 
-#page-mod-exescorm-player #exescormtop {
+#page-mod-seledascorm-player #seledascormtop {
     position: relative;
     width: 100%;
     height: 30px;
 }
 
-#page-mod-exescorm-player #exescormbrowse {
+#page-mod-seledascorm-player #seledascormbrowse {
     position: absolute;
     left: 5px;
     top: 0;
 }
 
-#page-mod-exescorm-player #exescormnav {
+#page-mod-seledascorm-player #seledascormnav {
     position: absolute;
     right: 5px;
     text-align: center;
@@ -41,7 +41,7 @@
     width: 100%;
 }
 
-#page-mod-exescorm-player #exescormbox {
+#page-mod-seledascorm-player #seledascormbox {
     width: 74%;
     height: 100%;
     position: absolute;
@@ -49,29 +49,29 @@
     top: 0;
 }
 
-#page-mod-exescorm-player #exescormpage {
+#page-mod-seledascorm-player #seledascormpage {
     position: relative;
     width: 100%;
     height: 100%;
 }
 
-#page-mod-exescorm-player #exescormpage.fullscreen {
+#page-mod-seledascorm-player #seledascormpage.fullscreen {
     overflow-y: auto;
 }
 
-#page-mod-exescorm-player #exescormpage.fullscreen div#exescorm_navpanel{
+#page-mod-seledascorm-player #seledascormpage.fullscreen div#seledascorm_navpanel{
     position: fixed;
     bottom: 0;
     width: 100%;
 	left: 0;
 }
 
-#page-mod-exescorm-player #exescormpage #toctree {
+#page-mod-seledascorm-player #seledascormpage #toctree {
     position: relative;
     width: 100%;
 }
 
-#page-mod-exescorm-player #tocbox {
+#page-mod-seledascorm-player #tocbox {
     position: relative;
     left: 0;
     width: 100%;
@@ -79,72 +79,72 @@
     font-size: 0.8em;
 }
 
-#page-mod-exescorm-player #tocbox li a i{
+#page-mod-seledascorm-player #tocbox li a i{
     margin-right: .5em
 }
 
-#page-mod-exescorm-player #tocbox a[aria-current]{
+#page-mod-seledascorm-player #tocbox a[aria-current]{
     text-decoration: underline;
 }
 
-#page-mod-exescorm-player #toctree {
+#page-mod-seledascorm-player #toctree {
     overflow: visible;
 }
 
-#page-mod-exescorm-player #tochead {
+#page-mod-seledascorm-player #tochead {
     position: relative;
     text-align: center;
     top: 3px;
     height: 30px;
 }
 
-#page-mod-exescorm-player #exescormpage .scoframe {
+#page-mod-seledascorm-player #seledascormpage .scoframe {
     border: 0;
 }
 
-#page-mod-exescorm-player #exescormpage #exescorm_object {
+#page-mod-seledascorm-player #seledascormpage #seledascorm_object {
     border: none;
     width: 98%;
     height: 98%;
     margin-left: 1%;
 }
 
-#page-mod-exescorm-player #exescormpage #exescorm_object.exescorm_nav_under_content {
+#page-mod-seledascorm-player #seledascormpage #seledascorm_object.seledascorm_nav_under_content {
     height: 95%;
 }
 
-#page-mod-exescorm-player #exescormpage #exescorm_content {
+#page-mod-seledascorm-player #seledascormpage #seledascorm_content {
     height: 100%;
 }
 
-#page-mod-exescorm-player #exescormpage #exescorm_toc {
+#page-mod-seledascorm-player #seledascormpage #seledascorm_toc {
     position: relative;
 }
 
-#page-mod-exescorm-player #exescormpage #exescorm_toc_title {
+#page-mod-seledascorm-player #seledascormpage #seledascorm_toc_title {
     font-size: 1.2em;
     font-weight: bold;
 }
 
-#page-mod-exescorm-player #exescormpage #exescorm_tree {
+#page-mod-seledascorm-player #seledascormpage #seledascorm_tree {
     border-right: 5px solid rgb(239, 245, 255);
 }
 
-#page-mod-exescorm-player #exescormpage #exescorm_navpanel {
+#page-mod-seledascorm-player #seledascormpage #seledascorm_navpanel {
     text-align: center;
 }
 
-#page-mod-exescorm-player .toc,
-#page-mod-exescorm-player .no-toc {
+#page-mod-seledascorm-player .toc,
+#page-mod-seledascorm-player .no-toc {
     width: 100%;
 }
 
-#page-mod-exescorm-player .structlist {
+#page-mod-seledascorm-player .structlist {
     list-style-type: none;
     white-space: nowrap;
 }
 
-#page-mod-exescorm-player .structurelist {
+#page-mod-seledascorm-player .structurelist {
     position: relative;
     list-style-type: none;
     width: 96%;
@@ -152,105 +152,105 @@
     padding: 0;
 }
 
-#page-mod-exescorm-player .structurelist ul {
+#page-mod-seledascorm-player .structurelist ul {
     padding-left: 0.5em;
     margin-left: 0.5em;
 }
 
-#page-mod-exescorm-player #exescormpage #exescorm_toc.disabled,
-#page-mod-exescorm-player #exescormpage #exescorm_toc.loading,
-#page-mod-exescorm-player #exescormpage #exescorm_toc_toggle.disabled,
-#page-mod-exescorm-player #exescormpage #exescorm_toc_toggle.loading {
+#page-mod-seledascorm-player #seledascormpage #seledascorm_toc.disabled,
+#page-mod-seledascorm-player #seledascormpage #seledascorm_toc.loading,
+#page-mod-seledascorm-player #seledascormpage #seledascorm_toc_toggle.disabled,
+#page-mod-seledascorm-player #seledascormpage #seledascorm_toc_toggle.loading {
     display: none;
 }
 
-#page-mod-exescorm-view .structurelist {
+#page-mod-seledascorm-view .structurelist {
     list-style-type: none;
     white-space: nowrap;
 }
 
-#page-mod-exescorm-view .structurelist {
+#page-mod-seledascorm-view .structurelist {
     list-style-type: none;
     white-space: nowrap;
 }
 
-#page-mod-exescorm-view .exceededmaxattempts {
+#page-mod-seledascorm-view .exceededmaxattempts {
     color: #c00;
 }
 
-#page-mod-exescorm-player #altfinishlink {
+#page-mod-seledascorm-player #altfinishlink {
     font-size: 140%;
     border: 0;
     padding: 0;
 }
 
-#page-mod-exescorm-player #exescormmode {
+#page-mod-seledascorm-player #seledascormmode {
     float: left;
     border: 0;
     font-size: 14px;
     font-weight: 400;
 }
 
-#page-mod-exescorm-player.pagelayout-popup #page-content .region-content {
+#page-mod-seledascorm-player.pagelayout-popup #page-content .region-content {
     padding: 0;
 }
 
-#page-mod-exescorm-player.pagelayout-popup #page-wrapper {
+#page-mod-seledascorm-player.pagelayout-popup #page-wrapper {
     width: 100%;
 }
 
-#page-mod-exescorm-player .yui-layout-scroll div.yui-layout-bd {
+#page-mod-seledascorm-player .yui-layout-scroll div.yui-layout-bd {
     overflow: visible;
 }
 
-#page-mod-exescorm-player .yui-layout-unit-left div.yui-layout-bd {
+#page-mod-seledascorm-player .yui-layout-unit-left div.yui-layout-bd {
     overflow: auto;
 }
 
-.path-mod-exescorm.forcejavascript .toc {
+.path-mod-seledascorm.forcejavascript .toc {
     display: none;
 }
 
-.path-mod-exescorm.forcejavascript #exescormpage #tocbox {
+.path-mod-seledascorm.forcejavascript #seledascormpage #tocbox {
     display: none;
 }
 
-.path-mod-exescorm.jsenabled .forcejavascriptmessage {
+.path-mod-seledascorm.jsenabled .forcejavascriptmessage {
     display: none;
 }
 
-.path-mod-exescorm.jsenabled .toc {
+.path-mod-seledascorm.jsenabled .toc {
     display: block;
 }
 
-.path-mod-exescorm.jsenabled #exescormpage #tocbox {
+.path-mod-seledascorm.jsenabled #seledascormpage #tocbox {
     display: block;
 }
 
-#page-mod-exescorm-report-userreporttracks table .c1 {
+#page-mod-seledascorm-report-userreporttracks table .c1 {
     word-wrap: break-word;
     word-break: break-all;
 }
 
-#page-mod-exescorm-report .exescormattemptcounts {
+#page-mod-seledascorm-report .seledascormattemptcounts {
     clear: left;
     text-align: center;
     display: inline;
     margin-left: 20%;
 }
 
-#page-mod-exescorm-player #exescormpage span.yui3-treeview-icon {
+#page-mod-seledascorm-player #seledascormpage span.yui3-treeview-icon {
     display: none;
 }
 
-#page-mod-exescorm-player #exescormpage li.yui3-treeview-has-children > div.yui3-treeview-row > span.yui3-treeview-icon {
+#page-mod-seledascorm-player #seledascormpage li.yui3-treeview-has-children > div.yui3-treeview-row > span.yui3-treeview-icon {
     display: block;
 }
 
-#page-mod-exescorm-player #exescormpage div.yui3-u-1,
-#page-mod-exescorm-player #exescormpage div.yui3-u-3-4,
-#page-mod-exescorm-player #exescormpage div.yui3-u-1-5,
-#page-mod-exescorm-player #exescormpage div.yui3-u-1-24 {
+#page-mod-seledascorm-player #seledascormpage div.yui3-u-1,
+#page-mod-seledascorm-player #seledascormpage div.yui3-u-3-4,
+#page-mod-seledascorm-player #seledascormpage div.yui3-u-1-5,
+#page-mod-seledascorm-player #seledascormpage div.yui3-u-1-24 {
     display: inline-block;
     zoom: 1;
     letter-spacing: normal;
@@ -259,28 +259,28 @@
     text-rendering: auto;
 }
 
-#page-mod-exescorm-player #exescormpage div.yui3-u-1 {
+#page-mod-seledascorm-player #seledascormpage div.yui3-u-1 {
     display: block;
 }
 
-#page-mod-exescorm-player #exescormpage div.yui3-u-3-4 {
+#page-mod-seledascorm-player #seledascormpage div.yui3-u-3-4 {
     width: 75%;
 }
 
-#page-mod-exescorm-player #exescormpage div.yui3-u-1-5 {
+#page-mod-seledascorm-player #seledascormpage div.yui3-u-1-5 {
     width: 20%;
 }
 
-#page-mod-exescorm-player #exescormpage div.yui3-u-1-24 {
+#page-mod-seledascorm-player #seledascormpage div.yui3-u-1-24 {
     width: 4.1666%;
 }
 
-#page-mod-exescorm-player #exescormpage div.yui3-g-r {
+#page-mod-seledascorm-player #seledascormpage div.yui3-g-r {
     letter-spacing: normal;
     word-spacing: -0.43em;
 }
 
-#exescorm_layout {
+#seledascorm_layout {
     height: auto!important;
 }
 
@@ -289,13 +289,13 @@
 * The ".opera-only" selector is used to prevent actual prefocus styling
 * and is not required in markup.
 */
-#page-mod-exescorm-player .opera-only :-o-prefocus,
-#page-mod-exescorm-player #exescormpage div.yui3-g-r img {
+#page-mod-seledascorm-player .opera-only :-o-prefocus,
+#page-mod-seledascorm-player #seledascormpage div.yui3-g-r img {
     max-width: 100%;
 }
 
-/* EXESCORM VISOR UPDATE */
-#page-mod-exescorm-player .tocbox_action-buttons {
+/* SELEDASCORM VISOR UPDATE */
+#page-mod-seledascorm-player .tocbox_action-buttons {
     display: flex;
     width: 100%;
     align-items: center;
@@ -304,7 +304,7 @@
     margin-bottom: 5px;
 }
 
-#page-mod-exescorm-player #exescormpage #exescorm_toc_title {
+#page-mod-seledascorm-player #seledascormpage #seledascorm_toc_title {
     font-size: 16px;
     font-weight: 700;
     margin: .5rem 0 0 0.5rem;
@@ -312,7 +312,7 @@
     top: -14px;
 }
 
-#page-mod-exescorm-player #exescormpage .btn-fullscreen {
+#page-mod-seledascorm-player #seledascormpage .btn-fullscreen {
     border: none;
     background-color: transparent;
     padding: 0;
@@ -322,50 +322,50 @@
     justify-content: center;
     width: 22px;
     height: 22px;
-    background-image: url('[[pix:mod_exescorm|fullscreen]]');
+    background-image: url('[[pix:mod_seledascorm|fullscreen]]');
     background-size: 18px;
     background-repeat: no-repeat;
     background-position: center;
 }
 
-#page-mod-exescorm-player #exescormpage .btn-fullscreen.actived {
-    background-image: url('[[pix:mod_exescorm|fullscreen2]]');
+#page-mod-seledascorm-player #seledascormpage .btn-fullscreen.actived {
+    background-image: url('[[pix:mod_seledascorm|fullscreen2]]');
 }
 
-#page-mod-exescorm-player #exescormpage .btn-fullscreen img {
+#page-mod-seledascorm-player #seledascormpage .btn-fullscreen img {
     height: 18px;
     padding: 0;
     margin: 0;
 }
 
-#page-mod-exescorm-player #exescormpage .btn-fullscreen:hover {
+#page-mod-seledascorm-player #seledascormpage .btn-fullscreen:hover {
     transition: background-size 0.1s ease-out;
     background-size: 22px;
 }
 
-#page-mod-exescorm-player .tocbox_action-buttons a.btn {
+#page-mod-seledascorm-player .tocbox_action-buttons a.btn {
     padding: 2px 8px;
     color: black;
     border-color: black;
 }
 
-#page-mod-exescorm-player .tocbox_action-buttons a.btn:hover {
+#page-mod-seledascorm-player .tocbox_action-buttons a.btn:hover {
     color: #fff;
     background-color: black;
     border-color: black;
 }
 
-#page-mod-exescorm-player #exescormpage {
+#page-mod-seledascorm-player #seledascormpage {
     margin-top: 22px;
     background-color: white;
     padding-top: 11px;
 }
 
-#page-mod-exescorm-player button#exescorm_toc_toggle_btn {
+#page-mod-seledascorm-player button#seledascorm_toc_toggle_btn {
     border: none;
     width: 30px;
     height: 30px;
-    background-image: url('[[pix:mod_exescorm|prev]]');
+    background-image: url('[[pix:mod_seledascorm|prev]]');
     background-size: 20px;
     background-repeat: no-repeat;
     background-position: center;
@@ -379,13 +379,13 @@
     border-radius: 0 5px 5px 0;
 }
 
-#page-mod-exescorm-player button#exescorm_toc_toggle_btn.collapsed {
-    background-image: url('[[pix:mod_exescorm|next]]');
+#page-mod-seledascorm-player button#seledascorm_toc_toggle_btn.collapsed {
+    background-image: url('[[pix:mod_seledascorm|next]]');
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
 }
 
-#page-mod-exescorm-player span#exescorm_nav button {
+#page-mod-seledascorm-player span#seledascorm_nav button {
     color: white;
     border: none;
     box-shadow: none;
@@ -397,42 +397,42 @@
     background-position: center;
 }
 
-#page-mod-exescorm-player button#nav_skipprev {
+#page-mod-seledascorm-player button#nav_skipprev {
     border-top-left-radius: 5px !important;
     border-bottom-left-radius: 5px !important;
-    background-image: url('[[pix:mod_exescorm|skipprev]]') !important;
+    background-image: url('[[pix:mod_seledascorm|skipprev]]') !important;
 }
 
-#page-mod-exescorm-player button#nav_skipnext {
+#page-mod-seledascorm-player button#nav_skipnext {
     border-top-right-radius: 5px !important;
     border-bottom-right-radius: 5px !important;
-    background-image: url('[[pix:mod_exescorm|skipnext]]') !important;
+    background-image: url('[[pix:mod_seledascorm|skipnext]]') !important;
 }
 
-#page-mod-exescorm-player button#nav_next {
-    background-image: url('[[pix:mod_exescorm|next]]') !important;
+#page-mod-seledascorm-player button#nav_next {
+    background-image: url('[[pix:mod_seledascorm|next]]') !important;
 }
 
-#page-mod-exescorm-player button#nav_prev {
-    background-image: url('[[pix:mod_exescorm|prev]]') !important;
+#page-mod-seledascorm-player button#nav_prev {
+    background-image: url('[[pix:mod_seledascorm|prev]]') !important;
 }
 
-#page-mod-exescorm-player button#nav_up {
-    background-image: url('[[pix:mod_exescorm|up]]') !important;
+#page-mod-seledascorm-player button#nav_up {
+    background-image: url('[[pix:mod_seledascorm|up]]') !important;
 }
 
-#page-mod-exescorm-player #exescormpage li.yui3-treeview-has-children > div.yui3-treeview-row > span.yui3-treeview-icon {
-    background-image: url('[[pix:mod_exescorm|folder]]');
+#page-mod-seledascorm-player #seledascormpage li.yui3-treeview-has-children > div.yui3-treeview-row > span.yui3-treeview-icon {
+    background-image: url('[[pix:mod_seledascorm|folder]]');
     width: 22px;
     height: 25px;
 }
 
-#page-mod-exescorm-player .yui3-treeview-node[aria-expanded="true"] .yui3-treeview-indicator s {
+#page-mod-seledascorm-player .yui3-treeview-node[aria-expanded="true"] .yui3-treeview-indicator s {
     border-left-color: transparent;
     border-top-color: black;
 }
 
-#page-mod-exescorm-player .yui3-treeview-node[aria-expanded="false"] .yui3-treeview-indicator s {
+#page-mod-seledascorm-player .yui3-treeview-node[aria-expanded="false"] .yui3-treeview-indicator s {
     border-left-color: black;
     border-top-color: transparent;
 }
@@ -463,19 +463,19 @@
 }
 
 .yui3-skin-sam .yui3-treeview-label .icon.fa-check-square-o {
-    background-image: url('[[pix:mod_exescorm|fa-check-square-o]]');
+    background-image: url('[[pix:mod_seledascorm|fa-check-square-o]]');
 }
 
 .yui3-skin-sam .yui3-treeview-label .icon.fa-pencil-square-o {
-    background-image: url('[[pix:mod_exescorm|fa-pencil-square-o]]');
+    background-image: url('[[pix:mod_seledascorm|fa-pencil-square-o]]');
 }
 
 .yui3-skin-sam .yui3-treeview-label .icon.fa-square-o {
-    background-image: url('[[pix:mod_exescorm|fa-square-o]]');
+    background-image: url('[[pix:mod_seledascorm|fa-square-o]]');
 }
 
 .yui3-skin-sam .yui3-treeview-label .icon.fa-pause {
-    background-image: url('[[pix:mod_exescorm|fa-pause]]');
+    background-image: url('[[pix:mod_seledascorm|fa-pause]]');
 }
 
 .yui3-skin-sam .yui3-treeview-label .icon.fa-check-square-o:before,
@@ -485,7 +485,7 @@
     content: inherit;
 }
 
-#page-mod-exescorm-player #exescormpage #exescorm_tree {
+#page-mod-seledascorm-player #seledascormpage #seledascorm_tree {
     border-right: 2px dotted rgb(231 231 231);
     margin-right: 2px;
 }
@@ -511,16 +511,16 @@
     background-image: none;
 }
 
-#page-mod-exescorm-player #exescormpage #exescorm_navpanel {
+#page-mod-seledascorm-player #seledascormpage #seledascorm_navpanel {
     text-align: center;
     padding-bottom: 30px;
 }
 
-#page-mod-exescorm-player a#exescorm-link-edit {
+#page-mod-seledascorm-player a#seledascorm-link-edit {
     position: relative;
     top: 67px;
 }
-#page-mod-exescorm-player .edit_exescorm_container {
+#page-mod-seledascorm-player .edit_seledascorm_container {
     width: 100%;
     display: flex;
     justify-content: end;
@@ -530,7 +530,7 @@
 }
 
 /* Embedded editor modal overlay */
-.exescorm-editor-overlay {
+.seledascorm-editor-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -542,7 +542,7 @@
     flex-direction: column;
 }
 
-.exescorm-editor-header {
+.seledascorm-editor-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -552,7 +552,7 @@
     flex-shrink: 0;
 }
 
-.exescorm-editor-title {
+.seledascorm-editor-title {
     font-weight: bold;
     font-size: 1.1em;
     overflow: hidden;
@@ -560,20 +560,20 @@
     white-space: nowrap;
 }
 
-.exescorm-editor-buttons {
+.seledascorm-editor-buttons {
     display: flex;
     align-items: center;
     flex-shrink: 0;
 }
 
-.exescorm-editor-iframe {
+.seledascorm-editor-iframe {
     flex: 1;
     border: none;
     width: 100%;
 }
 
 /* Loading modal shown while saving */
-.exescorm-loading-modal {
+.seledascorm-loading-modal {
     position: fixed;
     inset: 0;
     z-index: 10000;
@@ -586,12 +586,12 @@
     transition: opacity 0.2s ease, visibility 0.2s ease;
 }
 
-.exescorm-loading-modal.is-visible {
+.seledascorm-loading-modal.is-visible {
     opacity: 1;
     visibility: visible;
 }
 
-.exescorm-loading-modal__content {
+.seledascorm-loading-modal__content {
     background: #fff;
     border-radius: 12px;
     padding: 2.5rem 3rem;
@@ -601,29 +601,189 @@
     width: 90%;
 }
 
-.exescorm-loading-modal__spinner {
+.seledascorm-loading-modal__spinner {
     width: 48px;
     height: 48px;
     border: 4px solid #e9ecef;
     border-top-color: #0f6cbf;
     border-radius: 50%;
-    animation: exescorm-spin 0.8s linear infinite;
+    animation: seledascorm-spin 0.8s linear infinite;
     margin: 0 auto 1.5rem;
 }
 
-@keyframes exescorm-spin {
+@keyframes seledascorm-spin {
     to { transform: rotate(360deg); }
 }
 
-.exescorm-loading-modal__title {
+.seledascorm-loading-modal__title {
     margin: 0 0 0.5rem;
     font-size: 1.25rem;
     color: #1d2125;
 }
 
-.exescorm-loading-modal__message {
+.seledascorm-loading-modal__message {
     margin: 0;
     color: #6c757d;
     font-size: 0.9rem;
 }
 
+
+
+/* SELEDA SCORM ALIGNMENT
+ * Product-facing styling only. Technical mod_seledascorm selectors are retained
+ * so existing Moodle activities, player scripts and upstream upgrades remain compatible.
+ */
+.path-mod-seledascorm {
+    --seleda-primary: #2f6df6;
+    --seleda-primary-dark: #2459d3;
+    --seleda-primary-light: #e3ebff;
+    --seleda-secondary: #12b8aa;
+    --seleda-secondary-dark: #0f968b;
+    --seleda-border: #e3e8ef;
+    --seleda-surface: #f6f8fb;
+    --seleda-text: #182230;
+}
+
+#page-mod-seledascorm-player #seledascormpage {
+    color: var(--seleda-text);
+}
+
+#page-mod-seledascorm-player span#seledascorm_nav button {
+    background-color: var(--seleda-primary);
+    border-radius: 8px;
+    transition: background-color .15s ease, box-shadow .15s ease, transform .15s ease;
+}
+
+#page-mod-seledascorm-player span#seledascorm_nav button:hover:not(:disabled),
+#page-mod-seledascorm-player span#seledascorm_nav button:focus-visible:not(:disabled) {
+    background-color: var(--seleda-primary-dark);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--seleda-primary) 20%, transparent);
+}
+
+#page-mod-seledascorm-player span#seledascorm_nav button:disabled {
+    opacity: .48;
+}
+
+#page-mod-seledascorm-player .yui3-treeview-selected > .yui3-treeview-row {
+    background-color: var(--seleda-primary-light);
+    border-color: color-mix(in srgb, var(--seleda-primary) 28%, white);
+}
+
+#page-mod-seledascorm-player .yui3-treeview-selected:focus > .yui3-treeview-row,
+#page-mod-seledascorm-player .yui3-treeview-children[aria-multiselectable="true"] .yui3-treeview-selected > .yui3-treeview-row,
+#page-mod-seledascorm-player .yui3-treeview-selected > .yui3-treeview-row:hover {
+    background-color: color-mix(in srgb, var(--seleda-primary-light) 72%, white);
+    border-color: color-mix(in srgb, var(--seleda-primary) 36%, white);
+}
+
+#page-mod-seledascorm-player #seledascormpage #seledascorm_tree {
+    border-right-color: var(--seleda-border);
+}
+
+#page-mod-seledascorm-player .tocbox_action-buttons a.btn:hover,
+#page-mod-seledascorm-player .tocbox_action-buttons a.btn:focus-visible {
+    color: #fff;
+    background-color: var(--seleda-primary);
+    border-color: var(--seleda-primary);
+}
+
+.seledascorm-editor-header {
+    border-bottom-color: var(--seleda-border);
+    box-shadow: inset 0 3px 0 var(--seleda-secondary);
+}
+
+.seledascorm-loading-modal__spinner {
+    border-top-color: var(--seleda-secondary);
+}
+
+.path-mod-seledascorm .btn-primary {
+    --bs-btn-bg: var(--seleda-primary);
+    --bs-btn-border-color: var(--seleda-primary);
+    --bs-btn-hover-bg: var(--seleda-primary-dark);
+    --bs-btn-hover-border-color: var(--seleda-primary-dark);
+}
+
+
+/* SELEDA V1 PLAYER LAYOUT OVERRIDE
+ * Do not rely on the legacy YUI percentage grid for the main player columns.
+ * The module still uses YUI classes for state, but these rules define the
+ * actual visual geometry explicitly and survive Moodle/theme differences.
+ */
+#page-mod-seledascorm-player #seledascorm_layout {
+    display: flex !important;
+    align-items: stretch;
+    width: 100% !important;
+    max-width: 100%;
+    min-width: 0;
+    height: auto !important;
+    letter-spacing: normal !important;
+    word-spacing: normal !important;
+}
+
+#page-mod-seledascorm-player #seledascorm_toc {
+    flex: 0 0 20%;
+    width: 20% !important;
+    min-width: 220px;
+    max-width: 360px !important;
+    box-sizing: border-box;
+}
+
+#page-mod-seledascorm-player #seledascorm_toc.disabled {
+    display: none !important;
+}
+
+#page-mod-seledascorm-player #seledascorm_toc_toggle {
+    flex: 0 0 34px;
+    width: 34px !important;
+    min-width: 34px;
+    position: relative;
+    box-sizing: border-box;
+}
+
+#page-mod-seledascorm-player #seledascorm_content,
+#page-mod-seledascorm-player #seledascorm_content.yui3-u-1,
+#page-mod-seledascorm-player #seledascorm_content.yui3-u-3-4,
+#page-mod-seledascorm-player #seledascorm_content.yui3-u-1-5,
+#page-mod-seledascorm-player #seledascorm_content.yui3-u-1-24 {
+    flex: 1 1 auto !important;
+    width: auto !important;
+    min-width: 0;
+    max-width: none;
+    box-sizing: border-box;
+}
+
+#page-mod-seledascorm-player #seledascorm_content .scoframe,
+#page-mod-seledascorm-player #seledascorm_content #seledascorm_object {
+    display: block;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    box-sizing: border-box;
+}
+
+#page-mod-seledascorm-player #seledascorm_tree {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+    #page-mod-seledascorm-player #seledascorm_layout {
+        display: block !important;
+    }
+
+    #page-mod-seledascorm-player #seledascorm_toc {
+        width: 100% !important;
+        max-width: none !important;
+        min-width: 0;
+    }
+
+    #page-mod-seledascorm-player #seledascorm_toc_toggle {
+        width: 100% !important;
+        min-width: 0;
+        height: 34px;
+    }
+
+    #page-mod-seledascorm-player #seledascorm_content {
+        width: 100% !important;
+    }
+}

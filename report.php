@@ -14,38 +14,38 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-// This script uses installed report plugins to print exescorm reports.
+// This script uses installed report plugins to print seledascorm reports.
 
 require_once("../../config.php");
 require_once($CFG->libdir.'/tablelib.php');
-require_once($CFG->dirroot.'/mod/exescorm/locallib.php');
-require_once($CFG->dirroot.'/mod/exescorm/reportsettings_form.php');
-require_once($CFG->dirroot.'/mod/exescorm/report/reportlib.php');
+require_once($CFG->dirroot.'/mod/seledascorm/locallib.php');
+require_once($CFG->dirroot.'/mod/seledascorm/reportsettings_form.php');
+require_once($CFG->dirroot.'/mod/seledascorm/report/reportlib.php');
 require_once($CFG->libdir.'/formslib.php');
 
-define('EXESCORM_REPORT_DEFAULT_PAGE_SIZE', 20);
-define('EXESCORM_REPORT_ATTEMPTS_ALL_STUDENTS', 0);
-define('EXESCORM_REPORT_ATTEMPTS_STUDENTS_WITH', 1);
-define('EXESCORM_REPORT_ATTEMPTS_STUDENTS_WITH_NO', 2);
+define('SELEDASCORM_REPORT_DEFAULT_PAGE_SIZE', 20);
+define('SELEDASCORM_REPORT_ATTEMPTS_ALL_STUDENTS', 0);
+define('SELEDASCORM_REPORT_ATTEMPTS_STUDENTS_WITH', 1);
+define('SELEDASCORM_REPORT_ATTEMPTS_STUDENTS_WITH_NO', 2);
 
 $id = required_param('id', PARAM_INT);// Course Module ID, or ...
 $download = optional_param('download', '', PARAM_RAW);
 $mode = optional_param('mode', '', PARAM_ALPHA); // Report mode.
 
-$cm = get_coursemodule_from_id('exescorm', $id, 0, false, MUST_EXIST);
+$cm = get_coursemodule_from_id('seledascorm', $id, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-$exescorm = $DB->get_record('exescorm', array('id' => $cm->instance), '*', MUST_EXIST);
+$seledascorm = $DB->get_record('seledascorm', array('id' => $cm->instance), '*', MUST_EXIST);
 
 $contextmodule = context_module::instance($cm->id);
-$reportlist = exescorm_report_list($contextmodule);
+$reportlist = seledascorm_report_list($contextmodule);
 
-$url = new moodle_url('/mod/exescorm/report.php');
+$url = new moodle_url('/mod/seledascorm/report.php');
 
 $url->param('id', $id);
 if (empty($mode)) {
     $mode = reset($reportlist);
 } else if (!in_array($mode, $reportlist)) {
-    throw new \moodle_exception('erroraccessingreport', 'mod_exescorm');
+    throw new \moodle_exception('erroraccessingreport', 'mod_seledascorm');
 }
 $url->param('mode', $mode);
 
@@ -54,25 +54,25 @@ $PAGE->set_url($url);
 require_login($course, false, $cm);
 $PAGE->set_pagelayout('report');
 
-require_capability('mod/exescorm:viewreport', $contextmodule);
+require_capability('mod/seledascorm:viewreport', $contextmodule);
 
 // Activate the secondary nav tab.
-navigation_node::override_active_url(new moodle_url('/mod/exescorm/report.php', ['id' => $id]));
+navigation_node::override_active_url(new moodle_url('/mod/seledascorm/report.php', ['id' => $id]));
 
 if (count($reportlist) < 1) {
-    throw new \moodle_exception('erroraccessingreport', 'exescorm');
+    throw new \moodle_exception('erroraccessingreport', 'seledascorm');
 }
 
 // Trigger a report viewed event.
-$event = \mod_exescorm\event\report_viewed::create(array(
+$event = \mod_seledascorm\event\report_viewed::create(array(
     'context' => $contextmodule,
     'other' => array(
-        'exescormid' => $exescorm->id,
+        'seledascormid' => $seledascorm->id,
         'mode' => $mode
     )
 ));
 $event->add_record_snapshot('course_modules', $cm);
-$event->add_record_snapshot('exescorm', $exescorm);
+$event->add_record_snapshot('seledascorm', $seledascorm);
 $event->trigger();
 
 $userdata = null;
@@ -81,10 +81,10 @@ if (!empty($download)) {
 }
 // Print the page header.
 if (empty($noheader)) {
-    $strreport = get_string('report', 'mod_exescorm');
-    $strattempt = get_string('attempt', 'mod_exescorm');
+    $strreport = get_string('report', 'mod_seledascorm');
+    $strattempt = get_string('attempt', 'mod_seledascorm');
 
-    $PAGE->set_title("$course->shortname: ".format_string($exescorm->name));
+    $PAGE->set_title("$course->shortname: ".format_string($seledascorm->name));
     $PAGE->set_heading($course->fullname);
     if ($CFG->version >= 2022041900) { // Moodle 4+.
         $PAGE->activityheader->set_attrs([
@@ -92,22 +92,22 @@ if (empty($noheader)) {
             'description' => ''
         ]);
     }
-    $PAGE->navbar->add($strreport, new moodle_url('/mod/exescorm/report.php', array('id' => $cm->id)));
+    $PAGE->navbar->add($strreport, new moodle_url('/mod/seledascorm/report.php', array('id' => $cm->id)));
 
     echo $OUTPUT->header();
     if ($CFG->version < 2022041900) { // Moodle prior to 4.
-        echo $OUTPUT->heading(format_string($exescorm->name));
+        echo $OUTPUT->heading(format_string($seledascorm->name));
         $currenttab = 'reports';
-        require($CFG->dirroot . '/mod/exescorm/tabs.php');
+        require($CFG->dirroot . '/mod/seledascorm/tabs.php');
     }
 
 }
 
 // Open the selected Scorm report and display it.
-$classname = "exescormreport_{$mode}\\report";
-$legacyclassname = "exescorm_{$mode}_report";
+$classname = "seledascormreport_{$mode}\\report";
+$legacyclassname = "seledascorm_{$mode}_report";
 $report = class_exists($classname) ? new $classname() : new $legacyclassname();
-$report->display($exescorm, $cm, $course, $download); // Run the report!
+$report->display($seledascorm, $cm, $course, $download); // Run the report!
 
 // Print footer.
 

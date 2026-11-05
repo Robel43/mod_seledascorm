@@ -17,12 +17,12 @@
 /**
  * Tests for the optional stored-file admin setting.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  2025 eXeLearning
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_exescorm\admin;
+namespace mod_seledascorm\admin;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -33,7 +33,7 @@ require_once($CFG->libdir . '/filelib.php');
 /**
  * Regression tests covering the save flow of admin_setting_optional_configstoredfile.
  *
- * @covers \mod_exescorm\admin\admin_setting_optional_configstoredfile
+ * @covers \mod_seledascorm\admin\admin_setting_optional_configstoredfile
  */
 class admin_setting_optional_configstoredfile_test extends \advanced_testcase {
     protected function setUp(): void {
@@ -50,7 +50,7 @@ class admin_setting_optional_configstoredfile_test extends \advanced_testcase {
      */
     private function build_setting(): admin_setting_optional_configstoredfile {
         return new admin_setting_optional_configstoredfile(
-            'exescorm/template',
+            'seledascorm/template',
             'New package template',
             'Optional package template.',
             'config',
@@ -95,7 +95,7 @@ class admin_setting_optional_configstoredfile_test extends \advanced_testcase {
         $syscontext = \context_system::instance();
         return get_file_storage()->get_area_files(
             $syscontext->id,
-            'exescorm',
+            'seledascorm',
             'config',
             0,
             'itemid, filepath, filename',
@@ -124,7 +124,7 @@ class admin_setting_optional_configstoredfile_test extends \advanced_testcase {
         $this->assertCount(0, $this->get_stored_files());
         // The persisted value must be '' (not null) so the setting is never
         // treated as new on the upgrade page.
-        $this->assertSame('', get_config('exescorm', 'template'));
+        $this->assertSame('', get_config('seledascorm', 'template'));
     }
 
     /**

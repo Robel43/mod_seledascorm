@@ -16,8 +16,8 @@
 
 
 /**
- * Defines the version of exescorm_interactions
- * @package   exescormreport
+ * Defines the version of seledascorm_interactions
+ * @package   seledascormreport
  * @subpackage interactions
  * @author    Dan Marsden and Ankit Kumar Agarwal
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -29,4 +29,4 @@ $plugin->version = 2022112800;                 // The current plugin version (Da
 // $plugin->requires = 2022111800;    // Requires this Moodle version 4.1.
 $plugin->requires = 2020061500;    // Moodle 3.9.
 // $plugin->requires = 2021051700;    // Moodle 3.11.
-$plugin->component = 'exescormreport_interactions'; // Full name of the plugin (used for diagnostics).
+$plugin->component = 'seledascormreport_interactions'; // Full name of the plugin (used for diagnostics).

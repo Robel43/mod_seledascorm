@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace mod_exescorm\output;
+namespace mod_seledascorm\output;
 
 use renderable;
 use renderer_base;
@@ -23,9 +23,9 @@ use moodle_url;
 use url_select;
 
 /**
- * Render HTML elements for tertiary nav for exescorm.
+ * Render HTML elements for tertiary nav for seledascorm.
  *
- * @package mod_exescorm
+ * @package mod_seledascorm
  * @copyright 2021 Sujith Haridasan <sujith@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -44,7 +44,7 @@ class actionbar implements renderable, templatable {
      *
      * @param int $id The course module id.
      * @param bool $download Show download button or not.
-     * @param int $attemptsmode attempts mode for exescorm.
+     * @param int $attemptsmode attempts mode for seledascorm.
      */
     public function __construct(int $id, bool $download = false, int $attemptsmode = 0) {
         $this->id = $id;
@@ -61,16 +61,16 @@ class actionbar implements renderable, templatable {
     public function export_for_template(renderer_base $output): array {
         global $PAGE;
 
-        $basicreportlink = new moodle_url('/mod/exescorm/report.php', ['id' => $this->id, 'mode' => 'basic']);
-        $graphreportlink = new moodle_url('/mod/exescorm/report.php', ['id' => $this->id, 'mode' => 'graphs']);
-        $interactionreportlink = new moodle_url('/mod/exescorm/report.php', ['id' => $this->id, 'mode' => 'interactions']);
-        $objectivesreportlink = new moodle_url('/mod/exescorm/report.php', ['id' => $this->id, 'mode' => 'objectives']);
+        $basicreportlink = new moodle_url('/mod/seledascorm/report.php', ['id' => $this->id, 'mode' => 'basic']);
+        $graphreportlink = new moodle_url('/mod/seledascorm/report.php', ['id' => $this->id, 'mode' => 'graphs']);
+        $interactionreportlink = new moodle_url('/mod/seledascorm/report.php', ['id' => $this->id, 'mode' => 'interactions']);
+        $objectivesreportlink = new moodle_url('/mod/seledascorm/report.php', ['id' => $this->id, 'mode' => 'objectives']);
 
         $reportmenu = [
-            $basicreportlink->out(false) => get_string('pluginname', 'exescormreport_basic'),
-            $graphreportlink->out(false) => get_string('pluginname', 'exescormreport_graphs'),
-            $interactionreportlink->out(false) => get_string('pluginname', 'exescormreport_interactions'),
-            $objectivesreportlink->out(false) => get_string('pluginname', 'exescormreport_objectives'),
+            $basicreportlink->out(false) => get_string('pluginname', 'seledascormreport_basic'),
+            $graphreportlink->out(false) => get_string('pluginname', 'seledascormreport_graphs'),
+            $interactionreportlink->out(false) => get_string('pluginname', 'seledascormreport_interactions'),
+            $objectivesreportlink->out(false) => get_string('pluginname', 'seledascormreport_objectives'),
         ];
 
         $sesskey = sesskey();
@@ -105,13 +105,13 @@ class actionbar implements renderable, templatable {
             $downloadtextlink = new moodle_url($PAGE->url, $options);
         }
 
-        $url = new moodle_url('/mod/exescorm/report.php', $PAGE->url->remove_params('attemptsmode'));
-        $urlselect = new url_select($reportmenu, $url->out(false), null, 'selectexescormreports');
+        $url = new moodle_url('/mod/seledascorm/report.php', $PAGE->url->remove_params('attemptsmode'));
+        $urlselect = new url_select($reportmenu, $url->out(false), null, 'selectseledascormreports');
         $heading = $reportmenu[$url->out(false)] ?? null;
 
         $data = [
             'heading' => $heading,
-            'exescormreports' => $urlselect->export_for_template($output),
+            'seledascormreports' => $urlselect->export_for_template($output),
             'candownload' => $this->download,
             'downloadods' => ($this->download) ? $downloadodslink->out(false) : '',
             'downloadexcel' => ($this->download) ? $downloadexcellink->out(false) : '',

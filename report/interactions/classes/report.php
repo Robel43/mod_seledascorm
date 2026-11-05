@@ -15,72 +15,74 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 /**
  * Core Report class of basic reporting plugin
- * @package   exescormreport
+ * @package   seledascormreport
  * @subpackage interactions
  * @author    Dan Marsden and Ankit Kumar Agarwal
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace exescormreport_interactions;
+namespace seledascormreport_interactions;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot.'/mod/exescorm/report/interactions/responsessettings_form.php');
+require_once($CFG->dirroot.'/mod/seledascorm/report/interactions/responsessettings_form.php');
+require_once($CFG->dirroot.'/mod/seledascorm/report/timhirt_reporting.php');
+use mod_seledascorm\local\timhirt_reporting;
 
-class report extends \mod_exescorm\report {
+class report extends \mod_seledascorm\report {
     /**
      * displays the full report
-     * @param \stdClass $exescorm full EXESCORM object
+     * @param \stdClass $seledascorm full SELEDASCORM object
      * @param \stdClass $cm - full course_module object
      * @param \stdClass $course - full course object
      * @param string $download - type of download being requested
      */
-    public function display($exescorm, $cm, $course, $download) {
+    public function display($seledascorm, $cm, $course, $download) {
         global $CFG, $DB, $OUTPUT, $PAGE;
 
         $contextmodule = \context_module::instance($cm->id);
         $action = optional_param('action', '', PARAM_ALPHA);
         $attemptids = optional_param_array('attemptid', array(), PARAM_RAW);
-        $attemptsmode = optional_param('attemptsmode', EXESCORM_REPORT_ATTEMPTS_ALL_STUDENTS, PARAM_INT);
+        $attemptsmode = optional_param('attemptsmode', SELEDASCORM_REPORT_ATTEMPTS_ALL_STUDENTS, PARAM_INT);
         $PAGE->set_url(new \moodle_url($PAGE->url, array('attemptsmode' => $attemptsmode)));
 
         // Scorm action bar for report.
         if ($download === '') {
-            $actionbar = new \mod_exescorm\output\actionbar($cm->id, true, $attemptsmode);
-            $renderer = $PAGE->get_renderer('mod_exescorm');
+            $actionbar = new \mod_seledascorm\output\actionbar($cm->id, true, $attemptsmode);
+            $renderer = $PAGE->get_renderer('mod_seledascorm');
             echo $renderer->report_actionbar($actionbar);
         }
 
-        if ($action == 'delete' && has_capability('mod/exescorm:deleteresponses', $contextmodule) && confirm_sesskey()) {
-            if (exescorm_delete_responses($attemptids, $exescorm)) { // Delete responses.
-                echo $OUTPUT->notification(get_string('exescormresponsedeleted', 'mod_exescorm'), 'notifysuccess');
+        if ($action == 'delete' && has_capability('mod/seledascorm:deleteresponses', $contextmodule) && confirm_sesskey()) {
+            if (seledascorm_delete_responses($attemptids, $seledascorm)) { // Delete responses.
+                echo $OUTPUT->notification(get_string('seledascormresponsedeleted', 'mod_seledascorm'), 'notifysuccess');
             }
         }
         // Find out current groups mode.
         $currentgroup = groups_get_activity_group($cm, true);
 
         // Detailed report.
-        $mform = new \mod_exescorm_report_interactions_settings($PAGE->url, compact('currentgroup'));
+        $mform = new \mod_seledascorm_report_interactions_settings($PAGE->url, compact('currentgroup'));
         if ($fromform = $mform->get_data()) {
             $pagesize = $fromform->pagesize;
             $includeqtext = $fromform->qtext;
             $includeresp = $fromform->resp;
             $includeright = $fromform->right;
             $includeresult = $fromform->result;
-            set_user_preference('exescorm_report_pagesize', $pagesize);
-            set_user_preference('exescorm_report_interactions_qtext', $includeqtext);
-            set_user_preference('exescorm_report_interactions_resp', $includeresp);
-            set_user_preference('exescorm_report_interactions_right', $includeright);
-            set_user_preference('exescorm_report_interactions_result', $includeresult);
+            set_user_preference('seledascorm_report_pagesize', $pagesize);
+            set_user_preference('seledascorm_report_interactions_qtext', $includeqtext);
+            set_user_preference('seledascorm_report_interactions_resp', $includeresp);
+            set_user_preference('seledascorm_report_interactions_right', $includeright);
+            set_user_preference('seledascorm_report_interactions_result', $includeresult);
         } else {
-            $pagesize = get_user_preferences('exescorm_report_pagesize', 0);
-            $includeqtext = get_user_preferences('exescorm_report_interactions_qtext', 0);
-            $includeresp = get_user_preferences('exescorm_report_interactions_resp', 1);
-            $includeright = get_user_preferences('exescorm_report_interactions_right', 0);
-            $includeresult = get_user_preferences('exescorm_report_interactions_result', 0);
+            $pagesize = get_user_preferences('seledascorm_report_pagesize', 0);
+            $includeqtext = get_user_preferences('seledascorm_report_interactions_qtext', 1);
+            $includeresp = get_user_preferences('seledascorm_report_interactions_resp', 1);
+            $includeright = get_user_preferences('seledascorm_report_interactions_right', 1);
+            $includeresult = get_user_preferences('seledascorm_report_interactions_result', 1);
         }
         if ($pagesize < 1) {
-            $pagesize = EXESCORM_REPORT_DEFAULT_PAGE_SIZE;
+            $pagesize = SELEDASCORM_REPORT_DEFAULT_PAGE_SIZE;
         }
 
         // Select group menu.
@@ -101,11 +103,11 @@ class report extends \mod_exescorm\report {
 
         // We only want to show the checkbox to delete attempts
         // if the user has permissions and if the report mode is showing attempts.
-        $candelete = has_capability('mod/exescorm:deleteresponses', $contextmodule)
-                && ($attemptsmode != EXESCORM_REPORT_ATTEMPTS_STUDENTS_WITH_NO);
+        $candelete = has_capability('mod/seledascorm:deleteresponses', $contextmodule)
+                && ($attemptsmode != SELEDASCORM_REPORT_ATTEMPTS_STUDENTS_WITH_NO);
         // Select the students.
         $nostudents = false;
-        list($allowedlistsql, $params) = get_enrolled_sql($contextmodule, 'mod/exescorm:savetrack', (int) $currentgroup);
+        list($allowedlistsql, $params) = get_enrolled_sql($contextmodule, 'mod/seledascorm:savetrack', (int) $currentgroup);
         if (empty($currentgroup)) {
             // All users who can attempt scoes.
             if (!$DB->record_exists_sql($allowedlistsql, $params)) {
@@ -123,7 +125,7 @@ class report extends \mod_exescorm\report {
             // Now check if asked download of data.
             $coursecontext = \context_course::instance($course->id);
             if ($download) {
-                $filename = clean_filename("$course->shortname ".format_string($exescorm->name, true, $formattextoptions));
+                $filename = clean_filename("$course->shortname ".format_string($seledascorm->name, true, $formattextoptions));
             }
 
             // Define table columns.
@@ -147,41 +149,35 @@ class report extends \mod_exescorm\report {
                 $headers[] = \core_user\fields::get_display_name($field);
             }
             $columns[] = 'attempt';
-            $headers[] = get_string('attempt', 'mod_exescorm');
+            $headers[] = get_string('attempt', 'mod_seledascorm');
             $columns[] = 'start';
-            $headers[] = get_string('started', 'mod_exescorm');
+            $headers[] = get_string('started', 'mod_seledascorm');
             $columns[] = 'finish';
-            $headers[] = get_string('last', 'mod_exescorm');
+            $headers[] = get_string('last', 'mod_seledascorm');
             $columns[] = 'score';
-            $headers[] = get_string('score', 'mod_exescorm');
-            $scoes = $DB->get_records('exescorm_scoes', array("exescorm" => $exescorm->id), 'sortorder, id');
-            foreach ($scoes as $sco) {
-                if ($sco->launch != '') {
-                    $columns[] = 'scograde'.$sco->id;
-                    $headers[] = format_string($sco->title, '', $formattextoptions);
-                }
-            }
+            $headers[] = get_string('score', 'mod_seledascorm');
+            $scoes = $DB->get_records('seledascorm_scoes', array("seledascorm" => $seledascorm->id), 'sortorder, id');
 
             // Construct the SQL.
             $select = 'SELECT DISTINCT '.$DB->sql_concat('u.id', '\'#\'', 'COALESCE(st.attempt, 0)').' AS uniqueid, ';
             // TODO Does not support custom user profile fields (MDL-70456).
             $userfields = \core_user\fields::for_identity($coursecontext, false)->with_userpic()->including('idnumber');
             $selectfields = $userfields->get_sql('u', false, '', 'userid')->selects;
-            $select .= 'st.exescormid AS exescormid, st.attempt AS attempt ' . $selectfields . ' ';
+            $select .= 'st.seledascormid AS seledascormid, st.attempt AS attempt ' . $selectfields . ' ';
 
-            // This part is the same for all cases - join users and exescorm_scoes_track tables.
+            // This part is the same for all cases - join users and seledascorm_scoes_track tables.
             $from = 'FROM {user} u ';
-            $from .= 'LEFT JOIN {exescorm_scoes_track} st ON st.userid = u.id AND st.exescormid = '.$exescorm->id;
+            $from .= 'LEFT JOIN {seledascorm_scoes_track} st ON st.userid = u.id AND st.seledascormid = '.$seledascorm->id;
             switch ($attemptsmode) {
-                case EXESCORM_REPORT_ATTEMPTS_STUDENTS_WITH:
+                case SELEDASCORM_REPORT_ATTEMPTS_STUDENTS_WITH:
                     // Show only students with attempts.
                     $where = " WHERE u.id IN ({$allowedlistsql}) AND st.userid IS NOT NULL";
                     break;
-                case EXESCORM_REPORT_ATTEMPTS_STUDENTS_WITH_NO:
+                case SELEDASCORM_REPORT_ATTEMPTS_STUDENTS_WITH_NO:
                     // Show only students without attempts.
                     $where = " WHERE u.id IN ({$allowedlistsql}) AND st.userid IS NULL";
                     break;
-                case EXESCORM_REPORT_ATTEMPTS_ALL_STUDENTS:
+                case SELEDASCORM_REPORT_ATTEMPTS_ALL_STUDENTS:
                     // Show all students with or without attempts.
                     $where = " WHERE u.id IN ({$allowedlistsql}) AND (st.userid IS NOT NULL OR st.userid IS NULL)";
                     break;
@@ -191,29 +187,28 @@ class report extends \mod_exescorm\report {
             $countsql .= 'COUNT(DISTINCT('.$DB->sql_concat('u.id', '\'#\'', 'st.attempt').')) AS nbattempts, ';
             $countsql .= 'COUNT(DISTINCT(u.id)) AS nbusers ';
             $countsql .= $from.$where;
-            $questioncount = get_exescorm_question_count($exescorm->id);
-            $nbmaincolumns = count($columns);
-            for ($id = 0; $id < $questioncount; $id++) {
-                if ($displayoptions['qtext']) {
-                    $columns[] = 'question' . $id;
-                    $headers[] = get_string('questionx', 'exescormreport_interactions', $id);
-                }
-                if ($displayoptions['resp']) {
-                    $columns[] = 'response' . $id;
-                    $headers[] = get_string('responsex', 'exescormreport_interactions', $id);
-                }
-                if ($displayoptions['right']) {
-                    $columns[] = 'right' . $id;
-                    $headers[] = get_string('rightanswerx', 'exescormreport_interactions', $id);
-                }
-                if ($displayoptions['result']) {
-                    $columns[] = 'result' . $id;
-                    $headers[] = get_string('resultx', 'exescormreport_interactions', $id);
+            $questioncount = get_seledascorm_question_count($seledascorm->id);
+            $catalogs = [];
+            $interactioncolumns = [];
+            foreach ($scoes as $sco) {
+                if ($sco->launch === '') { continue; }
+                $columns[] = 'scograde' . $sco->id;
+                $headers[] = format_string($sco->title, '', $formattextoptions);
+                $catalogs[$sco->id] = timhirt_reporting::packagecatalog($contextmodule, $seledascorm, (int)$sco->id);
+                for ($index = 0; $index < $questioncount; $index++) {
+                    foreach (['qtext' => 'questionx', 'resp' => 'responsex', 'right' => 'rightanswerx', 'result' => 'resultx'] as $option => $label) {
+                        if (empty($displayoptions[$option])) { continue; }
+                        $column = 'interaction_' . $sco->id . '_' . $index . '_' . $option;
+                        $columns[] = $column;
+                        $interactioncolumns[] = $column;
+                        // Display one-based numbering, keeping each SCO's cells aligned with its header.
+                        $headers[] = get_string($label, 'seledascormreport_interactions', $index + 1);
+                    }
                 }
             }
 
             if (!$download) {
-                $table = new \flexible_table('mod-exescorm-report');
+                $table = new \flexible_table('mod-seledascorm-report');
 
                 $table->define_columns($columns);
                 $table->define_headers($headers);
@@ -235,19 +230,8 @@ class report extends \mod_exescorm\report {
                 $table->no_sorting('checkbox');
                 $table->no_sorting('picture');
 
-                for ($id = 0; $id < $questioncount; $id++) {
-                    if ($displayoptions['qtext']) {
-                        $table->no_sorting('question'.$id);
-                    }
-                    if ($displayoptions['resp']) {
-                        $table->no_sorting('response'.$id);
-                    }
-                    if ($displayoptions['right']) {
-                        $table->no_sorting('right'.$id);
-                    }
-                    if ($displayoptions['result']) {
-                        $table->no_sorting('result'.$id);
-                    }
+                foreach ($interactioncolumns as $column) {
+                    $table->no_sorting($column);
                 }
 
                 foreach ($scoes as $sco) {
@@ -275,7 +259,7 @@ class report extends \mod_exescorm\report {
                 // Sending HTTP headers.
                 $workbook->send($filename);
                 // Creating the first worksheet.
-                $sheettitle = get_string('report', 'mod_exescorm');
+                $sheettitle = get_string('report', 'mod_seledascorm');
                 $myxls = $workbook->add_worksheet($sheettitle);
                 // Format types.
                 $format = $workbook->add_format();
@@ -314,7 +298,7 @@ class report extends \mod_exescorm\report {
                 // Sending HTTP headers.
                 $workbook->send($filename);
                 // Creating the first worksheet.
-                $sheettitle = get_string('report', 'mod_exescorm');
+                $sheettitle = get_string('report', 'mod_seledascorm');
                 $myxls = $workbook->add_worksheet($sheettitle);
                 // Format types.
                 $format = $workbook->add_format();
@@ -381,11 +365,11 @@ class report extends \mod_exescorm\report {
 
                 $table->pagesize($pagesize, $total);
 
-                echo \html_writer::start_div('exescormattemptcounts');
+                echo \html_writer::start_div('seledascormattemptcounts');
                 if ( $count->nbresults == $count->nbattempts ) {
-                    echo get_string('reportcountattempts', 'mod_exescorm', $count);
+                    echo get_string('reportcountattempts', 'mod_seledascorm', $count);
                 } else if ( $count->nbattempts > 0 ) {
-                    echo get_string('reportcountallattempts', 'mod_exescorm', $count);
+                    echo get_string('reportcountallattempts', 'mod_seledascorm', $count);
                 } else {
                     echo $count->nbusers.' '.get_string('users');
                 }
@@ -396,10 +380,10 @@ class report extends \mod_exescorm\report {
             if (!$download) {
                 $attempts = $DB->get_records_sql($select.$from.$where.$sort, $params,
                 $table->get_page_start(), $table->get_page_size());
-                echo \html_writer::start_div('', array('id' => 'exescormtablecontainer'));
+                echo \html_writer::start_div('', array('id' => 'seledascormtablecontainer'));
                 if ($candelete) {
                     // Start form.
-                    $strreallydel = addslashes_js(get_string('deleteattemptcheck', 'mod_exescorm'));
+                    $strreallydel = addslashes_js(get_string('deleteattemptcheck', 'mod_seledascorm'));
                     echo \html_writer::start_tag('form', array('id' => 'attemptsform', 'method' => 'post',
                                                                 'action' => $PAGE->url->out(false),
                                                                 'onsubmit' => 'return confirm("'.$strreallydel.'");'));
@@ -418,7 +402,7 @@ class report extends \mod_exescorm\report {
                 foreach ($attempts as $scouser) {
                     $row = array();
                     if (!empty($scouser->attempt)) {
-                        $timetracks = exescorm_get_sco_runtime($exescorm->id, false, $scouser->userid, $scouser->attempt);
+                        $timetracks = seledascorm_get_sco_runtime($seledascorm->id, false, $scouser->userid, $scouser->attempt);
                     } else {
                         $timetracks = '';
                     }
@@ -452,7 +436,7 @@ class report extends \mod_exescorm\report {
                         $row[] = '-';
                     } else {
                         if (!$download) {
-                            $url = new \moodle_url('/mod/exescorm/report/userreport.php',
+                            $url = new \moodle_url('/mod/seledascorm/report/userreport.php',
                                 array('id' => $cm->id,
                                     'user' => $scouser->userid,
                                     'attempt' => $scouser->attempt,
@@ -471,17 +455,17 @@ class report extends \mod_exescorm\report {
                         } else {
                             $row[] = userdate($timetracks->finish);
                         }
-                        $row[] = exescorm_grade_user_attempt($exescorm, $scouser->userid, $scouser->attempt);
+                        $row[] = seledascorm_grade_user_attempt($seledascorm, $scouser->userid, $scouser->attempt);
                     }
                     // Print out all scores of attempt.
                     $emptyrow = $download ? '' : '&nbsp;';
                     foreach ($scoes as $sco) {
                         if ($sco->launch != '') {
-                            if ($trackdata = exescorm_get_tracks($sco->id, $scouser->userid, $scouser->attempt)) {
+                            if (!empty($scouser->attempt) && ($trackdata = seledascorm_get_tracks($sco->id, $scouser->userid, $scouser->attempt))) {
                                 if ($trackdata->status == '') {
                                     $trackdata->status = 'notattempted';
                                 }
-                                $strstatus = get_string($trackdata->status, 'mod_exescorm');
+                                $strstatus = get_string($trackdata->status, 'mod_seledascorm');
                                 // If raw score exists, print it.
                                 if ($trackdata->score_raw != '') {
                                     $score = $trackdata->score_raw;
@@ -493,76 +477,40 @@ class report extends \mod_exescorm\report {
                                     $score = $strstatus;
                                 }
                                 if (!$download) {
-                                    $url = new \moodle_url('/mod/exescorm/report/userreporttracks.php', array('id' => $cm->id,
+                                    $url = new \moodle_url('/mod/seledascorm/report/userreporttracks.php', array('id' => $cm->id,
                                         'scoid' => $sco->id, 'user' => $scouser->userid, 'attempt' => $scouser->attempt,
                                         'mode' => 'interactions'));
-                                    $row[] = $OUTPUT->pix_icon($trackdata->status, $strstatus, 'exescorm') . '<br>' .
-                                        \html_writer::link($url, $score, array('title' => get_string('details', 'mod_exescorm')));
+                                    $row[] = $OUTPUT->pix_icon($trackdata->status, $strstatus, 'seledascorm') . '<br>' .
+                                        \html_writer::link($url, $score, array('title' => get_string('details', 'mod_seledascorm')));
                                 } else {
                                     $row[] = $score;
                                 }
-                                // Interaction data.
-                                for ($i = 0; $i < $questioncount; $i++) {
-                                    if ($displayoptions['qtext']) {
-                                        $element = 'cmi.interactions_'.$i.'.id';
-                                        if (isset($trackdata->$element)) {
-                                            $row[] = s($trackdata->$element);
-                                        } else {
-                                            $row[] = $emptyrow;
-                                        }
-                                    }
-                                    if ($displayoptions['resp']) {
-                                        $element = 'cmi.interactions_'.$i.'.student_response';
-                                        if (isset($trackdata->$element)) {
-                                            $row[] = s($trackdata->$element);
-                                        } else {
-                                            $row[] = $emptyrow;
-                                        }
-                                    }
-                                    if ($displayoptions['right']) {
-                                        $j = 0;
-                                        $element = 'cmi.interactions_'.$i.'.correct_responses_'.$j.'.pattern';
-                                        $rightans = '';
-                                        if (isset($trackdata->$element)) {
-                                            while (isset($trackdata->$element)) {
-                                                if ($j > 0) {
-                                                    $rightans .= ',';
-                                                }
-                                                $rightans .= s($trackdata->$element);
-                                                $j++;
-                                                $element = 'cmi.interactions_'.$i.'.correct_responses_'.$j.'.pattern';
-                                            }
-                                            $row[] = $rightans;
-                                        } else {
-                                            $row[] = $emptyrow;
-                                        }
-                                    }
-                                    if ($displayoptions['result']) {
-                                        $element = 'cmi.interactions_'.$i.'.result';
-                                        if (isset($trackdata->$element)) {
-                                            $row[] = s($trackdata->$element);
-                                        } else {
-                                            $row[] = $emptyrow;
-                                        }
-                                    }
+                                // Use the same decoder and attempt snapshots as the learner detail report.
+                                $cells = timhirt_reporting::overviewcells((int)$sco->id, $trackdata,
+                                    $catalogs[$sco->id] ?? [], $questioncount, $displayoptions);
+                                foreach ($cells as $cell) {
+                                    $row[] = $download ? timhirt_reporting::exportcell($cell) : s($cell);
                                 }
                                 // End of interaction data.
                             } else {
                                 // If we don't have track data, we haven't attempted yet.
-                                $strstatus = get_string('notattempted', 'mod_exescorm');
+                                $strstatus = get_string('notattempted', 'mod_seledascorm');
                                 if (!$download) {
-                                    $row[] = $OUTPUT->pix_icon('notattempted', $strstatus, 'exescorm') . '<br>' . $strstatus;
+                                    $row[] = $OUTPUT->pix_icon('notattempted', $strstatus, 'seledascorm') . '<br>' . $strstatus;
                                 } else {
                                     $row[] = $strstatus;
                                 }
                                 // Complete the empty cells.
-                                for ($i = 0; $i < count($columns) - $nbmaincolumns; $i++) {
+                                for ($i = 0; $i < $questioncount * count(array_filter(array_intersect_key($displayoptions, array_flip(['qtext', 'resp', 'right', 'result'])))); $i++) {
                                     $row[] = $emptyrow;
                                 }
                             }
                         }
                     }
 
+                    if ($download) {
+                        $row = array_map([timhirt_reporting::class, 'exportcell'], array_map('strval', $row));
+                    }
                     if (!$download) {
                         $table->add_data($row);
                     } else if ($download == 'Excel' || $download == 'ODS') {
@@ -609,7 +557,7 @@ class report extends \mod_exescorm\report {
                 exit;
             }
         } else {
-            echo $OUTPUT->notification(get_string('noactivity', 'mod_exescorm'));
+            echo $OUTPUT->notification(get_string('noactivity', 'mod_seledascorm'));
         }
     }// Function ends.
 }

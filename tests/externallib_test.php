@@ -14,22 +14,22 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace mod_exescorm;
+namespace mod_seledascorm;
 
 use externallib_advanced_testcase;
-use mod_exescorm_external;
+use mod_seledascorm_external;
 
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 
 require_once($CFG->dirroot . '/webservice/tests/helpers.php');
-require_once($CFG->dirroot . '/mod/exescorm/lib.php');
+require_once($CFG->dirroot . '/mod/seledascorm/lib.php');
 
 /**
- * EXESCORM module external functions tests
+ * SELEDASCORM module external functions tests
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @category   external
  * @copyright  2015 Juan Leyva <juan@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -48,10 +48,10 @@ class externallib_test extends externallib_advanced_testcase {
         $CFG->enablecompletion = 1;
         // Setup test data.
         $this->course = $this->getDataGenerator()->create_course(array('enablecompletion' => 1));
-        $this->exescorm = $this->getDataGenerator()->create_module('exescorm', array('course' => $this->course->id),
+        $this->seledascorm = $this->getDataGenerator()->create_module('seledascorm', array('course' => $this->course->id),
             array('completion' => 2, 'completionview' => 1));
-        $this->context = \context_module::instance($this->exescorm->cmid);
-        $this->cm = get_coursemodule_from_instance('exescorm', $this->exescorm->id);
+        $this->context = \context_module::instance($this->seledascorm->cmid);
+        $this->cm = get_coursemodule_from_instance('seledascorm', $this->seledascorm->id);
 
         // Create users.
         $this->student = self::getDataGenerator()->create_user();
@@ -65,15 +65,15 @@ class externallib_test extends externallib_advanced_testcase {
     }
 
     /**
-     * Test view_exescorm
+     * Test view_seledascorm
      */
-    public function test_view_exescorm() {
+    public function test_view_seledascorm() {
         global $DB;
 
         // Test invalid instance id.
         try {
-            mod_exescorm_external::view_exescorm(0);
-            $this->fail('Exception expected due to invalid mod_exescorm instance id.');
+            mod_seledascorm_external::view_seledascorm(0);
+            $this->fail('Exception expected due to invalid mod_seledascorm instance id.');
         } catch (\moodle_exception $e) {
             $this->assertEquals('invalidrecord', $e->errorcode);
         }
@@ -82,7 +82,7 @@ class externallib_test extends externallib_advanced_testcase {
         $user = self::getDataGenerator()->create_user();
         $this->setUser($user);
         try {
-            mod_exescorm_external::view_exescorm($this->exescorm->id);
+            mod_seledascorm_external::view_seledascorm($this->seledascorm->id);
             $this->fail('Exception expected due to not enrolled user.');
         } catch (\moodle_exception $e) {
             $this->assertEquals('requireloginerror', $e->errorcode);
@@ -95,81 +95,81 @@ class externallib_test extends externallib_advanced_testcase {
         // Trigger and capture the event.
         $sink = $this->redirectEvents();
 
-        $result = mod_exescorm_external::view_exescorm($this->exescorm->id);
-        $result = \external_api::clean_returnvalue(mod_exescorm_external::view_exescorm_returns(), $result);
+        $result = mod_seledascorm_external::view_seledascorm($this->seledascorm->id);
+        $result = \external_api::clean_returnvalue(mod_seledascorm_external::view_seledascorm_returns(), $result);
 
         $events = $sink->get_events();
         $this->assertCount(1, $events);
         $event = array_shift($events);
 
         // Checking that the event contains the expected values.
-        $this->assertInstanceOf('\mod_exescorm\event\course_module_viewed', $event);
+        $this->assertInstanceOf('\mod_seledascorm\event\course_module_viewed', $event);
         $this->assertEquals($this->context, $event->get_context());
-        $moodleurl = new \moodle_url('/mod/exescorm/view.php', array('id' => $this->cm->id));
+        $moodleurl = new \moodle_url('/mod/seledascorm/view.php', array('id' => $this->cm->id));
         $this->assertEquals($moodleurl, $event->get_url());
         $this->assertEventContextNotUsed($event);
         $this->assertNotEmpty($event->get_name());
     }
 
     /**
-     * Test get exescorm attempt count
+     * Test get seledascorm attempt count
      */
-    public function test_mod_exescorm_get_exescorm_attempt_count_own_empty() {
+    public function test_mod_seledascorm_get_seledascorm_attempt_count_own_empty() {
         // Set to the student user.
         self::setUser($this->student);
 
         // Retrieve my attempts (should be 0).
-        $result = mod_exescorm_external::get_exescorm_attempt_count($this->exescorm->id, $this->student->id);
-        $result = \external_api::clean_returnvalue(mod_exescorm_external::get_exescorm_attempt_count_returns(), $result);
+        $result = mod_seledascorm_external::get_seledascorm_attempt_count($this->seledascorm->id, $this->student->id);
+        $result = \external_api::clean_returnvalue(mod_seledascorm_external::get_seledascorm_attempt_count_returns(), $result);
         $this->assertEquals(0, $result['attemptscount']);
     }
 
-    public function test_mod_exescorm_get_exescorm_attempt_count_own_with_complete() {
+    public function test_mod_seledascorm_get_seledascorm_attempt_count_own_with_complete() {
         // Set to the student user.
         self::setUser($this->student);
 
         // Create attempts.
-        $scoes = exescorm_get_scoes($this->exescorm->id);
+        $scoes = seledascorm_get_scoes($this->seledascorm->id);
         $sco = array_shift($scoes);
-        exescorm_insert_track($this->student->id, $this->exescorm->id, $sco->id, 1, 'cmi.core.lesson_status', 'completed');
-        exescorm_insert_track($this->student->id, $this->exescorm->id, $sco->id, 2, 'cmi.core.lesson_status', 'completed');
+        seledascorm_insert_track($this->student->id, $this->seledascorm->id, $sco->id, 1, 'cmi.core.lesson_status', 'completed');
+        seledascorm_insert_track($this->student->id, $this->seledascorm->id, $sco->id, 2, 'cmi.core.lesson_status', 'completed');
 
-        $result = mod_exescorm_external::get_exescorm_attempt_count($this->exescorm->id, $this->student->id);
-        $result = \external_api::clean_returnvalue(mod_exescorm_external::get_exescorm_attempt_count_returns(), $result);
+        $result = mod_seledascorm_external::get_seledascorm_attempt_count($this->seledascorm->id, $this->student->id);
+        $result = \external_api::clean_returnvalue(mod_seledascorm_external::get_seledascorm_attempt_count_returns(), $result);
         $this->assertEquals(2, $result['attemptscount']);
     }
 
-    public function test_mod_exescorm_get_exescorm_attempt_count_own_incomplete() {
+    public function test_mod_seledascorm_get_seledascorm_attempt_count_own_incomplete() {
         // Set to the student user.
         self::setUser($this->student);
 
         // Create a complete attempt, and an incomplete attempt.
-        $scoes = exescorm_get_scoes($this->exescorm->id);
+        $scoes = seledascorm_get_scoes($this->seledascorm->id);
         $sco = array_shift($scoes);
-        exescorm_insert_track($this->student->id, $this->exescorm->id, $sco->id, 1, 'cmi.core.lesson_status', 'completed');
-        exescorm_insert_track($this->student->id, $this->exescorm->id, $sco->id, 2, 'cmi.core.credit', '0');
+        seledascorm_insert_track($this->student->id, $this->seledascorm->id, $sco->id, 1, 'cmi.core.lesson_status', 'completed');
+        seledascorm_insert_track($this->student->id, $this->seledascorm->id, $sco->id, 2, 'cmi.core.credit', '0');
 
-        $result = mod_exescorm_external::get_exescorm_attempt_count($this->exescorm->id, $this->student->id, true);
-        $result = \external_api::clean_returnvalue(mod_exescorm_external::get_exescorm_attempt_count_returns(), $result);
+        $result = mod_seledascorm_external::get_seledascorm_attempt_count($this->seledascorm->id, $this->student->id, true);
+        $result = \external_api::clean_returnvalue(mod_seledascorm_external::get_seledascorm_attempt_count_returns(), $result);
         $this->assertEquals(1, $result['attemptscount']);
     }
 
-    public function test_mod_exescorm_get_exescorm_attempt_count_others_as_teacher() {
+    public function test_mod_seledascorm_get_seledascorm_attempt_count_others_as_teacher() {
         // As a teacher.
         self::setUser($this->teacher);
 
         // Create a completed attempt for student.
-        $scoes = exescorm_get_scoes($this->exescorm->id);
+        $scoes = seledascorm_get_scoes($this->seledascorm->id);
         $sco = array_shift($scoes);
-        exescorm_insert_track($this->student->id, $this->exescorm->id, $sco->id, 1, 'cmi.core.lesson_status', 'completed');
+        seledascorm_insert_track($this->student->id, $this->seledascorm->id, $sco->id, 1, 'cmi.core.lesson_status', 'completed');
 
         // I should be able to view the attempts for my students.
-        $result = mod_exescorm_external::get_exescorm_attempt_count($this->exescorm->id, $this->student->id);
-        $result = \external_api::clean_returnvalue(mod_exescorm_external::get_exescorm_attempt_count_returns(), $result);
+        $result = mod_seledascorm_external::get_seledascorm_attempt_count($this->seledascorm->id, $this->student->id);
+        $result = \external_api::clean_returnvalue(mod_seledascorm_external::get_seledascorm_attempt_count_returns(), $result);
         $this->assertEquals(1, $result['attemptscount']);
     }
 
-    public function test_mod_exescorm_get_exescorm_attempt_count_others_as_student() {
+    public function test_mod_seledascorm_get_seledascorm_attempt_count_others_as_student() {
         // Create a second student.
         $student2 = self::getDataGenerator()->create_user();
         $this->getDataGenerator()->enrol_user($student2->id, $this->course->id, $this->studentrole->id, 'manual');
@@ -179,30 +179,30 @@ class externallib_test extends externallib_advanced_testcase {
 
         // I should not be able to view the attempts of another student.
         $this->expectException(\required_capability_exception::class);
-        mod_exescorm_external::get_exescorm_attempt_count($this->exescorm->id, $this->student->id);
+        mod_seledascorm_external::get_seledascorm_attempt_count($this->seledascorm->id, $this->student->id);
     }
 
-    public function test_mod_exescorm_get_exescorm_attempt_count_invalid_instanceid() {
+    public function test_mod_seledascorm_get_seledascorm_attempt_count_invalid_instanceid() {
         // As student.
         self::setUser($this->student);
 
         // Test invalid instance id.
         $this->expectException(\moodle_exception::class);
-        mod_exescorm_external::get_exescorm_attempt_count(0, $this->student->id);
+        mod_seledascorm_external::get_seledascorm_attempt_count(0, $this->student->id);
     }
 
-    public function test_mod_exescorm_get_exescorm_attempt_count_invalid_userid() {
+    public function test_mod_seledascorm_get_seledascorm_attempt_count_invalid_userid() {
         // As student.
         self::setUser($this->student);
 
         $this->expectException(\moodle_exception::class);
-        mod_exescorm_external::get_exescorm_attempt_count($this->exescorm->id, -1);
+        mod_seledascorm_external::get_seledascorm_attempt_count($this->seledascorm->id, -1);
     }
 
     /**
-     * Test get exescorm scoes
+     * Test get seledascorm scoes
      */
-    public function test_mod_exescorm_get_exescorm_scoes() {
+    public function test_mod_seledascorm_get_seledascorm_scoes() {
         global $DB;
 
         $this->resetAfterTest(true);
@@ -214,12 +214,12 @@ class externallib_test extends externallib_advanced_testcase {
         // Create courses to add the modules.
         $course = self::getDataGenerator()->create_course();
 
-        // First exescorm, dates restriction.
+        // First seledascorm, dates restriction.
         $record = new \stdClass();
         $record->course = $course->id;
         $record->timeopen = time() + DAYSECS;
         $record->timeclose = $record->timeopen + DAYSECS;
-        $exescorm = self::getDataGenerator()->create_module('exescorm', $record);
+        $seledascorm = self::getDataGenerator()->create_module('seledascorm', $record);
 
         // Set to the student user.
         self::setUser($student);
@@ -232,18 +232,18 @@ class externallib_test extends externallib_advanced_testcase {
 
         // Retrieve my scoes, warning!.
         try {
-             mod_exescorm_external::get_exescorm_scoes($exescorm->id);
+             mod_seledascorm_external::get_seledascorm_scoes($seledascorm->id);
             $this->fail('Exception expected due to invalid dates.');
         } catch (\moodle_exception $e) {
             $this->assertEquals('notopenyet', $e->errorcode);
         }
 
-        $exescorm->timeopen = time() - DAYSECS;
-        $exescorm->timeclose = time() - HOURSECS;
-        $DB->update_record('exescorm', $exescorm);
+        $seledascorm->timeopen = time() - DAYSECS;
+        $seledascorm->timeclose = time() - HOURSECS;
+        $DB->update_record('seledascorm', $seledascorm);
 
         try {
-             mod_exescorm_external::get_exescorm_scoes($exescorm->id);
+             mod_seledascorm_external::get_seledascorm_scoes($seledascorm->id);
             $this->fail('Exception expected due to invalid dates.');
         } catch (\moodle_exception $e) {
             $this->assertEquals('expired', $e->errorcode);
@@ -251,12 +251,12 @@ class externallib_test extends externallib_advanced_testcase {
 
         // Retrieve my scoes, user with permission.
         self::setUser($teacher);
-        $result = mod_exescorm_external::get_exescorm_scoes($exescorm->id);
-        $result = \external_api::clean_returnvalue(mod_exescorm_external::get_exescorm_scoes_returns(), $result);
+        $result = mod_seledascorm_external::get_seledascorm_scoes($seledascorm->id);
+        $result = \external_api::clean_returnvalue(mod_seledascorm_external::get_seledascorm_scoes_returns(), $result);
         $this->assertCount(2, $result['scoes']);
         $this->assertCount(0, $result['warnings']);
 
-        $scoes = exescorm_get_scoes($exescorm->id);
+        $scoes = seledascorm_get_scoes($seledascorm->id);
         $sco = array_shift($scoes);
         $sco->extradata = array();
         $this->assertEquals((array) $sco, $result['scoes'][0]);
@@ -283,15 +283,15 @@ class externallib_test extends externallib_advanced_testcase {
 
         // Use organization.
         $organization = 'golf_sample_default_org';
-        $result = mod_exescorm_external::get_exescorm_scoes($exescorm->id, $organization);
-        $result = \external_api::clean_returnvalue(mod_exescorm_external::get_exescorm_scoes_returns(), $result);
+        $result = mod_seledascorm_external::get_seledascorm_scoes($seledascorm->id, $organization);
+        $result = \external_api::clean_returnvalue(mod_seledascorm_external::get_seledascorm_scoes_returns(), $result);
         $this->assertCount(1, $result['scoes']);
         $this->assertEquals($organization, $result['scoes'][0]['organization']);
         $this->assertCount(0, $result['warnings']);
 
         // Test invalid instance id.
         try {
-             mod_exescorm_external::get_exescorm_scoes(0);
+             mod_seledascorm_external::get_seledascorm_scoes(0);
             $this->fail('Exception expected due to invalid instance id.');
         } catch (\moodle_exception $e) {
             $this->assertEquals('invalidrecord', $e->errorcode);
@@ -300,9 +300,9 @@ class externallib_test extends externallib_advanced_testcase {
     }
 
     /**
-     * Test get exescorm scoes (with a complex EXESCORM package)
+     * Test get seledascorm scoes (with a complex SELEDASCORM package)
      */
-    public function test_mod_exescorm_get_exescorm_scoes_complex_package() {
+    public function test_mod_seledascorm_get_seledascorm_scoes_complex_package() {
         global $CFG;
 
         // As student.
@@ -310,17 +310,17 @@ class externallib_test extends externallib_advanced_testcase {
 
         $record = new \stdClass();
         $record->course = $this->course->id;
-        $record->packagefilepath = $CFG->dirroot.'/mod/exescorm/tests/packages/complexexescorm.zip';
-        $exescorm = self::getDataGenerator()->create_module('exescorm', $record);
+        $record->packagefilepath = $CFG->dirroot.'/mod/seledascorm/tests/packages/complexseledascorm.zip';
+        $seledascorm = self::getDataGenerator()->create_module('seledascorm', $record);
 
-        $result = mod_exescorm_external::get_exescorm_scoes($exescorm->id);
-        $result = \external_api::clean_returnvalue(mod_exescorm_external::get_exescorm_scoes_returns(), $result);
+        $result = mod_seledascorm_external::get_seledascorm_scoes($seledascorm->id);
+        $result = \external_api::clean_returnvalue(mod_seledascorm_external::get_seledascorm_scoes_returns(), $result);
         $this->assertCount(9, $result['scoes']);
         $this->assertCount(0, $result['warnings']);
 
         $expectedscoes = array();
-        $scoreturnstructure = mod_exescorm_external::get_exescorm_scoes_returns();
-        $scoes = exescorm_get_scoes($exescorm->id);
+        $scoreturnstructure = mod_seledascorm_external::get_seledascorm_scoes_returns();
+        $scoes = seledascorm_get_scoes($seledascorm->id);
         foreach ($scoes as $sco) {
             $sco->extradata = array();
             foreach ($sco as $element => $value) {
@@ -340,9 +340,9 @@ class externallib_test extends externallib_advanced_testcase {
     }
 
     /*
-     * Test get exescorm user data
+     * Test get seledascorm user data
      */
-    public function test_mod_exescorm_get_exescorm_user_data() {
+    public function test_mod_seledascorm_get_seledascorm_user_data() {
         global $DB;
 
         $this->resetAfterTest(true);
@@ -357,10 +357,10 @@ class externallib_test extends externallib_advanced_testcase {
         // Create courses to add the modules.
         $course = self::getDataGenerator()->create_course();
 
-        // First exescorm.
+        // First seledascorm.
         $record = new \stdClass();
         $record->course = $course->id;
-        $exescorm = self::getDataGenerator()->create_module('exescorm', $record);
+        $seledascorm = self::getDataGenerator()->create_module('seledascorm', $record);
 
         // Users enrolments.
         $studentrole = $DB->get_record('role', array('shortname' => 'student'));
@@ -369,14 +369,14 @@ class externallib_test extends externallib_advanced_testcase {
         $this->getDataGenerator()->enrol_user($teacher->id, $course->id, $teacherrole->id, 'manual');
 
         // Create attempts.
-        $scoes = exescorm_get_scoes($exescorm->id);
+        $scoes = seledascorm_get_scoes($seledascorm->id);
         $sco = array_shift($scoes);
-        exescorm_insert_track($student1->id, $exescorm->id, $sco->id, 1, 'cmi.core.lesson_status', 'completed');
-        exescorm_insert_track($student1->id, $exescorm->id, $sco->id, 1, 'cmi.core.score.raw', '80');
-        exescorm_insert_track($student1->id, $exescorm->id, $sco->id, 2, 'cmi.core.lesson_status', 'completed');
+        seledascorm_insert_track($student1->id, $seledascorm->id, $sco->id, 1, 'cmi.core.lesson_status', 'completed');
+        seledascorm_insert_track($student1->id, $seledascorm->id, $sco->id, 1, 'cmi.core.score.raw', '80');
+        seledascorm_insert_track($student1->id, $seledascorm->id, $sco->id, 2, 'cmi.core.lesson_status', 'completed');
 
-        $result = mod_exescorm_external::get_exescorm_user_data($exescorm->id, 1);
-        $result = \external_api::clean_returnvalue(mod_exescorm_external::get_exescorm_user_data_returns(), $result);
+        $result = mod_seledascorm_external::get_seledascorm_user_data($seledascorm->id, 1);
+        $result = \external_api::clean_returnvalue(mod_seledascorm_external::get_seledascorm_user_data_returns(), $result);
         $this->assertCount(2, $result['data']);
         // Find our tracking data.
         $found = 0;
@@ -394,7 +394,7 @@ class externallib_test extends externallib_advanced_testcase {
 
         // Test invalid instance id.
         try {
-             mod_exescorm_external::get_exescorm_user_data(0, 1);
+             mod_seledascorm_external::get_seledascorm_user_data(0, 1);
             $this->fail('Exception expected due to invalid instance id.');
         } catch (\moodle_exception $e) {
             $this->assertEquals('invalidrecord', $e->errorcode);
@@ -402,9 +402,9 @@ class externallib_test extends externallib_advanced_testcase {
     }
 
     /**
-     * Test insert exescorm tracks
+     * Test insert seledascorm tracks
      */
-    public function test_mod_exescorm_insert_exescorm_tracks() {
+    public function test_mod_seledascorm_insert_seledascorm_tracks() {
         global $DB;
 
         $this->resetAfterTest(true);
@@ -415,15 +415,15 @@ class externallib_test extends externallib_advanced_testcase {
         // Create courses to add the modules.
         $course = self::getDataGenerator()->create_course();
 
-        // First exescorm, dates restriction.
+        // First seledascorm, dates restriction.
         $record = new \stdClass();
         $record->course = $course->id;
         $record->timeopen = time() + DAYSECS;
         $record->timeclose = $record->timeopen + DAYSECS;
-        $exescorm = self::getDataGenerator()->create_module('exescorm', $record);
+        $seledascorm = self::getDataGenerator()->create_module('seledascorm', $record);
 
         // Get a SCO.
-        $scoes = exescorm_get_scoes($exescorm->id);
+        $scoes = seledascorm_get_scoes($seledascorm->id);
         $sco = array_shift($scoes);
 
         // Tracks.
@@ -446,18 +446,18 @@ class externallib_test extends externallib_advanced_testcase {
 
         // Exceptions first.
         try {
-            mod_exescorm_external::insert_exescorm_tracks($sco->id, 1, $tracks);
+            mod_seledascorm_external::insert_seledascorm_tracks($sco->id, 1, $tracks);
             $this->fail('Exception expected due to dates');
         } catch (\moodle_exception $e) {
             $this->assertEquals('notopenyet', $e->errorcode);
         }
 
-        $exescorm->timeopen = time() - DAYSECS;
-        $exescorm->timeclose = time() - HOURSECS;
-        $DB->update_record('exescorm', $exescorm);
+        $seledascorm->timeopen = time() - DAYSECS;
+        $seledascorm->timeclose = time() - HOURSECS;
+        $DB->update_record('seledascorm', $seledascorm);
 
         try {
-            mod_exescorm_external::insert_exescorm_tracks($sco->id, 1, $tracks);
+            mod_seledascorm_external::insert_seledascorm_tracks($sco->id, 1, $tracks);
             $this->fail('Exception expected due to dates');
         } catch (\moodle_exception $e) {
             $this->assertEquals('expired', $e->errorcode);
@@ -465,32 +465,32 @@ class externallib_test extends externallib_advanced_testcase {
 
         // Test invalid instance id.
         try {
-             mod_exescorm_external::insert_exescorm_tracks(0, 1, $tracks);
+             mod_seledascorm_external::insert_seledascorm_tracks(0, 1, $tracks);
             $this->fail('Exception expected due to invalid sco id.');
         } catch (\moodle_exception $e) {
             $this->assertEquals('cannotfindsco', $e->errorcode);
         }
 
-        $exescorm->timeopen = 0;
-        $exescorm->timeclose = 0;
-        $DB->update_record('exescorm', $exescorm);
+        $seledascorm->timeopen = 0;
+        $seledascorm->timeclose = 0;
+        $DB->update_record('seledascorm', $seledascorm);
 
         // Retrieve my tracks.
-        $result = mod_exescorm_external::insert_exescorm_tracks($sco->id, 1, $tracks);
-        $result = \external_api::clean_returnvalue(mod_exescorm_external::insert_exescorm_tracks_returns(), $result);
+        $result = mod_seledascorm_external::insert_seledascorm_tracks($sco->id, 1, $tracks);
+        $result = \external_api::clean_returnvalue(mod_seledascorm_external::insert_seledascorm_tracks_returns(), $result);
         $this->assertCount(0, $result['warnings']);
 
-        $trackids = $DB->get_records('exescorm_scoes_track', array('userid' => $student->id, 'scoid' => $sco->id,
-                                                                'exescormid' => $exescorm->id, 'attempt' => 1));
+        $trackids = $DB->get_records('seledascorm_scoes_track', array('userid' => $student->id, 'scoid' => $sco->id,
+                                                                'seledascormid' => $seledascorm->id, 'attempt' => 1));
         // We use asort here to prevent problems with ids ordering.
         $expectedkeys = array_keys($trackids);
         $this->assertEquals(asort($expectedkeys), asort($result['trackids']));
     }
 
     /**
-     * Test get exescorm sco tracks
+     * Test get seledascorm sco tracks
      */
-    public function test_mod_exescorm_get_exescorm_sco_tracks() {
+    public function test_mod_seledascorm_get_seledascorm_sco_tracks() {
         global $DB;
 
         $this->resetAfterTest(true);
@@ -506,10 +506,10 @@ class externallib_test extends externallib_advanced_testcase {
         // Create courses to add the modules.
         $course = self::getDataGenerator()->create_course();
 
-        // First exescorm.
+        // First seledascorm.
         $record = new \stdClass();
         $record->course = $course->id;
-        $exescorm = self::getDataGenerator()->create_module('exescorm', $record);
+        $seledascorm = self::getDataGenerator()->create_module('seledascorm', $record);
 
         // Users enrolments.
         $studentrole = $DB->get_record('role', array('shortname' => 'student'));
@@ -518,14 +518,14 @@ class externallib_test extends externallib_advanced_testcase {
         $this->getDataGenerator()->enrol_user($teacher->id, $course->id, $teacherrole->id, 'manual');
 
         // Create attempts.
-        $scoes = exescorm_get_scoes($exescorm->id);
+        $scoes = seledascorm_get_scoes($seledascorm->id);
         $sco = array_shift($scoes);
-        exescorm_insert_track($student->id, $exescorm->id, $sco->id, 1, 'cmi.core.lesson_status', 'completed');
-        exescorm_insert_track($student->id, $exescorm->id, $sco->id, 1, 'cmi.core.score.raw', '80');
-        exescorm_insert_track($student->id, $exescorm->id, $sco->id, 2, 'cmi.core.lesson_status', 'completed');
+        seledascorm_insert_track($student->id, $seledascorm->id, $sco->id, 1, 'cmi.core.lesson_status', 'completed');
+        seledascorm_insert_track($student->id, $seledascorm->id, $sco->id, 1, 'cmi.core.score.raw', '80');
+        seledascorm_insert_track($student->id, $seledascorm->id, $sco->id, 2, 'cmi.core.lesson_status', 'completed');
 
-        $result = mod_exescorm_external::get_exescorm_sco_tracks($sco->id, $student->id, 1);
-        $result = \external_api::clean_returnvalue(mod_exescorm_external::get_exescorm_sco_tracks_returns(), $result);
+        $result = mod_seledascorm_external::get_seledascorm_sco_tracks($sco->id, $student->id, 1);
+        $result = \external_api::clean_returnvalue(mod_seledascorm_external::get_seledascorm_sco_tracks_returns(), $result);
         // 7 default elements + 2 custom ones.
         $this->assertCount(9, $result['data']['tracks']);
         $this->assertEquals(1, $result['data']['attempt']);
@@ -543,8 +543,8 @@ class externallib_test extends externallib_advanced_testcase {
         $this->assertEquals(2, $found);
 
         // Try invalid attempt.
-        $result = mod_exescorm_external::get_exescorm_sco_tracks($sco->id, $student->id, 10);
-        $result = \external_api::clean_returnvalue(mod_exescorm_external::get_exescorm_sco_tracks_returns(), $result);
+        $result = mod_seledascorm_external::get_seledascorm_sco_tracks($sco->id, $student->id, 10);
+        $result = \external_api::clean_returnvalue(mod_seledascorm_external::get_seledascorm_sco_tracks_returns(), $result);
         $this->assertCount(0, $result['data']['tracks']);
         $this->assertEquals(10, $result['data']['attempt']);
         $this->assertCount(1, $result['warnings']);
@@ -552,7 +552,7 @@ class externallib_test extends externallib_advanced_testcase {
 
         // Capabilities check.
         try {
-             mod_exescorm_external::get_exescorm_sco_tracks($sco->id, $otherstudent->id);
+             mod_seledascorm_external::get_seledascorm_sco_tracks($sco->id, $otherstudent->id);
             $this->fail('Exception expected due to invalid instance id.');
         } catch (\required_capability_exception $e) {
             $this->assertEquals('nopermissions', $e->errorcode);
@@ -560,22 +560,22 @@ class externallib_test extends externallib_advanced_testcase {
 
         self::setUser($teacher);
         // Ommit the attempt parameter, the function should calculate the last attempt.
-        $result = mod_exescorm_external::get_exescorm_sco_tracks($sco->id, $student->id);
-        $result = \external_api::clean_returnvalue(mod_exescorm_external::get_exescorm_sco_tracks_returns(), $result);
+        $result = mod_seledascorm_external::get_seledascorm_sco_tracks($sco->id, $student->id);
+        $result = \external_api::clean_returnvalue(mod_seledascorm_external::get_seledascorm_sco_tracks_returns(), $result);
         // 7 default elements + 1 custom one.
         $this->assertCount(8, $result['data']['tracks']);
         $this->assertEquals(2, $result['data']['attempt']);
 
         // Test invalid instance id.
         try {
-             mod_exescorm_external::get_exescorm_sco_tracks(0, 1);
+             mod_seledascorm_external::get_seledascorm_sco_tracks(0, 1);
             $this->fail('Exception expected due to invalid instance id.');
         } catch (\moodle_exception $e) {
             $this->assertEquals('cannotfindsco', $e->errorcode);
         }
         // Invalid user.
         try {
-             mod_exescorm_external::get_exescorm_sco_tracks($sco->id, 0);
+             mod_seledascorm_external::get_seledascorm_sco_tracks($sco->id, 0);
             $this->fail('Exception expected due to invalid instance id.');
         } catch (\moodle_exception $e) {
             $this->assertEquals('invaliduser', $e->errorcode);
@@ -583,9 +583,9 @@ class externallib_test extends externallib_advanced_testcase {
     }
 
     /*
-     * Test get exescorms by courses
+     * Test get seledascorms by courses
      */
-    public function test_mod_exescorm_get_exescorms_by_courses() {
+    public function test_mod_seledascorm_get_seledascorms_by_courses() {
         global $DB;
 
         $this->resetAfterTest(true);
@@ -601,20 +601,20 @@ class externallib_test extends externallib_advanced_testcase {
         $course1 = self::getDataGenerator()->create_course();
         $course2 = self::getDataGenerator()->create_course();
 
-        // First exescorm.
+        // First seledascorm.
         $record = new \stdClass();
         $record->introformat = FORMAT_HTML;
         $record->course = $course1->id;
         $record->hidetoc = 2;
         $record->displayattemptstatus = 2;
         $record->skipview = 2;
-        $exescorm1 = self::getDataGenerator()->create_module('exescorm', $record);
+        $seledascorm1 = self::getDataGenerator()->create_module('seledascorm', $record);
 
-        // Second exescorm.
+        // Second seledascorm.
         $record = new \stdClass();
         $record->introformat = FORMAT_HTML;
         $record->course = $course2->id;
-        $exescorm2 = self::getDataGenerator()->create_module('exescorm', $record);
+        $seledascorm2 = self::getDataGenerator()->create_module('seledascorm', $record);
 
         $studentrole = $DB->get_record('role', array('shortname' => 'student'));
         $teacherrole = $DB->get_record('role', array('shortname' => 'editingteacher'));
@@ -634,37 +634,37 @@ class externallib_test extends externallib_advanced_testcase {
         }
         $enrol->enrol_user($instance2, $student->id, $studentrole->id);
 
-        $returndescription = mod_exescorm_external::get_exescorms_by_courses_returns();
+        $returndescription = mod_seledascorm_external::get_seledascorms_by_courses_returns();
 
         // Test open/close dates.
 
         $timenow = time();
-        $exescorm1->timeopen = $timenow - DAYSECS;
-        $exescorm1->timeclose = $timenow - HOURSECS;
-        $DB->update_record('exescorm', $exescorm1);
+        $seledascorm1->timeopen = $timenow - DAYSECS;
+        $seledascorm1->timeclose = $timenow - HOURSECS;
+        $DB->update_record('seledascorm', $seledascorm1);
 
-        $result = mod_exescorm_external::get_exescorms_by_courses(array($course1->id));
+        $result = mod_seledascorm_external::get_seledascorms_by_courses(array($course1->id));
         $result = \external_api::clean_returnvalue($returndescription, $result);
         $this->assertCount(1, $result['warnings']);
         // Only 'id', 'coursemodule', 'course', 'name', 'intro', 'introformat', 'introfiles'.
-        $this->assertCount(8, $result['exescorms'][0]);
+        $this->assertCount(8, $result['seledascorms'][0]);
         $this->assertEquals('expired', $result['warnings'][0]['warningcode']);
 
-        $exescorm1->timeopen = $timenow + DAYSECS;
-        $exescorm1->timeclose = $exescorm1->timeopen + DAYSECS;
-        $DB->update_record('exescorm', $exescorm1);
+        $seledascorm1->timeopen = $timenow + DAYSECS;
+        $seledascorm1->timeclose = $seledascorm1->timeopen + DAYSECS;
+        $DB->update_record('seledascorm', $seledascorm1);
 
-        $result = mod_exescorm_external::get_exescorms_by_courses(array($course1->id));
+        $result = mod_seledascorm_external::get_seledascorms_by_courses(array($course1->id));
         $result = \external_api::clean_returnvalue($returndescription, $result);
         $this->assertCount(1, $result['warnings']);
         // Only 'id', 'coursemodule', 'course', 'name', 'intro', 'introformat', 'introfiles'.
-        $this->assertCount(8, $result['exescorms'][0]);
+        $this->assertCount(8, $result['seledascorms'][0]);
         $this->assertEquals('notopenyet', $result['warnings'][0]['warningcode']);
 
         // Reset times.
-        $exescorm1->timeopen = 0;
-        $exescorm1->timeclose = 0;
-        $DB->update_record('exescorm', $exescorm1);
+        $seledascorm1->timeopen = 0;
+        $seledascorm1->timeclose = 0;
+        $DB->update_record('seledascorm', $seledascorm1);
 
         // Create what we expect to be returned when querying the two courses.
         // First for the student user.
@@ -673,88 +673,88 @@ class externallib_test extends externallib_advanced_testcase {
                                 'displayattemptstatus', 'displaycoursestructure', 'sha1hash', 'md5hash', 'revision', 'launch',
                                 'skipview', 'hidebrowse', 'hidetoc', 'nav', 'navpositionleft', 'navpositiontop', 'auto',
                                 'popup', 'width', 'height', 'timeopen', 'timeclose', 'packagesize',
-                                'packageurl', 'exescormtype', 'reference');
+                                'packageurl', 'seledascormtype', 'reference');
 
         // Add expected coursemodule and data.
-        $exescorm1->coursemodule = $exescorm1->cmid;
-        $exescorm1->section = 0;
-        $exescorm1->visible = true;
-        $exescorm1->groupmode = 0;
-        $exescorm1->groupingid = 0;
-        $exescorm1->lang = '';
+        $seledascorm1->coursemodule = $seledascorm1->cmid;
+        $seledascorm1->section = 0;
+        $seledascorm1->visible = true;
+        $seledascorm1->groupmode = 0;
+        $seledascorm1->groupingid = 0;
+        $seledascorm1->lang = '';
 
-        $exescorm2->coursemodule = $exescorm2->cmid;
-        $exescorm2->section = 0;
-        $exescorm2->visible = true;
-        $exescorm2->groupmode = 0;
-        $exescorm2->groupingid = 0;
-        $exescorm2->lang = '';
+        $seledascorm2->coursemodule = $seledascorm2->cmid;
+        $seledascorm2->section = 0;
+        $seledascorm2->visible = true;
+        $seledascorm2->groupmode = 0;
+        $seledascorm2->groupingid = 0;
+        $seledascorm2->lang = '';
 
-        // EXESCORM size. The same package is used in both EXESCORMs.
-        $exescormcontext1 = \context_module::instance($exescorm1->cmid);
-        $exescormcontext2 = \context_module::instance($exescorm2->cmid);
+        // SELEDASCORM size. The same package is used in both SELEDASCORMs.
+        $seledascormcontext1 = \context_module::instance($seledascorm1->cmid);
+        $seledascormcontext2 = \context_module::instance($seledascorm2->cmid);
         $fs = get_file_storage();
-        $packagefile = $fs->get_file($exescormcontext1->id, 'mod_exescorm', 'package', 0, '/', $exescorm1->reference);
+        $packagefile = $fs->get_file($seledascormcontext1->id, 'mod_seledascorm', 'package', 0, '/', $seledascorm1->reference);
         $packagesize = $packagefile->get_filesize();
 
         $packageurl1 = \moodle_url::make_webservice_pluginfile_url(
-                            $exescormcontext1->id, 'mod_exescorm', 'package', 0, '/', $exescorm1->reference)->out(false);
+                            $seledascormcontext1->id, 'mod_seledascorm', 'package', 0, '/', $seledascorm1->reference)->out(false);
         $packageurl2 = \moodle_url::make_webservice_pluginfile_url(
-                            $exescormcontext2->id, 'mod_exescorm', 'package', 0, '/', $exescorm2->reference)->out(false);
+                            $seledascormcontext2->id, 'mod_seledascorm', 'package', 0, '/', $seledascorm2->reference)->out(false);
 
-        $exescorm1->packagesize = $packagesize;
-        $exescorm1->packageurl = $packageurl1;
-        $exescorm2->packagesize = $packagesize;
-        $exescorm2->packageurl = $packageurl2;
+        $seledascorm1->packagesize = $packagesize;
+        $seledascorm1->packageurl = $packageurl1;
+        $seledascorm2->packagesize = $packagesize;
+        $seledascorm2->packageurl = $packageurl2;
 
         // Forced to boolean as it is returned as PARAM_BOOL.
-        $protectpackages = (bool)get_config('exescorm', 'protectpackagedownloads');
+        $protectpackages = (bool)get_config('seledascorm', 'protectpackagedownloads');
         $expected1 = array('protectpackagedownloads' => $protectpackages);
         $expected2 = array('protectpackagedownloads' => $protectpackages);
         foreach ($expectedfields as $field) {
 
             // Since we return the fields used as boolean as PARAM_BOOL instead PARAM_INT we need to force casting here.
             // From the returned fields definition we obtain the type expected for the field.
-            if (empty($returndescription->keys['exescorms']->content->keys[$field]->type)) {
+            if (empty($returndescription->keys['seledascorms']->content->keys[$field]->type)) {
                 continue;
             }
-            $fieldtype = $returndescription->keys['exescorms']->content->keys[$field]->type;
+            $fieldtype = $returndescription->keys['seledascorms']->content->keys[$field]->type;
             if ($fieldtype == PARAM_BOOL) {
-                $expected1[$field] = (bool) $exescorm1->{$field};
-                $expected2[$field] = (bool) $exescorm2->{$field};
+                $expected1[$field] = (bool) $seledascorm1->{$field};
+                $expected2[$field] = (bool) $seledascorm2->{$field};
             } else {
-                $expected1[$field] = $exescorm1->{$field};
-                $expected2[$field] = $exescorm2->{$field};
+                $expected1[$field] = $seledascorm1->{$field};
+                $expected2[$field] = $seledascorm2->{$field};
             }
         }
         $expected1['introfiles'] = [];
         $expected2['introfiles'] = [];
 
-        $expectedexescorms = array();
-        $expectedexescorms[] = $expected2;
-        $expectedexescorms[] = $expected1;
+        $expectedseledascorms = array();
+        $expectedseledascorms[] = $expected2;
+        $expectedseledascorms[] = $expected1;
 
         // Call the external function passing course ids.
-        $result = mod_exescorm_external::get_exescorms_by_courses(array($course2->id, $course1->id));
+        $result = mod_seledascorm_external::get_seledascorms_by_courses(array($course2->id, $course1->id));
         $result = \external_api::clean_returnvalue($returndescription, $result);
-        $this->assertEquals($expectedexescorms, $result['exescorms']);
+        $this->assertEquals($expectedseledascorms, $result['seledascorms']);
 
         // Call the external function without passing course id.
-        $result = mod_exescorm_external::get_exescorms_by_courses();
+        $result = mod_seledascorm_external::get_seledascorms_by_courses();
         $result = \external_api::clean_returnvalue($returndescription, $result);
-        $this->assertEquals($expectedexescorms, $result['exescorms']);
+        $this->assertEquals($expectedseledascorms, $result['seledascorms']);
 
-        // Unenrol user from second course and alter expected exescorms.
+        // Unenrol user from second course and alter expected seledascorms.
         $enrol->unenrol_user($instance2, $student->id);
-        array_shift($expectedexescorms);
+        array_shift($expectedseledascorms);
 
         // Call the external function without passing course id.
-        $result = mod_exescorm_external::get_exescorms_by_courses();
+        $result = mod_seledascorm_external::get_seledascorms_by_courses();
         $result = \external_api::clean_returnvalue($returndescription, $result);
-        $this->assertEquals($expectedexescorms, $result['exescorms']);
+        $this->assertEquals($expectedseledascorms, $result['seledascorms']);
 
         // Call for the second course we unenrolled the user from, expected warning.
-        $result = mod_exescorm_external::get_exescorms_by_courses(array($course2->id));
+        $result = mod_seledascorm_external::get_seledascorms_by_courses(array($course2->id));
         $this->assertCount(1, $result['warnings']);
         $this->assertEquals('1', $result['warnings'][0]['warningcode']);
         $this->assertEquals($course2->id, $result['warnings'][0]['itemid']);
@@ -767,37 +767,37 @@ class externallib_test extends externallib_advanced_testcase {
                                     'autocommit', 'section', 'visible', 'groupmode', 'groupingid');
 
         foreach ($additionalfields as $field) {
-            $fieldtype = $returndescription->keys['exescorms']->content->keys[$field]->type;
+            $fieldtype = $returndescription->keys['seledascorms']->content->keys[$field]->type;
 
             if ($fieldtype == PARAM_BOOL) {
-                $expectedexescorms[0][$field] = (bool) $exescorm1->{$field};
+                $expectedseledascorms[0][$field] = (bool) $seledascorm1->{$field};
             } else {
-                $expectedexescorms[0][$field] = $exescorm1->{$field};
+                $expectedseledascorms[0][$field] = $seledascorm1->{$field};
             }
         }
 
-        $result = mod_exescorm_external::get_exescorms_by_courses();
+        $result = mod_seledascorm_external::get_seledascorms_by_courses();
         $result = \external_api::clean_returnvalue($returndescription, $result);
-        $this->assertEquals($expectedexescorms, $result['exescorms']);
+        $this->assertEquals($expectedseledascorms, $result['seledascorms']);
 
-        // Even with the EXESCORM closed in time teacher should retrieve the info.
-        $exescorm1->timeopen = $timenow - DAYSECS;
-        $exescorm1->timeclose = $timenow - HOURSECS;
-        $DB->update_record('exescorm', $exescorm1);
+        // Even with the SELEDASCORM closed in time teacher should retrieve the info.
+        $seledascorm1->timeopen = $timenow - DAYSECS;
+        $seledascorm1->timeclose = $timenow - HOURSECS;
+        $DB->update_record('seledascorm', $seledascorm1);
 
-        $expectedexescorms[0]['timeopen'] = $exescorm1->timeopen;
-        $expectedexescorms[0]['timeclose'] = $exescorm1->timeclose;
+        $expectedseledascorms[0]['timeopen'] = $seledascorm1->timeopen;
+        $expectedseledascorms[0]['timeclose'] = $seledascorm1->timeclose;
 
-        $result = mod_exescorm_external::get_exescorms_by_courses();
+        $result = mod_seledascorm_external::get_seledascorms_by_courses();
         $result = \external_api::clean_returnvalue($returndescription, $result);
-        $this->assertEquals($expectedexescorms, $result['exescorms']);
+        $this->assertEquals($expectedseledascorms, $result['seledascorms']);
 
         // Admin also should get all the information.
         self::setAdminUser();
 
-        $result = mod_exescorm_external::get_exescorms_by_courses(array($course1->id));
+        $result = mod_seledascorm_external::get_seledascorms_by_courses(array($course1->id));
         $result = \external_api::clean_returnvalue($returndescription, $result);
-        $this->assertEquals($expectedexescorms, $result['exescorms']);
+        $this->assertEquals($expectedseledascorms, $result['seledascorms']);
     }
 
     /**
@@ -808,8 +808,8 @@ class externallib_test extends externallib_advanced_testcase {
 
         // Test invalid instance id.
         try {
-            mod_exescorm_external::launch_sco(0);
-            $this->fail('Exception expected due to invalid mod_exescorm instance id.');
+            mod_seledascorm_external::launch_sco(0);
+            $this->fail('Exception expected due to invalid mod_seledascorm instance id.');
         } catch (\moodle_exception $e) {
             $this->assertEquals('invalidrecord', $e->errorcode);
         }
@@ -818,7 +818,7 @@ class externallib_test extends externallib_advanced_testcase {
         $user = self::getDataGenerator()->create_user();
         $this->setUser($user);
         try {
-            mod_exescorm_external::launch_sco($this->exescorm->id);
+            mod_seledascorm_external::launch_sco($this->seledascorm->id);
             $this->fail('Exception expected due to not enrolled user.');
         } catch (\moodle_exception $e) {
             $this->assertEquals('requireloginerror', $e->errorcode);
@@ -830,7 +830,7 @@ class externallib_test extends externallib_advanced_testcase {
         // Trigger and capture the event.
         $sink = $this->redirectEvents();
 
-        $scoes = exescorm_get_scoes($this->exescorm->id);
+        $scoes = seledascorm_get_scoes($this->seledascorm->id);
         foreach ($scoes as $sco) {
             // Find launchable SCO.
             if ($sco->launch != '') {
@@ -838,17 +838,17 @@ class externallib_test extends externallib_advanced_testcase {
             }
         }
 
-        $result = mod_exescorm_external::launch_sco($this->exescorm->id, $sco->id);
-        $result = \external_api::clean_returnvalue(mod_exescorm_external::launch_sco_returns(), $result);
+        $result = mod_seledascorm_external::launch_sco($this->seledascorm->id, $sco->id);
+        $result = \external_api::clean_returnvalue(mod_seledascorm_external::launch_sco_returns(), $result);
 
         $events = $sink->get_events();
         $this->assertCount(3, $events);
         $event = array_pop($events);
 
         // Checking that the event contains the expected values.
-        $this->assertInstanceOf('\mod_exescorm\event\sco_launched', $event);
+        $this->assertInstanceOf('\mod_seledascorm\event\sco_launched', $event);
         $this->assertEquals($this->context, $event->get_context());
-        $moodleurl = new \moodle_url('/mod/exescorm/player.php', array('cm' => $this->cm->id, 'scoid' => $sco->id));
+        $moodleurl = new \moodle_url('/mod/seledascorm/player.php', array('cm' => $this->cm->id, 'scoid' => $sco->id));
         $this->assertEquals($moodleurl, $event->get_url());
         $this->assertEventContextNotUsed($event);
         $this->assertNotEmpty($event->get_name());
@@ -863,7 +863,7 @@ class externallib_test extends externallib_advanced_testcase {
 
         // Invalid SCO.
         try {
-            mod_exescorm_external::launch_sco($this->exescorm->id, -1);
+            mod_seledascorm_external::launch_sco($this->seledascorm->id, -1);
             $this->fail('Exception expected due to invalid SCO id.');
         } catch (\moodle_exception $e) {
             $this->assertEquals('cannotfindsco', $e->errorcode);
@@ -871,27 +871,27 @@ class externallib_test extends externallib_advanced_testcase {
     }
 
     /**
-     * Test mod_exescorm_get_exescorm_access_information.
+     * Test mod_seledascorm_get_seledascorm_access_information.
      */
-    public function test_mod_exescorm_get_exescorm_access_information() {
+    public function test_mod_seledascorm_get_seledascorm_access_information() {
         global $DB;
 
         $this->resetAfterTest(true);
 
         $student = self::getDataGenerator()->create_user();
         $course = self::getDataGenerator()->create_course();
-        // Create the exescorm.
+        // Create the seledascorm.
         $record = new \stdClass();
         $record->course = $course->id;
-        $exescorm = self::getDataGenerator()->create_module('exescorm', $record);
-        $context = \context_module::instance($exescorm->cmid);
+        $seledascorm = self::getDataGenerator()->create_module('seledascorm', $record);
+        $context = \context_module::instance($seledascorm->cmid);
 
         $studentrole = $DB->get_record('role', array('shortname' => 'student'));
         $this->getDataGenerator()->enrol_user($student->id, $course->id, $studentrole->id, 'manual');
 
         self::setUser($student);
-        $result = mod_exescorm_external::get_exescorm_access_information($exescorm->id);
-        $result = \external_api::clean_returnvalue(mod_exescorm_external::get_exescorm_access_information_returns(), $result);
+        $result = mod_seledascorm_external::get_seledascorm_access_information($seledascorm->id);
+        $result = \external_api::clean_returnvalue(mod_seledascorm_external::get_seledascorm_access_information_returns(), $result);
 
         // Check default values for capabilities.
         $enabledcaps = array('canskipview', 'cansavetrack', 'canviewscores');
@@ -905,12 +905,12 @@ class externallib_test extends externallib_advanced_testcase {
             }
         }
         // Now, unassign one capability.
-        unassign_capability('mod/exescorm:viewscores', $studentrole->id);
+        unassign_capability('mod/seledascorm:viewscores', $studentrole->id);
         array_pop($enabledcaps);
         accesslib_clear_all_caches_for_unit_testing();
 
-        $result = mod_exescorm_external::get_exescorm_access_information($exescorm->id);
-        $result = \external_api::clean_returnvalue(mod_exescorm_external::get_exescorm_access_information_returns(), $result);
+        $result = mod_seledascorm_external::get_seledascorm_access_information($seledascorm->id);
+        $result = \external_api::clean_returnvalue(mod_seledascorm_external::get_seledascorm_access_information_returns(), $result);
         unset($result['warnings']);
         foreach ($result as $capname => $capvalue) {
             if (in_array($capname, $enabledcaps)) {

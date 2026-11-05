@@ -74,17 +74,20 @@ jobs:
           grep -F "SOURCE_BUNDLED" classes/local/embedded_editor_source_resolver.php
           ! grep -F "SOURCE_MOODLEDATA" classes/local/embedded_editor_source_resolver.php
 
-      - name: Verify Seleda player CSS and resilient editor links
+      - name: Verify Seleda player CSS and direct editor links
         run: |
           grep -F "#page-mod-seledascorm-player #seledascormpage" styles.css
-          grep -F ".seledascorm-editor-overlay" styles.css
           grep -F "[[pix:mod_seledascorm|fullscreen]]" styles.css
           ! grep -F "page-mod-exescorm" styles.css
-          ! grep -F ".exescorm-editor-overlay" styles.css
+          grep -F "SELEDA V1 PLAYER LAYOUT OVERRIDE" styles.css
+          grep -F "#page-mod-seledascorm-player #seledascorm_layout" styles.css
+          grep -F "display: flex !important;" styles.css
+          grep -F "#page-mod-seledascorm-player #seledascorm_content" styles.css
           grep -F "html_writer::link($editorurl" view.php
           grep -F 'href="{{{editorurl}}}"' templates/player_editexitbar.mustache
-          grep -F 'data-action="mod_seledascorm/editor-open"' templates/player_editexitbar.mustache
-          grep -F "e.preventDefault();" amd/src/editor_modal.js
+          ! grep -F 'data-action="mod_seledascorm/editor-open"' view.php
+          ! grep -F 'data-action="mod_seledascorm/editor-open"' templates/player_editexitbar.mustache
+          ! grep -F "mod_seledascorm/editor_modal" player.php
 
       - name: Verify Seleda player alignment
         run: |

@@ -517,3 +517,17 @@ A post-rename regression was found after Moodle testing: `styles.css` still targ
 The stylesheet now targets `mod_seledascorm` / `seledascorm` consistently, including pix references and editor modal classes.
 
 The **Edit with Seleda** control is also now a real link to `editor/index.php` with the modal behavior layered on top through JavaScript. If the AMD modal handler fails, the link still opens the editor directly instead of doing nothing.
+
+
+### Second player-layout hardening
+
+Moodle testing showed that simply renaming legacy selectors was not sufficient because the player still relied on the old YUI percentage grid for its main geometry.
+
+The V1 player now uses an explicit flex layout:
+- bounded TOC column;
+- fixed-width TOC toggle;
+- content fills all remaining width;
+- SCO iframe/object is forced to 100% width;
+- mobile uses a stacked layout.
+
+**Edit with Seleda** now navigates directly to the embedded editor URL. It no longer depends on the fullscreen AMD modal to be clickable.

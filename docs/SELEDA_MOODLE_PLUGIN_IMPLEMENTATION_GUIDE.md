@@ -677,6 +677,36 @@ The visual-identity files used by the embedded branch were checked against curre
 
 ---
 
+### 2026-11-05 — Direct static editor asset delivery
+
+Editor startup profiling showed that all embedded application assets were being served through `editor/static.php/{cmid}/...`. That endpoint bootstraps Moodle and performs module/course/authentication checks for every asset request. It also embeds the course-module ID in the asset URL, reducing cache reuse between Seleda activities.
+
+The editor bootstrap now points its asset base directly to:
+
+```text
+/mod/seledascorm/dist/static/
+```
+
+These files are application assets only; they do not contain learner, course or authentication data.
+
+Protected Moodle operations remain unchanged:
+- authenticated editor bootstrap;
+- editable package loading;
+- OPEN_FILE;
+- REQUEST_EXPORT;
+- Save to Moodle;
+- package persistence.
+
+The legacy `editor/static.php` endpoint is retained only for compatibility/fallback and is no longer the normal asset path.
+
+Expected effect:
+- fewer PHP requests during editor startup;
+- no repeated Moodle bootstrap per JS/CSS/font/image request;
+- shared browser cache across activities;
+- faster repeat opens, especially on slower school networks and lower-powered devices.
+
+---
+
 ## 22. Pre-merge checklist
 
 Before V1 merge/release, verify at minimum:

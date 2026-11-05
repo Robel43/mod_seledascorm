@@ -35,13 +35,14 @@
         {{#str}}exitactivity, mod_seledascorm{{/str}}
     </a>
     {{#editorurl}}
-        <button type="button" class="btn btn-secondary mr-1"
+        <a class="btn btn-secondary mr-1"
+            href="{{{editorurl}}}"
             data-action="mod_seledascorm/editor-open"
             data-cmid="{{cmid}}"
             data-editorurl="{{{editorurl}}}"
             data-activityname="{{activityname}}">
             {{#str}}editembedded, mod_seledascorm{{/str}}
-        </button>
+        </a>
     {{/editorurl}}
     {{#editaction}}
         {{#hasgrades}}

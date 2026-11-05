@@ -222,7 +222,17 @@ The generic stock eXeLearning build path has been removed from the active Makefi
 
 ### Private Timhirt-Studio access
 
-The embedded profile currently lives in the private `Robel43/Timhirt-Studio` repository. CI/release builds can supply a fine-grained token through the `SELEDA_STUDIO_TOKEN` repository secret. The token only needs read access to repository contents.
+The embedded profile currently lives in the private `Robel43/Timhirt-Studio` repository.
+
+### Required repository secret
+
+Before GitHub can create a complete release ZIP, configure this repository secret in `Robel43/mod_seledascorm`:
+
+```text
+SELEDA_STUDIO_TOKEN
+```
+
+Use a fine-grained GitHub token with read-only **Contents** access to `Robel43/Timhirt-Studio`. The PR source-validation job can run without this secret, but the package sub-job will be skipped. The release workflow intentionally fails if the secret is absent because Seleda releases must never omit the embedded editor.
 
 `make package RELEASE=X.Y.Z` now depends on `build-editor`; it refuses to produce a distributable ZIP unless the embedded bundle exists.
 

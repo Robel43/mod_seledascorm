@@ -89,6 +89,14 @@ jobs:
           ! grep -F 'data-action="mod_seledascorm/editor-open"' templates/player_editexitbar.mustache
           ! grep -F "mod_seledascorm/editor_modal" player.php
 
+      - name: Verify direct embedded asset delivery
+        run: |
+          grep -F "/mod/seledascorm/dist/static" editor/index.php
+          ! grep -F "/mod/seledascorm/editor/static.php/" editor/index.php
+          grep -F "editorBaseUrl" editor/index.php
+          grep -F "saveUrl" editor/index.php
+          grep -F "packageUrl" editor/index.php
+
       - name: Verify Seleda player alignment
         run: |
           grep -F "SELEDA SCORM ALIGNMENT" styles.css

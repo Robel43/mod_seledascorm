@@ -508,3 +508,12 @@ https://github.com/Robel43/mod_seledascorm
 ## License
 
 This fork remains licensed under **GNU GPL v3 or later**, consistent with the upstream project. Upstream copyright and license notices in source files are retained.
+
+
+### Player layout and Edit with Seleda regression fix
+
+A post-rename regression was found after Moodle testing: `styles.css` still targeted legacy `mod_exescorm` page IDs/classes and editor overlay classes. This caused the SCORM player to collapse into a narrow left column and left the embedded editor modal effectively unstyled.
+
+The stylesheet now targets `mod_seledascorm` / `seledascorm` consistently, including pix references and editor modal classes.
+
+The **Edit with Seleda** control is also now a real link to `editor/index.php` with the modal behavior layered on top through JavaScript. If the AMD modal handler fails, the link still opens the editor directly instead of doing nothing.

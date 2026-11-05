@@ -28,23 +28,6 @@ defined('MOODLE_INTERNAL') || die();
 
 $functions = [
 
-    'mod_seledascorm_manage_embedded_editor_action' => [
-        'classname'   => 'mod_seledascorm\external\manage_embedded_editor',
-        'methodname'  => 'execute_action',
-        'description' => 'Execute an install, update, repair, or uninstall action on the embedded eXeLearning editor.',
-        'type'        => 'write',
-        'ajax'        => true,
-        'capabilities' => 'moodle/site:config, mod/seledascorm:manageembeddededitor',
-    ],
-    'mod_seledascorm_manage_embedded_editor_status' => [
-        'classname'   => 'mod_seledascorm\external\manage_embedded_editor',
-        'methodname'  => 'get_status',
-        'description' => 'Return the current installation status of the embedded eXeLearning editor.',
-        'type'        => 'read',
-        'ajax'        => true,
-        'capabilities' => 'moodle/site:config, mod/seledascorm:manageembeddededitor',
-    ],
-
     'mod_seledascorm_view_seledascorm' => [
         'classname' => 'mod_seledascorm_external',
         'methodname' => 'view_seledascorm',

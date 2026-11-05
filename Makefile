@@ -140,7 +140,7 @@ clean-editor:
 # -------------------------------------------------------
 
 PLUGIN_NAME = mod_seledascorm
-
+VERSION_SUFFIX ?= 01
 
 # Create a distributable ZIP package
 # Usage: make package RELEASE=0.0.2
@@ -150,7 +150,7 @@ package: build-editor
 		echo "Error: RELEASE not specified. Use 'make package RELEASE=0.0.2'"; \
 		exit 1; \
 	fi
-	$(eval DATE_VERSION := $(shell date +%Y%m%d)00)
+	$(eval DATE_VERSION := $(shell date +%Y%m%d)$(VERSION_SUFFIX))
 	@test -f $(EDITOR_DIST_PATH)/index.html || (echo "Error: bundled Seleda editor is missing from $(EDITOR_DIST_PATH)." && exit 1)
 	@test -d $(EDITOR_DIST_PATH)/app || (echo "Error: bundled Seleda editor app/ is missing." && exit 1)
 	@test -d $(EDITOR_DIST_PATH)/files || (echo "Error: bundled Seleda editor files/ is missing." && exit 1)

@@ -128,9 +128,17 @@ if ($brandlogourlstring !== '') {
         . '</style>';
 }
 
-// Serve editor resources through static.php (slash arguments) to ensure
-// files are always accessible regardless of web server configuration.
-$editorbaseurl = $CFG->wwwroot . '/mod/seledascorm/editor/static.php/' . $cm->id;
+// Serve the bundled Seleda application assets directly from the plugin.
+// These files are identical for every activity and contain no learner,
+// course, or authentication data. Using a course-module-specific PHP proxy
+// forced every JS/CSS/font/image request to bootstrap Moodle and also
+// prevented browser-cache reuse across activities.
+//
+// Protected operations remain behind Moodle endpoints:
+// - this bootstrap page authenticates the teacher;
+// - packageUrl loads the editable activity package through Moodle;
+// - saveUrl writes the exported package back through Moodle.
+$editorbaseurl = $CFG->wwwroot . '/mod/seledascorm/dist/static';
 
 // Read the editor template from the active local source.
 $editorindexsource = seledascorm_get_embedded_editor_index_source();
@@ -252,11 +260,10 @@ $configscript = <<<EOT
     // the Yjs theme bind and leaves the editor unresponsive. WP and Omeka-S
     // ship the same workaround: swallow 404s on .css / idevices URLs and
     // return an empty stylesheet so the editor keeps booting.
-    // Disable any new service-worker registration (the static editor's
-    // preview-sw.js is served from the same static.php router; environments
-    // that proxy or cache that router — e.g. moodle-playground — return a
-    // 404 there and the registration error spams the console without
-    // blocking anything).
+    // Disable the preview service worker in Moodle-embedded mode. The main
+    // application assets are now served directly from dist/static/ and use
+    // normal browser HTTP caching; the preview worker is not required for the
+    // Moodle authoring bridge and can create scope/cache complications.
     (function() {
         if ("serviceWorker" in navigator) {
             try {

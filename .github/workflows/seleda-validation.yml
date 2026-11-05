@@ -90,17 +90,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Require private Seleda Studio access
+      - name: Detect private Seleda Studio access
+        id: seleda_access
         run: |
-          if [ -z "$SELEDA_STUDIO_TOKEN" ]; then
-            echo "SELEDA_STUDIO_TOKEN is required to build the private embedded Seleda Studio source." >&2
-            exit 1
+          if [ -n "$SELEDA_STUDIO_TOKEN" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::SELEDA_STUDIO_TOKEN is not configured. Source validation can continue, but the complete plugin ZIP cannot be rebuilt in this PR run."
           fi
 
       - name: Build complete mod_seledascorm package
+        if: steps.seleda_access.outputs.available == 'true'
         run: make package RELEASE=pr-${GITHUB_SHA::7}
 
       - name: Verify packaged component and embedded editor
+        if: steps.seleda_access.outputs.available == 'true'
         run: |
           ZIP="mod_seledascorm-pr-${GITHUB_SHA::7}.zip"
           test -f "$ZIP"
@@ -111,6 +116,7 @@ jobs:
           unzip -l "$ZIP" | grep -F "seledascorm/dist/static/libs/"
 
       - name: Upload complete Moodle plugin package
+        if: steps.seleda_access.outputs.available == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: mod_seledascorm-pr-${{ github.sha }}

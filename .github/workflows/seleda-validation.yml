@@ -74,6 +74,18 @@ jobs:
           grep -F "SOURCE_BUNDLED" classes/local/embedded_editor_source_resolver.php
           ! grep -F "SOURCE_MOODLEDATA" classes/local/embedded_editor_source_resolver.php
 
+      - name: Verify Seleda player CSS and resilient editor links
+        run: |
+          grep -F "#page-mod-seledascorm-player #seledascormpage" styles.css
+          grep -F ".seledascorm-editor-overlay" styles.css
+          grep -F "[[pix:mod_seledascorm|fullscreen]]" styles.css
+          ! grep -F "page-mod-exescorm" styles.css
+          ! grep -F ".exescorm-editor-overlay" styles.css
+          grep -F "html_writer::link($editorurl" view.php
+          grep -F 'href="{{{editorurl}}}"' templates/player_editexitbar.mustache
+          grep -F 'data-action="mod_seledascorm/editor-open"' templates/player_editexitbar.mustache
+          grep -F "e.preventDefault();" amd/src/editor_modal.js
+
       - name: Verify Seleda player alignment
         run: |
           grep -F "SELEDA SCORM ALIGNMENT" styles.css

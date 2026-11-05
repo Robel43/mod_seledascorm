@@ -596,6 +596,14 @@ Removed:
 
 The Moodle settings card is now status-only.
 
+### 2026-11-05 — Release credential requirement
+
+The embedded source repository `Robel43/Timhirt-Studio` is private. `mod_seledascorm` therefore requires a repository secret named `SELEDA_STUDIO_TOKEN` for automated package/release builds. The token requires read-only Contents access to Timhirt-Studio.
+
+PR source validation remains runnable without the secret and emits a warning while skipping the package sub-job. The release workflow fails early when the secret is absent because publishing a Moodle ZIP without the embedded editor is prohibited.
+
+This credential is repository configuration, not application source code, and must be configured by a repository administrator in GitHub.
+
 ### 2026-11-05 — Embedded artifact verification
 
 Verified the successful Timhirt-Studio CI artifact from `feature/seleda-embedded-editor`. The artifact contains:

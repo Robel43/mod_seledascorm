@@ -658,6 +658,25 @@ Package version suffix advanced again so Moodle refreshes the corrected CSS/JS.
 
 ---
 
+### 2026-11-05 — Embedded static shell aligned to current Develop
+
+Moodle testing showed that the embedded editor had the correct Seleda customization files but still rendered the older static eXeLearning shell.
+
+Root cause:
+- standalone Timhirt-Studio `Develop` injects the latest visual identity through `views/workarea/workarea.njk`;
+- the Moodle embedded profile is built from `scripts/static-bundle/static-index.html`;
+- the custom CSS/JS files were copied into the static bundle but that separate static entry template did not load them.
+
+Correction:
+- the embedded profile now patches the static entry template before the static bundle is generated;
+- it explicitly loads the current Develop visual-identity assets for the authoring shell, Block Library drawer, Project Settings, Content Block Manager and Page Structure panel;
+- the embedded loading screen is intentionally blank, with no R43 artwork and no eXeLearning technical/version line;
+- CI and the Moodle packaging script verify these exact conditions.
+
+The visual-identity files used by the embedded branch were checked against current `Develop` and are byte-for-byte identical.
+
+---
+
 ## 22. Pre-merge checklist
 
 Before V1 merge/release, verify at minimum:

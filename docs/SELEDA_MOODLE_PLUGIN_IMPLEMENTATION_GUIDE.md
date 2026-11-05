@@ -484,7 +484,7 @@ The plugin retains the required embedded editor and style-management settings ne
 
 V1 defaults to the bundled embedded editor.
 
-The read-only editor status approach is intentional: the release artifact is the approved editor source. Administrators should not replace it independently through Moodle.
+The read-only editor status approach is intentional: the release artifact is the approved editor source. The legacy editor installer, AJAX management service, and install/update/uninstall controls have been removed from V1. A missing bundled editor is an invalid/incomplete plugin package.
 
 ---
 
@@ -579,6 +579,41 @@ Added explicit build-time verification for all V1 Seleda Content Blocks and modi
 - complete
 
 The Seleda Studio build and Moodle extraction build both fail if a required editor is absent.
+
+---
+
+### 2026-11-05 — Bundled-only editor enforcement
+
+Removed the legacy Moodledata editor installation path and all runtime download/update/uninstall services. V1 now resolves only `mod/seledascorm/dist/static`. The resolver requires `index.html`, `app/`, `libs/`, and `files/` to be present before the editor is considered valid.
+
+Removed:
+- `classes/local/embedded_editor_installer.php`
+- `classes/external/manage_embedded_editor.php`
+- `amd/src/admin_embedded_editor.js`
+- built admin embedded-editor AMD action module
+- embedded editor install/update/uninstall web-service definitions
+- installer/action tests
+
+The Moodle settings card is now status-only.
+
+### 2026-11-05 — Embedded artifact verification
+
+Verified the successful Timhirt-Studio CI artifact from `feature/seleda-embedded-editor`. The artifact contains:
+- `index.html`
+- `app/`
+- `files/`
+- `libs/`
+- `mcq-feedback`
+- `speaking-practice`
+- `page-navigation`
+- modified `dragdrop`
+- modified `beforeafter`
+- modified `map`
+- modified `quick-questions`
+- modified `complete`
+- Seleda Studio branding
+
+The Moodle PR validation workflow now includes a package job that builds `mod_seledascorm` with this embedded editor and verifies those core paths inside the final ZIP.
 
 ---
 

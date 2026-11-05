@@ -41,6 +41,120 @@
     var changeNotified = false;
 
     var pendingRequests = Object.create(null);
+    var moodleSaveButton = null;
+    var moodleSaveObserver = null;
+
+    function setMoodleSaveButtonState(label, disabled) {
+        if (!moodleSaveButton) {
+            return;
+        }
+        if (label) {
+            moodleSaveButton.textContent = label;
+        }
+        moodleSaveButton.disabled = !!disabled;
+        moodleSaveButton.setAttribute('aria-busy', disabled ? 'true' : 'false');
+    }
+
+    function ensureMoodleSaveButton() {
+        var toolbar = document.querySelector('#eXeLearningNavbar .main-menu-right')
+            || document.querySelector('#eXeLearningNavbar .main-menu')
+            || document.getElementById('eXeLearningNavbar');
+
+        if (!toolbar) {
+            return false;
+        }
+
+        // The upstream/local Save writes to the static editor's local project.
+        // In Moodle embedded mode that is misleading: the authoritative save
+        // must export the editable SCORM package back to Moodle.
+        var localSave = document.getElementById('head-top-save-button');
+        if (localSave) {
+            localSave.style.display = 'none';
+            localSave.setAttribute('aria-hidden', 'true');
+            localSave.setAttribute('tabindex', '-1');
+        }
+
+        var existing = document.getElementById('seledascorm-save-to-moodle');
+        if (existing) {
+            moodleSaveButton = existing;
+            return true;
+        }
+
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.id = 'seledascorm-save-to-moodle';
+        button.className = 'btn';
+        button.textContent = 'Save to Moodle';
+        button.title = 'Save this Seleda project back to Moodle';
+        button.setAttribute('aria-label', 'Save to Moodle');
+        button.setAttribute('aria-busy', 'false');
+        button.style.cssText = [
+            'min-width:148px',
+            'height:40px',
+            'padding:0 16px',
+            'display:inline-flex',
+            'align-items:center',
+            'justify-content:center',
+            'border:1px solid #2f6df6',
+            'border-radius:10px',
+            'background:#2f6df6',
+            'color:#fff',
+            'font-size:14.5px',
+            'font-weight:650',
+            'line-height:1',
+            'white-space:nowrap',
+            'cursor:pointer',
+            'box-shadow:none'
+        ].join(';');
+
+        button.addEventListener('mouseenter', function() {
+            if (!button.disabled) {
+                button.style.background = '#2459d3';
+                button.style.borderColor = '#2459d3';
+            }
+        });
+        button.addEventListener('mouseleave', function() {
+            if (!button.disabled) {
+                button.style.background = '#2f6df6';
+                button.style.borderColor = '#2f6df6';
+            }
+        });
+        button.addEventListener('click', function(event) {
+            event.preventDefault();
+            saveToMoodle();
+        });
+
+        // Put Moodle save in the same right-side action group used by the
+        // current Seleda Develop shell, immediately before the user/avatar area.
+        var userControl = toolbar.querySelector('#head-bottom-user-logged');
+        if (userControl) {
+            toolbar.insertBefore(button, userControl);
+        } else {
+            toolbar.appendChild(button);
+        }
+
+        moodleSaveButton = button;
+        return true;
+    }
+
+    function monitorMoodleSaveButton() {
+        if (ensureMoodleSaveButton()) {
+            // Keep watching because Seleda can rebuild toolbar nodes while
+            // changing project state or responsive layout.
+            if (!moodleSaveObserver) {
+                moodleSaveObserver = new MutationObserver(function() {
+                    ensureMoodleSaveButton();
+                });
+                moodleSaveObserver.observe(document.documentElement, {
+                    childList: true,
+                    subtree: true,
+                });
+            }
+            return;
+        }
+
+        window.setTimeout(monitorMoodleSaveButton, 150);
+    }
 
     function createRequestId(prefix) {
         return (prefix || 'req') + '-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
@@ -272,6 +386,7 @@
         }
 
         state.saving = true;
+        setMoodleSaveButtonState('Saving...', true);
         notifyParent('save-start');
 
         try {
@@ -296,16 +411,27 @@
 
             var saveResult = await uploadExportToMoodle(bytes, exportResponse.filename || 'package.zip');
 
+            setMoodleSaveButtonState('Saved to Moodle', true);
             notifyParent('save-complete', {
                 revision: saveResult.revision,
             });
+
+            window.setTimeout(function() {
+                if (!state.saving && moodleSaveButton) {
+                    setMoodleSaveButtonState('Save to Moodle', false);
+                }
+            }, 1400);
         } catch (error) {
             console.error('[moodle-exe-bridge] Save failed:', error);
+            setMoodleSaveButtonState('Save failed — retry', false);
             notifyParent('save-error', {
                 error: error.message || 'Unknown error',
             });
         } finally {
             state.saving = false;
+            if (moodleSaveButton && moodleSaveButton.textContent === 'Saving...') {
+                setMoodleSaveButtonState('Save to Moodle', false);
+            }
         }
     }
 
@@ -376,6 +502,7 @@
     }
 
     async function init() {
+        monitorMoodleSaveButton();
         window.addEventListener('message', handleFrameMessage);
 
         if (parentWindow && typeof parentWindow.addEventListener === 'function') {

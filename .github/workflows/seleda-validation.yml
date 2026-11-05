@@ -62,6 +62,18 @@ jobs:
           ! grep -R "mod_exescorm" version.php settings.php lib.php mod_form.php editor classes --include='*.php'
           ! grep -R "/mod/exescorm" version.php settings.php lib.php mod_form.php editor classes --include='*.php'
 
+      - name: Verify bundled-only editor architecture
+        run: |
+          test ! -f classes/local/embedded_editor_installer.php
+          test ! -f classes/external/manage_embedded_editor.php
+          test ! -f amd/src/admin_embedded_editor.js
+          test ! -f amd/build/admin_embedded_editor.min.js
+          ! grep -F "mod_seledascorm_manage_embedded_editor_action" db/services.php
+          ! grep -F "mod_seledascorm_manage_embedded_editor_status" db/services.php
+          grep -F "mod/seledascorm/dist/static" classes/local/embedded_editor_source_resolver.php
+          grep -F "SOURCE_BUNDLED" classes/local/embedded_editor_source_resolver.php
+          ! grep -F "SOURCE_MOODLEDATA" classes/local/embedded_editor_source_resolver.php
+
       - name: Verify Seleda player alignment
         run: |
           grep -F "SELEDA SCORM ALIGNMENT" styles.css

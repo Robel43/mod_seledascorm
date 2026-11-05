@@ -625,6 +625,22 @@ The Moodle PR validation workflow now includes a package job that builds `mod_se
 
 ---
 
+### 2026-11-05 — Player layout and Edit with Seleda regression fix
+
+Moodle acceptance testing exposed two rename regressions:
+
+1. `styles.css` still used legacy `mod_exescorm` page IDs/classes, pix component names, and `exescorm-editor-*` modal classes. After the component rename, Moodle rendered `mod_seledascorm` page IDs, so most player CSS no longer matched. The result was a narrow/collapsed player layout.
+2. The embedded editor control depended entirely on the AMD modal handler. Without the corresponding renamed modal CSS, a click could appear to do nothing.
+
+Fixes:
+- converted all plugin stylesheet selectors and pix references to `mod_seledascorm` / `seledascorm`;
+- aligned editor overlay, header, iframe, loading modal and animation class names;
+- changed **Edit with Seleda** from a JavaScript-only button to a real link to `editor/index.php` while retaining modal interception;
+- added CI regression checks for the Seleda player page selector, editor overlay class, pix component reference, and direct editor fallback URL;
+- advanced the package version suffix so Moodle treats the corrected ZIP as an upgrade and refreshes cached plugin assets.
+
+---
+
 ## 22. Pre-merge checklist
 
 Before V1 merge/release, verify at minimum:

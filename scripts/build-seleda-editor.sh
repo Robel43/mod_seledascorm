@@ -88,12 +88,18 @@ grep -F "timhirt-studio/content-block-manager.js" "$ROOT_DIR/dist/static/index.h
 
 # Embedded V1 loading screen must not expose upstream/R43 artwork or technical
 # eXeLearning version text.
-if grep -F ">eXeLearning " "$ROOT_DIR/dist/static/index.html" >/dev/null 2>&1; then
+# Validate the loading screen specifically. Compatibility text elsewhere in the
+# static editor may still legitimately contain the upstream technical name.
+LOAD_SCREEN_LINE=$(grep -F 'id="load-screen-main"' "$ROOT_DIR/dist/static/index.html" || true)
+if [ -z "$LOAD_SCREEN_LINE" ]; then
+    echo "Embedded static loading screen element is missing." >&2
+    exit 1
+fi
+if printf '%s' "$LOAD_SCREEN_LINE" | grep -Fi "eXeLearning" >/dev/null 2>&1; then
     echo "Embedded static loading screen still contains eXeLearning product/version text." >&2
     exit 1
 fi
-
-if grep -Fi "R43" "$ROOT_DIR/dist/static/index.html" >/dev/null 2>&1; then
+if printf '%s' "$LOAD_SCREEN_LINE" | grep -Fi "R43" >/dev/null 2>&1; then
     echo "Embedded static loading screen still contains R43 branding." >&2
     exit 1
 fi

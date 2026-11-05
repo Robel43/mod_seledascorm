@@ -189,13 +189,11 @@ if (($seledascorm->seledascormtype === SELEDASCORM_TYPE_EMBEDDED || $iselpx)
     echo html_writer::link($editorurl,
         get_string('editwithbrand', 'mod_seledascorm', seledascorm_get_brand_name()), [
             'class' => 'btn btn-primary',
-            'data-action' => 'mod_seledascorm/editor-open',
             'data-cmid' => $cm->id,
             'data-editorurl' => $editorurl->out(false),
             'data-activityname' => format_string($seledascorm->name),
         ]);
     echo html_writer::end_div();
-    $PAGE->requires->js_call_amd('mod_seledascorm/editor_modal', 'init');
 }
 
 if ($iselpx) {

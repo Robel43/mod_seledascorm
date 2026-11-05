@@ -78,4 +78,24 @@ if ! grep -RIl -m1 "Seleda Studio" "$ROOT_DIR/dist/static" >/dev/null 2>&1; then
     exit 1
 fi
 
+# Verify the static Moodle entry page actually loads the current Seleda visual
+# identity from Timhirt-Studio Develop. Copying the assets alone is not enough.
+grep -F "timhirt-studio/authoring-shell.css" "$ROOT_DIR/dist/static/index.html" >/dev/null
+grep -F "timhirt-studio/block-library-drawer.js" "$ROOT_DIR/dist/static/index.html" >/dev/null
+grep -F "timhirt-studio/project-settings.js" "$ROOT_DIR/dist/static/index.html" >/dev/null
+grep -F "timhirt-studio/page-structure-panel.js" "$ROOT_DIR/dist/static/index.html" >/dev/null
+grep -F "timhirt-studio/content-block-manager.js" "$ROOT_DIR/dist/static/index.html" >/dev/null
+
+# Embedded V1 loading screen must not expose upstream/R43 artwork or technical
+# eXeLearning version text.
+if grep -F ">eXeLearning " "$ROOT_DIR/dist/static/index.html" >/dev/null 2>&1; then
+    echo "Embedded static loading screen still contains eXeLearning product/version text." >&2
+    exit 1
+fi
+
+if grep -Fi "R43" "$ROOT_DIR/dist/static/index.html" >/dev/null 2>&1; then
+    echo "Embedded static loading screen still contains R43 branding." >&2
+    exit 1
+fi
+
 echo "Embedded Seleda bundle written to $ROOT_DIR/dist/static"

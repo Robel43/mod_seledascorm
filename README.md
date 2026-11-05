@@ -308,7 +308,7 @@ The Moodle settings page includes an embedded editor status widget implemented i
 classes/admin/admin_setting_embeddededitor.php
 ```
 
-For V1 it is deliberately read-only. Independent install/update/remove actions are disabled so an administrator cannot accidentally replace the approved Seleda editor with an upstream editor that lacks Seleda customizations.
+For V1 it is deliberately read-only. The old install/update/remove editor service has been removed entirely. If this status shows the editor as missing, the installed plugin ZIP is incomplete and must be replaced with a complete Seleda release package.
 
 ## Editor modes
 
@@ -366,16 +366,18 @@ php admin/cli/upgrade.php
 php admin/cli/purge_caches.php
 ```
 
-Verify at minimum:
+Verify a clean Seleda installation at minimum:
 
-1. existing activities still open;
-2. previous learner attempts and grades remain visible;
-3. completion status is unchanged;
-4. a fresh Seleda SCORM 1.2 export reports score and status;
-5. Reports > Interactions shows readable question/response labels when Seleda metadata is present;
-6. older packages still fall back safely to SCORM identifiers;
-7. Create with Seleda opens the customized embedded editor;
-8. Edit with Seleda reopens the existing editable source.
+1. Moodle identifies the module as `mod_seledascorm`;
+2. the installed plugin folder is `mod/seledascorm`;
+3. the embedded editor status reports the bundled editor as available;
+4. Create with Seleda opens the customized embedded editor without a separate download step;
+5. all required custom/new Content Blocks are available;
+6. a fresh Seleda SCORM 1.2 export reports score and status;
+7. Reports > Interactions shows readable question/response labels when Seleda metadata is present;
+8. Edit with Seleda reopens the existing editable source and resaves successfully.
+
+Legacy `mod_exescorm` migration must be validated separately once a dedicated migration procedure is implemented.
 
 ## Reporting architecture
 
@@ -481,8 +483,9 @@ The implementation guide is intended to become the final technical handover docu
 
 Current upstream base:
 
-- repository: `exelearning/mod_seledascorm`
-- internal component: `mod_seledascorm`
+- repository: `exelearning/mod_exescorm`
+- upstream component: `mod_exescorm`
+- Seleda component: `mod_seledascorm`
 
 Upstream fixes may still be reviewed and ported, but component-specific identifiers must be adapted to `mod_seledascorm`. Seleda-specific changes should remain isolated, documented and reviewable so future upstream synchronization stays manageable.
 

@@ -531,3 +531,28 @@ The V1 player now uses an explicit flex layout:
 - mobile uses a stacked layout.
 
 **Edit with Seleda** now navigates directly to the embedded editor URL. It no longer depends on the fullscreen AMD modal to be clickable.
+
+
+### Embedded editor startup performance
+
+The Moodle editor bootstrap remains authenticated through `editor/index.php`, but the bundled Seleda application assets are now served directly from:
+
+```text
+/mod/seledascorm/dist/static/
+```
+
+This replaces the previous per-activity PHP proxy path:
+
+```text
+/mod/seledascorm/editor/static.php/{cmid}/...
+```
+
+The old proxy caused every JavaScript, CSS, font, image and Content Block asset request to bootstrap Moodle, perform course/module lookups and permission checks, and use URLs unique to each activity. Direct static delivery removes that repeated PHP/Moodle overhead and lets the browser reuse the same cached asset URLs across Seleda activities.
+
+Protected operations remain behind Moodle:
+- editor bootstrap/authentication;
+- editable package loading;
+- `OPEN_FILE`;
+- `REQUEST_EXPORT`;
+- `Save to Moodle`;
+- activity/package persistence.

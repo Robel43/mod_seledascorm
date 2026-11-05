@@ -641,6 +641,23 @@ Fixes:
 
 ---
 
+### 2026-11-05 — Second player layout fix
+
+A second Moodle acceptance test showed that renaming the legacy selectors was insufficient. The player still depended on the old YUI 20% / 4% / 75% grid classes for its main geometry, and the rendered SCO remained confined to a narrow column.
+
+The player now uses an explicit flex layout:
+- TOC: bounded 20% column;
+- toggle: fixed 34px column;
+- content: flexible remaining width;
+- SCO iframe/object: forced to 100% of content width;
+- mobile breakpoint: stacked 100% layout.
+
+The **Edit with Seleda** link no longer depends on the AMD modal at all. It navigates directly to `/mod/seledascorm/editor/index.php`. This removes the failure mode where the click is intercepted and then appears to do nothing.
+
+Package version suffix advanced again so Moodle refreshes the corrected CSS/JS.
+
+---
+
 ## 22. Pre-merge checklist
 
 Before V1 merge/release, verify at minimum:

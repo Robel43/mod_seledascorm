@@ -69,3 +69,37 @@ jobs:
           grep -F '"moodle": "4.5"' blueprint.json
           grep -F -- "--seleda-primary: #2f6df6;" styles.css
           grep -F -- "--seleda-secondary: #12b8aa;" styles.css
+
+
+  package-with-embedded-editor:
+    runs-on: ubuntu-latest
+    env:
+      SELEDA_STUDIO_TOKEN: ${{ secrets.SELEDA_STUDIO_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Require private Seleda Studio access
+        run: |
+          if [ -z "$SELEDA_STUDIO_TOKEN" ]; then
+            echo "SELEDA_STUDIO_TOKEN is required to build the private embedded Seleda Studio source." >&2
+            exit 1
+          fi
+
+      - name: Build complete mod_seledascorm package
+        run: make package RELEASE=pr-${GITHUB_SHA::7}
+
+      - name: Verify packaged component and embedded editor
+        run: |
+          ZIP="mod_seledascorm-pr-${GITHUB_SHA::7}.zip"
+          test -f "$ZIP"
+          unzip -l "$ZIP" | grep -F "seledascorm/version.php"
+          unzip -l "$ZIP" | grep -F "seledascorm/dist/static/index.html"
+          unzip -l "$ZIP" | grep -F "seledascorm/dist/static/app/"
+          unzip -l "$ZIP" | grep -F "seledascorm/dist/static/files/"
+          unzip -l "$ZIP" | grep -F "seledascorm/dist/static/libs/"
+
+      - name: Upload complete Moodle plugin package
+        uses: actions/upload-artifact@v4
+        with:
+          name: mod_seledascorm-pr-${{ github.sha }}
+          path: mod_seledascorm-pr-*.zip

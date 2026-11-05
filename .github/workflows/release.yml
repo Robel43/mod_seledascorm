@@ -49,6 +49,13 @@ jobs:
             echo "APP_VERSION=${INPUT_RELEASE}" >> $GITHUB_ENV
           fi
 
+      - name: Require Seleda Studio source access
+        run: |
+          if [ -z "$SELEDA_STUDIO_TOKEN" ]; then
+            echo "SELEDA_STUDIO_TOKEN is required because every release must bundle the private Seleda Studio embedded profile." >&2
+            exit 1
+          fi
+
       - name: Create package
         run: make package RELEASE=${RELEASE_TAG}
 

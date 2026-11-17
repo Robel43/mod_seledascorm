@@ -2,6 +2,8 @@
 name: Seleda SCORM Validation
 
 on:
+  push:
+    branches: [feature/seleda-alignment]
   pull_request:
   workflow_dispatch:
 

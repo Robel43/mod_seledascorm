@@ -27,7 +27,7 @@ final class dashboard_test extends \advanced_testcase {
         $generator->create_group_member(['groupid' => $group->id, 'userid' => $one->id]);
         $teacherrole = $DB->get_record('role', ['shortname' => 'editingteacher'], '*', MUST_EXIST);
         assign_capability('moodle/site:accessallgroups', CAP_PREVENT, $teacherrole->id, \context_course::instance($course->id)->id);
-        $sco = $DB->get_record('seledascorm_scoes', ['seledascorm' => $activity->id, 'scormtype' => 'sco'], '*', IGNORE_MULTIPLE);
+        $sco = $DB->get_record('seledascorm_scoes', ['seledascorm' => $activity->id, 'seledascormtype' => 'sco'], '*', IGNORE_MULTIPLE);
         $this->assertNotFalse($sco);
         foreach ([$one, $two] as $learner) {
             $DB->insert_record('seledascorm_scoes_track', (object)['userid' => $learner->id, 'seledascormid' => $activity->id,
@@ -36,10 +36,10 @@ final class dashboard_test extends \advanced_testcase {
         $this->setUser($teacher);
         $this->assertTrue(reporting_dashboard::can_open());
         $catalogue = reporting_dashboard::catalogue();
-        $this->assertSame([$activity->cmid], array_map(function($row) { return (int)$row->id; }, $catalogue['items']));
+        $this->assertSame([(int)$activity->cmid], array_map(function($row) { return (int)$row->id; }, $catalogue['items']));
         [$allowed, $cm] = reporting_dashboard::activity($activity->cmid);
         $metrics = reporting_dashboard::overview($allowed, $cm);
-        $this->assertSame([$one->id], array_keys($metrics['learners']));
+        $this->assertSame([(int)$one->id], array_keys($metrics['learners']));
         $this->assertSame(0, $metrics['tracked']);
         $this->assertEmpty($metrics['blocks']);
         $this->expectException(\moodle_exception::class);

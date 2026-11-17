@@ -151,7 +151,7 @@ final class reporting_dashboard {
         $blocks = [];
         $actions = [];
         $required = array_keys(array_filter($pages, function($p) {
-            return !empty($p->launch) && ($p->scormtype ?? 'sco') === 'sco';
+            return !empty($p->launch) && ($p->seledascormtype ?? 'sco') === 'sco';
         }));
         foreach ($tracks as $track) {
             $userid = (int)$track->userid;

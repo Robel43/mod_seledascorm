@@ -69,7 +69,8 @@ $scope = ['x.path LIKE ?', ['/1/%']];
 $loggedin = true; $guest = false; $admin = false; $permitted = true; $allgroups = false; $groupmode = 1;
 $groups = [2 => (object)['id' => 2, 'name' => 'Class A']]; $closed = 0;
 $DB = new dashboard_db();
-$pages = [7 => (object)['title' => 'Introduction', 'launch' => 'index.html'], 8 => (object)['title' => 'Practice', 'launch' => 'practice.html']];
+$pages = [7 => (object)['title' => 'Introduction', 'launch' => 'index.html'], 8 => (object)['title' => 'Practice', 'launch' => 'practice.html'],
+    9 => (object)['title' => 'Supporting asset', 'launch' => 'asset.html', 'seledascormtype' => 'asset']];
 $tracks = [];
 function track($user, $attempt, $sco, $element, $value) {
     global $tracks;

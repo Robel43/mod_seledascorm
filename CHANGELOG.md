@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## Unreleased: Seleda reporting
+
+- Show active viewing time and interactions for individual content blocks and the whole SCORM attempt.
+- Add expandable block/action reports and CSV downloads while retaining native grades and completion.
+- Preserve readable question and answer labels across package edits and distinguish activity retries.
+- Scope usage saves to the authenticated learner, SCO and attempt; safely merge retries and late saves.
+- Include reporting regression checks and a remote-editor plugin artifact in CI.
+
+---
+
 ## v4.0.6 – 2026-10-29
 
 - Fix "Edit with eXeLearning" in eXeLearning Cloud showing "Access denied" when another teacher was the last to send the activity back from eXeLearning.

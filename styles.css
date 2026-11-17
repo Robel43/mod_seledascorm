@@ -627,3 +627,12 @@
     font-size: 0.9rem;
 }
 
+
+/* Per-block usage in the activity-wide Interactions overview. */
+.seleda-usage { margin: 1rem 0; padding: 1rem; border: 1px solid #dce3ed; border-radius: .75rem; background: #f9f9f9; }
+.seleda-usage-scroll { max-width: 100%; overflow-x: auto; }
+.seleda-usage th, .seleda-usage td { text-align: left; padding: .6rem; vertical-align: top; }
+.seleda-usage details { margin: .75rem 0; }
+.seleda-usage summary { cursor: pointer; font-weight: 600; }
+.seleda-usage li { margin: .4rem 0; overflow-wrap: anywhere; }
+.seleda-usage-note { color: #536179; font-size: .9rem; margin-bottom: 0; }

@@ -1,0 +1,15 @@
+.timhirt-readable-report { width: 100%; table-layout: auto; }
+.timhirt-readable-report th, .timhirt-readable-report td { vertical-align: top; padding: 1rem; white-space: normal; overflow-wrap: anywhere; }
+.timhirt-readable-report td:nth-child(3) { min-width: 16rem; max-width: 36rem; font-weight: 600; }
+.timhirt-readable-report td:nth-child(4), .timhirt-readable-report td:nth-child(5) { min-width: 10rem; max-width: 26rem; }
+.timhirt-result { display: inline-block; padding: .3rem .65rem; border-radius: .35rem; font-weight: 700; }
+.timhirt-result-correct { background: #e3f3e7; color: #18562b; }
+.timhirt-result-incorrect { background: #fde7e7; color: #8b2020; }
+.timhirt-result-recorded { background: #edf1f8; color: #334866; }
+.seleda-usage { margin: 1rem 0; padding: 1rem; border: 1px solid #dce3ed; border-radius: .75rem; background: #f9f9f9; }
+.seleda-usage-scroll { max-width: 100%; overflow-x: auto; }
+.seleda-usage th, .seleda-usage td { text-align: left; padding: .6rem; vertical-align: top; }
+.seleda-usage details { margin: .75rem 0; }
+.seleda-usage summary { cursor: pointer; font-weight: 600; }
+.seleda-usage li { margin: .4rem 0; overflow-wrap: anywhere; }
+.seleda-usage-note { color: #536179; font-size: .9rem; margin-bottom: 0; }

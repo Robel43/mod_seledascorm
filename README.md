@@ -131,3 +131,65 @@ GNU General Public License for more details.
 
 You should receive a copy of the GNU General Public License
 along with this program.
+
+## Seleda Studio block reporting
+
+This fork includes the Seleda reporting integration directly. Do not apply the
+separate Studio Moodle overlay after updating this plugin.
+
+With a fresh SCORM 1.2 export from the updated Seleda Studio, the **Interactions**
+report shows each learner's active viewing time, action count and individual
+content-block breakdown, plus totals across the whole SCORM attempt. Expand
+**View block usage**, then **View interaction log** for the detailed attempt page.
+The detailed page has expandable block logs and a downloadable table containing
+totals, blocks, actions and readable question/answer records. Question labels are
+snapshotted per learner/SCO/attempt to preserve wording when packages change.
+
+All block types can supply usage, including ungraded text and image blocks.
+Usage is separate from grades and completion. Time is estimated for one visible
+block at a time; hidden/unfocused tabs and more than 60 seconds of inactivity are
+excluded. Recorded actions include clicks, committed answers, drag/drop, hotspot
+hover and HTML audio/video actions. Cross-origin embeds may only expose launch
+or focus, not their internal actions. No microphone recordings are collected.
+
+The plugin accepts bounded, authenticated batches without blocking navigation.
+Retries do not double-count, and late saves remain tied to their original SCO,
+learner and attempt. Up to 2,000 action details per block visit session are retained;
+omitted detail counts are shown while cumulative totals remain available. A hard
+browser crash or an offline exit may lose the unsaved tail. SCORM 2004 retains
+its native behavior; this additional usage bridge currently targets SCORM 1.2.
+Historical packages cannot retrospectively provide usage they never recorded.
+
+### Updating an existing installation
+
+1. Back up Moodle's plugin directory and database.
+2. Update this repository's code in **mod/exescorm**. The repository name is
+   mod_seledascorm, but the installed component remains **mod_exescorm**. Keep this
+   directory and component name so existing activities and records remain intact.
+3. Run Moodle's normal upgrade and purge its caches. Git checkouts intentionally
+   retain the upstream dev version values; release packaging supplies a dated
+   version. No new tables or data migration are required for usage reporting.
+4. Re-export a SCORM 1.2 package from the updated Seleda Studio and update the
+   activity package. Verify two learners and separate attempts before rollout.
+
+Usage and label snapshots use the existing exescorm_scoes_track table. Existing
+Moodle privacy exports/deletions, attempt deletion and course reset cover these
+records. Learner-entered text can appear in action details; report access retains
+the plugin's existing capability and group restrictions. Display values are
+escaped for HTML and spreadsheet formula safety.
+
+Source ZIPs and the reporting-checks CI artifact include the complete plugin for
+**remote editor** mode. They do not bundle the embedded editor. Keep the existing
+embedded build during an in-place source update, or use make build-editor before
+packaging if an embedded-editor distribution is required.
+
+### Development checks
+
+See [tests/reporting/README.md](tests/reporting/README.md) for executable regression
+checks. The Seleda reporting checks workflow runs them on pushes and pull requests
+and produces an installable remote-editor plugin artifact. These tests use Moodle
+boundary fixtures; full site acceptance remains necessary.
+
+Sibling review: mod_exeweb does not contain the SCORM datamodel endpoint or CMI
+interaction report used here. Its native web-package delivery does not implement
+this SCORM bridge, so this change does not apply to that sibling plugin.

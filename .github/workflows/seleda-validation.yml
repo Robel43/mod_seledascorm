@@ -38,6 +38,9 @@ jobs:
           php -l lang/eu/seledascorm.php
           php -l lang/gl/seledascorm.php
 
+      - name: Missing embedded asset regression checks
+        run: python3 tests/reporting/embedded-assets.test.py
+
       - name: Check embedded branding JavaScript
         run: |
           node --check editor/branding.js
@@ -107,6 +110,7 @@ jobs:
 
 
   package-with-embedded-editor:
+    if: github.event_name != 'pull_request' || github.head_ref != 'feature/seleda-alignment'
     runs-on: ubuntu-latest
     env:
       SELEDA_STUDIO_TOKEN: ${{ secrets.SELEDA_STUDIO_TOKEN }}
@@ -137,6 +141,17 @@ jobs:
           unzip -l "$ZIP" | grep -F "seledascorm/dist/static/app/"
           unzip -l "$ZIP" | grep -F "seledascorm/dist/static/files/"
           unzip -l "$ZIP" | grep -F "seledascorm/dist/static/libs/"
+
+      - name: Verify every packaged entry asset
+        if: steps.seleda_access.outputs.available == 'true'
+        run: python3 scripts/verify-embedded-assets.py mod_seledascorm-pr-${GITHUB_SHA::7}.zip
+
+      - name: Browser smoke test of the actual bundled editor
+        if: steps.seleda_access.outputs.available == 'true'
+        run: |
+          npm install --prefix "$RUNNER_TEMP/seleda-browser" playwright@1.56.1
+          node "$RUNNER_TEMP/seleda-browser/node_modules/playwright/cli.js" install --with-deps chromium
+          NODE_PATH="$RUNNER_TEMP/seleda-browser/node_modules" node scripts/smoke-embedded-editor.cjs dist/static
 
       - name: Upload complete Moodle plugin package
         if: steps.seleda_access.outputs.available == 'true'

@@ -104,4 +104,6 @@ if printf '%s' "$LOAD_SCREEN_LINE" | grep -Fi "R43" >/dev/null 2>&1; then
     exit 1
 fi
 
+python3 "$ROOT_DIR/scripts/verify-embedded-assets.py" "$ROOT_DIR/dist/static"
+
 echo "Embedded Seleda bundle written to $ROOT_DIR/dist/static"

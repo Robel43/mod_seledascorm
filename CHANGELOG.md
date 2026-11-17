@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## Unreleased: standalone reporting dashboard
+
+- Add Seleda reports to Moodle's main navigation outside course and activity pages.
+- Browse accessible SCORM activities and explore learner, attempt, active-time and interaction summaries.
+- Add completion, content-block and action charts, filtered learner CSV, and learner/attempt drill-downs.
+- Preserve course, module and separate-group permissions across every dashboard view and export.
+
+---
+
 ## Unreleased: per-block usage reporting
 
 - Add independent content-block active time and action logs, plus whole-attempt totals and CSV exports.

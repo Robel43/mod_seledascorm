@@ -23,10 +23,78 @@ jobs:
           php -l datamodel.php
           find report tests/reporting -name '*.php' -print0 | xargs -0 -n1 php -l
           php -l lang/en/seledascorm.php
+          php -l dashboard.php
+          php -l classes/local/reporting_dashboard.php
+          php -l classes/output/reporting_dashboard.php
+          php -l classes/hook_callbacks.php
+          php -l db/hooks.php
+      - name: Prepare dashboard browser checks
+        run: |
+          npm install --prefix "$RUNNER_TEMP/dashboard-browser" playwright@1.56.1
+          node "$RUNNER_TEMP/dashboard-browser/node_modules/playwright/cli.js" install --with-deps chromium
       - name: Reporting, storage, permissions and API regression checks
         run: |
           php tests/reporting/readable-reporting.php
           php tests/reporting/block-usage.php
           php tests/reporting/overview-reporting.php
           php tests/reporting/overview-reporting.php --csv
+          php tests/reporting/dashboard.php
+          export NODE_PATH="$RUNNER_TEMP/dashboard-browser/node_modules"
           node --test tests/reporting/*.test.cjs
+  moodle-dashboard:
+    if: github.event_name != 'pull_request' || github.head_ref != 'feature/seleda-alignment'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: moodle
+          MARIADB_ROOT_HOST: '%'
+          MARIADB_DATABASE: moodle
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mariadb-admin ping -h 127.0.0.1 -pmoodle"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mysqli, mbstring, intl, gd, zip, soap, exif, sodium
+          ini-values: max_input_vars=5000, memory_limit=512M
+          coverage: none
+      - name: Prepare Moodle 4.5 with this plugin
+        run: |
+          git clone --depth 1 --branch MOODLE_405_STABLE https://github.com/moodle/moodle.git "$RUNNER_TEMP/moodle"
+          ln -s "$GITHUB_WORKSPACE" "$RUNNER_TEMP/moodle/mod/seledascorm"
+          composer install --no-interaction --prefer-dist --no-progress --working-dir "$RUNNER_TEMP/moodle"
+          cat > "$RUNNER_TEMP/moodle/config.php" <<'PHP'
+          <?php
+          unset($CFG);
+          global $CFG;
+          $CFG = new stdClass();
+          $CFG->dbtype = 'mariadb';
+          $CFG->dblibrary = 'native';
+          $CFG->dbhost = '127.0.0.1';
+          $CFG->dbname = 'moodle';
+          $CFG->dbuser = 'root';
+          $CFG->dbpass = 'moodle';
+          $CFG->prefix = 'mdl_';
+          $CFG->dboptions = ['dbport' => 3306, 'dbcollation' => 'utf8mb4_unicode_ci'];
+          $CFG->wwwroot = 'http://localhost';
+          $CFG->dataroot = getenv('RUNNER_TEMP') . '/moodledata';
+          $CFG->admin = 'admin';
+          $CFG->directorypermissions = 0777;
+          $CFG->phpunit_prefix = 'phpu_';
+          $CFG->phpunit_dataroot = getenv('RUNNER_TEMP') . '/phpunitdata';
+          require_once(__DIR__ . '/lib/setup.php');
+          PHP
+          cd "$RUNNER_TEMP/moodle"
+          php admin/cli/install_database.php --agree-license --adminpass='Admin-Secret-123!' --adminemail=admin@example.org --fullname='Dashboard tests' --shortname='Test'
+          php admin/tool/phpunit/cli/init.php
+      - name: Test actual Moodle permissions and MariaDB aggregation
+        run: |
+          cd "$RUNNER_TEMP/moodle"
+          vendor/bin/phpunit mod/seledascorm/tests/local/dashboard_test.php

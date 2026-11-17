@@ -1,5 +1,14 @@
 # Seleda Moodle Plugin Implementation Guide
 
+## Standalone reporting dashboard
+
+The `feature/seleda-alignment` branch now provides **Seleda reports** in Moodle's
+main navigation at `/mod/seledascorm/dashboard.php`, independently of course and
+activity report pages. The capability-filtered catalogue, group-scoped charts,
+learner table, CSV and learner/attempt details are documented in
+[REPORTING_DASHBOARD.md](REPORTING_DASHBOARD.md). Install the rebuilt complete
+plugin and purge Moodle caches to register the navigation hook and AMD assets.
+
 ## 1. Purpose
 
 This document is the living technical record for the Seleda Moodle 4.5 activity plugin. It documents what was changed, why it was changed, how the embedded Seleda Studio editor is built and packaged, how Moodle creates and edits Seleda activities, how branding works during installation, how the customized Content Blocks are included, and how releases are validated.

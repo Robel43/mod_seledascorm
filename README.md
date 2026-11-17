@@ -1,5 +1,12 @@
 # Seleda for Moodle
 
+**Seleda reports** is available from Moodle's main navigation for administrators
+and teachers with reporting permission. The standalone dashboard lists permitted
+SCORM activities by course and provides learner/attempt summaries, completion and
+engagement charts, block analytics, CSV and learner details. It applies Moodle's
+activity permissions and separate-group restrictions. See
+[the dashboard guide](docs/REPORTING_DASHBOARD.md).
+
 Seleda is the Moodle 4.5 activity plugin used with **Seleda Studio** to create, edit, publish, launch and track SCORM learning content directly from Moodle.
 
 This repository is a deliberate Seleda architecture fork of upstream `exelearning/mod_exescorm`. V1 now uses its own Moodle technical identity, `mod_seledascorm`, instead of masquerading as the upstream module.

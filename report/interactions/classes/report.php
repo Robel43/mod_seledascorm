@@ -93,7 +93,263 @@ class report extends \mod_exescorm\report {
 
     /**
      * displays the full report
-     * @param \stdClass $exescorm full EXESCORM …3346 tokens truncated…                   $colnum++;
+     * @param \stdClass $exescorm full EXESCORM object
+     * @param \stdClass $cm - full course_module object
+     * @param \stdClass $course - full course object
+     * @param string $download - type of download being requested
+     */
+    public function display($exescorm, $cm, $course, $download) {
+        global $CFG, $DB, $OUTPUT, $PAGE;
+
+        $contextmodule = \context_module::instance($cm->id);
+        $action = optional_param('action', '', PARAM_ALPHA);
+        $attemptids = optional_param_array('attemptid', array(), PARAM_RAW);
+        $attemptsmode = optional_param('attemptsmode', EXESCORM_REPORT_ATTEMPTS_ALL_STUDENTS, PARAM_INT);
+        $PAGE->set_url(new \moodle_url($PAGE->url, array('attemptsmode' => $attemptsmode)));
+
+        // Scorm action bar for report.
+        if ($download === '') {
+            $actionbar = new \mod_exescorm\output\actionbar($cm->id, true, $attemptsmode);
+            $renderer = $PAGE->get_renderer('mod_exescorm');
+            echo $renderer->report_actionbar($actionbar);
+        }
+
+        if ($action == 'delete' && has_capability('mod/exescorm:deleteresponses', $contextmodule) && confirm_sesskey()) {
+            if (exescorm_delete_responses($attemptids, $exescorm)) { // Delete responses.
+                echo $OUTPUT->notification(get_string('exescormresponsedeleted', 'mod_exescorm'), 'notifysuccess');
+            }
+        }
+        // Find out current groups mode.
+        $currentgroup = groups_get_activity_group($cm, true);
+
+        // Detailed report.
+        $mform = new \mod_exescorm_report_interactions_settings($PAGE->url, compact('currentgroup'));
+        if ($fromform = $mform->get_data()) {
+            $pagesize = $fromform->pagesize;
+            $includeqtext = $fromform->qtext;
+            $includeresp = $fromform->resp;
+            $includeright = $fromform->right;
+            $includeresult = $fromform->result;
+            set_user_preference('exescorm_report_pagesize', $pagesize);
+            set_user_preference('exescorm_report_interactions_qtext', $includeqtext);
+            set_user_preference('exescorm_report_interactions_resp', $includeresp);
+            set_user_preference('exescorm_report_interactions_right', $includeright);
+            set_user_preference('exescorm_report_interactions_result', $includeresult);
+        } else {
+            $pagesize = get_user_preferences('exescorm_report_pagesize', 0);
+            $includeqtext = get_user_preferences('exescorm_report_interactions_qtext', 1);
+            $includeresp = get_user_preferences('exescorm_report_interactions_resp', 1);
+            $includeright = get_user_preferences('exescorm_report_interactions_right', 1);
+            $includeresult = get_user_preferences('exescorm_report_interactions_result', 1);
+        }
+        if ($pagesize < 1) {
+            $pagesize = EXESCORM_REPORT_DEFAULT_PAGE_SIZE;
+        }
+
+        // Select group menu.
+        $displayoptions = array();
+        $displayoptions['attemptsmode'] = $attemptsmode;
+        $displayoptions['qtext'] = $includeqtext;
+        $displayoptions['resp'] = $includeresp;
+        $displayoptions['right'] = $includeright;
+        $displayoptions['result'] = $includeresult;
+
+        $mform->set_data($displayoptions + array('pagesize' => $pagesize));
+        if ($groupmode = groups_get_activity_groupmode($cm)) {   // Groups are being used.
+            if (!$download) {
+                groups_print_activity_menu($cm, new \moodle_url($PAGE->url, $displayoptions));
+            }
+        }
+        $formattextoptions = array('context' => \context_course::instance($course->id));
+
+        // We only want to show the checkbox to delete attempts
+        // if the user has permissions and if the report mode is showing attempts.
+        $candelete = has_capability('mod/exescorm:deleteresponses', $contextmodule)
+                && ($attemptsmode != EXESCORM_REPORT_ATTEMPTS_STUDENTS_WITH_NO);
+        // Select the students.
+        $nostudents = false;
+        list($allowedlistsql, $params) = get_enrolled_sql($contextmodule, 'mod/exescorm:savetrack', (int) $currentgroup);
+        if (empty($currentgroup)) {
+            // All users who can attempt scoes.
+            if (!$DB->record_exists_sql($allowedlistsql, $params)) {
+                echo $OUTPUT->notification(get_string('nostudentsyet'));
+                $nostudents = true;
+            }
+        } else {
+            // All users who can attempt scoes and who are in the currently selected group.
+            if (!$DB->record_exists_sql($allowedlistsql, $params)) {
+                echo $OUTPUT->notification(get_string('nostudentsingroup'));
+                $nostudents = true;
+            }
+        }
+        if ( !$nostudents ) {
+            // Now check if asked download of data.
+            $coursecontext = \context_course::instance($course->id);
+            if ($download) {
+                $filename = clean_filename("$course->shortname ".format_string($exescorm->name, true, $formattextoptions));
+            }
+
+            // Define table columns.
+            $columns = array();
+            $headers = array();
+            if (!$download && $candelete) {
+                $columns[] = 'checkbox';
+                $headers[] = $this->generate_master_checkbox();
+            }
+            if (!$download && $CFG->grade_report_showuserimage) {
+                $columns[] = 'picture';
+                $headers[] = '';
+            }
+            $columns[] = 'fullname';
+            $headers[] = get_string('name');
+
+            // TODO Does not support custom user profile fields (MDL-70456).
+            $extrafields = \core_user\fields::get_identity_fields($coursecontext, false);
+            foreach ($extrafields as $field) {
+                $columns[] = $field;
+                $headers[] = \core_user\fields::get_display_name($field);
+            }
+            $columns[] = 'attempt';
+            $headers[] = get_string('attempt', 'mod_exescorm');
+            $columns[] = 'start';
+            $headers[] = get_string('started', 'mod_exescorm');
+            $columns[] = 'finish';
+            $headers[] = get_string('last', 'mod_exescorm');
+            $columns[] = 'score';
+            $headers[] = get_string('score', 'mod_exescorm');
+            $columns = array_merge($columns, ['seleda_time', 'seleda_interactions', 'seleda_blocks']);
+            $headers = array_merge($headers, [get_string('usageactivetime', 'mod_exescorm'), get_string('usageinteractions', 'mod_exescorm'), get_string('usageblocks', 'mod_exescorm')]);
+            $scoes = $DB->get_records('exescorm_scoes', array("exescorm" => $exescorm->id), 'sortorder, id');
+
+            // Construct the SQL.
+            $select = 'SELECT DISTINCT '.$DB->sql_concat('u.id', '\'#\'', 'COALESCE(st.attempt, 0)').' AS uniqueid, ';
+            // TODO Does not support custom user profile fields (MDL-70456).
+            $userfields = \core_user\fields::for_identity($coursecontext, false)->with_userpic()->including('idnumber');
+            $selectfields = $userfields->get_sql('u', false, '', 'userid')->selects;
+            $select .= 'st.exescormid AS exescormid, st.attempt AS attempt ' . $selectfields . ' ';
+
+            // This part is the same for all cases - join users and exescorm_scoes_track tables.
+            $from = 'FROM {user} u ';
+            $from .= 'LEFT JOIN {exescorm_scoes_track} st ON st.userid = u.id AND st.exescormid = '.$exescorm->id;
+            switch ($attemptsmode) {
+                case EXESCORM_REPORT_ATTEMPTS_STUDENTS_WITH:
+                    // Show only students with attempts.
+                    $where = " WHERE u.id IN ({$allowedlistsql}) AND st.userid IS NOT NULL";
+                    break;
+                case EXESCORM_REPORT_ATTEMPTS_STUDENTS_WITH_NO:
+                    // Show only students without attempts.
+                    $where = " WHERE u.id IN ({$allowedlistsql}) AND st.userid IS NULL";
+                    break;
+                case EXESCORM_REPORT_ATTEMPTS_ALL_STUDENTS:
+                    // Show all students with or without attempts.
+                    $where = " WHERE u.id IN ({$allowedlistsql}) AND (st.userid IS NOT NULL OR st.userid IS NULL)";
+                    break;
+            }
+
+            $countsql = 'SELECT COUNT(DISTINCT('.$DB->sql_concat('u.id', '\'#\'', 'COALESCE(st.attempt, 0)').')) AS nbresults, ';
+            $countsql .= 'COUNT(DISTINCT('.$DB->sql_concat('u.id', '\'#\'', 'st.attempt').')) AS nbattempts, ';
+            $countsql .= 'COUNT(DISTINCT(u.id)) AS nbusers ';
+            $countsql .= $from.$where;
+            $questioncount = get_exescorm_question_count($exescorm->id);
+            $catalogs = [];
+            $interactioncolumns = [];
+            foreach ($scoes as $sco) {
+                if ($sco->launch === '') { continue; }
+                $columns[] = 'scograde' . $sco->id;
+                $headers[] = format_string($sco->title, '', $formattextoptions);
+                $catalogs[$sco->id] = timhirt_reporting::packagecatalog($contextmodule, $exescorm, (int)$sco->id);
+                for ($index = 0; $index < $questioncount; $index++) {
+                    foreach (['qtext' => 'questionx', 'resp' => 'responsex', 'right' => 'rightanswerx', 'result' => 'resultx'] as $option => $label) {
+                        if (empty($displayoptions[$option])) { continue; }
+                        $column = 'interaction_' . $sco->id . '_' . $index . '_' . $option;
+                        $columns[] = $column;
+                        $interactioncolumns[] = $column;
+                        // Display one-based numbering, keeping each SCO's cells aligned with its header.
+                        $headers[] = get_string($label, 'exescormreport_interactions', $index + 1);
+                    }
+                }
+            }
+
+            if (!$download) {
+                $table = new \flexible_table('mod-exescorm-report');
+
+                $table->define_columns($columns);
+                $table->define_headers($headers);
+                $table->define_baseurl($PAGE->url);
+
+                $table->sortable(true);
+                $table->collapsible(true);
+
+                // This is done to prevent redundant data, when a user has multiple attempts.
+                $table->column_suppress('picture');
+                $table->column_suppress('fullname');
+                foreach ($extrafields as $field) {
+                    $table->column_suppress($field);
+                }
+
+                $table->no_sorting('start');
+                $table->no_sorting('finish');
+                $table->no_sorting('score');
+                $table->no_sorting('checkbox');
+                $table->no_sorting('picture');
+
+                foreach ($interactioncolumns as $column) {
+                    $table->no_sorting($column);
+                }
+
+                foreach ($scoes as $sco) {
+                    if ($sco->launch != '') {
+                        $table->no_sorting('scograde'.$sco->id);
+                    }
+                }
+
+                $table->column_class('picture', 'picture');
+                $table->column_class('fullname', 'bold');
+                $table->column_class('score', 'bold');
+
+                $table->set_attribute('cellspacing', '0');
+                $table->set_attribute('id', 'attempts');
+                $table->set_attribute('class', 'generaltable generalbox');
+
+                // Start working -- this is necessary as soon as the niceties are over.
+                $table->setup();
+            } else if ($download == 'ODS') {
+                require_once("$CFG->libdir/odslib.class.php");
+
+                $filename .= ".ods";
+                // Creating a workbook.
+                $workbook = new \MoodleODSWorkbook("-");
+                // Sending HTTP headers.
+                $workbook->send($filename);
+                // Creating the first worksheet.
+                $sheettitle = get_string('report', 'mod_exescorm');
+                $myxls = $workbook->add_worksheet($sheettitle);
+                // Format types.
+                $format = $workbook->add_format();
+                $format->set_bold(0);
+                $formatbc = $workbook->add_format();
+                $formatbc->set_bold(1);
+                $formatbc->set_align('center');
+                $formatb = $workbook->add_format();
+                $formatb->set_bold(1);
+                $formaty = $workbook->add_format();
+                $formaty->set_bg_color('yellow');
+                $formatc = $workbook->add_format();
+                $formatc->set_align('center');
+                $formatr = $workbook->add_format();
+                $formatr->set_bold(1);
+                $formatr->set_color('red');
+                $formatr->set_align('center');
+                $formatg = $workbook->add_format();
+                $formatg->set_bold(1);
+                $formatg->set_color('green');
+                $formatg->set_align('center');
+                // Here starts workshhet headers.
+
+                $colnum = 0;
+                foreach ($headers as $item) {
+                    $myxls->write(0, $colnum, $item, $formatbc);
+                    $colnum++;
                 }
                 $rownum = 1;
             } else if ($download == 'Excel') {

@@ -70,6 +70,7 @@ jobs:
           git clone --depth 1 --branch MOODLE_405_STABLE https://github.com/moodle/moodle.git "$RUNNER_TEMP/moodle"
           ln -s "$GITHUB_WORKSPACE" "$RUNNER_TEMP/moodle/mod/seledascorm"
           composer install --no-interaction --prefer-dist --no-progress --working-dir "$RUNNER_TEMP/moodle"
+          mkdir -p "$RUNNER_TEMP/moodledata" "$RUNNER_TEMP/phpunitdata"
           cat > "$RUNNER_TEMP/moodle/config.php" <<'PHP'
           <?php
           unset($CFG);

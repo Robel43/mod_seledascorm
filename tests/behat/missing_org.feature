@@ -1,8 +1,8 @@
-@mod @mod_exescorm @_file_upload @_switch_iframe
-Feature: Check a EXESCORM package with missing Organisational structure.
+@mod @mod_seledascorm @_file_upload @_switch_iframe
+Feature: Check a SELEDASCORM package with missing Organisational structure.
 
   @javascript
-  Scenario: Add a exescorm activity to a course
+  Scenario: Add a seledascorm activity to a course
     Given the following "users" exist:
       | username | firstname | lastname | email |
       | teacher1 | Teacher | 1 | teacher1@example.com |
@@ -16,20 +16,20 @@ Feature: Check a EXESCORM package with missing Organisational structure.
       | student1 | C1 | student |
     When I log in as "teacher1"
     And I am on "Course 1" course homepage with editing mode on
-    And I add a "EXESCORM package" to section "1"
+    And I add a "SELEDASCORM package" to section "1"
     And I set the following fields to these values:
-      | Name | MissingOrg EXESCORM package |
+      | Name | MissingOrg SELEDASCORM package |
       | Description | Description |
       | ID number   | Missingorg  |
-    And I upload "mod/exescorm/tests/packages/singlescobasic_missingorg.zip" file to "Package file" filemanager
+    And I upload "mod/seledascorm/tests/packages/singlescobasic_missingorg.zip" file to "Package file" filemanager
     And I click on "Save and display" "button"
-    Then I should see "MissingOrg EXESCORM package"
+    Then I should see "MissingOrg SELEDASCORM package"
     And I should see "Enter"
     And I should see "Preview"
     And I log out
     And I am on the "Missingorg" Activity page logged in as student1
     And I should see "Enter"
     And I press "Enter"
-    And I switch to "exescorm_object" iframe
+    And I switch to "seledascorm_object" iframe
     And I switch to "contentFrame" iframe
     And I should see "Play of the game"

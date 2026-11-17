@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * EXESCORM module external API
+ * SELEDASCORM module external API
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @category   external
  * @copyright  2015 Juan Leyva <juan@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -29,19 +29,19 @@ use core_course\external\helper_for_get_mods_by_courses;
 defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->libdir . '/externallib.php');
-require_once($CFG->dirroot . '/mod/exescorm/lib.php');
-require_once($CFG->dirroot . '/mod/exescorm/locallib.php');
+require_once($CFG->dirroot . '/mod/seledascorm/lib.php');
+require_once($CFG->dirroot . '/mod/seledascorm/locallib.php');
 
 /**
- * EXESCORM module external functions
+ * SELEDASCORM module external functions
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @category   external
  * @copyright  2015 Juan Leyva <juan@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @since      Moodle 3.0
  */
-class mod_exescorm_external extends external_api {
+class mod_seledascorm_external extends external_api {
 
     /**
      * Returns description of method parameters
@@ -49,10 +49,10 @@ class mod_exescorm_external extends external_api {
      * @return external_function_parameters
      * @since Moodle 3.0
      */
-    public static function view_exescorm_parameters() {
+    public static function view_seledascorm_parameters() {
         return new external_function_parameters(
             array(
-                'exescormid' => new external_value(PARAM_INT, 'exescorm instance id')
+                'seledascormid' => new external_value(PARAM_INT, 'seledascorm instance id')
             )
         );
     }
@@ -60,30 +60,30 @@ class mod_exescorm_external extends external_api {
     /**
      * Trigger the course module viewed event.
      *
-     * @param int $exescormid the exescorm instance id
+     * @param int $seledascormid the seledascorm instance id
      * @return array of warnings and status result
      * @since Moodle 3.0
      * @throws moodle_exception
      */
-    public static function view_exescorm($exescormid) {
+    public static function view_seledascorm($seledascormid) {
         global $DB, $CFG;
-        require_once($CFG->dirroot . '/mod/exescorm/lib.php');
+        require_once($CFG->dirroot . '/mod/seledascorm/lib.php');
 
-        $params = self::validate_parameters(self::view_exescorm_parameters(),
+        $params = self::validate_parameters(self::view_seledascorm_parameters(),
                                             array(
-                                                'exescormid' => $exescormid
+                                                'seledascormid' => $seledascormid
                                             ));
         $warnings = array();
 
         // Request and permission validation.
-        $exescorm = $DB->get_record('exescorm', array('id' => $params['exescormid']), '*', MUST_EXIST);
-        list($course, $cm) = get_course_and_cm_from_instance($exescorm, 'exescorm');
+        $seledascorm = $DB->get_record('seledascorm', array('id' => $params['seledascormid']), '*', MUST_EXIST);
+        list($course, $cm) = get_course_and_cm_from_instance($seledascorm, 'seledascorm');
 
         $context = context_module::instance($cm->id);
         self::validate_context($context);
 
-        // Call the exescorm/lib API.
-        exescorm_view($exescorm, $course, $cm, $context);
+        // Call the seledascorm/lib API.
+        seledascorm_view($seledascorm, $course, $cm, $context);
 
         $result = array();
         $result['status'] = true;
@@ -97,7 +97,7 @@ class mod_exescorm_external extends external_api {
      * @return external_description
      * @since Moodle 3.0
      */
-    public static function view_exescorm_returns() {
+    public static function view_seledascorm_returns() {
         return new external_single_structure(
             array(
                 'status' => new external_value(PARAM_BOOL, 'status: true if success'),
@@ -107,15 +107,15 @@ class mod_exescorm_external extends external_api {
     }
 
     /**
-     * Describes the parameters for get_exescorm_attempt_count.
+     * Describes the parameters for get_seledascorm_attempt_count.
      *
      * @return external_function_parameters
      * @since Moodle 3.0
      */
-    public static function get_exescorm_attempt_count_parameters() {
+    public static function get_seledascorm_attempt_count_parameters() {
         return new external_function_parameters(
             array(
-                'exescormid' => new external_value(PARAM_INT, 'EXESCORM instance id'),
+                'seledascormid' => new external_value(PARAM_INT, 'SELEDASCORM instance id'),
                 'userid' => new external_value(PARAM_INT, 'User id'),
                 'ignoremissingcompletion' => new external_value(PARAM_BOOL,
                                                 'Ignores attempts that haven\'t reported a grade/completion',
@@ -125,26 +125,26 @@ class mod_exescorm_external extends external_api {
     }
 
     /**
-     * Return the number of attempts done by a user in the given EXESCORM.
+     * Return the number of attempts done by a user in the given SELEDASCORM.
      *
-     * @param int $exescormid the exescorm id
+     * @param int $seledascormid the seledascorm id
      * @param int $userid the user id
      * @param bool $ignoremissingcompletion ignores attempts that haven't reported a grade/completion
      * @return array of warnings and the attempts count
      * @since Moodle 3.0
      */
-    public static function get_exescorm_attempt_count($exescormid, $userid, $ignoremissingcompletion = false) {
+    public static function get_seledascorm_attempt_count($seledascormid, $userid, $ignoremissingcompletion = false) {
         global $USER, $DB;
 
-        $params = self::validate_parameters(self::get_exescorm_attempt_count_parameters(),
-                                            array('exescormid' => $exescormid, 'userid' => $userid,
+        $params = self::validate_parameters(self::get_seledascorm_attempt_count_parameters(),
+                                            array('seledascormid' => $seledascormid, 'userid' => $userid,
                                                 'ignoremissingcompletion' => $ignoremissingcompletion));
 
         $attempts = array();
         $warnings = array();
 
-        $exescorm = $DB->get_record('exescorm', array('id' => $params['exescormid']), '*', MUST_EXIST);
-        $cm = get_coursemodule_from_instance('exescorm', $exescorm->id);
+        $seledascorm = $DB->get_record('seledascorm', array('id' => $params['seledascormid']), '*', MUST_EXIST);
+        $cm = get_coursemodule_from_instance('seledascorm', $seledascorm->id);
 
         $context = context_module::instance($cm->id);
         self::validate_context($context);
@@ -154,13 +154,13 @@ class mod_exescorm_external extends external_api {
 
         // Extra checks so only users with permissions can view other users attempts.
         if ($USER->id != $user->id) {
-            require_capability('mod/exescorm:viewreport', $context);
+            require_capability('mod/seledascorm:viewreport', $context);
         }
 
-        // If the EXESCORM is not open this function will throw exceptions.
-        exescorm_require_available($exescorm);
+        // If the SELEDASCORM is not open this function will throw exceptions.
+        seledascorm_require_available($seledascorm);
 
-        $attemptscount = exescorm_get_attempt_count($user->id, $exescorm, false, $params['ignoremissingcompletion']);
+        $attemptscount = seledascorm_get_attempt_count($user->id, $seledascorm, false, $params['ignoremissingcompletion']);
 
         $result = array();
         $result['attemptscount'] = $attemptscount;
@@ -169,12 +169,12 @@ class mod_exescorm_external extends external_api {
     }
 
     /**
-     * Describes the get_exescorm_attempt_count return value.
+     * Describes the get_seledascorm_attempt_count return value.
      *
      * @return external_single_structure
      * @since Moodle 3.0
      */
-    public static function get_exescorm_attempt_count_returns() {
+    public static function get_seledascorm_attempt_count_returns() {
 
         return new external_single_structure(
             array(
@@ -185,51 +185,51 @@ class mod_exescorm_external extends external_api {
     }
 
     /**
-     * Describes the parameters for get_exescorm_scoes.
+     * Describes the parameters for get_seledascorm_scoes.
      *
      * @return external_function_parameters
      * @since Moodle 3.0
      */
-    public static function get_exescorm_scoes_parameters() {
+    public static function get_seledascorm_scoes_parameters() {
         return new external_function_parameters(
             array(
-                'exescormid' => new external_value(PARAM_INT, 'exescorm instance id'),
+                'seledascormid' => new external_value(PARAM_INT, 'seledascorm instance id'),
                 'organization' => new external_value(PARAM_RAW, 'organization id', VALUE_DEFAULT, '')
             )
         );
     }
 
     /**
-     * Returns a list containing all the scoes data related to the given exescorm id
+     * Returns a list containing all the scoes data related to the given seledascorm id
      *
-     * @param int $exescormid the exescorm id
+     * @param int $seledascormid the seledascorm id
      * @param string $organization the organization id
      * @return array warnings and the scoes data
      * @since Moodle 3.0
      */
-    public static function get_exescorm_scoes($exescormid, $organization = '') {
+    public static function get_seledascorm_scoes($seledascormid, $organization = '') {
         global $DB;
 
-        $params = self::validate_parameters(self::get_exescorm_scoes_parameters(),
-                                            array('exescormid' => $exescormid, 'organization' => $organization));
+        $params = self::validate_parameters(self::get_seledascorm_scoes_parameters(),
+                                            array('seledascormid' => $seledascormid, 'organization' => $organization));
 
         $scoes = array();
         $warnings = array();
 
-        $exescorm = $DB->get_record('exescorm', array('id' => $params['exescormid']), '*', MUST_EXIST);
-        $cm = get_coursemodule_from_instance('exescorm', $exescorm->id);
+        $seledascorm = $DB->get_record('seledascorm', array('id' => $params['seledascormid']), '*', MUST_EXIST);
+        $cm = get_coursemodule_from_instance('seledascorm', $seledascorm->id);
 
         $context = context_module::instance($cm->id);
         self::validate_context($context);
 
-        // Check settings / permissions to view the EXESCORM.
-        exescorm_require_available($exescorm, true, $context);
+        // Check settings / permissions to view the SELEDASCORM.
+        seledascorm_require_available($seledascorm, true, $context);
 
-        if (!$scoes = exescorm_get_scoes($exescorm->id, $params['organization'])) {
-            // Function exescorm_get_scoes return false, not an empty array.
+        if (!$scoes = seledascorm_get_scoes($seledascorm->id, $params['organization'])) {
+            // Function seledascorm_get_scoes return false, not an empty array.
             $scoes = array();
         } else {
-            $scoreturnstructure = self::get_exescorm_scoes_returns();
+            $scoreturnstructure = self::get_seledascorm_scoes_returns();
             foreach ($scoes as $sco) {
                 $extradata = array();
                 foreach ($sco as $element => $value) {
@@ -252,12 +252,12 @@ class mod_exescorm_external extends external_api {
     }
 
     /**
-     * Describes the get_exescorm_scoes return value.
+     * Describes the get_seledascorm_scoes return value.
      *
      * @return external_single_structure
      * @since Moodle 3.0
      */
-    public static function get_exescorm_scoes_returns() {
+    public static function get_seledascorm_scoes_returns() {
 
         return new external_single_structure(
             array(
@@ -265,13 +265,13 @@ class mod_exescorm_external extends external_api {
                     new external_single_structure(
                         array(
                             'id' => new external_value(PARAM_INT, 'sco id'),
-                            'exescorm' => new external_value(PARAM_INT, 'exescorm id'),
+                            'seledascorm' => new external_value(PARAM_INT, 'seledascorm id'),
                             'manifest' => new external_value(PARAM_NOTAGS, 'manifest id'),
                             'organization' => new external_value(PARAM_NOTAGS, 'organization id'),
                             'parent' => new external_value(PARAM_NOTAGS, 'parent'),
                             'identifier' => new external_value(PARAM_NOTAGS, 'identifier'),
                             'launch' => new external_value(PARAM_NOTAGS, 'launch file'),
-                            'exescormtype' => new external_value(PARAM_ALPHA, 'exescorm type (asset, sco)'),
+                            'seledascormtype' => new external_value(PARAM_ALPHA, 'seledascorm type (asset, sco)'),
                             'title' => new external_value(PARAM_NOTAGS, 'sco title'),
                             'sortorder' => new external_value(PARAM_INT, 'sort order'),
                             'extradata' => new external_multiple_structure(
@@ -282,7 +282,7 @@ class mod_exescorm_external extends external_api {
                                     )
                                 ), 'Additional SCO data', VALUE_OPTIONAL
                             )
-                        ), 'EXESCORM SCO data'
+                        ), 'SELEDASCORM SCO data'
                     )
                 ),
                 'warnings' => new external_warnings(),
@@ -291,53 +291,53 @@ class mod_exescorm_external extends external_api {
     }
 
     /**
-     * Describes the parameters for get_exescorm_user_data.
+     * Describes the parameters for get_seledascorm_user_data.
      *
      * @return external_function_parameters
      * @since Moodle 3.0
      */
-    public static function get_exescorm_user_data_parameters() {
+    public static function get_seledascorm_user_data_parameters() {
         return new external_function_parameters(
             array(
-                'exescormid' => new external_value(PARAM_INT, 'exescorm instance id'),
+                'seledascormid' => new external_value(PARAM_INT, 'seledascorm instance id'),
                 'attempt' => new external_value(PARAM_INT, 'attempt number')
             )
         );
     }
 
     /**
-     * Retrieves user tracking and SCO data and default EXESCORM values
+     * Retrieves user tracking and SCO data and default SELEDASCORM values
      *
-     * @param int $exescormid the exescorm id
+     * @param int $seledascormid the seledascorm id
      * @param int $attempt the attempt number
      * @return array warnings and the scoes data
      * @throws  moodle_exception
      * @since Moodle 3.0
      */
-    public static function get_exescorm_user_data($exescormid, $attempt) {
+    public static function get_seledascorm_user_data($seledascormid, $attempt) {
         global $CFG, $DB;
 
-        $params = self::validate_parameters(self::get_exescorm_user_data_parameters(),
-                                            array('exescormid' => $exescormid, 'attempt' => $attempt));
+        $params = self::validate_parameters(self::get_seledascorm_user_data_parameters(),
+                                            array('seledascormid' => $seledascormid, 'attempt' => $attempt));
 
         $data = array();
         $warnings = array();
 
-        $exescorm = $DB->get_record('exescorm', array('id' => $params['exescormid']), '*', MUST_EXIST);
-        $cm = get_coursemodule_from_instance('exescorm', $exescorm->id);
+        $seledascorm = $DB->get_record('seledascorm', array('id' => $params['seledascormid']), '*', MUST_EXIST);
+        $cm = get_coursemodule_from_instance('seledascorm', $seledascorm->id);
 
         $context = context_module::instance($cm->id);
         self::validate_context($context);
 
-        exescorm_require_available($exescorm, true, $context);
+        seledascorm_require_available($seledascorm, true, $context);
 
-        $exescorm->version = strtolower(clean_param($exescorm->version, PARAM_SAFEDIR));
-        if (!file_exists($CFG->dirroot.'/mod/exescorm/datamodels/'.$exescorm->version.'lib.php')) {
-            $exescorm->version = 'SCORM_12';
+        $seledascorm->version = strtolower(clean_param($seledascorm->version, PARAM_SAFEDIR));
+        if (!file_exists($CFG->dirroot.'/mod/seledascorm/datamodels/'.$seledascorm->version.'lib.php')) {
+            $seledascorm->version = 'SCORM_12';
         }
-        require_once($CFG->dirroot.'/mod/exescorm/datamodels/'.$exescorm->version.'lib.php');
+        require_once($CFG->dirroot.'/mod/seledascorm/datamodels/'.$seledascorm->version.'lib.php');
 
-        if ($scoes = exescorm_get_scoes($exescorm->id)) {
+        if ($scoes = seledascorm_get_scoes($seledascorm->id)) {
             $def = new stdClass();
             $user = new stdClass();
 
@@ -345,7 +345,7 @@ class mod_exescorm_external extends external_api {
                 $def->{$sco->id} = new stdClass();
                 $user->{$sco->id} = new stdClass();
                 // We force mode normal, this can be override by the client at any time.
-                $def->{$sco->id} = get_exescorm_default($user->{$sco->id}, $exescorm, $sco->id, $params['attempt'], 'normal');
+                $def->{$sco->id} = get_seledascorm_default($user->{$sco->id}, $seledascorm, $sco->id, $params['attempt'], 'normal');
 
                 $userdata = array();
                 $defaultdata = array();
@@ -378,12 +378,12 @@ class mod_exescorm_external extends external_api {
     }
 
     /**
-     * Describes the get_exescorm_user_data return value.
+     * Describes the get_seledascorm_user_data return value.
      *
      * @return external_single_structure
      * @since Moodle 3.0
      */
-    public static function get_exescorm_user_data_returns() {
+    public static function get_seledascorm_user_data_returns() {
 
         return new external_single_structure(
             array(
@@ -416,12 +416,12 @@ class mod_exescorm_external extends external_api {
     }
 
     /**
-     * Describes the parameters for insert_exescorm_tracks.
+     * Describes the parameters for insert_seledascorm_tracks.
      *
      * @return external_function_parameters
      * @since Moodle 3.0
      */
-    public static function insert_exescorm_tracks_parameters() {
+    public static function insert_seledascorm_tracks_parameters() {
         return new external_function_parameters(
             array(
                 'scoid' => new external_value(PARAM_INT, 'SCO id'),
@@ -439,7 +439,7 @@ class mod_exescorm_external extends external_api {
     }
 
     /**
-     * Saves a EXESCORM tracking record.
+     * Saves a SELEDASCORM tracking record.
      * It will overwrite any existing tracking data for this attempt.
      * Validation should be performed before running the function to ensure the user will not lose any existing attempt data.
      *
@@ -450,44 +450,44 @@ class mod_exescorm_external extends external_api {
      * @throws moodle_exception
      * @since Moodle 3.0
      */
-    public static function insert_exescorm_tracks($scoid, $attempt, $tracks) {
+    public static function insert_seledascorm_tracks($scoid, $attempt, $tracks) {
         global $USER, $DB;
 
-        $params = self::validate_parameters(self::insert_exescorm_tracks_parameters(),
+        $params = self::validate_parameters(self::insert_seledascorm_tracks_parameters(),
                                             array('scoid' => $scoid, 'attempt' => $attempt, 'tracks' => $tracks));
 
         $trackids = array();
         $warnings = array();
 
-        $sco = exescorm_get_sco($params['scoid'], EXESCORM_SCO_ONLY);
+        $sco = seledascorm_get_sco($params['scoid'], SELEDASCORM_SCO_ONLY);
         if (!$sco) {
-            throw new moodle_exception('cannotfindsco', 'exescorm');
+            throw new moodle_exception('cannotfindsco', 'seledascorm');
         }
 
-        $exescorm = $DB->get_record('exescorm', array('id' => $sco->exescorm), '*', MUST_EXIST);
-        $cm = get_coursemodule_from_instance('exescorm', $exescorm->id);
+        $seledascorm = $DB->get_record('seledascorm', array('id' => $sco->seledascorm), '*', MUST_EXIST);
+        $cm = get_coursemodule_from_instance('seledascorm', $seledascorm->id);
 
         $context = context_module::instance($cm->id);
         self::validate_context($context);
 
-        // Check settings / permissions to view the EXESCORM.
-        require_capability('mod/exescorm:savetrack', $context);
+        // Check settings / permissions to view the SELEDASCORM.
+        require_capability('mod/seledascorm:savetrack', $context);
 
-        // Check settings / permissions to view the EXESCORM.
-        exescorm_require_available($exescorm);
+        // Check settings / permissions to view the SELEDASCORM.
+        seledascorm_require_available($seledascorm);
 
         foreach ($params['tracks'] as $track) {
             $element = $track['element'];
             $value = $track['value'];
-            $trackid = exescorm_insert_track($USER->id, $exescorm->id, $sco->id, $params['attempt'], $element, $value,
-                                            $exescorm->forcecompleted);
+            $trackid = seledascorm_insert_track($USER->id, $seledascorm->id, $sco->id, $params['attempt'], $element, $value,
+                                            $seledascorm->forcecompleted);
 
             if ($trackid) {
                 $trackids[] = $trackid;
             } else {
                 $warnings[] = array(
-                    'item' => 'exescorm',
-                    'itemid' => $exescorm->id,
+                    'item' => 'seledascorm',
+                    'itemid' => $seledascorm->id,
                     'warningcode' => 1,
                     'message' => 'Element: ' . $element . ' was not saved'
                 );
@@ -501,12 +501,12 @@ class mod_exescorm_external extends external_api {
     }
 
     /**
-     * Describes the insert_exescorm_tracks return value.
+     * Describes the insert_seledascorm_tracks return value.
      *
      * @return external_single_structure
      * @since Moodle 3.0
      */
-    public static function insert_exescorm_tracks_returns() {
+    public static function insert_seledascorm_tracks_returns() {
 
         return new external_single_structure(
             array(
@@ -517,12 +517,12 @@ class mod_exescorm_external extends external_api {
     }
 
     /**
-     * Describes the parameters for get_exescorm_sco_tracks.
+     * Describes the parameters for get_seledascorm_sco_tracks.
      *
      * @return external_function_parameters
      * @since Moodle 3.0
      */
-    public static function get_exescorm_sco_tracks_parameters() {
+    public static function get_seledascorm_sco_tracks_parameters() {
         return new external_function_parameters(
             array(
                 'scoid' => new external_value(PARAM_INT, 'sco id'),
@@ -541,22 +541,22 @@ class mod_exescorm_external extends external_api {
      * @return array warnings and the scoes data
      * @since Moodle 3.0
      */
-    public static function get_exescorm_sco_tracks($scoid, $userid, $attempt = 0) {
+    public static function get_seledascorm_sco_tracks($scoid, $userid, $attempt = 0) {
         global $USER, $DB;
 
-        $params = self::validate_parameters(self::get_exescorm_sco_tracks_parameters(),
+        $params = self::validate_parameters(self::get_seledascorm_sco_tracks_parameters(),
                                             array('scoid' => $scoid, 'userid' => $userid, 'attempt' => $attempt));
 
         $tracks = array();
         $warnings = array();
 
-        $sco = exescorm_get_sco($params['scoid'], EXESCORM_SCO_ONLY);
+        $sco = seledascorm_get_sco($params['scoid'], SELEDASCORM_SCO_ONLY);
         if (!$sco) {
-            throw new moodle_exception('cannotfindsco', 'exescorm');
+            throw new moodle_exception('cannotfindsco', 'seledascorm');
         }
 
-        $exescorm = $DB->get_record('exescorm', array('id' => $sco->exescorm), '*', MUST_EXIST);
-        $cm = get_coursemodule_from_instance('exescorm', $exescorm->id);
+        $seledascorm = $DB->get_record('seledascorm', array('id' => $sco->seledascorm), '*', MUST_EXIST);
+        $cm = get_coursemodule_from_instance('seledascorm', $seledascorm->id);
 
         $context = context_module::instance($cm->id);
         self::validate_context($context);
@@ -566,21 +566,21 @@ class mod_exescorm_external extends external_api {
 
         // Extra checks so only users with permissions can view other users attempts.
         if ($USER->id != $user->id) {
-            require_capability('mod/exescorm:viewreport', $context);
+            require_capability('mod/seledascorm:viewreport', $context);
         }
 
-        exescorm_require_available($exescorm, true, $context);
+        seledascorm_require_available($seledascorm, true, $context);
 
         if (empty($params['attempt'])) {
-            $params['attempt'] = exescorm_get_last_attempt($exescorm->id, $user->id);
+            $params['attempt'] = seledascorm_get_last_attempt($seledascorm->id, $user->id);
         }
 
         $attempted = false;
-        if ($exescormtracks = exescorm_get_tracks($sco->id, $params['userid'], $params['attempt'])) {
+        if ($seledascormtracks = seledascorm_get_tracks($sco->id, $params['userid'], $params['attempt'])) {
             // Check if attempted.
-            if ($exescormtracks->status != '') {
+            if ($seledascormtracks->status != '') {
                 $attempted = true;
-                foreach ($exescormtracks as $element => $value) {
+                foreach ($seledascormtracks as $element => $value) {
                     $tracks[] = array(
                         'element' => $element,
                         'value' => $value,
@@ -594,7 +594,7 @@ class mod_exescorm_external extends external_api {
                 'item' => 'attempt',
                 'itemid' => $params['attempt'],
                 'warningcode' => 'notattempted',
-                'message' => get_string('notattempted', 'mod_exescorm')
+                'message' => get_string('notattempted', 'mod_seledascorm')
             );
         }
 
@@ -606,12 +606,12 @@ class mod_exescorm_external extends external_api {
     }
 
     /**
-     * Describes the get_exescorm_sco_tracks return value.
+     * Describes the get_seledascorm_sco_tracks return value.
      *
      * @return external_single_structure
      * @since Moodle 3.0
      */
-    public static function get_exescorm_sco_tracks_returns() {
+    public static function get_seledascorm_sco_tracks_returns() {
 
         return new external_single_structure(
             array(
@@ -634,12 +634,12 @@ class mod_exescorm_external extends external_api {
     }
 
     /**
-     * Describes the parameters for get_exescorms_by_courses.
+     * Describes the parameters for get_seledascorms_by_courses.
      *
      * @return external_function_parameters
      * @since Moodle 3.0
      */
-    public static function get_exescorms_by_courses_parameters() {
+    public static function get_seledascorms_by_courses_parameters() {
         return new external_function_parameters (
             array(
                 'courseids' => new external_multiple_structure(
@@ -650,20 +650,20 @@ class mod_exescorm_external extends external_api {
     }
 
     /**
-     * Returns a list of exescorms in a provided list of courses,
-     * if no list is provided all exescorms that the user can view will be returned.
+     * Returns a list of seledascorms in a provided list of courses,
+     * if no list is provided all seledascorms that the user can view will be returned.
      *
      * @param array $courseids the course ids
-     * @return array the exescorm details
+     * @return array the seledascorm details
      * @since Moodle 3.0
      */
-    public static function get_exescorms_by_courses($courseids = array()) {
+    public static function get_seledascorms_by_courses($courseids = array()) {
         global $CFG;
 
-        $returnedexescorms = array();
+        $returnedseledascorms = array();
         $warnings = array();
 
-        $params = self::validate_parameters(self::get_exescorms_by_courses_parameters(), array('courseids' => $courseids));
+        $params = self::validate_parameters(self::get_seledascorms_by_courses_parameters(), array('courseids' => $courseids));
 
         $courses = array();
         if (empty($params['courseids'])) {
@@ -676,59 +676,59 @@ class mod_exescorm_external extends external_api {
 
             list($courses, $warnings) = external_util::validate_courses($params['courseids'], $courses);
 
-            // Get the exescorms in this course, this function checks users visibility permissions.
+            // Get the seledascorms in this course, this function checks users visibility permissions.
             // We can avoid then additional validate_context calls.
-            $exescorms = get_all_instances_in_courses("exescorm", $courses);
+            $seledascorms = get_all_instances_in_courses("seledascorm", $courses);
 
             $fs = get_file_storage();
-            foreach ($exescorms as $exescorm) {
+            foreach ($seledascorms as $seledascorm) {
 
-                $context = context_module::instance($exescorm->coursemodule);
+                $context = context_module::instance($seledascorm->coursemodule);
 
                 // Entry to return.
-                $module = helper_for_get_mods_by_courses::standard_coursemodule_element_values($exescorm, 'mod_exescorm');
+                $module = helper_for_get_mods_by_courses::standard_coursemodule_element_values($seledascorm, 'mod_seledascorm');
 
-                // Check if the EXESCORM open and return warnings if so.
-                list($open, $openwarnings) = exescorm_get_availability_status($exescorm, true, $context);
+                // Check if the SELEDASCORM open and return warnings if so.
+                list($open, $openwarnings) = seledascorm_get_availability_status($seledascorm, true, $context);
 
                 if (!$open) {
                     foreach ($openwarnings as $warningkey => $warningdata) {
                         $warnings[] = array(
-                            'item' => 'exescorm',
-                            'itemid' => $exescorm->id,
+                            'item' => 'seledascorm',
+                            'itemid' => $seledascorm->id,
                             'warningcode' => $warningkey,
-                            'message' => get_string($warningkey, 'mod_exescorm', $warningdata)
+                            'message' => get_string($warningkey, 'mod_seledascorm', $warningdata)
                         );
                     }
                 } else {
                     $module['packagesize'] = 0;
-                    // EXESCORM size.
+                    // SELEDASCORM size.
                     if (
-                        $exescorm->exescormtype === EXESCORM_TYPE_LOCAL ||
-                        $exescorm->exescormtype === EXESCORM_TYPE_LOCALSYNC
+                        $seledascorm->seledascormtype === SELEDASCORM_TYPE_LOCAL ||
+                        $seledascorm->seledascormtype === SELEDASCORM_TYPE_LOCALSYNC
                     ) {
                         if ($packagefile = $fs->get_file($context->id,
-                                            'mod_exescorm',
+                                            'mod_seledascorm',
                                             'package',
                                             0,
                                             '/',
-                                            $exescorm->reference)
+                                            $seledascorm->reference)
                         ) {
                             $module['packagesize'] = $packagefile->get_filesize();
                             // Download URL.
                             $module['packageurl'] = moodle_url::make_webservice_pluginfile_url(
-                                                        $context->id, 'mod_exescorm', 'package', 0, '/', $exescorm->reference
+                                                        $context->id, 'mod_seledascorm', 'package', 0, '/', $seledascorm->reference
                                                     )->out(false);
                         }
                     }
 
-                    $module['protectpackagedownloads'] = get_config('exescorm', 'protectpackagedownloads');
+                    $module['protectpackagedownloads'] = get_config('seledascorm', 'protectpackagedownloads');
 
                     $viewablefields = array('version', 'maxgrade', 'grademethod', 'whatgrade', 'maxattempt', 'forcecompleted',
                                             'forcenewattempt', 'lastattemptlock', 'displayattemptstatus', 'displaycoursestructure',
                                             'sha1hash', 'md5hash', 'revision', 'launch', 'skipview', 'hidebrowse', 'hidetoc', 'nav',
                                             'navpositionleft', 'navpositiontop', 'auto', 'popup', 'width', 'height', 'timeopen',
-                                            'timeclose', 'exescormtype', 'reference');
+                                            'timeclose', 'seledascormtype', 'reference');
 
                     // Check additional permissions for returning optional private settings.
                     if (has_capability('moodle/course:manageactivities', $context)) {
@@ -738,38 +738,38 @@ class mod_exescorm_external extends external_api {
                     }
 
                     foreach ($viewablefields as $field) {
-                        $module[$field] = $exescorm->{$field};
+                        $module[$field] = $seledascorm->{$field};
                     }
                 }
 
-                $returnedexescorms[] = $module;
+                $returnedseledascorms[] = $module;
             }
         }
 
         $result = array();
-        $result['exescorms'] = $returnedexescorms;
+        $result['seledascorms'] = $returnedseledascorms;
         $result['warnings'] = $warnings;
         return $result;
     }
 
     /**
-     * Describes the get_exescorms_by_courses return value.
+     * Describes the get_seledascorms_by_courses return value.
      *
      * @return external_single_structure
      * @since Moodle 3.0
      */
-    public static function get_exescorms_by_courses_returns() {
+    public static function get_seledascorms_by_courses_returns() {
 
         return new external_single_structure(
             array(
-                'exescorms' => new external_multiple_structure(
+                'seledascorms' => new external_multiple_structure(
                     new external_single_structure(array_merge(
                         helper_for_get_mods_by_courses::standard_coursemodule_elements_returns(),
                         [
-                            'packagesize' => new external_value(PARAM_INT, 'EXESCORM zip package size', VALUE_OPTIONAL),
-                            'packageurl' => new external_value(PARAM_URL, 'EXESCORM zip package URL', VALUE_OPTIONAL),
+                            'packagesize' => new external_value(PARAM_INT, 'SELEDASCORM zip package size', VALUE_OPTIONAL),
+                            'packageurl' => new external_value(PARAM_URL, 'SELEDASCORM zip package URL', VALUE_OPTIONAL),
                             'version' => new external_value(PARAM_NOTAGS,
-                                        'EXESCORM version EXESCORM_SCORM_12,EXESCORM_SCORM_13,EXESCORM_SCORM_AICC)',
+                                        'SELEDASCORM version SELEDASCORM_SCORM_12,SELEDASCORM_SCORM_13,SELEDASCORM_SCORM_AICC)',
                                         VALUE_OPTIONAL),
                             'maxgrade' => new external_value(PARAM_INT, 'Max grade', VALUE_OPTIONAL),
                             'grademethod' => new external_value(PARAM_INT, 'Grade method', VALUE_OPTIONAL),
@@ -791,7 +791,7 @@ class mod_exescorm_external extends external_api {
                             'launch' => new external_value(PARAM_INT, 'First content to launch', VALUE_OPTIONAL),
                             'skipview' => new external_value(PARAM_INT, 'How to skip the content structure page', VALUE_OPTIONAL),
                             'hidebrowse' => new external_value(PARAM_BOOL, 'Disable preview mode?', VALUE_OPTIONAL),
-                            'hidetoc' => new external_value(PARAM_INT, 'How to display the EXESCORM structure in player',
+                            'hidetoc' => new external_value(PARAM_INT, 'How to display the SELEDASCORM structure in player',
                                                             VALUE_OPTIONAL),
                             'nav' => new external_value(PARAM_INT, 'Show navigation buttons', VALUE_OPTIONAL),
                             'navpositionleft' => new external_value(PARAM_INT, 'Navigation position left', VALUE_OPTIONAL),
@@ -802,7 +802,7 @@ class mod_exescorm_external extends external_api {
                             'height' => new external_value(PARAM_INT, 'Frame height', VALUE_OPTIONAL),
                             'timeopen' => new external_value(PARAM_INT, 'Available from', VALUE_OPTIONAL),
                             'timeclose' => new external_value(PARAM_INT, 'Available to', VALUE_OPTIONAL),
-                            'exescormtype' => new external_value(PARAM_ALPHA, 'EXESCORM type', VALUE_OPTIONAL),
+                            'seledascormtype' => new external_value(PARAM_ALPHA, 'SELEDASCORM type', VALUE_OPTIONAL),
                             'reference' => new external_value(PARAM_NOTAGS, 'Reference to the package', VALUE_OPTIONAL),
                             'protectpackagedownloads' => new external_value(PARAM_BOOL, 'Protect package downloads?',
                                                                             VALUE_OPTIONAL),
@@ -818,7 +818,7 @@ class mod_exescorm_external extends external_api {
                             'autocommit' => new external_value(PARAM_BOOL, 'Save track data automatically?', VALUE_OPTIONAL),
                             'timemodified' => new external_value(PARAM_INT, 'Time of last modification', VALUE_OPTIONAL),
                         ]
-                    ), 'EXESCORM')
+                    ), 'SELEDASCORM')
                 ),
                 'warnings' => new external_warnings(),
             )
@@ -834,7 +834,7 @@ class mod_exescorm_external extends external_api {
     public static function launch_sco_parameters() {
         return new external_function_parameters(
             array(
-                'exescormid' => new external_value(PARAM_INT, 'EXESCORM instance id'),
+                'seledascormid' => new external_value(PARAM_INT, 'SELEDASCORM instance id'),
                 'scoid' => new external_value(PARAM_INT, 'SCO id (empty for launching the first SCO)', VALUE_DEFAULT, 0)
             )
         );
@@ -843,45 +843,45 @@ class mod_exescorm_external extends external_api {
     /**
      * Trigger the course module viewed event.
      *
-     * @param int $exescormid the EXESCORM instance id
+     * @param int $seledascormid the SELEDASCORM instance id
      * @param int $scoid the SCO id
      * @return array of warnings and status result
      * @since Moodle 3.1
      * @throws moodle_exception
      */
-    public static function launch_sco($exescormid, $scoid = 0) {
+    public static function launch_sco($seledascormid, $scoid = 0) {
         global $DB, $CFG;
 
         require_once($CFG->libdir . '/completionlib.php');
 
         $params = self::validate_parameters(self::launch_sco_parameters(),
                                             array(
-                                                'exescormid' => $exescormid,
+                                                'seledascormid' => $seledascormid,
                                                 'scoid' => $scoid
                                             ));
         $warnings = array();
 
         // Request and permission validation.
-        $exescorm = $DB->get_record('exescorm', array('id' => $params['exescormid']), '*', MUST_EXIST);
-        list($course, $cm) = get_course_and_cm_from_instance($exescorm, 'exescorm');
+        $seledascorm = $DB->get_record('seledascorm', array('id' => $params['seledascormid']), '*', MUST_EXIST);
+        list($course, $cm) = get_course_and_cm_from_instance($seledascorm, 'seledascorm');
 
         $context = context_module::instance($cm->id);
         self::validate_context($context);
 
-        // If the EXESCORM is not open this function will throw exceptions.
-        exescorm_require_available($exescorm);
+        // If the SELEDASCORM is not open this function will throw exceptions.
+        seledascorm_require_available($seledascorm);
 
-        if (!empty($params['scoid']) && !($sco = exescorm_get_sco($params['scoid'], EXESCORM_SCO_ONLY))) {
-            throw new moodle_exception('cannotfindsco', 'exescorm');
+        if (!empty($params['scoid']) && !($sco = seledascorm_get_sco($params['scoid'], SELEDASCORM_SCO_ONLY))) {
+            throw new moodle_exception('cannotfindsco', 'seledascorm');
         }
 
         // Mark module viewed.
         $completion = new completion_info($course);
         $completion->set_module_viewed($cm);
 
-        list($sco, $scolaunchurl) = exescorm_get_sco_and_launch_url($exescorm, $params['scoid'], $context);
+        list($sco, $scolaunchurl) = seledascorm_get_sco_and_launch_url($seledascorm, $params['scoid'], $context);
         // Trigger the SCO launched event.
-        exescorm_launch_sco($exescorm, $sco, $cm, $context, $scolaunchurl);
+        seledascorm_launch_sco($seledascorm, $sco, $cm, $context, $scolaunchurl);
 
         $result = array();
         $result['status'] = true;
@@ -905,47 +905,47 @@ class mod_exescorm_external extends external_api {
     }
 
     /**
-     * Describes the parameters for get_exescorm_access_information.
+     * Describes the parameters for get_seledascorm_access_information.
      *
      * @return external_function_parameters
      * @since Moodle 3.7
      */
-    public static function get_exescorm_access_information_parameters() {
+    public static function get_seledascorm_access_information_parameters() {
         return new external_function_parameters (
             array(
-                'exescormid' => new external_value(PARAM_INT, 'exescorm instance id.')
+                'seledascormid' => new external_value(PARAM_INT, 'seledascorm instance id.')
             )
         );
     }
 
     /**
-     * Return access information for a given exescorm.
+     * Return access information for a given seledascorm.
      *
-     * @param int $exescormid exescorm instance id
+     * @param int $seledascormid seledascorm instance id
      * @return array of warnings and the access information
      * @since Moodle 3.7
      * @throws  moodle_exception
      */
-    public static function get_exescorm_access_information($exescormid) {
+    public static function get_seledascorm_access_information($seledascormid) {
         global $DB;
 
-        $params = self::validate_parameters(self::get_exescorm_access_information_parameters(),
-                                            ['exescormid' => $exescormid]
+        $params = self::validate_parameters(self::get_seledascorm_access_information_parameters(),
+                                            ['seledascormid' => $seledascormid]
                                         );
 
         // Request and permission validation.
-        $exescorm = $DB->get_record('exescorm', array('id' => $params['exescormid']), '*', MUST_EXIST);
-        list($course, $cm) = get_course_and_cm_from_instance($exescorm, 'exescorm');
+        $seledascorm = $DB->get_record('seledascorm', array('id' => $params['seledascormid']), '*', MUST_EXIST);
+        list($course, $cm) = get_course_and_cm_from_instance($seledascorm, 'seledascorm');
 
         $context = context_module::instance($cm->id);
         self::validate_context($context);
 
         $result = array();
         // Return all the available capabilities.
-        $capabilities = load_capability_def('mod_exescorm');
+        $capabilities = load_capability_def('mod_seledascorm');
         foreach ($capabilities as $capname => $capdata) {
             // Get fields like cansubmit so it is consistent with the access_information function implemented in other modules.
-            $field = 'can' . str_replace('mod/exescorm:', '', $capname);
+            $field = 'can' . str_replace('mod/seledascorm:', '', $capname);
             $result[$field] = has_capability($capname, $context);
         }
 
@@ -954,21 +954,21 @@ class mod_exescorm_external extends external_api {
     }
 
     /**
-     * Describes the get_exescorm_access_information return value.
+     * Describes the get_seledascorm_access_information return value.
      *
      * @return external_single_structure
      * @since Moodle 3.7
      */
-    public static function get_exescorm_access_information_returns() {
+    public static function get_seledascorm_access_information_returns() {
 
         $structure = array(
             'warnings' => new external_warnings()
         );
 
-        $capabilities = load_capability_def('mod_exescorm');
+        $capabilities = load_capability_def('mod_seledascorm');
         foreach ($capabilities as $capname => $capdata) {
             // Get fields like cansubmit so it is consistent with the access_information function implemented in other modules.
-            $field = 'can' . str_replace('mod/exescorm:', '', $capname);
+            $field = 'can' . str_replace('mod/seledascorm:', '', $capname);
             $structure[$field] = new external_value(PARAM_BOOL, 'Whether the user has the capability ' . $capname . ' allowed.',
                 VALUE_OPTIONAL);
         }

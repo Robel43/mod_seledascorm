@@ -19,10 +19,10 @@
  *
  * Receives an uploaded SCORM ZIP file, checks it is a valid SCORM package that
  * carries the eXeLearning source the editor needs to re-open it, saves it to the
- * package filearea and calls exescorm_parse() to extract content and parse the
+ * package filearea and calls seledascorm_parse() to extract content and parse the
  * manifest.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  2025 eXeLearning
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,14 +30,14 @@
 define('AJAX_SCRIPT', true);
 
 require('../../../config.php');
-require_once($CFG->dirroot . '/mod/exescorm/lib.php');
-require_once($CFG->dirroot . '/mod/exescorm/locallib.php');
+require_once($CFG->dirroot . '/mod/seledascorm/lib.php');
+require_once($CFG->dirroot . '/mod/seledascorm/locallib.php');
 
 $cmid = required_param('cmid', PARAM_INT);
 
-$cm = get_coursemodule_from_id('exescorm', $cmid, 0, false, MUST_EXIST);
+$cm = get_coursemodule_from_id('seledascorm', $cmid, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST);
-$exescorm = $DB->get_record('exescorm', ['id' => $cm->instance], '*', MUST_EXIST);
+$seledascorm = $DB->get_record('seledascorm', ['id' => $cm->instance], '*', MUST_EXIST);
 
 require_login($course, true, $cm);
 require_sesskey();
@@ -72,10 +72,10 @@ try {
 
     // Stage the upload in the temppackage area, as set_ode.php does, so the
     // package the activity already has is untouched if this one is refused.
-    $fs->delete_area_files($context->id, 'mod_exescorm', 'temppackage');
+    $fs->delete_area_files($context->id, 'mod_seledascorm', 'temppackage');
     $fileinfo = [
         'contextid' => $context->id,
-        'component' => 'mod_exescorm',
+        'component' => 'mod_seledascorm',
         'filearea' => 'temppackage',
         'itemid' => 0,
         'filepath' => '/',
@@ -94,11 +94,11 @@ try {
     // with forceEditableSource so the source check never fires; if it ever
     // does, refusing the save is what keeps the activity editable.
     // See https://github.com/exelearning/exelearning/issues/2415.
-    $errors = exescorm_validate_package($tmpfile);
+    $errors = seledascorm_validate_package($tmpfile);
     if (empty($errors)) {
         $filelist = $tmpfile->list_files(get_file_packer('application/zip'));
-        if (!\mod_exescorm\exescorm_package::has_editable_source($filelist)) {
-            $errors['packagefile'] = get_string('nosourcetosave', 'mod_exescorm');
+        if (!\mod_seledascorm\seledascorm_package::has_editable_source($filelist)) {
+            $errors['packagefile'] = get_string('nosourcetosave', 'mod_seledascorm');
         }
     }
     if (!empty($errors)) {
@@ -109,18 +109,18 @@ try {
     }
 
     // Overwrite current package.
-    $fs->delete_area_files($context->id, 'mod_exescorm', 'package');
+    $fs->delete_area_files($context->id, 'mod_seledascorm', 'package');
     $fileinfo['filearea'] = 'package';
     $fs->create_file_from_storedfile($fileinfo, $tmpfile);
-    $fs->delete_area_files($context->id, 'mod_exescorm', 'temppackage');
+    $fs->delete_area_files($context->id, 'mod_seledascorm', 'temppackage');
 
     // Keep package name in SCORM reference and trigger re-parse.
-    $exescorm->timemodified = time();
-    $exescorm->reference = $filename;
-    $DB->update_record('exescorm', $exescorm);
-    exescorm_parse($exescorm, true);
+    $seledascorm->timemodified = time();
+    $seledascorm->reference = $filename;
+    $DB->update_record('seledascorm', $seledascorm);
+    seledascorm_parse($seledascorm, true);
 
-    $updated = $DB->get_record('exescorm', ['id' => $exescorm->id], 'id,timemodified,version', MUST_EXIST);
+    $updated = $DB->get_record('seledascorm', ['id' => $seledascorm->id], 'id,timemodified,version', MUST_EXIST);
 
     echo json_encode([
         'success' => true,
@@ -128,7 +128,7 @@ try {
         'version' => $updated->version,
     ]);
 } catch (Exception $e) {
-    debugging('mod_exescorm editor save failed: ' . $e->getMessage(), DEBUG_DEVELOPER);
+    debugging('mod_seledascorm editor save failed: ' . $e->getMessage(), DEBUG_DEVELOPER);
     http_response_code(500);
     echo json_encode([
         'success' => false,

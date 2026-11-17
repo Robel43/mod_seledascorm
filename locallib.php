@@ -15,56 +15,56 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Library of internal classes and functions for module EXESCORM
+ * Library of internal classes and functions for module SELEDASCORM
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  1999 onwards Roberto Pinna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once("$CFG->dirroot/mod/exescorm/lib.php");
+require_once("$CFG->dirroot/mod/seledascorm/lib.php");
 require_once("$CFG->libdir/filelib.php");
 
-// Constants and settings for module exescorm.
-define('EXESCORM_UPDATE_NEVER', '0');
-define('EXESCORM_UPDATE_EVERYDAY', '2');
-define('EXESCORM_UPDATE_EVERYTIME', '3');
+// Constants and settings for module seledascorm.
+define('SELEDASCORM_UPDATE_NEVER', '0');
+define('SELEDASCORM_UPDATE_EVERYDAY', '2');
+define('SELEDASCORM_UPDATE_EVERYTIME', '3');
 
-define('EXESCORM_SKIPVIEW_NEVER', '0');
-define('EXESCORM_SKIPVIEW_FIRST', '1');
-define('EXESCORM_SKIPVIEW_ALWAYS', '2');
+define('SELEDASCORM_SKIPVIEW_NEVER', '0');
+define('SELEDASCORM_SKIPVIEW_FIRST', '1');
+define('SELEDASCORM_SKIPVIEW_ALWAYS', '2');
 
-define('EXESCORM_SCO_ALL', 0);
-define('EXESCORM_SCO_DATA', 1);
-define('EXESCORM_SCO_ONLY', 2);
+define('SELEDASCORM_SCO_ALL', 0);
+define('SELEDASCORM_SCO_DATA', 1);
+define('SELEDASCORM_SCO_ONLY', 2);
 
-define('EXESCORM_GRADESCOES', '0');
-define('EXESCORM_GRADEHIGHEST', '1');
-define('EXESCORM_GRADEAVERAGE', '2');
-define('EXESCORM_GRADESUM', '3');
+define('SELEDASCORM_GRADESCOES', '0');
+define('SELEDASCORM_GRADEHIGHEST', '1');
+define('SELEDASCORM_GRADEAVERAGE', '2');
+define('SELEDASCORM_GRADESUM', '3');
 
-define('EXESCORM_HIGHESTATTEMPT', '0');
-define('EXESCORM_AVERAGEATTEMPT', '1');
-define('EXESCORM_FIRSTATTEMPT', '2');
-define('EXESCORM_LASTATTEMPT', '3');
+define('SELEDASCORM_HIGHESTATTEMPT', '0');
+define('SELEDASCORM_AVERAGEATTEMPT', '1');
+define('SELEDASCORM_FIRSTATTEMPT', '2');
+define('SELEDASCORM_LASTATTEMPT', '3');
 
-define('EXESCORM_TOCJSLINK', 1);
-define('EXESCORM_TOCFULLURL', 2);
+define('SELEDASCORM_TOCJSLINK', 1);
+define('SELEDASCORM_TOCFULLURL', 2);
 
-define('EXESCORM_FORCEATTEMPT_NO', 0);
-define('EXESCORM_FORCEATTEMPT_ONCOMPLETE', 1);
-define('EXESCORM_FORCEATTEMPT_ALWAYS', 2);
+define('SELEDASCORM_FORCEATTEMPT_NO', 0);
+define('SELEDASCORM_FORCEATTEMPT_ONCOMPLETE', 1);
+define('SELEDASCORM_FORCEATTEMPT_ALWAYS', 2);
 
-// Local Library of functions for module exescorm.
+// Local Library of functions for module seledascorm.
 
 /**
- * @package   mod_exescorm
+ * @package   mod_seledascorm
  * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class exescorm_package_file_info extends file_info_stored {
+class seledascorm_package_file_info extends file_info_stored {
     public function get_parent() {
         if ($this->lf->get_filepath() === '/' && $this->lf->get_filename() === '.') {
             return $this->browser->get_file_info($this->context);
@@ -80,19 +80,19 @@ class exescorm_package_file_info extends file_info_stored {
 }
 
 /**
- * Returns an array of the popup options for EXESCORM and each options default value
+ * Returns an array of the popup options for SELEDASCORM and each options default value
  *
  * @return array an array of popup options as the key and their defaults as the value
  */
-function exescorm_get_popup_options_array() {
-    $cfgexescorm = get_config('exescorm');
+function seledascorm_get_popup_options_array() {
+    $cfgseledascorm = get_config('seledascorm');
 
-    return array('scrollbars' => isset($cfgexescorm->scrollbars) ? $cfgexescorm->scrollbars : 0,
-                 'directories' => isset($cfgexescorm->directories) ? $cfgexescorm->directories : 0,
-                 'location' => isset($cfgexescorm->location) ? $cfgexescorm->location : 0,
-                 'menubar' => isset($cfgexescorm->menubar) ? $cfgexescorm->menubar : 0,
-                 'toolbar' => isset($cfgexescorm->toolbar) ? $cfgexescorm->toolbar : 0,
-                 'status' => isset($cfgexescorm->status) ? $cfgexescorm->status : 0);
+    return array('scrollbars' => isset($cfgseledascorm->scrollbars) ? $cfgseledascorm->scrollbars : 0,
+                 'directories' => isset($cfgseledascorm->directories) ? $cfgseledascorm->directories : 0,
+                 'location' => isset($cfgseledascorm->location) ? $cfgseledascorm->location : 0,
+                 'menubar' => isset($cfgseledascorm->menubar) ? $cfgseledascorm->menubar : 0,
+                 'toolbar' => isset($cfgseledascorm->toolbar) ? $cfgseledascorm->toolbar : 0,
+                 'status' => isset($cfgseledascorm->status) ? $cfgseledascorm->status : 0);
 }
 
 /**
@@ -100,11 +100,11 @@ function exescorm_get_popup_options_array() {
  *
  * @return array an array of what grade options
  */
-function exescorm_get_grade_method_array() {
-    return array (EXESCORM_GRADESCOES => get_string('gradescoes', 'mod_exescorm'),
-                  EXESCORM_GRADEHIGHEST => get_string('gradehighest', 'mod_exescorm'),
-                  EXESCORM_GRADEAVERAGE => get_string('gradeaverage', 'mod_exescorm'),
-                  EXESCORM_GRADESUM => get_string('gradesum', 'mod_exescorm'));
+function seledascorm_get_grade_method_array() {
+    return array (SELEDASCORM_GRADESCOES => get_string('gradescoes', 'mod_seledascorm'),
+                  SELEDASCORM_GRADEHIGHEST => get_string('gradehighest', 'mod_seledascorm'),
+                  SELEDASCORM_GRADEAVERAGE => get_string('gradeaverage', 'mod_seledascorm'),
+                  SELEDASCORM_GRADESUM => get_string('gradesum', 'mod_seledascorm'));
 }
 
 /**
@@ -112,11 +112,11 @@ function exescorm_get_grade_method_array() {
  *
  * @return array an array of what grade options
  */
-function exescorm_get_what_grade_array() {
-    return array (EXESCORM_HIGHESTATTEMPT => get_string('EXESCORM_HIGHESTATTEMPT', 'mod_exescorm'),
-                  EXESCORM_AVERAGEATTEMPT => get_string('EXESCORM_AVERAGEATTEMPT', 'mod_exescorm'),
-                  EXESCORM_FIRSTATTEMPT => get_string('firstattempt', 'mod_exescorm'),
-                  EXESCORM_LASTATTEMPT => get_string('lastattempt', 'mod_exescorm'));
+function seledascorm_get_what_grade_array() {
+    return array (SELEDASCORM_HIGHESTATTEMPT => get_string('SELEDASCORM_HIGHESTATTEMPT', 'mod_seledascorm'),
+                  SELEDASCORM_AVERAGEATTEMPT => get_string('SELEDASCORM_AVERAGEATTEMPT', 'mod_seledascorm'),
+                  SELEDASCORM_FIRSTATTEMPT => get_string('firstattempt', 'mod_seledascorm'),
+                  SELEDASCORM_LASTATTEMPT => get_string('lastattempt', 'mod_seledascorm'));
 }
 
 /**
@@ -124,10 +124,10 @@ function exescorm_get_what_grade_array() {
  *
  * @return array an array of skip view options
  */
-function exescorm_get_skip_view_array() {
-    return array(EXESCORM_SKIPVIEW_NEVER => get_string('never'),
-                 EXESCORM_SKIPVIEW_FIRST => get_string('firstaccess', 'mod_exescorm'),
-                 EXESCORM_SKIPVIEW_ALWAYS => get_string('always'));
+function seledascorm_get_skip_view_array() {
+    return array(SELEDASCORM_SKIPVIEW_NEVER => get_string('never'),
+                 SELEDASCORM_SKIPVIEW_FIRST => get_string('firstaccess', 'mod_seledascorm'),
+                 SELEDASCORM_SKIPVIEW_ALWAYS => get_string('always'));
 }
 
 /**
@@ -135,11 +135,11 @@ function exescorm_get_skip_view_array() {
  *
  * @return array an array of hide table of contents options
  */
-function exescorm_get_hidetoc_array() {
-     return array(EXESCORM_TOC_SIDE => get_string('sided', 'mod_exescorm'),
-                  EXESCORM_TOC_HIDDEN => get_string('hidden', 'mod_exescorm'),
-                  EXESCORM_TOC_POPUP => get_string('popupmenu', 'mod_exescorm'),
-                  EXESCORM_TOC_DISABLED => get_string('disabled', 'mod_exescorm'));
+function seledascorm_get_hidetoc_array() {
+     return array(SELEDASCORM_TOC_SIDE => get_string('sided', 'mod_seledascorm'),
+                  SELEDASCORM_TOC_HIDDEN => get_string('hidden', 'mod_seledascorm'),
+                  SELEDASCORM_TOC_POPUP => get_string('popupmenu', 'mod_seledascorm'),
+                  SELEDASCORM_TOC_DISABLED => get_string('disabled', 'mod_seledascorm'));
 }
 
 /**
@@ -147,10 +147,10 @@ function exescorm_get_hidetoc_array() {
  *
  * @return array an array of update frequency options
  */
-function exescorm_get_updatefreq_array() {
-    return array(EXESCORM_UPDATE_NEVER => get_string('never'),
-                 EXESCORM_UPDATE_EVERYDAY => get_string('everyday', 'mod_exescorm'),
-                 EXESCORM_UPDATE_EVERYTIME => get_string('everytime', 'mod_exescorm'));
+function seledascorm_get_updatefreq_array() {
+    return array(SELEDASCORM_UPDATE_NEVER => get_string('never'),
+                 SELEDASCORM_UPDATE_EVERYDAY => get_string('everyday', 'mod_seledascorm'),
+                 SELEDASCORM_UPDATE_EVERYTIME => get_string('everytime', 'mod_seledascorm'));
 }
 
 /**
@@ -158,9 +158,9 @@ function exescorm_get_updatefreq_array() {
  *
  * @return array an array of popup display options
  */
-function exescorm_get_popup_display_array() {
-    return array(0 => get_string('currentwindow', 'mod_exescorm'),
-                 1 => get_string('popup', 'mod_exescorm'));
+function seledascorm_get_popup_display_array() {
+    return array(0 => get_string('currentwindow', 'mod_seledascorm'),
+                 1 => get_string('popup', 'mod_seledascorm'));
 }
 
 /**
@@ -168,10 +168,10 @@ function exescorm_get_popup_display_array() {
  *
  * @return array an array of navigation buttons display options
  */
-function exescorm_get_navigation_display_array() {
-    return array(EXESCORM_NAV_DISABLED => get_string('no'),
-                 EXESCORM_NAV_UNDER_CONTENT => get_string('undercontent', 'mod_exescorm'),
-                 EXESCORM_NAV_FLOATING => get_string('floating', 'mod_exescorm'));
+function seledascorm_get_navigation_display_array() {
+    return array(SELEDASCORM_NAV_DISABLED => get_string('no'),
+                 SELEDASCORM_NAV_UNDER_CONTENT => get_string('undercontent', 'mod_seledascorm'),
+                 SELEDASCORM_NAV_FLOATING => get_string('floating', 'mod_seledascorm'));
 }
 
 /**
@@ -179,12 +179,12 @@ function exescorm_get_navigation_display_array() {
  *
  * @return array an array of attempt options
  */
-function exescorm_get_attempts_array() {
-    $attempts = array(0 => get_string('nolimit', 'mod_exescorm'),
-                      1 => get_string('attempt1', 'mod_exescorm'));
+function seledascorm_get_attempts_array() {
+    $attempts = array(0 => get_string('nolimit', 'mod_seledascorm'),
+                      1 => get_string('attempt1', 'mod_seledascorm'));
 
     for ($i = 2; $i <= 6; $i++) {
-        $attempts[$i] = get_string('attemptsx', 'mod_exescorm', $i);
+        $attempts[$i] = get_string('attemptsx', 'mod_seledascorm', $i);
     }
 
     return $attempts;
@@ -195,11 +195,11 @@ function exescorm_get_attempts_array() {
  *
  * @return array an array of attempt status options
  */
-function exescorm_get_attemptstatus_array() {
-    return array(EXESCORM_DISPLAY_ATTEMPTSTATUS_NO => get_string('no'),
-                 EXESCORM_DISPLAY_ATTEMPTSTATUS_ALL => get_string('attemptstatusall', 'mod_exescorm'),
-                 EXESCORM_DISPLAY_ATTEMPTSTATUS_MY => get_string('attemptstatusmy', 'mod_exescorm'),
-                 EXESCORM_DISPLAY_ATTEMPTSTATUS_ENTRY => get_string('attemptstatusentry', 'mod_exescorm'));
+function seledascorm_get_attemptstatus_array() {
+    return array(SELEDASCORM_DISPLAY_ATTEMPTSTATUS_NO => get_string('no'),
+                 SELEDASCORM_DISPLAY_ATTEMPTSTATUS_ALL => get_string('attemptstatusall', 'mod_seledascorm'),
+                 SELEDASCORM_DISPLAY_ATTEMPTSTATUS_MY => get_string('attemptstatusmy', 'mod_seledascorm'),
+                 SELEDASCORM_DISPLAY_ATTEMPTSTATUS_ENTRY => get_string('attemptstatusentry', 'mod_seledascorm'));
 }
 
 /**
@@ -207,42 +207,42 @@ function exescorm_get_attemptstatus_array() {
  *
  * @return array an array of attempt options
  */
-function exescorm_get_forceattempt_array() {
-    return array(EXESCORM_FORCEATTEMPT_NO => get_string('no'),
-                 EXESCORM_FORCEATTEMPT_ONCOMPLETE => get_string('forceattemptoncomplete', 'mod_exescorm'),
-                 EXESCORM_FORCEATTEMPT_ALWAYS => get_string('forceattemptalways', 'mod_exescorm'));
+function seledascorm_get_forceattempt_array() {
+    return array(SELEDASCORM_FORCEATTEMPT_NO => get_string('no'),
+                 SELEDASCORM_FORCEATTEMPT_ONCOMPLETE => get_string('forceattemptoncomplete', 'mod_seledascorm'),
+                 SELEDASCORM_FORCEATTEMPT_ALWAYS => get_string('forceattemptalways', 'mod_seledascorm'));
 }
 
 /**
  * Extracts scrom package, sets up all variables.
- * Called whenever exescorm changes
- * @param object $exescorm instance - fields are updated and changes saved into database
+ * Called whenever seledascorm changes
+ * @param object $seledascorm instance - fields are updated and changes saved into database
  * @param bool $full force full update if true
  * @return void
  */
-function exescorm_parse($exescorm, $full) {
+function seledascorm_parse($seledascorm, $full) {
     global $CFG, $DB;
-    $cfgexescorm = get_config('exescorm');
+    $cfgseledascorm = get_config('seledascorm');
 
-    if (!isset($exescorm->cmid)) {
-        $cm = get_coursemodule_from_instance('exescorm', $exescorm->id);
-        $exescorm->cmid = $cm->id;
+    if (!isset($seledascorm->cmid)) {
+        $cm = get_coursemodule_from_instance('seledascorm', $seledascorm->id);
+        $seledascorm->cmid = $cm->id;
     }
-    $context = context_module::instance($exescorm->cmid);
-    $newhash = $exescorm->sha1hash;
+    $context = context_module::instance($seledascorm->cmid);
+    $newhash = $seledascorm->sha1hash;
 
-    if ($exescorm->exescormtype === EXESCORM_TYPE_LOCAL || $exescorm->exescormtype === EXESCORM_TYPE_LOCALSYNC
-        || $exescorm->exescormtype === EXESCORM_TYPE_EMBEDDED) {
+    if ($seledascorm->seledascormtype === SELEDASCORM_TYPE_LOCAL || $seledascorm->seledascormtype === SELEDASCORM_TYPE_LOCALSYNC
+        || $seledascorm->seledascormtype === SELEDASCORM_TYPE_EMBEDDED) {
 
         $fs = get_file_storage();
         $packagefile = false;
         $packagefileimsmanifest = false;
 
-        if ($exescorm->exescormtype === EXESCORM_TYPE_LOCAL || $exescorm->exescormtype === EXESCORM_TYPE_EMBEDDED) {
-            if ($packagefile = $fs->get_file($context->id, 'mod_exescorm', 'package', 0, '/', $exescorm->reference)) {
+        if ($seledascorm->seledascormtype === SELEDASCORM_TYPE_LOCAL || $seledascorm->seledascormtype === SELEDASCORM_TYPE_EMBEDDED) {
+            if ($packagefile = $fs->get_file($context->id, 'mod_seledascorm', 'package', 0, '/', $seledascorm->reference)) {
                 if ($packagefile->is_external_file()) { // Get zip file so we can check it is correct.
                     $packagefile->import_external_file_contents();
-                    $errors = \mod_exescorm\exescorm_package::validate_file_list($packagefile);
+                    $errors = \mod_seledascorm\seledascorm_package::validate_file_list($packagefile);
                     if (! empty($errors)) {
                         // Invalid external file. Nothing to do.
                         return;
@@ -257,15 +257,15 @@ function exescorm_parse($exescorm, $full) {
                 $newhash = null;
             }
         } else {
-            if (!$cfgexescorm->allowtypelocalsync) {
+            if (!$cfgseledascorm->allowtypelocalsync) {
                 // Sorry - localsync disabled.
                 return;
             }
-            if ($exescorm->reference !== '') {
-                $fs->delete_area_files($context->id, 'mod_exescorm', 'package');
-                $filerecord = array('contextid' => $context->id, 'component' => 'mod_exescorm', 'filearea' => 'package',
+            if ($seledascorm->reference !== '') {
+                $fs->delete_area_files($context->id, 'mod_seledascorm', 'package');
+                $filerecord = array('contextid' => $context->id, 'component' => 'mod_seledascorm', 'filearea' => 'package',
                                     'itemid' => 0, 'filepath' => '/');
-                if ($packagefile = $fs->create_file_from_url($filerecord, $exescorm->reference, ['calctimeout' => true], true)) {
+                if ($packagefile = $fs->create_file_from_url($filerecord, $seledascorm->reference, ['calctimeout' => true], true)) {
                     $newhash = $packagefile->get_contenthash();
                 } else {
                     $newhash = null;
@@ -275,70 +275,70 @@ function exescorm_parse($exescorm, $full) {
 
         if ($packagefile) {
 
-            if (!$full && $packagefile && $exescorm->sha1hash === $newhash) {
-                if (strpos($exescorm->version, 'SCORM') !== false) {
+            if (!$full && $packagefile && $seledascorm->sha1hash === $newhash) {
+                if (strpos($seledascorm->version, 'SCORM') !== false) {
                     if ($packagefileimsmanifest ||
-                        $fs->get_file($context->id, 'mod_exescorm', 'content', 0, '/', 'imsmanifest.xml')
+                        $fs->get_file($context->id, 'mod_seledascorm', 'content', 0, '/', 'imsmanifest.xml')
                     ) {
                         // No need to update.
                         return;
                     }
-                } else if (strpos($exescorm->version, 'AICC') !== false) {
-                    // TODO: add more sanity checks - something really exists in exescorm_content area.
+                } else if (strpos($seledascorm->version, 'AICC') !== false) {
+                    // TODO: add more sanity checks - something really exists in seledascorm_content area.
                     return;
                 }
             }
             if (!$packagefileimsmanifest) {
                 // Now extract files.
-                $fs->delete_area_files($context->id, 'mod_exescorm', 'content');
+                $fs->delete_area_files($context->id, 'mod_seledascorm', 'content');
 
                 $packer = get_file_packer('application/zip');
-                $packagefile->extract_to_storage($packer, $context->id, 'mod_exescorm', 'content', 0, '/');
+                $packagefile->extract_to_storage($packer, $context->id, 'mod_seledascorm', 'content', 0, '/');
             }
 
         } else if (!$full) {
             return;
         }
         if ($packagefileimsmanifest) {
-            require_once("$CFG->dirroot/mod/exescorm/datamodels/scormlib.php");
+            require_once("$CFG->dirroot/mod/seledascorm/datamodels/scormlib.php");
             // Direct link to imsmanifest.xml file.
-            if (!exescorm_parse_scorm($exescorm, $packagefile)) {
-                $exescorm->version = 'ERROR';
+            if (!seledascorm_parse_scorm($seledascorm, $packagefile)) {
+                $seledascorm->version = 'ERROR';
             }
 
-        } else if ($manifest = $fs->get_file($context->id, 'mod_exescorm', 'content', 0, '/', 'imsmanifest.xml')) {
-            require_once("$CFG->dirroot/mod/exescorm/datamodels/scormlib.php");
-            // EXESCORM.
-            if (!exescorm_parse_scorm($exescorm, $manifest)) {
-                $exescorm->version = 'ERROR';
+        } else if ($manifest = $fs->get_file($context->id, 'mod_seledascorm', 'content', 0, '/', 'imsmanifest.xml')) {
+            require_once("$CFG->dirroot/mod/seledascorm/datamodels/scormlib.php");
+            // SELEDASCORM.
+            if (!seledascorm_parse_scorm($seledascorm, $manifest)) {
+                $seledascorm->version = 'ERROR';
             }
         } else {
-            require_once("$CFG->dirroot/mod/exescorm/datamodels/aicclib.php");
+            require_once("$CFG->dirroot/mod/seledascorm/datamodels/aicclib.php");
             // AICC.
-            $result = exescorm_parse_aicc($exescorm);
+            $result = seledascorm_parse_aicc($seledascorm);
             if (!$result) {
-                $exescorm->version = 'ERROR';
+                $seledascorm->version = 'ERROR';
             } else {
-                $exescorm->version = 'AICC';
+                $seledascorm->version = 'AICC';
             }
         }
 
-    } else if ($exescorm->exescormtype === EXESCORM_TYPE_EXTERNAL && $cfgexescorm->allowtypeexternal) {
-        require_once("$CFG->dirroot/mod/exescorm/datamodels/scormlib.php");
-        // EXESCORM only, AICC can not be external.
-        if (!exescorm_parse_scorm($exescorm, $exescorm->reference)) {
-            $exescorm->version = 'ERROR';
+    } else if ($seledascorm->seledascormtype === SELEDASCORM_TYPE_EXTERNAL && $cfgseledascorm->allowtypeexternal) {
+        require_once("$CFG->dirroot/mod/seledascorm/datamodels/scormlib.php");
+        // SELEDASCORM only, AICC can not be external.
+        if (!seledascorm_parse_scorm($seledascorm, $seledascorm->reference)) {
+            $seledascorm->version = 'ERROR';
         }
-        $newhash = sha1($exescorm->reference);
+        $newhash = sha1($seledascorm->reference);
 
-    } else if ($exescorm->exescormtype === EXESCORM_TYPE_AICCURL  && $cfgexescorm->allowtypeexternalaicc) {
-        require_once("$CFG->dirroot/mod/exescorm/datamodels/aicclib.php");
+    } else if ($seledascorm->seledascormtype === SELEDASCORM_TYPE_AICCURL  && $cfgseledascorm->allowtypeexternalaicc) {
+        require_once("$CFG->dirroot/mod/seledascorm/datamodels/aicclib.php");
         // AICC.
-        $result = exescorm_parse_aicc($exescorm);
+        $result = seledascorm_parse_aicc($seledascorm);
         if (!$result) {
-            $exescorm->version = 'ERROR';
+            $seledascorm->version = 'ERROR';
         } else {
-            $exescorm->version = 'AICC';
+            $seledascorm->version = 'AICC';
         }
 
     } else {
@@ -346,13 +346,13 @@ function exescorm_parse($exescorm, $full) {
         return;
     }
 
-    $exescorm->revision++;
-    $exescorm->sha1hash = $newhash;
-    $DB->update_record('exescorm', $exescorm);
+    $seledascorm->revision++;
+    $seledascorm->sha1hash = $newhash;
+    $DB->update_record('seledascorm', $seledascorm);
 }
 
 
-function exescorm_array_search($item, $needle, $haystacks, $strict=false) {
+function seledascorm_array_search($item, $needle, $haystacks, $strict=false) {
     if (!empty($haystacks)) {
         foreach ($haystacks as $key => $element) {
             if ($strict) {
@@ -369,7 +369,7 @@ function exescorm_array_search($item, $needle, $haystacks, $strict=false) {
     return false;
 }
 
-function exescorm_repeater($what, $times) {
+function seledascorm_repeater($what, $times) {
     if ($times <= 0) {
         return null;
     }
@@ -380,7 +380,7 @@ function exescorm_repeater($what, $times) {
     return $return;
 }
 
-function exescorm_external_link($link) {
+function seledascorm_external_link($link) {
     // Check if a link is external.
     $result = false;
     $link = strtolower($link);
@@ -400,17 +400,17 @@ function exescorm_external_link($link) {
  * @param integer $id The sco ID
  * @return mixed (false if sco id does not exists)
  */
-function exescorm_get_sco($id, $what=EXESCORM_SCO_ALL) {
+function seledascorm_get_sco($id, $what=SELEDASCORM_SCO_ALL) {
     global $DB;
 
-    if ($sco = $DB->get_record('exescorm_scoes', array('id' => $id))) {
-        $sco = ($what == EXESCORM_SCO_DATA) ? new stdClass() : $sco;
-        if (($what != EXESCORM_SCO_ONLY) && ($scodatas = $DB->get_records('exescorm_scoes_data', array('scoid' => $id)))) {
+    if ($sco = $DB->get_record('seledascorm_scoes', array('id' => $id))) {
+        $sco = ($what == SELEDASCORM_SCO_DATA) ? new stdClass() : $sco;
+        if (($what != SELEDASCORM_SCO_ONLY) && ($scodatas = $DB->get_records('seledascorm_scoes_data', array('scoid' => $id)))) {
             foreach ($scodatas as $scodata) {
                 $sco->{$scodata->name} = $scodata->value;
             }
-        } else if (($what != EXESCORM_SCO_ONLY) &&
-            (!($scodatas = $DB->get_records('exescorm_scoes_data', array('scoid' => $id))))
+        } else if (($what != SELEDASCORM_SCO_ONLY) &&
+            (!($scodatas = $DB->get_records('seledascorm_scoes_data', array('scoid' => $id))))
         ) {
             $sco->parameters = '';
         }
@@ -427,18 +427,18 @@ function exescorm_get_sco($id, $what=EXESCORM_SCO_ALL) {
  * @param integer $organisation an organisation ID - defaults to false if not required
  * @return mixed (false if there are no scoes or an array)
  */
-function exescorm_get_scoes($id, $organisation=false) {
+function seledascorm_get_scoes($id, $organisation=false) {
     global $DB;
 
-    $queryarray = array('exescorm' => $id);
+    $queryarray = array('seledascorm' => $id);
     if (!empty($organisation)) {
         $queryarray['organization'] = $organisation;
     }
-    if ($scoes = $DB->get_records('exescorm_scoes', $queryarray, 'sortorder, id')) {
+    if ($scoes = $DB->get_records('seledascorm_scoes', $queryarray, 'sortorder, id')) {
         // Drop keys so that it is a simple array as expected.
         $scoes = array_values($scoes);
         foreach ($scoes as $sco) {
-            if ($scodatas = $DB->get_records('exescorm_scoes_data', array('scoid' => $sco->id))) {
+            if ($scodatas = $DB->get_records('seledascorm_scoes_data', array('scoid' => $sco->id))) {
                 foreach ($scodatas as $scodata) {
                     $sco->{$scodata->name} = $scodata->value;
                 }
@@ -450,7 +450,7 @@ function exescorm_get_scoes($id, $organisation=false) {
     }
 }
 
-function exescorm_insert_track($userid, $exescormid, $scoid, $attempt, $element,
+function seledascorm_insert_track($userid, $seledascormid, $scoid, $attempt, $element,
                                         $value, $forcecompleted=false, $trackdata = null) {
     global $DB, $CFG;
 
@@ -459,72 +459,72 @@ function exescorm_insert_track($userid, $exescormid, $scoid, $attempt, $element,
     if ($forcecompleted) {
         // TODO - this could be broadened to encompass SCORM 2004 in future.
         if (($element == 'cmi.core.lesson_status') && ($value == 'incomplete')) {
-            if ($track = $DB->get_record_select('exescorm_scoes_track',
-                                                'userid=? AND exescormid=? AND scoid=? AND attempt=? '.
+            if ($track = $DB->get_record_select('seledascorm_scoes_track',
+                                                'userid=? AND seledascormid=? AND scoid=? AND attempt=? '.
                                                 'AND element=\'cmi.core.score.raw\'',
-                                                array($userid, $exescormid, $scoid, $attempt))) {
+                                                array($userid, $seledascormid, $scoid, $attempt))) {
                 $value = 'completed';
             }
         }
         if ($element == 'cmi.core.score.raw') {
-            if ($tracktest = $DB->get_record_select('exescorm_scoes_track',
-                                                    'userid=? AND exescormid=? AND scoid=? AND attempt=? '.
+            if ($tracktest = $DB->get_record_select('seledascorm_scoes_track',
+                                                    'userid=? AND seledascormid=? AND scoid=? AND attempt=? '.
                                                     'AND element=\'cmi.core.lesson_status\'',
-                                                    array($userid, $exescormid, $scoid, $attempt))) {
+                                                    array($userid, $seledascormid, $scoid, $attempt))) {
                 if ($tracktest->value == "incomplete") {
                     $tracktest->value = "completed";
-                    $DB->update_record('exescorm_scoes_track', $tracktest);
+                    $DB->update_record('seledascorm_scoes_track', $tracktest);
                 }
             }
         }
         if (($element == 'cmi.success_status') && ($value == 'passed' || $value == 'failed')) {
-            if ($DB->get_record('exescorm_scoes_data', array('scoid' => $scoid, 'name' => 'objectivesetbycontent'))) {
+            if ($DB->get_record('seledascorm_scoes_data', array('scoid' => $scoid, 'name' => 'objectivesetbycontent'))) {
                 $objectiveprogressstatus = true;
                 $objectivesatisfiedstatus = false;
                 if ($value == 'passed') {
                     $objectivesatisfiedstatus = true;
                 }
 
-                if ($track = $DB->get_record('exescorm_scoes_track', array('userid' => $userid,
-                                                                        'exescormid' => $exescormid,
+                if ($track = $DB->get_record('seledascorm_scoes_track', array('userid' => $userid,
+                                                                        'seledascormid' => $seledascormid,
                                                                         'scoid' => $scoid,
                                                                         'attempt' => $attempt,
                                                                         'element' => 'objectiveprogressstatus'))) {
                     $track->value = $objectiveprogressstatus;
                     $track->timemodified = time();
-                    $DB->update_record('exescorm_scoes_track', $track);
+                    $DB->update_record('seledascorm_scoes_track', $track);
                     $id = $track->id;
                 } else {
                     $track = new stdClass();
                     $track->userid = $userid;
-                    $track->exescormid = $exescormid;
+                    $track->seledascormid = $seledascormid;
                     $track->scoid = $scoid;
                     $track->attempt = $attempt;
                     $track->element = 'objectiveprogressstatus';
                     $track->value = $objectiveprogressstatus;
                     $track->timemodified = time();
-                    $id = $DB->insert_record('exescorm_scoes_track', $track);
+                    $id = $DB->insert_record('seledascorm_scoes_track', $track);
                 }
                 if ($objectivesatisfiedstatus) {
-                    if ($track = $DB->get_record('exescorm_scoes_track', array('userid' => $userid,
-                                                                            'exescormid' => $exescormid,
+                    if ($track = $DB->get_record('seledascorm_scoes_track', array('userid' => $userid,
+                                                                            'seledascormid' => $seledascormid,
                                                                             'scoid' => $scoid,
                                                                             'attempt' => $attempt,
                                                                             'element' => 'objectivesatisfiedstatus'))) {
                         $track->value = $objectivesatisfiedstatus;
                         $track->timemodified = time();
-                        $DB->update_record('exescorm_scoes_track', $track);
+                        $DB->update_record('seledascorm_scoes_track', $track);
                         $id = $track->id;
                     } else {
                         $track = new stdClass();
                         $track->userid = $userid;
-                        $track->exescormid = $exescormid;
+                        $track->seledascormid = $seledascormid;
                         $track->scoid = $scoid;
                         $track->attempt = $attempt;
                         $track->element = 'objectivesatisfiedstatus';
                         $track->value = $objectivesatisfiedstatus;
                         $track->timemodified = time();
-                        $id = $DB->insert_record('exescorm_scoes_track', $track);
+                        $id = $DB->insert_record('seledascorm_scoes_track', $track);
                     }
                 }
             }
@@ -538,8 +538,8 @@ function exescorm_insert_track($userid, $exescormid, $scoid, $attempt, $element,
             $track = $trackdata[$element];
         }
     } else {
-        $track = $DB->get_record('exescorm_scoes_track', array('userid' => $userid,
-                                                            'exescormid' => $exescormid,
+        $track = $DB->get_record('seledascorm_scoes_track', array('userid' => $userid,
+                                                            'seledascormid' => $seledascormid,
                                                             'scoid' => $scoid,
                                                             'attempt' => $attempt,
                                                             'element' => $element));
@@ -549,65 +549,65 @@ function exescorm_insert_track($userid, $exescormid, $scoid, $attempt, $element,
             if ($track->value != $value) {
                 $track->value = $value;
                 $track->timemodified = time();
-                $DB->update_record('exescorm_scoes_track', $track);
+                $DB->update_record('seledascorm_scoes_track', $track);
             }
             $id = $track->id;
         }
     } else {
         $track = new stdClass();
         $track->userid = $userid;
-        $track->exescormid = $exescormid;
+        $track->seledascormid = $seledascormid;
         $track->scoid = $scoid;
         $track->attempt = $attempt;
         $track->element = $element;
         $track->value = $value;
         $track->timemodified = time();
-        $id = $DB->insert_record('exescorm_scoes_track', $track);
+        $id = $DB->insert_record('seledascorm_scoes_track', $track);
         $track->id = $id;
     }
 
-    // Trigger updating grades based on a given set of EXESCORM CMI elements.
-    $exescorm = false;
+    // Trigger updating grades based on a given set of SELEDASCORM CMI elements.
+    $seledascorm = false;
     if (in_array($element, array('cmi.core.score.raw', 'cmi.score.raw')) ||
         (in_array($element, array('cmi.completion_status', 'cmi.core.lesson_status', 'cmi.success_status'))
          && in_array($track->value, array('completed', 'passed')))) {
-        $exescorm = $DB->get_record('exescorm', array('id' => $exescormid));
-        include_once($CFG->dirroot.'/mod/exescorm/lib.php');
-        exescorm_update_grades($exescorm, $userid);
+        $seledascorm = $DB->get_record('seledascorm', array('id' => $seledascormid));
+        include_once($CFG->dirroot.'/mod/seledascorm/lib.php');
+        seledascorm_update_grades($seledascorm, $userid);
     }
 
     // Trigger CMI element events.
     if (in_array($element, array('cmi.core.score.raw', 'cmi.score.raw')) ||
         (in_array($element, array('cmi.completion_status', 'cmi.core.lesson_status', 'cmi.success_status'))
         && in_array($track->value, array('completed', 'failed', 'passed')))) {
-        if (!$exescorm) {
-            $exescorm = $DB->get_record('exescorm', array('id' => $exescormid));
+        if (!$seledascorm) {
+            $seledascorm = $DB->get_record('seledascorm', array('id' => $seledascormid));
         }
-        $cm = get_coursemodule_from_instance('exescorm', $exescormid);
+        $cm = get_coursemodule_from_instance('seledascorm', $seledascormid);
         $data = array(
             'other' => array('attemptid' => $attempt, 'cmielement' => $element, 'cmivalue' => $track->value),
-            'objectid' => $exescorm->id,
+            'objectid' => $seledascorm->id,
             'context' => context_module::instance($cm->id),
             'relateduserid' => $userid
         );
         if (in_array($element, array('cmi.core.score.raw', 'cmi.score.raw'))) {
             // Create score submitted event.
-            $event = \mod_exescorm\event\scoreraw_submitted::create($data);
+            $event = \mod_seledascorm\event\scoreraw_submitted::create($data);
         } else {
             // Create status submitted event.
-            $event = \mod_exescorm\event\status_submitted::create($data);
+            $event = \mod_seledascorm\event\status_submitted::create($data);
         }
-        // Fix the missing track keys when the EXESCORM track record already exists, see $trackdata in datamodel.php.
+        // Fix the missing track keys when the SELEDASCORM track record already exists, see $trackdata in datamodel.php.
         // There, for performances reasons, columns are limited to: element, id, value, timemodified.
-        // Missing fields are: userid, exescormid, scoid, attempt.
+        // Missing fields are: userid, seledascormid, scoid, attempt.
         $track->userid = $userid;
-        $track->exescormid = $exescormid;
+        $track->seledascormid = $seledascormid;
         $track->scoid = $scoid;
         $track->attempt = $attempt;
         // Trigger submitted event.
-        $event->add_record_snapshot('exescorm_scoes_track', $track);
+        $event->add_record_snapshot('seledascorm_scoes_track', $track);
         $event->add_record_snapshot('course_modules', $cm);
-        $event->add_record_snapshot('exescorm', $exescorm);
+        $event->add_record_snapshot('seledascorm', $seledascorm);
         $event->trigger();
     }
 
@@ -615,31 +615,31 @@ function exescorm_insert_track($userid, $exescormid, $scoid, $attempt, $element,
 }
 
 /**
- * simple quick function to return true/false if this user has tracks in this exescorm
+ * simple quick function to return true/false if this user has tracks in this seledascorm
  *
- * @param integer $exescormid The exescorm ID
+ * @param integer $seledascormid The seledascorm ID
  * @param integer $userid the users id
  * @return boolean (false if there are no tracks)
  */
-function exescorm_has_tracks($exescormid, $userid) {
+function seledascorm_has_tracks($seledascormid, $userid) {
     global $DB;
-    return $DB->record_exists('exescorm_scoes_track', array('userid' => $userid, 'exescormid' => $exescormid));
+    return $DB->record_exists('seledascorm_scoes_track', array('userid' => $userid, 'seledascormid' => $seledascormid));
 }
 
-function exescorm_get_tracks($scoid, $userid, $attempt='') {
+function seledascorm_get_tracks($scoid, $userid, $attempt='') {
     // Gets all tracks of specified sco and user.
     global $DB;
 
     if (empty($attempt)) {
-        if ($exescormid = $DB->get_field('exescorm_scoes', 'exescorm', array('id' => $scoid))) {
-            $attempt = exescorm_get_last_attempt($exescormid, $userid);
+        if ($seledascormid = $DB->get_field('seledascorm_scoes', 'seledascorm', array('id' => $scoid))) {
+            $attempt = seledascorm_get_last_attempt($seledascormid, $userid);
         } else {
             $attempt = 1;
         }
     }
-    if ($tracks = $DB->get_records('exescorm_scoes_track', array('userid' => $userid, 'scoid' => $scoid,
+    if ($tracks = $DB->get_records('seledascorm_scoes_track', array('userid' => $userid, 'scoid' => $scoid,
                                                               'attempt' => $attempt), 'element ASC')) {
-        $usertrack = exescorm_format_interactions($tracks);
+        $usertrack = seledascorm_format_interactions($tracks);
         $usertrack->userid = $userid;
         $usertrack->scoid = $scoid;
 
@@ -651,13 +651,13 @@ function exescorm_get_tracks($scoid, $userid, $attempt='') {
 /**
  * helper function to return a formatted list of interactions for reports.
  *
- * @param array $trackdata the records from exescorm_scoes_track table
+ * @param array $trackdata the records from seledascorm_scoes_track table
  * @return object formatted list of interactions
  */
-function exescorm_format_interactions($trackdata) {
+function seledascorm_format_interactions($trackdata) {
     $usertrack = new stdClass();
 
-    // Defined in order to unify exescorm1.2 and exescorm2004.
+    // Defined in order to unify seledascorm1.2 and seledascorm2004.
     $usertrack->score_raw = '';
     $usertrack->status = '';
     $usertrack->total_time = '00:00:00';
@@ -697,7 +697,7 @@ function exescorm_format_interactions($trackdata) {
 }
 /* Find the start and finsh time for a a given SCO attempt
  *
- * @param int $exescormid EXESCORM Id
+ * @param int $seledascormid SELEDASCORM Id
  * @param int $scoid SCO Id
  * @param int $userid User Id
  * @param int $attemt Attempt Id
@@ -705,15 +705,15 @@ function exescorm_format_interactions($trackdata) {
  * @return object start and finsh time EPOC secods
  *
  */
-function exescorm_get_sco_runtime($exescormid, $scoid, $userid, $attempt=1) {
+function seledascorm_get_sco_runtime($seledascormid, $scoid, $userid, $attempt=1) {
     global $DB;
 
     $timedata = new stdClass();
-    $params = array('userid' => $userid, 'exescormid' => $exescormid, 'attempt' => $attempt);
+    $params = array('userid' => $userid, 'seledascormid' => $seledascormid, 'attempt' => $attempt);
     if (!empty($scoid)) {
         $params['scoid'] = $scoid;
     }
-    $tracks = $DB->get_records('exescorm_scoes_track', $params, "timemodified ASC");
+    $tracks = $DB->get_records('seledascorm_scoes_track', $params, "timemodified ASC");
     if ($tracks) {
         $tracks = array_values($tracks);
     }
@@ -731,7 +731,7 @@ function exescorm_get_sco_runtime($exescormid, $scoid, $userid, $attempt=1) {
     return $timedata;
 }
 
-function exescorm_grade_user_attempt($exescorm, $userid, $attempt=1) {
+function seledascorm_grade_user_attempt($seledascorm, $userid, $attempt=1) {
     global $DB;
     $attemptscore = new stdClass();
     $attemptscore->scoes = 0;
@@ -740,17 +740,17 @@ function exescorm_grade_user_attempt($exescorm, $userid, $attempt=1) {
     $attemptscore->sum = 0;
     $attemptscore->lastmodify = 0;
 
-    if (!$scoes = $DB->get_records('exescorm_scoes', array('exescorm' => $exescorm->id), 'sortorder, id')) {
+    if (!$scoes = $DB->get_records('seledascorm_scoes', array('seledascorm' => $seledascorm->id), 'sortorder, id')) {
         return null;
     }
 
     foreach ($scoes as $sco) {
-        if ($userdata = exescorm_get_tracks($sco->id, $userid, $attempt)) {
+        if ($userdata = seledascorm_get_tracks($sco->id, $userid, $attempt)) {
             if (($userdata->status == 'completed') || ($userdata->status == 'passed')) {
                 $attemptscore->scoes++;
             }
             // A raw score of 0 is a real score, so only SCOes that reported no score at all must be
-            // skipped (exescorm_format_interactions() defaults score_raw to an empty string in that case).
+            // skipped (seledascorm_format_interactions() defaults score_raw to an empty string in that case).
             if (isset($userdata->score_raw) && $userdata->score_raw !== '') {
                 $attemptscore->values++;
                 $attemptscore->sum += $userdata->score_raw;
@@ -761,68 +761,68 @@ function exescorm_grade_user_attempt($exescorm, $userid, $attempt=1) {
             }
         }
     }
-    switch ($exescorm->grademethod) {
-        case EXESCORM_GRADEHIGHEST:
+    switch ($seledascorm->grademethod) {
+        case SELEDASCORM_GRADEHIGHEST:
             $score = (float) $attemptscore->max;
         break;
-        case EXESCORM_GRADEAVERAGE:
+        case SELEDASCORM_GRADEAVERAGE:
             if ($attemptscore->values > 0) {
                 $score = $attemptscore->sum / $attemptscore->values;
             } else {
                 $score = 0;
             }
         break;
-        case EXESCORM_GRADESUM:
+        case SELEDASCORM_GRADESUM:
             $score = $attemptscore->sum;
         break;
-        case EXESCORM_GRADESCOES:
+        case SELEDASCORM_GRADESCOES:
             $score = $attemptscore->scoes;
         break;
         default:
-            $score = $attemptscore->max;   // Remote Learner EXESCORM_GRADEHIGHEST is default.
+            $score = $attemptscore->max;   // Remote Learner SELEDASCORM_GRADEHIGHEST is default.
     }
 
     return $score;
 }
 
-function exescorm_grade_user($exescorm, $userid) {
+function seledascorm_grade_user($seledascorm, $userid) {
 
-    // Ensure we dont grade user beyond $exescorm->maxattempt settings.
-    $lastattempt = exescorm_get_last_attempt($exescorm->id, $userid);
-    if ($exescorm->maxattempt != 0 && $lastattempt >= $exescorm->maxattempt) {
-        $lastattempt = $exescorm->maxattempt;
+    // Ensure we dont grade user beyond $seledascorm->maxattempt settings.
+    $lastattempt = seledascorm_get_last_attempt($seledascorm->id, $userid);
+    if ($seledascorm->maxattempt != 0 && $lastattempt >= $seledascorm->maxattempt) {
+        $lastattempt = $seledascorm->maxattempt;
     }
 
-    switch ($exescorm->whatgrade) {
-        case EXESCORM_FIRSTATTEMPT:
-            return exescorm_grade_user_attempt($exescorm, $userid, exescorm_get_first_attempt($exescorm->id, $userid));
+    switch ($seledascorm->whatgrade) {
+        case SELEDASCORM_FIRSTATTEMPT:
+            return seledascorm_grade_user_attempt($seledascorm, $userid, seledascorm_get_first_attempt($seledascorm->id, $userid));
         break;
-        case EXESCORM_LASTATTEMPT:
-            return exescorm_grade_user_attempt($exescorm,
+        case SELEDASCORM_LASTATTEMPT:
+            return seledascorm_grade_user_attempt($seledascorm,
                                                 $userid,
-                                                exescorm_get_last_completed_attempt($exescorm->id, $userid)
+                                                seledascorm_get_last_completed_attempt($seledascorm->id, $userid)
                                             );
         break;
-        case EXESCORM_HIGHESTATTEMPT:
+        case SELEDASCORM_HIGHESTATTEMPT:
             $maxscore = 0;
             for ($attempt = 1; $attempt <= $lastattempt; $attempt++) {
-                $attemptscore = exescorm_grade_user_attempt($exescorm, $userid, $attempt);
+                $attemptscore = seledascorm_grade_user_attempt($seledascorm, $userid, $attempt);
                 $maxscore = $attemptscore > $maxscore ? $attemptscore : $maxscore;
             }
             return $maxscore;
 
         break;
-        case EXESCORM_AVERAGEATTEMPT:
-            $attemptcount = exescorm_get_attempt_count($userid, $exescorm, true, true);
+        case SELEDASCORM_AVERAGEATTEMPT:
+            $attemptcount = seledascorm_get_attempt_count($userid, $seledascorm, true, true);
             if (empty($attemptcount)) {
                 return 0;
             } else {
                 $attemptcount = count($attemptcount);
             }
-            $lastattempt = exescorm_get_last_attempt($exescorm->id, $userid);
+            $lastattempt = seledascorm_get_last_attempt($seledascorm->id, $userid);
             $sumscore = 0;
             for ($attempt = 1; $attempt <= $lastattempt; $attempt++) {
-                $attemptscore = exescorm_grade_user_attempt($exescorm, $userid, $attempt);
+                $attemptscore = seledascorm_grade_user_attempt($seledascorm, $userid, $attempt);
                 $sumscore += $attemptscore;
             }
 
@@ -831,36 +831,36 @@ function exescorm_grade_user($exescorm, $userid) {
     }
 }
 
-function exescorm_count_launchable($exescormid, $organization='') {
+function seledascorm_count_launchable($seledascormid, $organization='') {
     global $DB;
 
     $sqlorganization = '';
-    $params = array($exescormid);
+    $params = array($seledascormid);
     if (!empty($organization)) {
         $sqlorganization = " AND organization=?";
         $params[] = $organization;
     }
-    return $DB->count_records_select('exescorm_scoes', "exescorm = ? $sqlorganization AND ".
-                                        $DB->sql_isnotempty('exescorm_scoes', 'launch', false, true),
+    return $DB->count_records_select('seledascorm_scoes', "seledascorm = ? $sqlorganization AND ".
+                                        $DB->sql_isnotempty('seledascorm_scoes', 'launch', false, true),
                                         $params);
 }
 
 /**
  * Returns the last attempt used - if no attempts yet, returns 1 for first attempt
  *
- * @param int $exescormid the id of the exescorm.
+ * @param int $seledascormid the id of the seledascorm.
  * @param int $userid the id of the user.
  *
  * @return int The attempt number to use.
  */
-function exescorm_get_last_attempt($exescormid, $userid) {
+function seledascorm_get_last_attempt($seledascormid, $userid) {
     global $DB;
 
-    // Find the last attempt number for the given user id and exescorm id.
+    // Find the last attempt number for the given user id and seledascorm id.
     $sql = "SELECT MAX(attempt)
-              FROM {exescorm_scoes_track}
-             WHERE userid = ? AND exescormid = ?";
-    $lastattempt = $DB->get_field_sql($sql, array($userid, $exescormid));
+              FROM {seledascorm_scoes_track}
+             WHERE userid = ? AND seledascormid = ?";
+    $lastattempt = $DB->get_field_sql($sql, array($userid, $seledascormid));
     if (empty($lastattempt)) {
         return '1';
     } else {
@@ -871,20 +871,20 @@ function exescorm_get_last_attempt($exescormid, $userid) {
 /**
  * Returns the first attempt used - if no attempts yet, returns 1 for first attempt.
  *
- * @param int $exescormid the id of the exescorm.
+ * @param int $seledascormid the id of the seledascorm.
  * @param int $userid the id of the user.
  *
  * @return int The first attempt number.
  */
-function exescorm_get_first_attempt($exescormid, $userid) {
+function seledascorm_get_first_attempt($seledascormid, $userid) {
     global $DB;
 
-    // Find the first attempt number for the given user id and exescorm id.
+    // Find the first attempt number for the given user id and seledascorm id.
     $sql = "SELECT MIN(attempt)
-              FROM {exescorm_scoes_track}
-             WHERE userid = ? AND exescormid = ?";
+              FROM {seledascorm_scoes_track}
+             WHERE userid = ? AND seledascormid = ?";
 
-    $lastattempt = $DB->get_field_sql($sql, array($userid, $exescormid));
+    $lastattempt = $DB->get_field_sql($sql, array($userid, $seledascormid));
     if (empty($lastattempt)) {
         return '1';
     } else {
@@ -895,21 +895,21 @@ function exescorm_get_first_attempt($exescormid, $userid) {
 /**
  * Returns the last completed attempt used - if no completed attempts yet, returns 1 for first attempt
  *
- * @param int $exescormid the id of the exescorm.
+ * @param int $seledascormid the id of the seledascorm.
  * @param int $userid the id of the user.
  *
  * @return int The attempt number to use.
  */
-function exescorm_get_last_completed_attempt($exescormid, $userid) {
+function seledascorm_get_last_completed_attempt($seledascormid, $userid) {
     global $DB;
 
-    // Find the last completed attempt number for the given user id and exescorm id.
+    // Find the last completed attempt number for the given user id and seledascorm id.
     $sql = "SELECT MAX(attempt)
-              FROM {exescorm_scoes_track}
-             WHERE userid = ? AND exescormid = ?
+              FROM {seledascorm_scoes_track}
+             WHERE userid = ? AND seledascormid = ?
                AND (".$DB->sql_compare_text('value')." = ".$DB->sql_compare_text('?')." OR ".
                       $DB->sql_compare_text('value')." = ".$DB->sql_compare_text('?').")";
-    $lastattempt = $DB->get_field_sql($sql, array($userid, $exescormid, 'completed', 'passed'));
+    $lastattempt = $DB->get_field_sql($sql, array($userid, $seledascormid, 'completed', 'passed'));
     if (empty($lastattempt)) {
         return '1';
     } else {
@@ -920,16 +920,16 @@ function exescorm_get_last_completed_attempt($exescormid, $userid) {
 /**
  * Returns the full list of attempts a user has made.
  *
- * @param int $exescormid the id of the exescorm.
+ * @param int $seledascormid the id of the seledascorm.
  * @param int $userid the id of the user.
  *
  * @return array array of attemptids
  */
-function exescorm_get_all_attempts($exescormid, $userid) {
+function seledascorm_get_all_attempts($seledascormid, $userid) {
     global $DB;
     $attemptids = array();
-    $sql = "SELECT DISTINCT attempt FROM {exescorm_scoes_track} WHERE userid = ? AND exescormid = ? ORDER BY attempt";
-    $attempts = $DB->get_records_sql($sql, array($userid, $exescormid));
+    $sql = "SELECT DISTINCT attempt FROM {seledascorm_scoes_track} WHERE userid = ? AND seledascormid = ? ORDER BY attempt";
+    $attempts = $DB->get_records_sql($sql, array($userid, $seledascormid));
     foreach ($attempts as $attempt) {
         $attemptids[] = $attempt->attempt;
     }
@@ -940,39 +940,39 @@ function exescorm_get_all_attempts($exescormid, $userid) {
  * Displays the entry form and toc if required.
  *
  * @param  stdClass $user   user object
- * @param  stdClass $exescorm  exescorm object
+ * @param  stdClass $seledascorm  seledascorm object
  * @param  string   $action base URL for the organizations select box
  * @param  stdClass $cm     course module object
  */
-function exescorm_print_launch ($user, $exescorm, $action, $cm) {
+function seledascorm_print_launch ($user, $seledascorm, $action, $cm) {
     global $CFG, $DB, $OUTPUT;
 
-    if ($exescorm->updatefreq == EXESCORM_UPDATE_EVERYTIME) {
-        exescorm_parse($exescorm, false);
+    if ($seledascorm->updatefreq == SELEDASCORM_UPDATE_EVERYTIME) {
+        seledascorm_parse($seledascorm, false);
     }
 
     $organization = optional_param('organization', '', PARAM_INT);
 
-    if ($exescorm->displaycoursestructure == 1) {
+    if ($seledascorm->displaycoursestructure == 1) {
         echo $OUTPUT->box_start('generalbox boxaligncenter toc', 'toc');
-        echo html_writer::div(get_string('contents', 'mod_exescorm'), 'structurehead');
+        echo html_writer::div(get_string('contents', 'mod_seledascorm'), 'structurehead');
     }
     if (empty($organization)) {
-        $organization = $exescorm->launch;
+        $organization = $seledascorm->launch;
     }
-    if ($orgs = $DB->get_records_select_menu('exescorm_scoes', 'exescorm = ? AND '.
-                                         $DB->sql_isempty('exescorm_scoes', 'launch', false, true).' AND '.
-                                         $DB->sql_isempty('exescorm_scoes', 'organization', false, false),
-                                         array($exescorm->id), 'sortorder, id', 'id,title')) {
+    if ($orgs = $DB->get_records_select_menu('seledascorm_scoes', 'seledascorm = ? AND '.
+                                         $DB->sql_isempty('seledascorm_scoes', 'launch', false, true).' AND '.
+                                         $DB->sql_isempty('seledascorm_scoes', 'organization', false, false),
+                                         array($seledascorm->id), 'sortorder, id', 'id,title')) {
         if (count($orgs) > 1) {
             $select = new single_select(new moodle_url($action), 'organization', $orgs, $organization, null);
-            $select->label = get_string('organizations', 'mod_exescorm');
-            $select->class = 'exescorm-center';
+            $select->label = get_string('organizations', 'mod_seledascorm');
+            $select->class = 'seledascorm-center';
             echo $OUTPUT->render($select);
         }
     }
     $orgidentifier = '';
-    if ($sco = exescorm_get_sco($organization, EXESCORM_SCO_ONLY)) {
+    if ($sco = seledascorm_get_sco($organization, SELEDASCORM_SCO_ONLY)) {
         if (($sco->organization == '') && ($sco->launch == '')) {
             $orgidentifier = $sco->identifier;
         } else {
@@ -980,65 +980,65 @@ function exescorm_print_launch ($user, $exescorm, $action, $cm) {
         }
     }
 
-    $exescorm->version = strtolower(clean_param($exescorm->version, PARAM_SAFEDIR));   // Just to be safe.
-    if (!file_exists($CFG->dirroot.'/mod/exescorm/datamodels/'.$exescorm->version.'lib.php')) {
-        $exescorm->version = 'SCORM_12';
+    $seledascorm->version = strtolower(clean_param($seledascorm->version, PARAM_SAFEDIR));   // Just to be safe.
+    if (!file_exists($CFG->dirroot.'/mod/seledascorm/datamodels/'.$seledascorm->version.'lib.php')) {
+        $seledascorm->version = 'SCORM_12';
     }
-    require_once($CFG->dirroot.'/mod/exescorm/datamodels/'.$exescorm->version.'lib.php');
+    require_once($CFG->dirroot.'/mod/seledascorm/datamodels/'.$seledascorm->version.'lib.php');
 
-    $result = exescorm_get_toc($user, $exescorm, $cm->id, EXESCORM_TOCFULLURL, $orgidentifier);
+    $result = seledascorm_get_toc($user, $seledascorm, $cm->id, SELEDASCORM_TOCFULLURL, $orgidentifier);
     $incomplete = $result->incomplete;
     // Get latest incomplete sco to launch first if force new attempt isn't set to always.
-    if (!empty($result->sco->id) && $exescorm->forcenewattempt != EXESCORM_FORCEATTEMPT_ALWAYS) {
+    if (!empty($result->sco->id) && $seledascorm->forcenewattempt != SELEDASCORM_FORCEATTEMPT_ALWAYS) {
         $launchsco = $result->sco->id;
     } else {
-        // Use launch defined by EXESCORM package.
-        $launchsco = $exescorm->launch;
+        // Use launch defined by SELEDASCORM package.
+        $launchsco = $seledascorm->launch;
     }
 
     // Do we want the TOC to be displayed?
-    if ($exescorm->displaycoursestructure == 1) {
+    if ($seledascorm->displaycoursestructure == 1) {
         echo $result->toc;
         echo $OUTPUT->box_end();
     }
 
     // Is this the first attempt ?
-    $attemptcount = exescorm_get_attempt_count($user->id, $exescorm);
+    $attemptcount = seledascorm_get_attempt_count($user->id, $seledascorm);
 
-    // Do not give the player launch FORM if the EXESCORM object is locked after the final attempt.
-    if ($exescorm->lastattemptlock == 0 || $result->attemptleft > 0) {
-            echo html_writer::start_div('exescorm-center');
-            echo html_writer::start_tag('form', array('id' => 'exescormviewform',
+    // Do not give the player launch FORM if the SELEDASCORM object is locked after the final attempt.
+    if ($seledascorm->lastattemptlock == 0 || $result->attemptleft > 0) {
+            echo html_writer::start_div('seledascorm-center');
+            echo html_writer::start_tag('form', array('id' => 'seledascormviewform',
                                                         'method' => 'post',
-                                                        'action' => $CFG->wwwroot.'/mod/exescorm/player.php'));
-        if ($exescorm->hidebrowse == 0) {
-            echo html_writer::tag('button', get_string('browse', 'mod_exescorm'),
+                                                        'action' => $CFG->wwwroot.'/mod/seledascorm/player.php'));
+        if ($seledascorm->hidebrowse == 0) {
+            echo html_writer::tag('button', get_string('browse', 'mod_seledascorm'),
                     ['class' => 'btn btn-secondary mr-1', 'name' => 'mode',
                         'type' => 'submit', 'id' => 'b', 'value' => 'browse'])
                 . html_writer::end_tag('button');
         } else {
             echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'mode', 'value' => 'normal'));
         }
-        echo html_writer::tag('button', get_string('enter', 'mod_exescorm'),
+        echo html_writer::tag('button', get_string('enter', 'mod_seledascorm'),
                 ['class' => 'btn btn-primary mx-1', 'name' => 'mode',
                     'type' => 'submit', 'id' => 'n', 'value' => 'normal'])
              . html_writer::end_tag('button');
-        if (!empty($exescorm->forcenewattempt)) {
-            if ($exescorm->forcenewattempt == EXESCORM_FORCEATTEMPT_ALWAYS ||
-                    ($exescorm->forcenewattempt == EXESCORM_FORCEATTEMPT_ONCOMPLETE && $incomplete === false)) {
+        if (!empty($seledascorm->forcenewattempt)) {
+            if ($seledascorm->forcenewattempt == SELEDASCORM_FORCEATTEMPT_ALWAYS ||
+                    ($seledascorm->forcenewattempt == SELEDASCORM_FORCEATTEMPT_ONCOMPLETE && $incomplete === false)) {
                 echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'newattempt', 'value' => 'on'));
             }
         } else if (
             !empty($attemptcount) &&
             ($incomplete === false) &&
-            (($result->attemptleft > 0)||($exescorm->maxattempt == 0))
+            (($result->attemptleft > 0)||($seledascorm->maxattempt == 0))
         ) {
             echo html_writer::start_div('pt-1');
             echo html_writer::checkbox('newattempt', 'on', false, '', array('id' => 'a'));
-            echo html_writer::label(get_string('newattempt', 'mod_exescorm'), 'a', true, ['class' => 'pl-1']);
+            echo html_writer::label(get_string('newattempt', 'mod_seledascorm'), 'a', true, ['class' => 'pl-1']);
             echo html_writer::end_div();
         }
-        if (!empty($exescorm->popup)) {
+        if (!empty($seledascorm->popup)) {
             echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'display', 'value' => 'popup'));
         }
 
@@ -1051,46 +1051,46 @@ function exescorm_print_launch ($user, $exescorm, $action, $cm) {
     }
 }
 
-function exescorm_simple_play($exescorm, $user, $context, $cmid) {
+function seledascorm_simple_play($seledascorm, $user, $context, $cmid) {
     global $DB;
 
     $result = false;
 
-    if (has_capability('mod/exescorm:viewreport', $context)) {
+    if (has_capability('mod/seledascorm:viewreport', $context)) {
         // If this user can view reports, don't skipview so they can see links to reports.
         return $result;
     }
 
-    if ($exescorm->updatefreq == EXESCORM_UPDATE_EVERYTIME) {
-        exescorm_parse($exescorm, false);
+    if ($seledascorm->updatefreq == SELEDASCORM_UPDATE_EVERYTIME) {
+        seledascorm_parse($seledascorm, false);
     }
-    $scoes = $DB->get_records_select('exescorm_scoes', 'exescorm = ? AND '.
-        $DB->sql_isnotempty('exescorm_scoes', 'launch', false, true), array($exescorm->id), 'sortorder, id', 'id');
+    $scoes = $DB->get_records_select('seledascorm_scoes', 'seledascorm = ? AND '.
+        $DB->sql_isnotempty('seledascorm_scoes', 'launch', false, true), array($seledascorm->id), 'sortorder, id', 'id');
 
     if ($scoes) {
         $orgidentifier = '';
-        if ($sco = exescorm_get_sco($exescorm->launch, EXESCORM_SCO_ONLY)) {
+        if ($sco = seledascorm_get_sco($seledascorm->launch, SELEDASCORM_SCO_ONLY)) {
             if (($sco->organization == '') && ($sco->launch == '')) {
                 $orgidentifier = $sco->identifier;
             } else {
                 $orgidentifier = $sco->organization;
             }
         }
-        if ($exescorm->skipview >= EXESCORM_SKIPVIEW_FIRST) {
+        if ($seledascorm->skipview >= SELEDASCORM_SKIPVIEW_FIRST) {
             $sco = current($scoes);
-            $result = exescorm_get_toc($user, $exescorm, $cmid, EXESCORM_TOCFULLURL, $orgidentifier);
-            $url = new moodle_url('/mod/exescorm/player.php', array('a' => $exescorm->id, 'currentorg' => $orgidentifier));
+            $result = seledascorm_get_toc($user, $seledascorm, $cmid, SELEDASCORM_TOCFULLURL, $orgidentifier);
+            $url = new moodle_url('/mod/seledascorm/player.php', array('a' => $seledascorm->id, 'currentorg' => $orgidentifier));
 
             // Set last incomplete sco to launch first if forcenewattempt not set to always.
-            if (!empty($result->sco->id) && $exescorm->forcenewattempt != EXESCORM_FORCEATTEMPT_ALWAYS) {
+            if (!empty($result->sco->id) && $seledascorm->forcenewattempt != SELEDASCORM_FORCEATTEMPT_ALWAYS) {
                 $url->param('scoid', $result->sco->id);
             } else {
                 $url->param('scoid', $sco->id);
             }
 
-            if ($exescorm->skipview == EXESCORM_SKIPVIEW_ALWAYS || !exescorm_has_tracks($exescorm->id, $user->id)) {
-                if ($exescorm->forcenewattempt == EXESCORM_FORCEATTEMPT_ALWAYS ||
-                   ($result->incomplete === false && $exescorm->forcenewattempt == EXESCORM_FORCEATTEMPT_ONCOMPLETE)) {
+            if ($seledascorm->skipview == SELEDASCORM_SKIPVIEW_ALWAYS || !seledascorm_has_tracks($seledascorm->id, $user->id)) {
+                if ($seledascorm->forcenewattempt == SELEDASCORM_FORCEATTEMPT_ALWAYS ||
+                   ($result->incomplete === false && $seledascorm->forcenewattempt == SELEDASCORM_FORCEATTEMPT_ONCOMPLETE)) {
 
                     $url->param('newattempt', 'on');
                 }
@@ -1101,23 +1101,23 @@ function exescorm_simple_play($exescorm, $user, $context, $cmid) {
     return $result;
 }
 
-function exescorm_get_count_users($exescormid, $groupingid=null) {
+function seledascorm_get_count_users($seledascormid, $groupingid=null) {
     global $CFG, $DB;
 
     if (!empty($groupingid)) {
         $sql = "SELECT COUNT(DISTINCT st.userid)
-                FROM {exescorm_scoes_track} st
+                FROM {seledascorm_scoes_track} st
                     INNER JOIN {groups_members} gm ON st.userid = gm.userid
                     INNER JOIN {groupings_groups} gg ON gm.groupid = gg.groupid
-                WHERE st.exescormid = ? AND gg.groupingid = ?
+                WHERE st.seledascormid = ? AND gg.groupingid = ?
                 ";
-        $params = array($exescormid, $groupingid);
+        $params = array($seledascormid, $groupingid);
     } else {
         $sql = "SELECT COUNT(DISTINCT st.userid)
-                FROM {exescorm_scoes_track} st
-                WHERE st.exescormid = ?
+                FROM {seledascorm_scoes_track} st
+                WHERE st.seledascormid = ?
                 ";
-        $params = array($exescormid);
+        $params = array($seledascormid);
     }
 
     return ($DB->count_records_sql($sql, $params));
@@ -1126,23 +1126,23 @@ function exescorm_get_count_users($exescormid, $groupingid=null) {
 /**
  * Build up the JavaScript representation of an array element
  *
- * @param string $sversion EXESCORM API version
+ * @param string $sversion SELEDASCORM API version
  * @param array $userdata User track data
  * @param string $elementname Name of array element to get values for
  * @param array $children list of sub elements of this array element that also need instantiating
  * @return Javascript array elements
  */
-function exescorm_reconstitute_array_element($sversion, $userdata, $elementname, $children) {
+function seledascorm_reconstitute_array_element($sversion, $userdata, $elementname, $children) {
     // Reconstitute comments_from_learner and comments_from_lms.
     $current = '';
     $currentsubelement = '';
     $currentsub = '';
     $count = 0;
     $countsub = 0;
-    $exescormseperator = '_';
+    $seledascormseperator = '_';
     $return = '';
-    if (exescorm_version_check($sversion, EXESCORM_SCORM_13)) { // Scorm 1.3 elements use a . instead of an _ .
-        $exescormseperator = '.';
+    if (seledascorm_version_check($sversion, SELEDASCORM_SCORM_13)) { // Scorm 1.3 elements use a . instead of an _ .
+        $seledascormseperator = '.';
     }
     // Filter out the ones we want.
     $elementlist = array();
@@ -1153,11 +1153,11 @@ function exescorm_reconstitute_array_element($sversion, $userdata, $elementname,
     }
 
     // Sort elements in .n array order.
-    uksort($elementlist, "exescorm_element_cmp");
+    uksort($elementlist, "seledascorm_element_cmp");
 
     // Generate JavaScript.
     foreach ($elementlist as $element => $value) {
-        if (exescorm_version_check($sversion, EXESCORM_SCORM_13)) {
+        if (seledascorm_version_check($sversion, SELEDASCORM_SCORM_13)) {
             $element = preg_replace('/\.(\d+)\./', ".N\$1.", $element);
             preg_match('/\.(N\d+)\./', $element, $matches);
         } else {
@@ -1166,7 +1166,7 @@ function exescorm_reconstitute_array_element($sversion, $userdata, $elementname,
         }
         if (count($matches) > 0 && $current != $matches[1]) {
             if ($countsub > 0) {
-                $return .= '    '.$elementname.$exescormseperator.$current.'.'.$currentsubelement.'._count = '.$countsub.";\n";
+                $return .= '    '.$elementname.$seledascormseperator.$current.'.'.$currentsubelement.'._count = '.$countsub.";\n";
             }
             $current = $matches[1];
             $count++;
@@ -1184,7 +1184,7 @@ function exescorm_reconstitute_array_element($sversion, $userdata, $elementname,
         }
 
         // Now - flesh out the second level elements if there are any.
-        if (exescorm_version_check($sversion, EXESCORM_SCORM_13)) {
+        if (seledascorm_version_check($sversion, SELEDASCORM_SCORM_13)) {
             $element = preg_replace('/(.*?\.N\d+\..*?)\.(\d+)\./', "\$1.N\$2.", $element);
             preg_match('/.*?\.N\d+\.(.*?)\.(N\d+)\./', $element, $matches);
         } else {
@@ -1195,7 +1195,7 @@ function exescorm_reconstitute_array_element($sversion, $userdata, $elementname,
         // Check the sub element type.
         if (count($matches) > 0 && $currentsubelement != $matches[1]) {
             if ($countsub > 0) {
-                $return .= '    '.$elementname.$exescormseperator.$current.'.'.$currentsubelement.'._count = '.$countsub.";\n";
+                $return .= '    '.$elementname.$seledascormseperator.$current.'.'.$currentsubelement.'._count = '.$countsub.";\n";
             }
             $currentsubelement = $matches[1];
             $currentsub = '';
@@ -1217,7 +1217,7 @@ function exescorm_reconstitute_array_element($sversion, $userdata, $elementname,
         $return .= '    '.$element.' = '.json_encode($value).";\n";
     }
     if ($countsub > 0) {
-        $return .= '    '.$elementname.$exescormseperator.$current.'.'.$currentsubelement.'._count = '.$countsub.";\n";
+        $return .= '    '.$elementname.$seledascormseperator.$current.'.'.$currentsubelement.'._count = '.$countsub.";\n";
     }
     if ($count > 0) {
         $return .= '    '.$elementname.'._count = '.$count.";\n";
@@ -1232,7 +1232,7 @@ function exescorm_reconstitute_array_element($sversion, $userdata, $elementname,
  * @param string $b right array element
  * @return comparator - 0,1,-1
  */
-function exescorm_element_cmp($a, $b) {
+function seledascorm_element_cmp($a, $b) {
     preg_match('/.*?(\d+)\./', $a, $matches);
     $left = intval($matches[1]);
     preg_match('/.?(\d+)\./', $b, $matches);
@@ -1271,56 +1271,56 @@ function exescorm_element_cmp($a, $b) {
  * Generate the user attempt status string
  *
  * @param object $user Current context user
- * @param object $exescorm a moodle scrom object - mdl_exescorm
+ * @param object $seledascorm a moodle scrom object - mdl_seledascorm
  * @param stdClass|null $cm Course module object (optional).
  * @return string - Attempt status string
  */
-function exescorm_get_attempt_status($user, $exescorm, $cm = null) {
+function seledascorm_get_attempt_status($user, $seledascorm, $cm = null) {
     global $DB, $PAGE, $OUTPUT;
 
-    $attempts = exescorm_get_attempt_count($user->id, $exescorm, true);
+    $attempts = seledascorm_get_attempt_count($user->id, $seledascorm, true);
     if (empty($attempts)) {
         $attemptcount = 0;
     } else {
         $attemptcount = count($attempts);
     }
 
-    $result = html_writer::start_tag('p').get_string('noattemptsallowed', 'mod_exescorm').': ';
-    if ($exescorm->maxattempt > 0) {
-        $result .= $exescorm->maxattempt . html_writer::empty_tag('br');
+    $result = html_writer::start_tag('p').get_string('noattemptsallowed', 'mod_seledascorm').': ';
+    if ($seledascorm->maxattempt > 0) {
+        $result .= $seledascorm->maxattempt . html_writer::empty_tag('br');
     } else {
         $result .= get_string('unlimited').html_writer::empty_tag('br');
     }
-    $result .= get_string('noattemptsmade', 'mod_exescorm').': ' . $attemptcount . html_writer::empty_tag('br');
+    $result .= get_string('noattemptsmade', 'mod_seledascorm').': ' . $attemptcount . html_writer::empty_tag('br');
 
-    if ($exescorm->maxattempt == 1) {
-        switch ($exescorm->grademethod) {
-            case EXESCORM_GRADEHIGHEST:
-                $grademethod = get_string('gradehighest', 'mod_exescorm');
+    if ($seledascorm->maxattempt == 1) {
+        switch ($seledascorm->grademethod) {
+            case SELEDASCORM_GRADEHIGHEST:
+                $grademethod = get_string('gradehighest', 'mod_seledascorm');
             break;
-            case EXESCORM_GRADEAVERAGE:
-                $grademethod = get_string('gradeaverage', 'mod_exescorm');
+            case SELEDASCORM_GRADEAVERAGE:
+                $grademethod = get_string('gradeaverage', 'mod_seledascorm');
             break;
-            case EXESCORM_GRADESUM:
-                $grademethod = get_string('gradesum', 'mod_exescorm');
+            case SELEDASCORM_GRADESUM:
+                $grademethod = get_string('gradesum', 'mod_seledascorm');
             break;
-            case EXESCORM_GRADESCOES:
-                $grademethod = get_string('gradescoes', 'mod_exescorm');
+            case SELEDASCORM_GRADESCOES:
+                $grademethod = get_string('gradescoes', 'mod_seledascorm');
             break;
         }
     } else {
-        switch ($exescorm->whatgrade) {
-            case EXESCORM_HIGHESTATTEMPT:
-                $grademethod = get_string('EXESCORM_HIGHESTATTEMPT', 'mod_exescorm');
+        switch ($seledascorm->whatgrade) {
+            case SELEDASCORM_HIGHESTATTEMPT:
+                $grademethod = get_string('SELEDASCORM_HIGHESTATTEMPT', 'mod_seledascorm');
             break;
-            case EXESCORM_AVERAGEATTEMPT:
-                $grademethod = get_string('EXESCORM_AVERAGEATTEMPT', 'mod_exescorm');
+            case SELEDASCORM_AVERAGEATTEMPT:
+                $grademethod = get_string('SELEDASCORM_AVERAGEATTEMPT', 'mod_seledascorm');
             break;
-            case EXESCORM_FIRSTATTEMPT:
-                $grademethod = get_string('firstattempt', 'mod_exescorm');
+            case SELEDASCORM_FIRSTATTEMPT:
+                $grademethod = get_string('firstattempt', 'mod_seledascorm');
             break;
-            case EXESCORM_LASTATTEMPT:
-                $grademethod = get_string('lastattempt', 'mod_exescorm');
+            case SELEDASCORM_LASTATTEMPT:
+                $grademethod = get_string('lastattempt', 'mod_seledascorm');
             break;
         }
     }
@@ -1328,39 +1328,39 @@ function exescorm_get_attempt_status($user, $exescorm, $cm = null) {
     if (!empty($attempts)) {
         $i = 1;
         foreach ($attempts as $attempt) {
-            $gradereported = exescorm_grade_user_attempt($exescorm, $user->id, $attempt->attemptnumber);
-            if ($exescorm->grademethod !== EXESCORM_GRADESCOES && !empty($exescorm->maxgrade)) {
-                $gradereported = $gradereported / $exescorm->maxgrade;
+            $gradereported = seledascorm_grade_user_attempt($seledascorm, $user->id, $attempt->attemptnumber);
+            if ($seledascorm->grademethod !== SELEDASCORM_GRADESCOES && !empty($seledascorm->maxgrade)) {
+                $gradereported = $gradereported / $seledascorm->maxgrade;
                 $gradereported = number_format($gradereported * 100, 0) .'%';
             }
-            $result .= get_string('gradeforattempt', 'mod_exescorm').' ' . $i . ': ' . $gradereported .html_writer::empty_tag('br');
+            $result .= get_string('gradeforattempt', 'mod_seledascorm').' ' . $i . ': ' . $gradereported .html_writer::empty_tag('br');
             $i++;
         }
     }
-    $calculatedgrade = exescorm_grade_user($exescorm, $user->id);
-    if ($exescorm->grademethod !== EXESCORM_GRADESCOES && !empty($exescorm->maxgrade)) {
-        $calculatedgrade = $calculatedgrade / $exescorm->maxgrade;
+    $calculatedgrade = seledascorm_grade_user($seledascorm, $user->id);
+    if ($seledascorm->grademethod !== SELEDASCORM_GRADESCOES && !empty($seledascorm->maxgrade)) {
+        $calculatedgrade = $calculatedgrade / $seledascorm->maxgrade;
         $calculatedgrade = number_format($calculatedgrade * 100, 0) .'%';
     }
-    $result .= get_string('grademethod', 'mod_exescorm'). ': ' . $grademethod;
+    $result .= get_string('grademethod', 'mod_seledascorm'). ': ' . $grademethod;
     if (empty($attempts)) {
-        $result .= html_writer::empty_tag('br').get_string('gradereported', 'mod_exescorm').
+        $result .= html_writer::empty_tag('br').get_string('gradereported', 'mod_seledascorm').
                     ': '.get_string('none').html_writer::empty_tag('br');
     } else {
-        $result .= html_writer::empty_tag('br').get_string('gradereported', 'mod_exescorm').
+        $result .= html_writer::empty_tag('br').get_string('gradereported', 'mod_seledascorm').
                     ': '.$calculatedgrade.html_writer::empty_tag('br');
     }
     $result .= html_writer::end_tag('p');
-    if ($attemptcount >= $exescorm->maxattempt && $exescorm->maxattempt > 0) {
-        $result .= html_writer::tag('p', get_string('exceededmaxattempts', 'mod_exescorm'), ['class' => 'exceededmaxattempts']);
+    if ($attemptcount >= $seledascorm->maxattempt && $seledascorm->maxattempt > 0) {
+        $result .= html_writer::tag('p', get_string('exceededmaxattempts', 'mod_seledascorm'), ['class' => 'exceededmaxattempts']);
     }
     if (!empty($cm)) {
         $context = context_module::instance($cm->id);
-        if (has_capability('mod/exescorm:deleteownresponses', $context) &&
-            $DB->record_exists('exescorm_scoes_track', array('userid' => $user->id, 'exescormid' => $exescorm->id))) {
+        if (has_capability('mod/seledascorm:deleteownresponses', $context) &&
+            $DB->record_exists('seledascorm_scoes_track', array('userid' => $user->id, 'seledascormid' => $seledascorm->id))) {
             // Check to see if any data is stored for this user.
             $deleteurl = new moodle_url($PAGE->url, array('action' => 'delete', 'sesskey' => sesskey()));
-            $result .= $OUTPUT->single_button($deleteurl, get_string('deleteallattempts', 'mod_exescorm'));
+            $result .= $OUTPUT->single_button($deleteurl, get_string('deleteallattempts', 'mod_seledascorm'));
         }
     }
 
@@ -1368,39 +1368,39 @@ function exescorm_get_attempt_status($user, $exescorm, $cm = null) {
 }
 
 /**
- * Get EXESCORM attempt count
+ * Get SELEDASCORM attempt count
  *
  * @param object $user Current context user
- * @param object $exescorm a moodle scrom object - mdl_exescorm
+ * @param object $seledascorm a moodle scrom object - mdl_seledascorm
  * @param bool $returnobjects if true returns a object with attempts, if false returns count of attempts.
  * @param bool $ignoremissingcompletion - ignores attempts that haven't reported a grade/completion.
  * @return array|int - no. of attempts so far
  */
-function exescorm_get_attempt_count($userid, $exescorm, $returnobjects = false, $ignoremissingcompletion = false) {
+function seledascorm_get_attempt_count($userid, $seledascorm, $returnobjects = false, $ignoremissingcompletion = false) {
     global $DB;
 
     // Historically attempts that don't report these elements haven't been included in the average attempts grading method
     // we may want to change this in future, but to avoid unexpected grade decreases we're leaving this in. MDL-43222 .
-    if (exescorm_version_check($exescorm->version, EXESCORM_SCORM_13)) {
+    if (seledascorm_version_check($seledascorm->version, SELEDASCORM_SCORM_13)) {
         $element = 'cmi.score.raw';
-    } else if ($exescorm->grademethod == EXESCORM_GRADESCOES) {
+    } else if ($seledascorm->grademethod == SELEDASCORM_GRADESCOES) {
         $element = 'cmi.core.lesson_status';
     } else {
         $element = 'cmi.core.score.raw';
     }
 
     if ($returnobjects) {
-        $params = array('userid' => $userid, 'exescormid' => $exescorm->id);
+        $params = array('userid' => $userid, 'seledascormid' => $seledascorm->id);
         if ($ignoremissingcompletion) { // Exclude attempts that don't have the completion element requested.
             $params['element'] = $element;
         }
-        $attempts = $DB->get_records('exescorm_scoes_track', $params, 'attempt', 'DISTINCT attempt AS attemptnumber');
+        $attempts = $DB->get_records('seledascorm_scoes_track', $params, 'attempt', 'DISTINCT attempt AS attemptnumber');
         return $attempts;
     } else {
-        $params = array($userid, $exescorm->id);
+        $params = array($userid, $seledascorm->id);
         $sql = "SELECT COUNT(DISTINCT attempt)
-                  FROM {exescorm_scoes_track}
-                 WHERE userid = ? AND exescormid = ?";
+                  FROM {seledascorm_scoes_track}
+                 WHERE userid = ? AND seledascormid = ?";
         if ($ignoremissingcompletion) { // Exclude attempts that don't have the completion element requested.
             $sql .= ' AND element = ?';
             $params[] = $element;
@@ -1414,18 +1414,18 @@ function exescorm_get_attempt_count($userid, $exescorm, $returnobjects = false, 
 /**
  * Figure out with this is a debug situation
  *
- * @param object $exescorm a moodle scrom object - mdl_exescorm
+ * @param object $seledascorm a moodle scrom object - mdl_seledascorm
  * @return boolean - debugging true/false
  */
-function exescorm_debugging($exescorm) {
+function seledascorm_debugging($seledascorm) {
     global $USER;
-    $cfgexescorm = get_config('exescorm');
+    $cfgseledascorm = get_config('seledascorm');
 
-    if (!$cfgexescorm->allowapidebug) {
+    if (!$cfgseledascorm->allowapidebug) {
         return false;
     }
-    $identifier = $USER->username.':'.$exescorm->name;
-    $test = $cfgexescorm->apidebugmask;
+    $identifier = $USER->username.':'.$seledascorm->name;
+    $test = $cfgseledascorm->apidebugmask;
     // Check the regex is only a short list of safe characters.
     if (!preg_match('/^[\w\s\*\.\?\+\:\_\\\]+$/', $test)) {
         return false;
@@ -1441,11 +1441,11 @@ function exescorm_debugging($exescorm) {
  * Delete Scorm tracks for selected users
  *
  * @param array $attemptids list of attempts that need to be deleted
- * @param stdClass $exescorm instance
+ * @param stdClass $seledascorm instance
  *
  * @return bool true deleted all responses, false failed deleting an attempt - stopped here
  */
-function exescorm_delete_responses($attemptids, $exescorm) {
+function seledascorm_delete_responses($attemptids, $seledascorm) {
     if (!is_array($attemptids) || empty($attemptids)) {
         return false;
     }
@@ -1461,7 +1461,7 @@ function exescorm_delete_responses($attemptids, $exescorm) {
         if (count($keys) == 2) {
             $userid = clean_param($keys[0], PARAM_INT);
             $attemptid = clean_param($keys[1], PARAM_INT);
-            if (!$userid || !$attemptid || !exescorm_delete_attempt($userid, $exescorm, $attemptid)) {
+            if (!$userid || !$attemptid || !seledascorm_delete_attempt($userid, $seledascorm, $attemptid)) {
                     return false;
             }
         } else {
@@ -1475,40 +1475,40 @@ function exescorm_delete_responses($attemptids, $exescorm) {
  * Delete Scorm tracks for selected users
  *
  * @param int $userid ID of User
- * @param stdClass $exescorm Scorm object
+ * @param stdClass $seledascorm Scorm object
  * @param int $attemptid user attempt that need to be deleted
  *
  * @return bool true suceeded
  */
-function exescorm_delete_attempt($userid, $exescorm, $attemptid) {
+function seledascorm_delete_attempt($userid, $seledascorm, $attemptid) {
     global $DB;
 
-    $DB->delete_records('exescorm_scoes_track',
-                        ['userid' => $userid, 'exescormid' => $exescorm->id, 'attempt' => $attemptid]);
-    $cm = get_coursemodule_from_instance('exescorm', $exescorm->id);
+    $DB->delete_records('seledascorm_scoes_track',
+                        ['userid' => $userid, 'seledascormid' => $seledascorm->id, 'attempt' => $attemptid]);
+    $cm = get_coursemodule_from_instance('seledascorm', $seledascorm->id);
 
     // Trigger instances list viewed event.
-    $event = \mod_exescorm\event\attempt_deleted::create(array(
+    $event = \mod_seledascorm\event\attempt_deleted::create(array(
          'other' => array('attemptid' => $attemptid),
          'context' => context_module::instance($cm->id),
          'relateduserid' => $userid
     ));
     $event->add_record_snapshot('course_modules', $cm);
-    $event->add_record_snapshot('exescorm', $exescorm);
+    $event->add_record_snapshot('seledascorm', $seledascorm);
     $event->trigger();
 
     include_once('lib.php');
-    exescorm_update_grades($exescorm, $userid, true);
+    seledascorm_update_grades($seledascorm, $userid, true);
     return true;
 }
 
 /**
- * Converts EXESCORM duration notation to human-readable format
+ * Converts SELEDASCORM duration notation to human-readable format
  * The function works with both SCORM 1.2 and SCORM 2004 time formats
- * @param $duration string EXESCORM duration
+ * @param $duration string SELEDASCORM duration
  * @return string human-readable date/time
  */
-function exescorm_format_duration($duration) {
+function seledascorm_format_duration($duration) {
     // Fetch date/time strings.
     $stryears = get_string('years');
     $strmonths = get_string('nummonths');
@@ -1545,7 +1545,7 @@ function exescorm_format_duration($duration) {
     return $result;
 }
 
-function exescorm_get_toc_object($user, $exescorm, $currentorg='', $scoid='', $mode='normal', $attempt='',
+function seledascorm_get_toc_object($user, $seledascorm, $currentorg='', $scoid='', $mode='normal', $attempt='',
                                 $play=false, $organizationsco=null) {
     global $CFG, $DB, $PAGE, $OUTPUT;
 
@@ -1566,11 +1566,11 @@ function exescorm_get_toc_object($user, $exescorm, $currentorg='', $scoid='', $m
         $result[0]->url = '';
     }
 
-    if ($scoes = exescorm_get_scoes($exescorm->id, $currentorg)) {
+    if ($scoes = seledascorm_get_scoes($seledascorm->id, $currentorg)) {
         // Retrieve user tracking data for each learning object.
         foreach ($scoes as $sco) {
             if (!empty($sco->launch)) {
-                if ($usertrack = exescorm_get_tracks($sco->id, $user->id, $attempt)) {
+                if ($usertrack = seledascorm_get_tracks($sco->id, $user->id, $attempt)) {
                     if ($usertrack->status == '') {
                         $usertrack->status = 'notattempted';
                     }
@@ -1587,10 +1587,10 @@ function exescorm_get_toc_object($user, $exescorm, $currentorg='', $scoid='', $m
                 $sco->title = $sco->identifier;
             }
 
-            if (exescorm_version_check($exescorm->version, EXESCORM_SCORM_13)) {
+            if (seledascorm_version_check($seledascorm->version, SELEDASCORM_SCORM_13)) {
                 $sco->prereq = true;
             } else {
-                $sco->prereq = empty($sco->prerequisites) || exescorm_eval_prerequisites($sco->prerequisites, $usertracks);
+                $sco->prereq = empty($sco->prerequisites) || seledascorm_eval_prerequisites($sco->prerequisites, $usertracks);
             }
 
             if ($sco->isvisible === 'true') {
@@ -1604,18 +1604,18 @@ function exescorm_get_toc_object($user, $exescorm, $currentorg='', $scoid='', $m
                         $usertrack = $usertracks[$sco->identifier];
 
                         // Check we have a valid status string identifier.
-                        if ($statusstringexists = get_string_manager()->string_exists($usertrack->status, 'mod_exescorm')) {
-                            $strstatus = get_string($usertrack->status, 'mod_exescorm');
+                        if ($statusstringexists = get_string_manager()->string_exists($usertrack->status, 'mod_seledascorm')) {
+                            $strstatus = get_string($usertrack->status, 'mod_seledascorm');
                         } else {
-                            $strstatus = get_string('invalidstatus', 'mod_exescorm');
+                            $strstatus = get_string('invalidstatus', 'mod_seledascorm');
                         }
 
-                        if ($sco->exescormtype == 'sco') {
+                        if ($sco->seledascormtype == 'sco') {
                             // Assume if we didn't get a valid status string, we don't have an icon either.
                             $statusicon = $OUTPUT->pix_icon($statusstringexists ? $usertrack->status : 'incomplete',
-                                $strstatus, 'exescorm');
+                                $strstatus, 'seledascorm');
                         } else {
-                            $statusicon = $OUTPUT->pix_icon('asset', get_string('assetlaunched', 'mod_exescorm'), 'mod_exescorm');
+                            $statusicon = $OUTPUT->pix_icon('asset', get_string('assetlaunched', 'mod_seledascorm'), 'mod_seledascorm');
                         }
 
                         if (($usertrack->status == 'notattempted') ||
@@ -1627,16 +1627,16 @@ function exescorm_get_toc_object($user, $exescorm, $currentorg='', $scoid='', $m
                             }
                         }
 
-                        $strsuspended = get_string('suspended', 'mod_exescorm');
+                        $strsuspended = get_string('suspended', 'mod_seledascorm');
 
                         $exitvar = 'cmi.core.exit';
 
-                        if (exescorm_version_check($exescorm->version, EXESCORM_SCORM_13)) {
+                        if (seledascorm_version_check($seledascorm->version, SELEDASCORM_SCORM_13)) {
                             $exitvar = 'cmi.exit';
                         }
 
                         if ($incomplete && isset($usertrack->{$exitvar}) && ($usertrack->{$exitvar} == 'suspend')) {
-                            $statusicon = $OUTPUT->pix_icon('suspend', $strstatus.' - '.$strsuspended, 'exescorm');
+                            $statusicon = $OUTPUT->pix_icon('suspend', $strstatus.' - '.$strsuspended, 'seledascorm');
                         }
 
                     } else {
@@ -1646,24 +1646,24 @@ function exescorm_get_toc_object($user, $exescorm, $currentorg='', $scoid='', $m
 
                         $incomplete = true;
 
-                        if ($sco->exescormtype == 'sco') {
+                        if ($sco->seledascormtype == 'sco') {
                             $statusicon = $OUTPUT->pix_icon('notattempted',
-                                                            get_string('notattempted', 'mod_exescorm'),
-                                                            'exescorm');
+                                                            get_string('notattempted', 'mod_seledascorm'),
+                                                            'seledascorm');
                         } else {
-                            $statusicon = $OUTPUT->pix_icon('asset', get_string('asset', 'mod_exescorm'), 'mod_exescorm');
+                            $statusicon = $OUTPUT->pix_icon('asset', get_string('asset', 'mod_seledascorm'), 'mod_seledascorm');
                         }
                     }
                 }
             }
 
             if (empty($statusicon)) {
-                $sco->statusicon = $OUTPUT->pix_icon('notattempted', get_string('notattempted', 'mod_exescorm'), 'mod_exescorm');
+                $sco->statusicon = $OUTPUT->pix_icon('notattempted', get_string('notattempted', 'mod_seledascorm'), 'mod_seledascorm');
             } else {
                 $sco->statusicon = $statusicon;
             }
 
-            $sco->url = 'a='.$exescorm->id.'&scoid='.$sco->id.'&currentorg='.$currentorg.$modestr.'&attempt='.$attempt;
+            $sco->url = 'a='.$seledascorm->id.'&scoid='.$sco->id.'&currentorg='.$currentorg.$modestr.'&attempt='.$attempt;
             $sco->incomplete = $incomplete;
 
             if (!in_array($sco->id, array_keys($result))) {
@@ -1673,7 +1673,7 @@ function exescorm_get_toc_object($user, $exescorm, $currentorg='', $scoid='', $m
     }
 
     // Get the parent scoes!
-    $result = exescorm_get_toc_get_parent_child($result, $currentorg);
+    $result = seledascorm_get_toc_get_parent_child($result, $currentorg);
 
     // Be safe, prevent warnings from showing up while returning array.
     if (!isset($scoid)) {
@@ -1683,7 +1683,7 @@ function exescorm_get_toc_object($user, $exescorm, $currentorg='', $scoid='', $m
     return array('scoes' => $result, 'usertracks' => $usertracks, 'scoid' => $scoid);
 }
 
-function exescorm_get_toc_get_parent_child(&$result, $currentorg) {
+function seledascorm_get_toc_get_parent_child(&$result, $currentorg) {
     $final = array();
     $level = 0;
     // Organization is always the root, prevparent.
@@ -1768,7 +1768,7 @@ function exescorm_get_toc_get_parent_child(&$result, $currentorg) {
     return $results;
 }
 
-function exescorm_format_toc_for_treeview($user, $exescorm, $scoes, $usertracks, $cmid, $toclink = EXESCORM_TOCJSLINK,
+function seledascorm_format_toc_for_treeview($user, $seledascorm, $scoes, $usertracks, $cmid, $toclink = SELEDASCORM_TOCJSLINK,
                                         $currentorg='', $attempt='', $play=false, $organizationsco=null, $children=false) {
     global $CFG;
 
@@ -1778,8 +1778,8 @@ function exescorm_format_toc_for_treeview($user, $exescorm, $scoes, $usertracks,
     $result->toc = '';
 
     if (!$children) {
-        $attemptsmade = exescorm_get_attempt_count($user->id, $exescorm);
-        $result->attemptleft = $exescorm->maxattempt == 0 ? 1 : $exescorm->maxattempt - $attemptsmade;
+        $attemptsmade = seledascorm_get_attempt_count($user->id, $seledascorm);
+        $result->attemptleft = $seledascorm->maxattempt == 0 ? 1 : $seledascorm->maxattempt - $attemptsmade;
     }
 
     if (!$children) {
@@ -1804,10 +1804,10 @@ function exescorm_format_toc_for_treeview($user, $exescorm, $scoes, $usertracks,
             $score = '';
 
             if (isset($usertracks[$sco->identifier])) {
-                $viewscore = has_capability('mod/exescorm:viewscores', context_module::instance($cmid));
+                $viewscore = has_capability('mod/seledascorm:viewscores', context_module::instance($cmid));
                 if (isset($usertracks[$sco->identifier]->score_raw) && $viewscore) {
                     if ($usertracks[$sco->identifier]->score_raw != '') {
-                        $score = '('.get_string('score', 'mod_exescorm').':&nbsp;'.$usertracks[$sco->identifier]->score_raw.')';
+                        $score = '('.get_string('score', 'mod_seledascorm').':&nbsp;'.$usertracks[$sco->identifier]->score_raw.')';
                     }
                 }
             }
@@ -1818,18 +1818,18 @@ function exescorm_format_toc_for_treeview($user, $exescorm, $scoes, $usertracks,
                 }
 
                 if (!empty($prevsco) &&
-                    exescorm_version_check($exescorm->version, EXESCORM_SCORM_13) &&
+                    seledascorm_version_check($seledascorm->version, SELEDASCORM_SCORM_13) &&
                     !empty($prevsco->hidecontinue)
                 ) {
-                    if ($sco->exescormtype == 'sco') {
+                    if ($sco->seledascormtype == 'sco') {
                         $result->toc .= html_writer::span($sco->statusicon.'&nbsp;'.format_string($sco->title));
                     } else {
                         $result->toc .= html_writer::span('&nbsp;'.format_string($sco->title));
                     }
-                } else if ($toclink == EXESCORM_TOCFULLURL) {
-                    $url = $CFG->wwwroot.'/mod/exescorm/player.php?'.$sco->url;
+                } else if ($toclink == SELEDASCORM_TOCFULLURL) {
+                    $url = $CFG->wwwroot.'/mod/seledascorm/player.php?'.$sco->url;
                     if (!empty($sco->launch)) {
-                        if ($sco->exescormtype == 'sco') {
+                        if ($sco->seledascormtype == 'sco') {
                             $result->toc .= $sco->statusicon.'&nbsp;';
                             $result->toc .= html_writer::link($url, format_string($sco->title)).$score;
                         } else {
@@ -1837,7 +1837,7 @@ function exescorm_format_toc_for_treeview($user, $exescorm, $scoes, $usertracks,
                                                                         array('data-scoid' => $sco->id)).$score;
                         }
                     } else {
-                        if ($sco->exescormtype == 'sco') {
+                        if ($sco->seledascormtype == 'sco') {
                             $result->toc .= $sco->statusicon.'&nbsp;'.format_string($sco->title).$score;
                         } else {
                             $result->toc .= '&nbsp;'.format_string($sco->title).$score;
@@ -1845,7 +1845,7 @@ function exescorm_format_toc_for_treeview($user, $exescorm, $scoes, $usertracks,
                     }
                 } else {
                     if (!empty($sco->launch)) {
-                        if ($sco->exescormtype == 'sco') {
+                        if ($sco->seledascormtype == 'sco') {
                             $result->toc .= html_writer::tag('a', $sco->statusicon.
                                                                 format_string($sco->title).($score ? '&nbsp;'.$score : ''),
                                                                 array('data-scoid' => $sco->id, 'title' => $sco->url,
@@ -1856,7 +1856,7 @@ function exescorm_format_toc_for_treeview($user, $exescorm, $scoes, $usertracks,
                                                                     'href' => '#'));
                         }
                     } else {
-                        if ($sco->exescormtype == 'sco') {
+                        if ($sco->seledascormtype == 'sco') {
                             $result->toc .= html_writer::span($sco->statusicon.'&nbsp;'.format_string($sco->title));
                         } else {
                             $result->toc .= html_writer::span('&nbsp;'.format_string($sco->title));
@@ -1866,13 +1866,13 @@ function exescorm_format_toc_for_treeview($user, $exescorm, $scoes, $usertracks,
 
             } else {
                 if ($play) {
-                    if ($sco->exescormtype == 'sco') {
+                    if ($sco->seledascormtype == 'sco') {
                         $result->toc .= html_writer::span($sco->statusicon.'&nbsp;'.format_string($sco->title));
                     } else {
                         $result->toc .= '&nbsp;'.format_string($sco->title).html_writer::end_span();
                     }
                 } else {
-                    if ($sco->exescormtype == 'sco') {
+                    if ($sco->seledascormtype == 'sco') {
                         $result->toc .= $sco->statusicon.'&nbsp;'.format_string($sco->title);
                     } else {
                         $result->toc .= '&nbsp;'.format_string($sco->title);
@@ -1882,7 +1882,7 @@ function exescorm_format_toc_for_treeview($user, $exescorm, $scoes, $usertracks,
 
             if (!empty($sco->children)) {
                 $result->toc .= html_writer::start_tag('ul');
-                $childresult = exescorm_format_toc_for_treeview($user, $exescorm, $sco->children, $usertracks, $cmid,
+                $childresult = seledascorm_format_toc_for_treeview($user, $seledascorm, $sco->children, $usertracks, $cmid,
                                                                 $toclink, $currentorg, $attempt, $play, $organizationsco, true);
 
                 // Is any of the children incomplete?
@@ -1905,7 +1905,7 @@ function exescorm_format_toc_for_treeview($user, $exescorm, $scoes, $usertracks,
     return $result;
 }
 
-function exescorm_format_toc_for_droplist($exescorm, $scoes, $usertracks, $currentorg='', $organizationsco=null,
+function seledascorm_format_toc_for_droplist($seledascorm, $scoes, $usertracks, $currentorg='', $organizationsco=null,
                                         $children=false, $level=0, $tocmenus=array()) {
     if (!empty($scoes)) {
         if (!empty($organizationsco) && !$children) {
@@ -1933,12 +1933,12 @@ function exescorm_format_toc_for_droplist($exescorm, $scoes, $usertracks, $curre
                 }
             }
 
-            if ($sco->exescormtype == 'sco') {
-                $tocmenus[$sco->id] = exescorm_repeater('&minus;', $level) . '&gt;' . format_string($sco->title);
+            if ($sco->seledascormtype == 'sco') {
+                $tocmenus[$sco->id] = seledascorm_repeater('&minus;', $level) . '&gt;' . format_string($sco->title);
             }
 
             if (!empty($sco->children)) {
-                $tocmenus = exescorm_format_toc_for_droplist($exescorm, $sco->children, $usertracks, $currentorg,
+                $tocmenus = seledascorm_format_toc_for_droplist($seledascorm, $sco->children, $usertracks, $currentorg,
                                                             $organizationsco, true, $level, $tocmenus);
             }
         }
@@ -1947,29 +1947,29 @@ function exescorm_format_toc_for_droplist($exescorm, $scoes, $usertracks, $curre
     return $tocmenus;
 }
 
-function exescorm_get_toc($user, $exescorm, $cmid, $toclink=EXESCORM_TOCJSLINK, $currentorg='', $scoid='', $mode='normal',
+function seledascorm_get_toc($user, $seledascorm, $cmid, $toclink=SELEDASCORM_TOCJSLINK, $currentorg='', $scoid='', $mode='normal',
                         $attempt='', $play=false, $tocheader=false) {
     global $CFG, $DB, $OUTPUT;
 
     if (empty($attempt)) {
-        $attempt = exescorm_get_last_attempt($exescorm->id, $user->id);
+        $attempt = seledascorm_get_last_attempt($seledascorm->id, $user->id);
     }
 
     $result = new stdClass();
     $organizationsco = null;
 
     if ($tocheader) {
-        $result->toc = html_writer::start_div('yui3-g-r', array('id' => 'exescorm_layout'));
+        $result->toc = html_writer::start_div('yui3-g-r', array('id' => 'seledascorm_layout'));
         $result->toc .= html_writer::start_div('yui3-u-1-5 loading', array(
-            'id' => 'exescorm_toc',
+            'id' => 'seledascorm_toc',
             'role' => 'navigation',
-            'aria-label' => get_string('contents', 'mod_exescorm'),
+            'aria-label' => get_string('contents', 'mod_seledascorm'),
         ));
-        $result->toc .= html_writer::start_div('', ['id' => 'exescorm_tree']);
+        $result->toc .= html_writer::start_div('', ['id' => 'seledascorm_tree']);
     }
 
     if (!empty($currentorg)) {
-        $organizationsco = $DB->get_record('exescorm_scoes', ['exescorm' => $exescorm->id, 'identifier' => $currentorg]);
+        $organizationsco = $DB->get_record('seledascorm_scoes', ['seledascorm' => $seledascorm->id, 'identifier' => $currentorg]);
         if (!empty($organizationsco->title)) {
             if ($play) {
                 $result->toctitle = $organizationsco->title;
@@ -1977,12 +1977,12 @@ function exescorm_get_toc($user, $exescorm, $cmid, $toclink=EXESCORM_TOCJSLINK, 
         }
     }
 
-    $scoes = exescorm_get_toc_object($user, $exescorm, $currentorg, $scoid, $mode, $attempt, $play, $organizationsco);
+    $scoes = seledascorm_get_toc_object($user, $seledascorm, $currentorg, $scoid, $mode, $attempt, $play, $organizationsco);
 
     $rootsco = !empty($scoes['scoes']) ? $scoes['scoes'][0] : null;
 
     if ($rootsco) {
-        $treeview = exescorm_format_toc_for_treeview($user, $exescorm, $rootsco->children ?? [], $scoes['usertracks'], $cmid,
+        $treeview = seledascorm_format_toc_for_treeview($user, $seledascorm, $rootsco->children ?? [], $scoes['usertracks'], $cmid,
                                                     $toclink, $currentorg, $attempt, $play, $organizationsco, false);
 
         if ($tocheader) {
@@ -2005,11 +2005,11 @@ function exescorm_get_toc($user, $exescorm, $cmid, $toclink=EXESCORM_TOCJSLINK, 
         }
 
     } else {
-        $result->sco = exescorm_get_sco($scoid);
+        $result->sco = seledascorm_get_sco($scoid);
     }
 
-    if ($exescorm->hidetoc == EXESCORM_TOC_POPUP && $rootsco) {
-        $tocmenu = exescorm_format_toc_for_droplist($exescorm, $rootsco->children ?? [], $scoes['usertracks'],
+    if ($seledascorm->hidetoc == SELEDASCORM_TOC_POPUP && $rootsco) {
+        $tocmenu = seledascorm_format_toc_for_droplist($seledascorm, $rootsco->children ?? [], $scoes['usertracks'],
                                                     $currentorg, $organizationsco);
 
         $modestr = '';
@@ -2017,7 +2017,7 @@ function exescorm_get_toc($user, $exescorm, $cmid, $toclink=EXESCORM_TOCJSLINK, 
             $modestr = '&mode='.$mode;
         }
 
-        $url = new moodle_url('/mod/exescorm/player.php?a='.$exescorm->id.'&currentorg='.$currentorg.$modestr);
+        $url = new moodle_url('/mod/seledascorm/player.php?a='.$seledascorm->id.'&currentorg='.$currentorg.$modestr);
         $result->tocmenu = $OUTPUT->single_select($url, 'scoid', $tocmenu, $result->sco->id, null, "tocmenu");
     }
 
@@ -2027,19 +2027,19 @@ function exescorm_get_toc($user, $exescorm, $cmid, $toclink=EXESCORM_TOCJSLINK, 
 
     if ($tocheader) {
         $result->toc .= html_writer::end_div().html_writer::end_div();
-        $result->toc .= html_writer::start_div('loading', array('id' => 'exescorm_toc_toggle'));
+        $result->toc .= html_writer::start_div('loading', array('id' => 'seledascorm_toc_toggle'));
         $result->toc .= html_writer::tag('button', '',
-                        array('id' => 'exescorm_toc_toggle_btn', 'class' => 'bg-primary',
-                            'aria-expanded' => 'true', 'aria-controls' => 'exescorm_toc')).html_writer::end_div();
-        $result->toc .= html_writer::start_div('', array('id' => 'exescorm_content'));
-        $result->toc .= html_writer::div('', '', array('id' => 'exescorm_navpanel'));
+                        array('id' => 'seledascorm_toc_toggle_btn', 'class' => 'bg-primary',
+                            'aria-expanded' => 'true', 'aria-controls' => 'seledascorm_toc')).html_writer::end_div();
+        $result->toc .= html_writer::start_div('', array('id' => 'seledascorm_content'));
+        $result->toc .= html_writer::div('', '', array('id' => 'seledascorm_navpanel'));
         $result->toc .= html_writer::end_div().html_writer::end_div();
     }
 
     return $result;
 }
 
-function exescorm_get_adlnav_json ($scoes, &$adlnav = array(), $parentscoid = null) {
+function seledascorm_get_adlnav_json ($scoes, &$adlnav = array(), $parentscoid = null) {
     if (is_object($scoes)) {
         $sco = $scoes;
         if (isset($sco->url)) {
@@ -2087,12 +2087,12 @@ function exescorm_get_adlnav_json ($scoes, &$adlnav = array(), $parentscoid = nu
         }
         if (isset($sco->children)) {
             foreach ($sco->children as $children) {
-                exescorm_get_adlnav_json($children, $adlnav, $sco->id);
+                seledascorm_get_adlnav_json($children, $adlnav, $sco->id);
             }
         }
     } else {
         foreach ($scoes as $sco) {
-            exescorm_get_adlnav_json ($sco, $adlnav);
+            seledascorm_get_adlnav_json ($sco, $adlnav);
         }
         unset($adlnav['prevscoid']);
         unset($adlnav['prevparent']);
@@ -2108,14 +2108,14 @@ function exescorm_get_adlnav_json ($scoes, &$adlnav = array(), $parentscoid = nu
  * @param $url string A valid URL
  * @return bool|string True if no issue is found. The error string message, otherwise
  */
-function exescorm_check_url($url) {
+function seledascorm_check_url($url) {
     $curl = new curl;
-    // Same options as in {@link download_file_content()}, used in {@link exescorm_parse_scorm()}.
+    // Same options as in {@link download_file_content()}, used in {@link seledascorm_parse_scorm()}.
     $curl->setopt(array('CURLOPT_FOLLOWLOCATION' => true, 'CURLOPT_MAXREDIRS' => 5));
     $cmsg = $curl->head($url);
     $info = $curl->get_info();
     if (empty($info['http_code']) || $info['http_code'] != 200) {
-        return get_string('invalidurlhttpcheck', 'mod_exescorm', array('cmsg' => $cmsg));
+        return get_string('invalidurlhttpcheck', 'mod_seledascorm', array('cmsg' => $cmsg));
     }
 
     return true;
@@ -2130,7 +2130,7 @@ function exescorm_check_url($url) {
  * @param string $ifempty value to be replaced with if $param is not set
  * @return string value from $userdata->$param if its not empty, or $ifempty
  */
-function exescorm_isset($userdata, $param, $ifempty = '') {
+function seledascorm_isset($userdata, $param, $ifempty = '') {
     if (isset($userdata->$param)) {
         return $userdata->$param;
     } else {
@@ -2142,18 +2142,18 @@ function exescorm_isset($userdata, $param, $ifempty = '') {
  * Check if the current sco is launchable
  * If not, find the next launchable sco
  *
- * @param stdClass $exescorm Scorm object
- * @param integer $scoid id of exescorm_scoes record.
+ * @param stdClass $seledascorm Scorm object
+ * @param integer $scoid id of seledascorm_scoes record.
  * @return integer scoid of correct sco to launch or empty if one cannot be found, which will trigger first sco.
  */
-function exescorm_check_launchable_sco($exescorm, $scoid) {
+function seledascorm_check_launchable_sco($seledascorm, $scoid) {
     global $DB;
-    if ($sco = exescorm_get_sco($scoid, EXESCORM_SCO_ONLY)) {
+    if ($sco = seledascorm_get_sco($scoid, SELEDASCORM_SCO_ONLY)) {
         if ($sco->launch == '') {
             // This scoid might be a top level org that can't be launched, find the first launchable sco after this sco.
-            $scoes = $DB->get_records_select('exescorm_scoes',
-                                             'exescorm = ? AND '.$DB->sql_isnotempty('exescorm_scoes', 'launch', false, true).
-                                             ' AND id > ?', array($exescorm->id, $sco->id), 'sortorder, id', 'id', 0, 1);
+            $scoes = $DB->get_records_select('seledascorm_scoes',
+                                             'seledascorm = ? AND '.$DB->sql_isnotempty('seledascorm_scoes', 'launch', false, true).
+                                             ' AND id > ?', array($seledascorm->id, $sco->id), 'sortorder, id', 'id', 0, 1);
             if (!empty($scoes)) {
                 $sco = reset($scoes); // Get first item from the list.
                 return $sco->id;
@@ -2167,38 +2167,38 @@ function exescorm_check_launchable_sco($exescorm, $scoid) {
 }
 
 /**
- * Check if a EXESCORM is available for the current user.
+ * Check if a SELEDASCORM is available for the current user.
  *
- * @param  stdClass  $exescorm            EXESCORM record
- * @param  boolean $checkviewreportcap Check the exescorm:viewreport cap
+ * @param  stdClass  $seledascorm            SELEDASCORM record
+ * @param  boolean $checkviewreportcap Check the seledascorm:viewreport cap
  * @param  stdClass  $context          Module context, required if $checkviewreportcap is set to true
  * @param  int  $userid                User id override
  * @return array                       status (available or not and possible warnings)
  * @since  Moodle 3.0
  */
-function exescorm_get_availability_status($exescorm, $checkviewreportcap = false, $context = null, $userid = null) {
+function seledascorm_get_availability_status($seledascorm, $checkviewreportcap = false, $context = null, $userid = null) {
     $open = true;
     $closed = false;
     $warnings = array();
 
     $timenow = time();
-    if (!empty($exescorm->timeopen) && $exescorm->timeopen > $timenow) {
+    if (!empty($seledascorm->timeopen) && $seledascorm->timeopen > $timenow) {
         $open = false;
     }
-    if (!empty($exescorm->timeclose) && $timenow > $exescorm->timeclose) {
+    if (!empty($seledascorm->timeclose) && $timenow > $seledascorm->timeclose) {
         $closed = true;
     }
 
     if (!$open || $closed) {
-        if ($checkviewreportcap && !empty($context) && has_capability('mod/exescorm:viewreport', $context, $userid)) {
+        if ($checkviewreportcap && !empty($context) && has_capability('mod/seledascorm:viewreport', $context, $userid)) {
             return array(true, $warnings);
         }
 
         if (!$open) {
-            $warnings['notopenyet'] = userdate($exescorm->timeopen);
+            $warnings['notopenyet'] = userdate($seledascorm->timeopen);
         }
         if ($closed) {
-            $warnings['expired'] = userdate($exescorm->timeclose);
+            $warnings['expired'] = userdate($seledascorm->timeclose);
         }
         return array(false, $warnings);
     }
@@ -2208,21 +2208,21 @@ function exescorm_get_availability_status($exescorm, $checkviewreportcap = false
 }
 
 /**
- * Requires a EXESCORM package to be available for the current user.
+ * Requires a SELEDASCORM package to be available for the current user.
  *
- * @param  stdClass  $exescorm            EXESCORM record
- * @param  boolean $checkviewreportcap Check the exescorm:viewreport cap
+ * @param  stdClass  $seledascorm            SELEDASCORM record
+ * @param  boolean $checkviewreportcap Check the seledascorm:viewreport cap
  * @param  stdClass  $context          Module context, required if $checkviewreportcap is set to true
  * @throws moodle_exception
  * @since  Moodle 3.0
  */
-function exescorm_require_available($exescorm, $checkviewreportcap = false, $context = null) {
+function seledascorm_require_available($seledascorm, $checkviewreportcap = false, $context = null) {
 
-    list($available, $warnings) = exescorm_get_availability_status($exescorm, $checkviewreportcap, $context);
+    list($available, $warnings) = seledascorm_get_availability_status($seledascorm, $checkviewreportcap, $context);
 
     if (!$available) {
         $reason = current(array_keys($warnings));
-        throw new moodle_exception($reason, 'exescorm', '', $warnings[$reason]);
+        throw new moodle_exception($reason, 'seledascorm', '', $warnings[$reason]);
     }
 
 }
@@ -2230,24 +2230,24 @@ function exescorm_require_available($exescorm, $checkviewreportcap = false, $con
 /**
  * Return a SCO object and the SCO launch URL
  *
- * @param  stdClass $exescorm EXESCORM object
+ * @param  stdClass $seledascorm SELEDASCORM object
  * @param  int $scoid The SCO id in database
  * @param  stdClass $context context object
  * @return array the SCO object and URL
  * @since  Moodle 3.1
  */
-function exescorm_get_sco_and_launch_url($exescorm, $scoid, $context) {
+function seledascorm_get_sco_and_launch_url($seledascorm, $scoid, $context) {
     global $CFG, $DB;
 
     if (!empty($scoid)) {
         // Direct SCO request.
-        if ($sco = exescorm_get_sco($scoid)) {
+        if ($sco = seledascorm_get_sco($scoid)) {
             if ($sco->launch == '') {
                 // Search for the next launchable sco.
                 if ($scoes = $DB->get_records_select(
-                        'exescorm_scoes',
-                        'exescorm = ? AND '.$DB->sql_isnotempty('exescorm_scoes', 'launch', false, true).' AND id > ?',
-                        array($exescorm->id, $sco->id),
+                        'seledascorm_scoes',
+                        'seledascorm = ? AND '.$DB->sql_isnotempty('seledascorm_scoes', 'launch', false, true).' AND id > ?',
+                        array($seledascorm->id, $sco->id),
                         'sortorder, id')) {
                     $sco = current($scoes);
                 }
@@ -2255,12 +2255,12 @@ function exescorm_get_sco_and_launch_url($exescorm, $scoid, $context) {
         }
     }
 
-    // If no sco was found get the first of EXESCORM package.
+    // If no sco was found get the first of SELEDASCORM package.
     if (!isset($sco)) {
         $scoes = $DB->get_records_select(
-            'exescorm_scoes',
-            'exescorm = ? AND '.$DB->sql_isnotempty('exescorm_scoes', 'launch', false, true),
-            array($exescorm->id),
+            'seledascorm_scoes',
+            'seledascorm = ? AND '.$DB->sql_isnotempty('seledascorm_scoes', 'launch', false, true),
+            array($seledascorm->id),
             'sortorder, id'
         );
         $sco = current($scoes);
@@ -2268,7 +2268,7 @@ function exescorm_get_sco_and_launch_url($exescorm, $scoid, $context) {
 
     $connector = '';
     $scolaunchurl = '';
-    $version = substr($exescorm->version, 0, 4);
+    $version = substr($seledascorm->version, 0, 4);
     if ((isset($sco->parameters) && (!empty($sco->parameters))) || ($version == 'AICC')) {
         if (stripos($sco->launch, '?') !== false) {
             $connector = '&';
@@ -2281,8 +2281,8 @@ function exescorm_get_sco_and_launch_url($exescorm, $scoid, $context) {
     }
 
     if ($version == 'AICC') {
-        require_once("$CFG->dirroot/mod/exescorm/datamodels/aicclib.php");
-        $aiccsid = exescorm_aicc_get_hacp_session($exescorm->id);
+        require_once("$CFG->dirroot/mod/seledascorm/datamodels/aicclib.php");
+        $aiccsid = seledascorm_aicc_get_hacp_session($seledascorm->id);
         if (empty($aiccsid)) {
             $aiccsid = sesskey();
         }
@@ -2290,7 +2290,7 @@ function exescorm_get_sco_and_launch_url($exescorm, $scoid, $context) {
         if (isset($sco->parameters) && (!empty($sco->parameters))) {
             $scoparams = '&'. $sco->parameters;
         }
-        $launcher = $sco->launch.$connector.'aicc_sid='.$aiccsid.'&aicc_url='.$CFG->wwwroot.'/mod/exescorm/aicc.php'.$scoparams;
+        $launcher = $sco->launch.$connector.'aicc_sid='.$aiccsid.'&aicc_url='.$CFG->wwwroot.'/mod/seledascorm/aicc.php'.$scoparams;
     } else {
         if (isset($sco->parameters) && (!empty($sco->parameters))) {
             $launcher = $sco->launch.$connector.$sco->parameters;
@@ -2299,26 +2299,26 @@ function exescorm_get_sco_and_launch_url($exescorm, $scoid, $context) {
         }
     }
 
-    if (exescorm_external_link($sco->launch)) {
+    if (seledascorm_external_link($sco->launch)) {
         // TODO: does this happen?
         $scolaunchurl = $launcher;
-    } else if ($exescorm->exescormtype === EXESCORM_TYPE_EXTERNAL) {
+    } else if ($seledascorm->seledascormtype === SELEDASCORM_TYPE_EXTERNAL) {
         // Remote learning activity.
-        $scolaunchurl = dirname($exescorm->reference).'/'.$launcher;
+        $scolaunchurl = dirname($seledascorm->reference).'/'.$launcher;
     } else if (
-        $exescorm->exescormtype === EXESCORM_TYPE_LOCAL &&
-        strtolower($exescorm->reference) == 'imsmanifest.xml'
+        $seledascorm->seledascormtype === SELEDASCORM_TYPE_LOCAL &&
+        strtolower($seledascorm->reference) == 'imsmanifest.xml'
     ) {
-        // This EXESCORM content sits in a repository that allows relative links.
-        $scolaunchurl = "$CFG->wwwroot/pluginfile.php/$context->id/mod_exescorm/imsmanifest/$exescorm->revision/$launcher";
+        // This SELEDASCORM content sits in a repository that allows relative links.
+        $scolaunchurl = "$CFG->wwwroot/pluginfile.php/$context->id/mod_seledascorm/imsmanifest/$seledascorm->revision/$launcher";
     } else if (
-        $exescorm->exescormtype === EXESCORM_TYPE_LOCAL ||
-        $exescorm->exescormtype === EXESCORM_TYPE_LOCALSYNC ||
-        $exescorm->exescormtype === EXESCORM_TYPE_EMBEDDED
+        $seledascorm->seledascormtype === SELEDASCORM_TYPE_LOCAL ||
+        $seledascorm->seledascormtype === SELEDASCORM_TYPE_LOCALSYNC ||
+        $seledascorm->seledascormtype === SELEDASCORM_TYPE_EMBEDDED
     ) {
         // Note: do not convert this to use moodle_url().
-        // EXESCORM does not work without slasharguments and moodle_url() encodes querystring vars.
-        $scolaunchurl = "$CFG->wwwroot/pluginfile.php/$context->id/mod_exescorm/content/$exescorm->revision/$launcher";
+        // SELEDASCORM does not work without slasharguments and moodle_url() encodes querystring vars.
+        $scolaunchurl = "$CFG->wwwroot/pluginfile.php/$context->id/mod_seledascorm/content/$seledascorm->revision/$launcher";
     }
 
     // Make the in-package teacher-layer selector available via the package's own URL
@@ -2328,7 +2328,7 @@ function exescorm_get_sco_and_launch_url($exescorm, $scoid, $context) {
     // per-activity teachermodevisible setting alone controls it: when on, the selector
     // is offered to all viewers; it does not gate on role. Appended by hand (not
     // moodle_url()) to preserve slasharguments and any existing query string.
-    if (!empty($exescorm->teachermodevisible) && $scolaunchurl !== '') {
+    if (!empty($seledascorm->teachermodevisible) && $scolaunchurl !== '') {
         $scolaunchurl .= (strpos($scolaunchurl, '?') === false ? '?' : '&') . 'exe-teacher=1';
     }
 
@@ -2336,25 +2336,25 @@ function exescorm_get_sco_and_launch_url($exescorm, $scoid, $context) {
 }
 
 /**
- * Trigger the exescorm_launched event.
+ * Trigger the seledascorm_launched event.
  *
- * @param  stdClass $exescorm   exescorm object
+ * @param  stdClass $seledascorm   seledascorm object
  * @param  stdClass $sco     sco object
  * @param  stdClass $cm      course module object
  * @param  stdClass $context context object
  * @param  string $scourl    SCO URL
  * @since Moodle 3.1
  */
-function exescorm_launch_sco($exescorm, $sco, $cm, $context, $scourl) {
+function seledascorm_launch_sco($seledascorm, $sco, $cm, $context, $scourl) {
 
-    $event = \mod_exescorm\event\sco_launched::create(array(
+    $event = \mod_seledascorm\event\sco_launched::create(array(
         'objectid' => $sco->id,
         'context' => $context,
-        'other' => array('instanceid' => $exescorm->id, 'loadedcontent' => !empty($scourl) ? $scourl : (string)$sco->launch)
+        'other' => array('instanceid' => $seledascorm->id, 'loadedcontent' => !empty($scourl) ? $scourl : (string)$sco->launch)
     ));
     $event->add_record_snapshot('course_modules', $cm);
-    $event->add_record_snapshot('exescorm', $exescorm);
-    $event->add_record_snapshot('exescorm_scoes', $sco);
+    $event->add_record_snapshot('seledascorm', $seledascorm);
+    $event->add_record_snapshot('seledascorm_scoes', $sco);
     $event->trigger();
 }
 
@@ -2368,7 +2368,7 @@ function exescorm_launch_sco($exescorm, $sco, $cm, $context, $scourl) {
  * @param array  $usertracks the tracked user data of each SCO visited
  * @return boolean
  */
-function exescorm_eval_prerequisites($prerequisites, $usertracks) {
+function seledascorm_eval_prerequisites($prerequisites, $usertracks) {
 
     // This is really a little language parser - AICC_SCRIPT is the reference
     // see 2.3.2.5.1. Sequencing/Navigation Today  - from the SCORM 1.2 spec.
@@ -2466,32 +2466,32 @@ function exescorm_eval_prerequisites($prerequisites, $usertracks) {
 }
 
 /**
- * Update the calendar entries for this exescorm activity.
+ * Update the calendar entries for this seledascorm activity.
  *
- * @param stdClass $exescorm the row from the database table exescorm.
+ * @param stdClass $seledascorm the row from the database table seledascorm.
  * @param int $cmid The coursemodule id
  * @return bool
  */
-function exescorm_update_calendar(stdClass $exescorm, $cmid) {
+function seledascorm_update_calendar(stdClass $seledascorm, $cmid) {
     global $DB, $CFG;
 
     require_once($CFG->dirroot.'/calendar/lib.php');
 
     // Scorm start calendar events.
     $event = new stdClass();
-    $event->eventtype = EXESCORM_EVENT_TYPE_OPEN;
-    // The EXESCORM_EVENT_TYPE_OPEN event should only be an action event if no close time is specified.
-    $event->type = empty($exescorm->timeclose) ? CALENDAR_EVENT_TYPE_ACTION : CALENDAR_EVENT_TYPE_STANDARD;
+    $event->eventtype = SELEDASCORM_EVENT_TYPE_OPEN;
+    // The SELEDASCORM_EVENT_TYPE_OPEN event should only be an action event if no close time is specified.
+    $event->type = empty($seledascorm->timeclose) ? CALENDAR_EVENT_TYPE_ACTION : CALENDAR_EVENT_TYPE_STANDARD;
     if ($event->id = $DB->get_field('event', 'id',
-        array('modulename' => 'exescorm', 'instance' => $exescorm->id, 'eventtype' => $event->eventtype))) {
-        if ((!empty($exescorm->timeopen)) && ($exescorm->timeopen > 0)) {
+        array('modulename' => 'seledascorm', 'instance' => $seledascorm->id, 'eventtype' => $event->eventtype))) {
+        if ((!empty($seledascorm->timeopen)) && ($seledascorm->timeopen > 0)) {
             // Calendar event exists so update it.
-            $event->name = get_string('calendarstart', 'mod_exescorm', $exescorm->name);
-            $event->description = format_module_intro('exescorm', $exescorm, $cmid, false);
+            $event->name = get_string('calendarstart', 'mod_seledascorm', $seledascorm->name);
+            $event->description = format_module_intro('seledascorm', $seledascorm, $cmid, false);
             $event->format = FORMAT_HTML;
-            $event->timestart = $exescorm->timeopen;
-            $event->timesort = $exescorm->timeopen;
-            $event->visible = instance_is_visible('exescorm', $exescorm);
+            $event->timestart = $seledascorm->timeopen;
+            $event->timesort = $seledascorm->timeopen;
+            $event->visible = instance_is_visible('seledascorm', $seledascorm);
             $event->timeduration = 0;
 
             $calendarevent = calendar_event::load($event->id);
@@ -2503,18 +2503,18 @@ function exescorm_update_calendar(stdClass $exescorm, $cmid) {
         }
     } else {
         // Event doesn't exist so create one.
-        if ((!empty($exescorm->timeopen)) && ($exescorm->timeopen > 0)) {
-            $event->name = get_string('calendarstart', 'mod_exescorm', $exescorm->name);
-            $event->description = format_module_intro('exescorm', $exescorm, $cmid, false);
+        if ((!empty($seledascorm->timeopen)) && ($seledascorm->timeopen > 0)) {
+            $event->name = get_string('calendarstart', 'mod_seledascorm', $seledascorm->name);
+            $event->description = format_module_intro('seledascorm', $seledascorm, $cmid, false);
             $event->format = FORMAT_HTML;
-            $event->courseid = $exescorm->course;
+            $event->courseid = $seledascorm->course;
             $event->groupid = 0;
             $event->userid = 0;
-            $event->modulename = 'exescorm';
-            $event->instance = $exescorm->id;
-            $event->timestart = $exescorm->timeopen;
-            $event->timesort = $exescorm->timeopen;
-            $event->visible = instance_is_visible('exescorm', $exescorm);
+            $event->modulename = 'seledascorm';
+            $event->instance = $seledascorm->id;
+            $event->timestart = $seledascorm->timeopen;
+            $event->timesort = $seledascorm->timeopen;
+            $event->visible = instance_is_visible('seledascorm', $seledascorm);
             $event->timeduration = 0;
 
             calendar_event::create($event, false);
@@ -2524,17 +2524,17 @@ function exescorm_update_calendar(stdClass $exescorm, $cmid) {
     // Scorm end calendar events.
     $event = new stdClass();
     $event->type = CALENDAR_EVENT_TYPE_ACTION;
-    $event->eventtype = EXESCORM_EVENT_TYPE_CLOSE;
+    $event->eventtype = SELEDASCORM_EVENT_TYPE_CLOSE;
     if ($event->id = $DB->get_field('event', 'id',
-        array('modulename' => 'exescorm', 'instance' => $exescorm->id, 'eventtype' => $event->eventtype))) {
-        if ((!empty($exescorm->timeclose)) && ($exescorm->timeclose > 0)) {
+        array('modulename' => 'seledascorm', 'instance' => $seledascorm->id, 'eventtype' => $event->eventtype))) {
+        if ((!empty($seledascorm->timeclose)) && ($seledascorm->timeclose > 0)) {
             // Calendar event exists so update it.
-            $event->name = get_string('calendarend', 'mod_exescorm', $exescorm->name);
-            $event->description = format_module_intro('exescorm', $exescorm, $cmid, false);
+            $event->name = get_string('calendarend', 'mod_seledascorm', $seledascorm->name);
+            $event->description = format_module_intro('seledascorm', $seledascorm, $cmid, false);
             $event->format = FORMAT_HTML;
-            $event->timestart = $exescorm->timeclose;
-            $event->timesort = $exescorm->timeclose;
-            $event->visible = instance_is_visible('exescorm', $exescorm);
+            $event->timestart = $seledascorm->timeclose;
+            $event->timesort = $seledascorm->timeclose;
+            $event->visible = instance_is_visible('seledascorm', $seledascorm);
             $event->timeduration = 0;
 
             $calendarevent = calendar_event::load($event->id);
@@ -2546,18 +2546,18 @@ function exescorm_update_calendar(stdClass $exescorm, $cmid) {
         }
     } else {
         // Event doesn't exist so create one.
-        if ((!empty($exescorm->timeclose)) && ($exescorm->timeclose > 0)) {
-            $event->name = get_string('calendarend', 'mod_exescorm', $exescorm->name);
-            $event->description = format_module_intro('exescorm', $exescorm, $cmid, false);
+        if ((!empty($seledascorm->timeclose)) && ($seledascorm->timeclose > 0)) {
+            $event->name = get_string('calendarend', 'mod_seledascorm', $seledascorm->name);
+            $event->description = format_module_intro('seledascorm', $seledascorm, $cmid, false);
             $event->format = FORMAT_HTML;
-            $event->courseid = $exescorm->course;
+            $event->courseid = $seledascorm->course;
             $event->groupid = 0;
             $event->userid = 0;
-            $event->modulename = 'exescorm';
-            $event->instance = $exescorm->id;
-            $event->timestart = $exescorm->timeclose;
-            $event->timesort = $exescorm->timeclose;
-            $event->visible = instance_is_visible('exescorm', $exescorm);
+            $event->modulename = 'seledascorm';
+            $event->instance = $seledascorm->id;
+            $event->timestart = $seledascorm->timeclose;
+            $event->timesort = $seledascorm->timeclose;
+            $event->visible = instance_is_visible('seledascorm', $seledascorm);
             $event->timeduration = 0;
 
             calendar_event::create($event, false);

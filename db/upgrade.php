@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Upgrade script for the exescorm module.
+ * Upgrade script for the seledascorm module.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -27,7 +27,7 @@
  * @param int $oldversion
  * @return bool
  */
-function xmldb_exescorm_upgrade($oldversion) {
+function xmldb_seledascorm_upgrade($oldversion) {
     global $DB;
 
     $dbman = $DB->get_manager();
@@ -36,12 +36,12 @@ function xmldb_exescorm_upgrade($oldversion) {
     // Put any upgrade step following this.
 
     if ($oldversion < 2021052501) {
-        $table = new xmldb_table('exescorm');
+        $table = new xmldb_table('seledascorm');
         $field = new xmldb_field('displayactivityname');
         if ($dbman->field_exists($table, $field)) {
             $dbman->drop_field($table, $field);
         }
-        upgrade_mod_savepoint(true, 2021052501, 'exescorm');
+        upgrade_mod_savepoint(true, 2021052501, 'seledascorm');
     }
 
     // Automatically generated Moodle v4.0.0 release upgrade line.
@@ -51,7 +51,7 @@ function xmldb_exescorm_upgrade($oldversion) {
     // Put any upgrade step following this.
 
     if ($oldversion < 2026021200) {
-        $table = new xmldb_table('exescorm');
+        $table = new xmldb_table('seledascorm');
         $field = new xmldb_field('teachermodevisible', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1',
             'displaycoursestructure');
 
@@ -59,7 +59,7 @@ function xmldb_exescorm_upgrade($oldversion) {
             $dbman->add_field($table, $field);
         }
 
-        upgrade_mod_savepoint(true, 2026021200, 'exescorm');
+        upgrade_mod_savepoint(true, 2026021200, 'seledascorm');
     }
 
     // teachermodevisible now defaults to 0 (align with eXeLearning #1772: teacher
@@ -69,9 +69,9 @@ function xmldb_exescorm_upgrade($oldversion) {
     // unchanged with teacher content hidden. Lower the default 1 -> 0 and reset
     // existing rows to the new default.
     if ($oldversion < 2026021201) {
-        $table = new xmldb_table('exescorm');
+        $table = new xmldb_table('seledascorm');
 
-        $DB->set_field('exescorm', 'teachermodevisible', 0);
+        $DB->set_field('seledascorm', 'teachermodevisible', 0);
 
         $field = new xmldb_field('teachermodevisible', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0',
             'displaycoursestructure');
@@ -80,11 +80,11 @@ function xmldb_exescorm_upgrade($oldversion) {
             $dbman->change_field_default($table, $field);
         }
 
-        upgrade_mod_savepoint(true, 2026021201, 'exescorm');
+        upgrade_mod_savepoint(true, 2026021201, 'seledascorm');
     }
 
     // The mandatory-files rule no longer requires an eXeLearning content.xml by
-    // default: exescorm_validate_package() already enforces SCORM validity (a root
+    // default: seledascorm_validate_package() already enforces SCORM validity (a root
     // imsmanifest.xml or an AICC .cst), so the rule only rejected plain SCORM
     // packages -- including one eXeLearning produces when the author turns the
     // "Editable export" property off (exelearning/exelearning#2415). Such a
@@ -94,11 +94,11 @@ function xmldb_exescorm_upgrade($oldversion) {
     // A site that customised the list keeps its own policy.
     if ($oldversion < 2026091400) {
         $oldmandatory = '/^content(v\d+)?\.xml$/';
-        if (get_config('exescorm', 'mandatoryfileslist') === $oldmandatory) {
-            set_config('mandatoryfileslist', '', 'exescorm');
+        if (get_config('seledascorm', 'mandatoryfileslist') === $oldmandatory) {
+            set_config('mandatoryfileslist', '', 'seledascorm');
         }
 
-        upgrade_mod_savepoint(true, 2026091400, 'exescorm');
+        upgrade_mod_savepoint(true, 2026091400, 'seledascorm');
     }
 
     return true;

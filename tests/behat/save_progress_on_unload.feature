@@ -1,8 +1,8 @@
-@mod @mod_exescorm @_file_upload @_switch_iframe @_alert
+@mod @mod_seledascorm @_file_upload @_switch_iframe @_alert
 Feature: Confirm progress gets saved on unload events
-  In order to let students access a exescorm package
+  In order to let students access a seledascorm package
   As a teacher
-  I need to add exescorm activity to a course
+  I need to add seledascorm activity to a course
   Background:
     Given the following "users" exist:
       | username | firstname | lastname | email |
@@ -18,29 +18,29 @@ Feature: Confirm progress gets saved on unload events
     And I change window size to "large"
 
   @javascript
-  Scenario: Test progress gets saved correctly when the user navigates away from the exescorm activity
+  Scenario: Test progress gets saved correctly when the user navigates away from the seledascorm activity
     Given the following "activity" exists:
-      | activity        | exescorm                                                              |
+      | activity        | seledascorm                                                              |
       | course          | C1                                                                 |
       | name            | Runtime Basic Calls SCORM 2004 3rd Edition package                 |
-      | packagefilepath | mod/exescorm/tests/packages/RuntimeBasicCalls_EXESCORM20043rdEdition.zip |
+      | packagefilepath | mod/seledascorm/tests/packages/RuntimeBasicCalls_SELEDASCORM20043rdEdition.zip |
     When I log in as "student1"
     And I am on "Course 1" course homepage
-    And I am on the "Runtime Basic Calls SCORM 2004 3rd Edition package" "exescorm activity" page
+    And I am on the "Runtime Basic Calls SCORM 2004 3rd Edition package" "seledascorm activity" page
     Then I should see "Enter"
     And I press "Enter"
-    And I switch to "exescorm_object" iframe
+    And I switch to "seledascorm_object" iframe
     And I press "Next"
     And I press "Next"
     And I switch to "contentFrame" iframe
     And I should see "Scoring"
     And I switch to the main frame
-    And I am on the "Runtime Basic Calls SCORM 2004 3rd Edition package" "exescorm activity" page
+    And I am on the "Runtime Basic Calls SCORM 2004 3rd Edition package" "seledascorm activity" page
     And I should see "Enter"
     And I click on "Enter" "button" confirming the dialogue
-    And I switch to "exescorm_object" iframe
+    And I switch to "seledascorm_object" iframe
     And I switch to "contentFrame" iframe
     And I should see "Scoring"
     And I switch to the main frame
-    # Go away from the exescorm to stop background requests
+    # Go away from the seledascorm to stop background requests
     And I am on homepage

@@ -1,0 +1,412 @@
+[
+  {
+    "block": "quiz",
+    "definition": {
+      "schema": 1,
+      "blockType": "assessment",
+      "title": "Knowledge check",
+      "items": [
+        {
+          "id": "q1",
+          "type": "choice",
+          "prompt": "<p>Which city is the capital?</p>",
+          "options": [
+            {
+              "id": "a",
+              "label": "Addis Ababa"
+            },
+            {
+              "id": "b",
+              "label": "Nairobi"
+            }
+          ]
+        }
+      ]
+    },
+    "response": [
+      "b"
+    ],
+    "correct": [
+      "a"
+    ],
+    "result": "wrong",
+    "expectedResponse": "Nairobi",
+    "expectedCorrect": "Addis Ababa",
+    "raw": "{\"schema\":1,\"blockType\":\"assessment\",\"title\":\"Knowledge check\",\"items\":[{\"id\":\"q1\",\"type\":\"choice\",\"prompt\":\"<p>Which city is the capital?</p>\",\"options\":[{\"id\":\"a\",\"label\":\"Addis Ababa\"},{\"id\":\"b\",\"label\":\"Nairobi\"}]}]}",
+    "revision": "7d6cb3d4",
+    "id": "quiz-r1-7d6cb3d4-q1-7e46a852",
+    "wireResponse": "b",
+    "wireCorrect": "a"
+  },
+  {
+    "block": "sentence",
+    "definition": {
+      "schema": 1,
+      "blockType": "construct-sentence",
+      "title": "Build a sentence",
+      "items": [
+        {
+          "id": "order",
+          "type": "sequencing",
+          "prompt": "Put the words in order",
+          "options": [
+            {
+              "id": "one",
+              "label": "We"
+            },
+            {
+              "id": "two",
+              "label": "learn"
+            },
+            {
+              "id": "three",
+              "label": "together"
+            }
+          ]
+        }
+      ]
+    },
+    "response": [
+      "one",
+      "two",
+      "three"
+    ],
+    "correct": [
+      "one",
+      "two",
+      "three"
+    ],
+    "result": "correct",
+    "expectedResponse": "We → learn → together",
+    "expectedCorrect": "We → learn → together",
+    "raw": "{\"schema\":1,\"blockType\":\"construct-sentence\",\"title\":\"Build a sentence\",\"items\":[{\"id\":\"order\",\"type\":\"sequencing\",\"prompt\":\"Put the words in order\",\"options\":[{\"id\":\"one\",\"label\":\"We\"},{\"id\":\"two\",\"label\":\"learn\"},{\"id\":\"three\",\"label\":\"together\"}]}]}",
+    "revision": "d2bbf4df",
+    "id": "sentence-r1-d2bbf4df-order-ce8c39b4",
+    "wireResponse": "one,two,three",
+    "wireCorrect": "one,two,three"
+  },
+  {
+    "block": "matching",
+    "definition": {
+      "schema": 1,
+      "blockType": "matching",
+      "title": "Match countries",
+      "items": [
+        {
+          "id": "pairs",
+          "type": "matching",
+          "prompt": "Match the country and capital",
+          "sources": [
+            {
+              "id": "et",
+              "label": "Ethiopia"
+            }
+          ],
+          "targets": [
+            {
+              "id": "aa",
+              "label": "Addis Ababa"
+            }
+          ]
+        }
+      ]
+    },
+    "response": [
+      {
+        "source": "et",
+        "target": "aa"
+      }
+    ],
+    "correct": [
+      {
+        "source": "et",
+        "target": "aa"
+      }
+    ],
+    "result": "correct",
+    "expectedResponse": "Ethiopia → Addis Ababa",
+    "expectedCorrect": "Ethiopia → Addis Ababa",
+    "raw": "{\"schema\":1,\"blockType\":\"matching\",\"title\":\"Match countries\",\"items\":[{\"id\":\"pairs\",\"type\":\"matching\",\"prompt\":\"Match the country and capital\",\"sources\":[{\"id\":\"et\",\"label\":\"Ethiopia\"}],\"targets\":[{\"id\":\"aa\",\"label\":\"Addis Ababa\"}]}]}",
+    "revision": "9c457204",
+    "id": "matching-r1-9c457204-pairs-72b43157",
+    "wireResponse": "et.aa",
+    "wireCorrect": "et.aa"
+  },
+  {
+    "block": "language",
+    "definition": {
+      "schema": 1,
+      "blockType": "short-answer",
+      "title": "አማርኛ 😀",
+      "items": [
+        {
+          "id": "text",
+          "type": "fill-in",
+          "prompt": "<strong>Write a greeting</strong>",
+          "options": []
+        }
+      ]
+    },
+    "response": "ሰላም, world",
+    "correct": "ሰላም",
+    "result": "neutral",
+    "expectedResponse": "ሰላም, world",
+    "expectedCorrect": "ሰላም",
+    "raw": "{\"schema\":1,\"blockType\":\"short-answer\",\"title\":\"አማርኛ 😀\",\"items\":[{\"id\":\"text\",\"type\":\"fill-in\",\"prompt\":\"<strong>Write a greeting</strong>\",\"options\":[]}]}",
+    "revision": "d3e2dbd8",
+    "id": "language-r1-d3e2dbd8-text-aa76fa12",
+    "wireResponse": "ሰላም, world",
+    "wireCorrect": "ሰላም"
+  },
+  {
+    "block": "number",
+    "definition": {
+      "schema": 1,
+      "blockType": "equation",
+      "title": "Calculate",
+      "items": [
+        {
+          "id": "sum",
+          "type": "numeric",
+          "prompt": "2 + 3 = ?"
+        }
+      ]
+    },
+    "response": 5,
+    "correct": 5,
+    "result": "correct",
+    "expectedResponse": "5",
+    "expectedCorrect": "5",
+    "raw": "{\"schema\":1,\"blockType\":\"equation\",\"title\":\"Calculate\",\"items\":[{\"id\":\"sum\",\"type\":\"numeric\",\"prompt\":\"2 + 3 = ?\"}]}",
+    "revision": "33a92751",
+    "id": "number-r1-33a92751-sum-0552ba7b",
+    "wireResponse": "5",
+    "wireCorrect": "5"
+  },
+  {
+    "block": "boolean",
+    "definition": {
+      "schema": 1,
+      "blockType": "true-false",
+      "title": "Check a fact",
+      "items": [
+        {
+          "id": "fact",
+          "type": "true-false",
+          "prompt": "The Earth is round"
+        }
+      ]
+    },
+    "response": true,
+    "correct": true,
+    "result": "correct",
+    "expectedResponse": "True",
+    "expectedCorrect": "True",
+    "raw": "{\"schema\":1,\"blockType\":\"true-false\",\"title\":\"Check a fact\",\"items\":[{\"id\":\"fact\",\"type\":\"true-false\",\"prompt\":\"The Earth is round\"}]}",
+    "revision": "adccdbe3",
+    "id": "boolean-r1-adccdbe3-fact-4f045087",
+    "wireResponse": "t",
+    "wireCorrect": "t"
+  },
+  {
+    "block": "scenario",
+    "definition": {
+      "schema": 1,
+      "blockType": "branching-scenario",
+      "title": "Decision",
+      "items": [
+        {
+          "id": "decision",
+          "type": "choice",
+          "prompt": "Choose the safe action",
+          "options": [
+            {
+              "id": "stop",
+              "label": "Stop and ask for help"
+            },
+            {
+              "id": "continue",
+              "label": "Continue"
+            }
+          ]
+        }
+      ]
+    },
+    "response": [
+      "stop"
+    ],
+    "correct": [
+      "stop"
+    ],
+    "result": "correct",
+    "expectedResponse": "Stop and ask for help",
+    "expectedCorrect": "Stop and ask for help",
+    "raw": "{\"schema\":1,\"blockType\":\"branching-scenario\",\"title\":\"Decision\",\"items\":[{\"id\":\"decision\",\"type\":\"choice\",\"prompt\":\"Choose the safe action\",\"options\":[{\"id\":\"stop\",\"label\":\"Stop and ask for help\"},{\"id\":\"continue\",\"label\":\"Continue\"}]}]}",
+    "revision": "ee0f39a8",
+    "id": "scenario-r1-ee0f39a8-decision-a238905b",
+    "wireResponse": "stop",
+    "wireCorrect": "stop"
+  },
+  {
+    "block": "timeline",
+    "definition": {
+      "schema": 1,
+      "blockType": "timeline",
+      "title": "Explore history",
+      "items": [
+        {
+          "id": "visited",
+          "type": "performance",
+          "prompt": "Explore all required events"
+        }
+      ]
+    },
+    "response": "All three events explored",
+    "correct": null,
+    "result": "neutral",
+    "expectedResponse": "All three events explored",
+    "expectedCorrect": "",
+    "raw": "{\"schema\":1,\"blockType\":\"timeline\",\"title\":\"Explore history\",\"items\":[{\"id\":\"visited\",\"type\":\"performance\",\"prompt\":\"Explore all required events\"}]}",
+    "revision": "7dfb2d4b",
+    "id": "timeline-r1-7dfb2d4b-visited-7457cb80",
+    "wireResponse": "All three events explored",
+    "wireCorrect": null
+  },
+  {
+    "block": "cards",
+    "definition": {
+      "schema": 1,
+      "blockType": "flip-cards",
+      "title": "Reflection",
+      "items": [
+        {
+          "id": "confidence",
+          "type": "likert",
+          "prompt": "How confident are you?",
+          "options": [
+            {
+              "id": "high",
+              "label": "Very confident"
+            }
+          ]
+        }
+      ]
+    },
+    "response": [
+      "high"
+    ],
+    "correct": null,
+    "result": "neutral",
+    "expectedResponse": "Very confident",
+    "expectedCorrect": "",
+    "raw": "{\"schema\":1,\"blockType\":\"flip-cards\",\"title\":\"Reflection\",\"items\":[{\"id\":\"confidence\",\"type\":\"likert\",\"prompt\":\"How confident are you?\",\"options\":[{\"id\":\"high\",\"label\":\"Very confident\"}]}]}",
+    "revision": "43e3ba65",
+    "id": "cards-r1-43e3ba65-confidence-53b876ec",
+    "wireResponse": "high",
+    "wireCorrect": null
+  },
+  {
+    "block": "native-test",
+    "definition": {
+      "schema": 1,
+      "blockType": "quick-questions",
+      "title": "Test",
+      "rules": {
+        "tracking": {
+          "mode": "graded",
+          "required": true,
+          "weight": 1,
+          "passingScore": 50,
+          "scorePolicy": "latest",
+          "detailedInteractions": true,
+          "resume": true
+        },
+        "quiz": {
+          "percentage": 100,
+          "customScore": false,
+          "timer": true,
+          "lives": false
+        }
+      },
+      "items": [
+        {
+          "id": "q0",
+          "type": "choice",
+          "prompt": "Pick four",
+          "options": [
+            {
+              "id": "o0",
+              "label": "Four"
+            },
+            {
+              "id": "o1",
+              "label": "Three"
+            }
+          ],
+          "score": 1,
+          "solution": 0
+        }
+      ]
+    },
+    "response": [
+      "o1"
+    ],
+    "correct": [
+      "o0"
+    ],
+    "result": "wrong",
+    "expectedResponse": "Three",
+    "expectedCorrect": "Four",
+    "raw": "{\"schema\":1,\"blockType\":\"quick-questions\",\"title\":\"Test\",\"rules\":{\"tracking\":{\"mode\":\"graded\",\"required\":true,\"weight\":1,\"passingScore\":50,\"scorePolicy\":\"latest\",\"detailedInteractions\":true,\"resume\":true},\"quiz\":{\"percentage\":100,\"customScore\":false,\"timer\":true,\"lives\":false}},\"items\":[{\"id\":\"q0\",\"type\":\"choice\",\"prompt\":\"Pick four\",\"options\":[{\"id\":\"o0\",\"label\":\"Four\"},{\"id\":\"o1\",\"label\":\"Three\"}],\"score\":1,\"solution\":0}]}",
+    "revision": "387e0210",
+    "id": "native-test-r1-387e0210-q0-01cab8ae",
+    "wireResponse": "o1",
+    "wireCorrect": "o0"
+  },
+  {
+    "block": "native-complete",
+    "definition": {
+      "schema": 1,
+      "blockType": "complete",
+      "title": "Complete",
+      "rules": {
+        "tracking": {
+          "mode": "graded",
+          "required": true,
+          "weight": 1,
+          "passingScore": 50,
+          "scorePolicy": "latest",
+          "detailedInteractions": true,
+          "resume": true
+        },
+        "gaps": {
+          "type": 0,
+          "caseSensitive": false,
+          "estrictCheck": false,
+          "wordsLimit": false
+        }
+      },
+      "items": [
+        {
+          "id": "gap0",
+          "type": "fill-in",
+          "prompt": "Gap 1: Plants need [Gap 1].",
+          "answers": [
+            "water",
+            "H2O"
+          ]
+        }
+      ]
+    },
+    "response": "H2O",
+    "correct": "water",
+    "result": "correct",
+    "expectedResponse": "H2O",
+    "expectedCorrect": "water",
+    "raw": "{\"schema\":1,\"blockType\":\"complete\",\"title\":\"Complete\",\"rules\":{\"tracking\":{\"mode\":\"graded\",\"required\":true,\"weight\":1,\"passingScore\":50,\"scorePolicy\":\"latest\",\"detailedInteractions\":true,\"resume\":true},\"gaps\":{\"type\":0,\"caseSensitive\":false,\"estrictCheck\":false,\"wordsLimit\":false}},\"items\":[{\"id\":\"gap0\",\"type\":\"fill-in\",\"prompt\":\"Gap 1: Plants need [Gap 1].\",\"answers\":[\"water\",\"H2O\"]}]}",
+    "revision": "ba461b46",
+    "id": "native-complete-r1-ba461b46-gap0-4fdff106",
+    "wireResponse": "H2O",
+    "wireCorrect": "water"
+  }
+]

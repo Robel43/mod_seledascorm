@@ -42,7 +42,7 @@ define([
 
         Fullscreen.prototype.changeFullScreen = function(e) {
             let btnToggle = document.getElementById('toggleFullscreen');
-            let page = document.getElementById('exescormpage');
+            let page = document.getElementById('seledascormpage');
 
             if (page.classList.contains('fullscreen')) {
                 btnToggle.classList.remove('actived');
@@ -69,7 +69,7 @@ define([
                     document.msExitFullscreen();
                 }
             } else {
-                var element = $('#exescormpage')[0];
+                var element = $('#seledascormpage')[0];
                 if (element.requestFullscreen) {
                     element.requestFullscreen();
                 } else if (element.mozRequestFullScreen) {

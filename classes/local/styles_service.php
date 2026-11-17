@@ -15,25 +15,25 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Style package registry and ZIP validator for mod_exescorm.
+ * Style package registry and ZIP validator for mod_seledascorm.
  *
  * Administrators upload eXeLearning style packages as .zip files. This
  * service validates them, extracts them into moodledata, records metadata
- * in `config_plugin(exescorm)`, and builds the registry payload that the
+ * in `config_plugin(seledascorm)`, and builds the registry payload that the
  * embedded editor consumes via `window.eXeLearning.config.themeRegistryOverride`.
  *
  * Uploaded styles live at:
- *   {dataroot}/mod_exescorm/styles/{slug}/
+ *   {dataroot}/mod_seledascorm/styles/{slug}/
  * which is a *sibling* of the admin-installed editor directory
- * ({dataroot}/mod_exescorm/embedded_editor/), so reinstalling the editor
+ * ({dataroot}/mod_seledascorm/embedded_editor/), so reinstalling the editor
  * never destroys admin-managed styles.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  2025 eXeLearning
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_exescorm\local;
+namespace mod_seledascorm\local;
 
 /**
  * Class styles_service.
@@ -41,7 +41,7 @@ namespace mod_exescorm\local;
 class styles_service {
 
     /** @var string Subdirectory under $CFG->dataroot holding uploaded styles. */
-    const MOODLEDATA_SUBDIR = 'mod_exescorm/styles';
+    const MOODLEDATA_SUBDIR = 'mod_seledascorm/styles';
 
     /** @var string Plugin config key storing the serialized registry. */
     const CONFIG_REGISTRY = 'styles_registry';
@@ -88,7 +88,7 @@ class styles_service {
      */
     public static function get_style_url(string $slug): string {
         global $CFG;
-        return $CFG->wwwroot . '/mod/exescorm/editor/styles.php/' . rawurlencode(self::normalize_slug($slug));
+        return $CFG->wwwroot . '/mod/seledascorm/editor/styles.php/' . rawurlencode(self::normalize_slug($slug));
     }
 
     /**
@@ -97,7 +97,7 @@ class styles_service {
      * @return int
      */
     public static function get_max_zip_size(): int {
-        $configured = (int) get_config('exescorm', 'styles_max_zip_size');
+        $configured = (int) get_config('seledascorm', 'styles_max_zip_size');
         return $configured > 0 ? $configured : self::DEFAULT_MAX_ZIP_SIZE;
     }
 
@@ -111,7 +111,7 @@ class styles_service {
      * @return array{uploaded: array<string,array>, disabled_builtins: string[]}
      */
     public static function get_registry(): array {
-        $raw = get_config('exescorm', self::CONFIG_REGISTRY);
+        $raw = get_config('seledascorm', self::CONFIG_REGISTRY);
         if (!is_string($raw) || $raw === '' || $raw === 'false') {
             $data = [];
         } else {
@@ -132,7 +132,7 @@ class styles_service {
      * @param array $registry
      */
     public static function save_registry(array $registry): void {
-        set_config(self::CONFIG_REGISTRY, json_encode($registry), 'exescorm');
+        set_config(self::CONFIG_REGISTRY, json_encode($registry), 'seledascorm');
     }
 
     // ---------------------------------------------------------------------
@@ -261,7 +261,7 @@ class styles_service {
      * @return bool
      */
     public static function is_import_blocked(): bool {
-        $value = get_config('exescorm', 'stylesblockimport');
+        $value = get_config('seledascorm', 'stylesblockimport');
         if ($value === false || $value === '' || $value === null) {
             return false;
         }
@@ -352,7 +352,7 @@ class styles_service {
 
         $dest = self::get_style_dir($slug);
         if (!check_dir_exists($dest, true, true)) {
-            throw new \moodle_exception('stylesinstallfailed', 'mod_exescorm', '', 'mkdir');
+            throw new \moodle_exception('stylesinstallfailed', 'mod_seledascorm', '', 'mkdir');
         }
 
         try {
@@ -365,7 +365,7 @@ class styles_service {
         $cssfiles = self::find_css_files($dest);
         if (empty($cssfiles)) {
             self::recursive_delete($dest);
-            throw new \moodle_exception('stylesnocss', 'mod_exescorm');
+            throw new \moodle_exception('stylesnocss', 'mod_seledascorm');
         }
 
         $entry = [
@@ -399,23 +399,23 @@ class styles_service {
      */
     public static function validate_zip(string $zippath): array {
         if (!is_file($zippath) || !is_readable($zippath)) {
-            throw new \moodle_exception('stylesupload_missing', 'mod_exescorm');
+            throw new \moodle_exception('stylesupload_missing', 'mod_seledascorm');
         }
         $size = filesize($zippath);
         if ($size === false || $size <= 0) {
-            throw new \moodle_exception('stylesupload_empty', 'mod_exescorm');
+            throw new \moodle_exception('stylesupload_empty', 'mod_seledascorm');
         }
         if ($size > self::get_max_zip_size()) {
-            throw new \moodle_exception('stylesupload_toolarge', 'mod_exescorm', '',
+            throw new \moodle_exception('stylesupload_toolarge', 'mod_seledascorm', '',
                 display_size(self::get_max_zip_size()));
         }
         if (!class_exists('\ZipArchive')) {
-            throw new \moodle_exception('stylesupload_nozip', 'mod_exescorm');
+            throw new \moodle_exception('stylesupload_nozip', 'mod_seledascorm');
         }
 
         $zip = new \ZipArchive();
         if ($zip->open($zippath, \ZipArchive::CHECKCONS) !== true) {
-            throw new \moodle_exception('stylesupload_badzip', 'mod_exescorm');
+            throw new \moodle_exception('stylesupload_badzip', 'mod_seledascorm');
         }
 
         $configpath = null;
@@ -426,18 +426,18 @@ class styles_service {
             $stat = $zip->statIndex($i);
             if ($stat === false) {
                 $zip->close();
-                throw new \moodle_exception('stylesupload_badentry', 'mod_exescorm');
+                throw new \moodle_exception('stylesupload_badentry', 'mod_seledascorm');
             }
             $name = (string) $stat['name'];
             if (self::is_unsafe_zip_entry($name)) {
                 $zip->close();
-                throw new \moodle_exception('stylesupload_unsafe', 'mod_exescorm', '', $name);
+                throw new \moodle_exception('stylesupload_unsafe', 'mod_seledascorm', '', $name);
             }
             $entries[] = $name;
             if (basename($name) === 'config.xml') {
                 if ($configpath !== null) {
                     $zip->close();
-                    throw new \moodle_exception('stylesupload_multiconfig', 'mod_exescorm');
+                    throw new \moodle_exception('stylesupload_multiconfig', 'mod_seledascorm');
                 }
                 $configpath = $name;
                 $dirname = trim(str_replace('\\', '/', dirname($name)), '/');
@@ -447,7 +447,7 @@ class styles_service {
 
         if ($configpath === null) {
             $zip->close();
-            throw new \moodle_exception('stylesupload_noconfig', 'mod_exescorm');
+            throw new \moodle_exception('stylesupload_noconfig', 'mod_seledascorm');
         }
 
         foreach ($entries as $entry) {
@@ -460,18 +460,18 @@ class styles_service {
             }
             if ($prefix !== '' && strpos($entry, $prefix) !== 0) {
                 $zip->close();
-                throw new \moodle_exception('stylesupload_mixedroots', 'mod_exescorm');
+                throw new \moodle_exception('stylesupload_mixedroots', 'mod_seledascorm');
             }
             if (!self::is_allowed_filename($entry)) {
                 $zip->close();
-                throw new \moodle_exception('stylesupload_badext', 'mod_exescorm', '', $entry);
+                throw new \moodle_exception('stylesupload_badext', 'mod_seledascorm', '', $entry);
             }
         }
 
         $configxml = $zip->getFromName($configpath);
         $zip->close();
         if ($configxml === false) {
-            throw new \moodle_exception('stylesupload_configread', 'mod_exescorm');
+            throw new \moodle_exception('stylesupload_configread', 'mod_seledascorm');
         }
 
         return [
@@ -494,11 +494,11 @@ class styles_service {
         libxml_clear_errors();
         libxml_use_internal_errors($preverrors);
         if ($xml === false) {
-            throw new \moodle_exception('stylesupload_badxml', 'mod_exescorm');
+            throw new \moodle_exception('stylesupload_badxml', 'mod_seledascorm');
         }
         $name = isset($xml->name) ? trim((string) $xml->name) : '';
         if ($name === '') {
-            throw new \moodle_exception('stylesupload_noname', 'mod_exescorm');
+            throw new \moodle_exception('stylesupload_noname', 'mod_seledascorm');
         }
         return [
             'name' => self::normalize_slug($name),
@@ -522,7 +522,7 @@ class styles_service {
     private static function extract_zip_safely(string $zippath, string $dest, string $prefix): void {
         $zip = new \ZipArchive();
         if ($zip->open($zippath, \ZipArchive::CHECKCONS) !== true) {
-            throw new \moodle_exception('stylesupload_badzip', 'mod_exescorm');
+            throw new \moodle_exception('stylesupload_badzip', 'mod_seledascorm');
         }
         $destreal = rtrim(str_replace('\\', '/', $dest), '/');
         for ($i = 0; $i < $zip->numFiles; $i++) {
@@ -533,7 +533,7 @@ class styles_service {
             $name = (string) $stat['name'];
             if (self::is_unsafe_zip_entry($name)) {
                 $zip->close();
-                throw new \moodle_exception('stylesupload_unsafe', 'mod_exescorm', '', $name);
+                throw new \moodle_exception('stylesupload_unsafe', 'mod_seledascorm', '', $name);
             }
             $relative = $name;
             if ($prefix !== '') {
@@ -549,7 +549,7 @@ class styles_service {
             $target = str_replace('\\', '/', $target);
             if (strpos($target, $destreal . '/') !== 0 && $target !== $destreal) {
                 $zip->close();
-                throw new \moodle_exception('stylesupload_traversal', 'mod_exescorm');
+                throw new \moodle_exception('stylesupload_traversal', 'mod_seledascorm');
             }
             if (substr($name, -1) === '/') {
                 check_dir_exists($target, true, true);
@@ -559,11 +559,11 @@ class styles_service {
             $contents = $zip->getFromIndex($i);
             if ($contents === false) {
                 $zip->close();
-                throw new \moodle_exception('stylesupload_readfailed', 'mod_exescorm');
+                throw new \moodle_exception('stylesupload_readfailed', 'mod_seledascorm');
             }
             if (file_put_contents($target, $contents) === false) {
                 $zip->close();
-                throw new \moodle_exception('stylesupload_writefailed', 'mod_exescorm');
+                throw new \moodle_exception('stylesupload_writefailed', 'mod_seledascorm');
             }
         }
         $zip->close();

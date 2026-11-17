@@ -17,12 +17,12 @@
 /**
  * functions used by AICC packages.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright 1999 onwards Roberto Pinna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-function exescorm_add_time($a, $b) {
+function seledascorm_add_time($a, $b) {
     $aes = explode(':', $a);
     $bes = explode(':', $b);
     $aseconds = explode('.', $aes[2]);
@@ -79,7 +79,7 @@ function exescorm_add_time($a, $b) {
  * @param string $mastername AICC sco identifier column
  * @return mixed
  */
-function exescorm_get_aicc_columns($row, $mastername='system_id') {
+function seledascorm_get_aicc_columns($row, $mastername='system_id') {
     $tok = strtok(strtolower($row), "\",\n\r");
     $result = new stdClass();
     $result->columns = array();
@@ -106,7 +106,7 @@ function exescorm_get_aicc_columns($row, $mastername='system_id') {
  * @param string $remodule The regular expression module for a single column
  * @return string
  */
-function exescorm_forge_cols_regexp($columns, $remodule='(".*")?,') {
+function seledascorm_forge_cols_regexp($columns, $remodule='(".*")?,') {
     $regexp = '/^';
     foreach ($columns as $column) {
         $regexp .= $remodule;
@@ -118,24 +118,24 @@ function exescorm_forge_cols_regexp($columns, $remodule='(".*")?,') {
 /**
  * Sets up AICC packages
  * Called whenever package changes
- * @param object $exescorm instance - fields are updated and changes saved into database
+ * @param object $seledascorm instance - fields are updated and changes saved into database
  * @return bool
  */
-function exescorm_parse_aicc(&$exescorm) {
+function seledascorm_parse_aicc(&$seledascorm) {
     global $DB;
 
-    if ($exescorm->exescormtype == EXESCORM_TYPE_AICCURL) {
-        return exescorm_aicc_generate_simple_sco($exescorm);
+    if ($seledascorm->seledascormtype == SELEDASCORM_TYPE_AICCURL) {
+        return seledascorm_aicc_generate_simple_sco($seledascorm);
     }
-    if (!isset($exescorm->cmid)) {
-        $cm = get_coursemodule_from_instance('exescorm', $exescorm->id);
-        $exescorm->cmid = $cm->id;
+    if (!isset($seledascorm->cmid)) {
+        $cm = get_coursemodule_from_instance('seledascorm', $seledascorm->id);
+        $seledascorm->cmid = $cm->id;
     }
-    $context = context_module::instance($exescorm->cmid);
+    $context = context_module::instance($seledascorm->cmid);
 
     $fs = get_file_storage();
 
-    $files = $fs->get_area_files($context->id, 'mod_exescorm', 'content', 0, 'sortorder, itemid, filepath, filename', false);
+    $files = $fs->get_area_files($context->id, 'mod_seledascorm', 'content', 0, 'sortorder, itemid, filepath, filename', false);
 
     $version = 'AICC';
     $ids = array();
@@ -183,8 +183,8 @@ function exescorm_parse_aicc(&$exescorm) {
         if (isset($id->des)) {
             $contents = $id->des->get_content();
             $rows = explode("\r\n", $contents);
-            $columns = exescorm_get_aicc_columns($rows[0]);
-            $regexp = exescorm_forge_cols_regexp($columns->columns);
+            $columns = seledascorm_get_aicc_columns($rows[0]);
+            $regexp = seledascorm_forge_cols_regexp($columns->columns);
             for ($i = 1; $i < count($rows); $i++) {
                 if (preg_match($regexp, $rows[$i], $matches)) {
                     for ($j = 0; $j < count($columns->columns); $j++) {
@@ -202,8 +202,8 @@ function exescorm_parse_aicc(&$exescorm) {
         if (isset($id->au)) {
             $contents = $id->au->get_content();
             $rows = explode("\r\n", $contents);
-            $columns = exescorm_get_aicc_columns($rows[0]);
-            $regexp = exescorm_forge_cols_regexp($columns->columns);
+            $columns = seledascorm_get_aicc_columns($rows[0]);
+            $regexp = seledascorm_forge_cols_regexp($columns->columns);
             for ($i = 1; $i < count($rows); $i++) {
                 if (preg_match($regexp, $rows[$i], $matches)) {
                     for ($j = 0; $j < count($columns->columns); $j++) {
@@ -218,8 +218,8 @@ function exescorm_parse_aicc(&$exescorm) {
         if (isset($id->cst)) {
             $contents = $id->cst->get_content();
             $rows = explode("\r\n", $contents);
-            $columns = exescorm_get_aicc_columns($rows[0], 'block');
-            $regexp = exescorm_forge_cols_regexp($columns->columns, '(.+)?,');
+            $columns = seledascorm_get_aicc_columns($rows[0], 'block');
+            $regexp = seledascorm_forge_cols_regexp($columns->columns, '(.+)?,');
             for ($i = 1; $i < count($rows); $i++) {
                 if (preg_match($regexp, $rows[$i], $matches)) {
                     for ($j = 0; $j < count($columns->columns); $j++) {
@@ -238,8 +238,8 @@ function exescorm_parse_aicc(&$exescorm) {
         if (isset($id->ort)) {
             $contents = $id->ort->get_content();
             $rows = explode("\r\n", $contents);
-            $columns = exescorm_get_aicc_columns($rows[0], 'course_element');
-            $regexp = exescorm_forge_cols_regexp($columns->columns, '(.+)?,');
+            $columns = seledascorm_get_aicc_columns($rows[0], 'course_element');
+            $regexp = seledascorm_forge_cols_regexp($columns->columns, '(.+)?,');
             for ($i = 1; $i < count($rows); $i++) {
                 if (preg_match($regexp, $rows[$i], $matches)) {
                     for ($j = 0; $j < count($matches) - 1; $j++) {
@@ -255,8 +255,8 @@ function exescorm_parse_aicc(&$exescorm) {
         if (isset($id->pre)) {
             $contents = $id->pre->get_content();
             $rows = explode("\r\n", $contents);
-            $columns = exescorm_get_aicc_columns($rows[0], 'structure_element');
-            $regexp = exescorm_forge_cols_regexp($columns->columns, '(.+),');
+            $columns = seledascorm_get_aicc_columns($rows[0], 'structure_element');
+            $regexp = seledascorm_forge_cols_regexp($columns->columns, '(.+),');
             for ($i = 1; $i < count($rows); $i++) {
                 if (preg_match($regexp, $rows[$i], $matches)) {
                     $elementid = trim($matches[$columns->mastercol + 1]);
@@ -275,7 +275,7 @@ function exescorm_parse_aicc(&$exescorm) {
         }
     }
 
-    $oldscoes = $DB->get_records('exescorm_scoes', array('exescorm' => $exescorm->id));
+    $oldscoes = $DB->get_records('seledascorm_scoes', array('seledascorm' => $seledascorm->id));
     $sortorder = 0;
     $launch = 0;
     if (isset($courses)) {
@@ -283,22 +283,22 @@ function exescorm_parse_aicc(&$exescorm) {
             $sortorder++;
             $sco = new stdClass();
             $sco->identifier = $course->id;
-            $sco->exescorm = $exescorm->id;
+            $sco->seledascorm = $seledascorm->id;
             $sco->organization = '';
             $sco->title = $course->title;
             $sco->parent = '/';
             $sco->launch = '';
-            $sco->exescormtype = '';
+            $sco->seledascormtype = '';
             $sco->sortorder = $sortorder;
 
-            if ($ss = $DB->get_record('exescorm_scoes', array('exescorm' => $exescorm->id,
+            if ($ss = $DB->get_record('seledascorm_scoes', array('seledascorm' => $seledascorm->id,
                                                            'identifier' => $sco->identifier))) {
                 $id = $ss->id;
                 $sco->id = $id;
-                $DB->update_record('exescorm_scoes', $sco);
+                $DB->update_record('seledascorm_scoes', $sco);
                 unset($oldscoes[$id]);
             } else {
-                $id = $DB->insert_record('exescorm_scoes', $sco);
+                $id = $DB->insert_record('seledascorm_scoes', $sco);
             }
 
             if ($launch == 0) {
@@ -309,7 +309,7 @@ function exescorm_parse_aicc(&$exescorm) {
                     unset($sco);
                     $sco = new stdClass();
                     $sco->identifier = $element->system_id;
-                    $sco->exescorm = $exescorm->id;
+                    $sco->seledascorm = $seledascorm->id;
                     $sco->organization = $course->id;
                     $sco->title = $element->title;
 
@@ -321,23 +321,23 @@ function exescorm_parse_aicc(&$exescorm) {
                         $sco->parent = $element->parent;
                     }
                     $sco->launch = '';
-                    $sco->exescormtype = '';
+                    $sco->seledascormtype = '';
                     $sco->previous = 0;
                     $sco->next = 0;
                     $id = null;
                     // Is it an Assignable Unit (AU)?
                     if (isset($element->file_name)) {
                         $sco->launch = $element->file_name;
-                        $sco->exescormtype = 'sco';
+                        $sco->seledascormtype = 'sco';
                     }
-                    if ($oldscoid = exescorm_array_search('identifier', $sco->identifier, $oldscoes)) {
+                    if ($oldscoid = seledascorm_array_search('identifier', $sco->identifier, $oldscoes)) {
                         $sco->id = $oldscoid;
-                        $DB->update_record('exescorm_scoes', $sco);
+                        $DB->update_record('seledascorm_scoes', $sco);
                         $id = $oldscoid;
-                        $DB->delete_records('exescorm_scoes_data', array('scoid' => $oldscoid));
+                        $DB->delete_records('seledascorm_scoes_data', array('scoid' => $oldscoid));
                         unset($oldscoes[$oldscoid]);
                     } else {
-                        $id = $DB->insert_record('exescorm_scoes', $sco);
+                        $id = $DB->insert_record('seledascorm_scoes', $sco);
                     }
                     if (!empty($id)) {
                         $scodata = new stdClass();
@@ -345,32 +345,32 @@ function exescorm_parse_aicc(&$exescorm) {
                         if (isset($element->web_launch)) {
                             $scodata->name = 'parameters';
                             $scodata->value = $element->web_launch;
-                            $dataid = $DB->insert_record('exescorm_scoes_data', $scodata);
+                            $dataid = $DB->insert_record('seledascorm_scoes_data', $scodata);
                         }
                         if (isset($element->prerequisites)) {
                             $scodata->name = 'prerequisites';
                             $scodata->value = $element->prerequisites;
-                            $dataid = $DB->insert_record('exescorm_scoes_data', $scodata);
+                            $dataid = $DB->insert_record('seledascorm_scoes_data', $scodata);
                         }
                         if (isset($element->max_time_allowed)) {
                             $scodata->name = 'max_time_allowed';
                             $scodata->value = $element->max_time_allowed;
-                            $dataid = $DB->insert_record('exescorm_scoes_data', $scodata);
+                            $dataid = $DB->insert_record('seledascorm_scoes_data', $scodata);
                         }
                         if (isset($element->time_limit_action)) {
                             $scodata->name = 'time_limit_action';
                             $scodata->value = $element->time_limit_action;
-                            $dataid = $DB->insert_record('exescorm_scoes_data', $scodata);
+                            $dataid = $DB->insert_record('seledascorm_scoes_data', $scodata);
                         }
                         if (isset($element->mastery_score)) {
                             $scodata->name = 'mastery_score';
                             $scodata->value = $element->mastery_score;
-                            $dataid = $DB->insert_record('exescorm_scoes_data', $scodata);
+                            $dataid = $DB->insert_record('seledascorm_scoes_data', $scodata);
                         }
                         if (isset($element->core_vendor)) {
                             $scodata->name = 'datafromlms';
                             $scodata->value = preg_replace('/<cr>/i', "\r\n", $element->core_vendor);
-                            $dataid = $DB->insert_record('exescorm_scoes_data', $scodata);
+                            $dataid = $DB->insert_record('seledascorm_scoes_data', $scodata);
                         }
                     }
                     if ($launch == 0) {
@@ -382,48 +382,48 @@ function exescorm_parse_aicc(&$exescorm) {
     }
     if (!empty($oldscoes)) {
         foreach ($oldscoes as $oldsco) {
-            $DB->delete_records('exescorm_scoes', array('id' => $oldsco->id));
-            $DB->delete_records('exescorm_scoes_track', array('scoid' => $oldsco->id));
+            $DB->delete_records('seledascorm_scoes', array('id' => $oldsco->id));
+            $DB->delete_records('seledascorm_scoes_track', array('scoid' => $oldsco->id));
         }
     }
 
     // Find first launchable object.
-    $sqlselect = 'exescorm = ? AND '.$DB->sql_isnotempty('exescorm_scoes', 'launch', false, true);
+    $sqlselect = 'seledascorm = ? AND '.$DB->sql_isnotempty('seledascorm_scoes', 'launch', false, true);
     // We use get_records here as we need to pass a limit in the query that works cross db.
-    $scoes = $DB->get_records_select('exescorm_scoes', $sqlselect, array($exescorm->id), 'sortorder', 'id', 0, 1);
+    $scoes = $DB->get_records_select('seledascorm_scoes', $sqlselect, array($seledascorm->id), 'sortorder', 'id', 0, 1);
     if (!empty($scoes)) {
         $sco = reset($scoes); // We only care about the first record - the above query only returns one.
-        $exescorm->launch = $sco->id;
+        $seledascorm->launch = $sco->id;
     } else {
-        $exescorm->launch = $launch;
+        $seledascorm->launch = $launch;
     }
 
-    $exescorm->version = 'AICC';
+    $seledascorm->version = 'AICC';
 
     return true;
 }
 
 /**
- * Given a exescormid creates an AICC Session record to allow HACP
+ * Given a seledascormid creates an AICC Session record to allow HACP
  *
- * @param int $exescormid - id from exescorm table
+ * @param int $seledascormid - id from seledascorm table
  * @return string hacpsession
  */
-function exescorm_aicc_get_hacp_session($exescormid) {
+function seledascorm_aicc_get_hacp_session($seledascormid) {
     global $USER, $DB, $SESSION;
-    $cfgexescorm = get_config('exescorm');
-    if (empty($cfgexescorm->allowaicchacp)) {
+    $cfgseledascorm = get_config('seledascorm');
+    if (empty($cfgseledascorm->allowaicchacp)) {
         return false;
     }
     $now = time();
 
-    $hacpsession = $SESSION->exescorm;
-    $hacpsession->exescormid = $exescormid;
+    $hacpsession = $SESSION->seledascorm;
+    $hacpsession->seledascormid = $seledascormid;
     $hacpsession->hacpsession = random_string(20);
     $hacpsession->userid = $USER->id;
     $hacpsession->timecreated = $now;
     $hacpsession->timemodified = $now;
-    $DB->insert_record('exescorm_aicc_session', $hacpsession);
+    $DB->insert_record('seledascorm_aicc_session', $hacpsession);
 
     return $hacpsession->hacpsession;
 }
@@ -433,20 +433,20 @@ function exescorm_aicc_get_hacp_session($exescormid) {
  *
  * @param string $hacpsession The hacpsession value to check (optional). Normally leave this blank
  *      and this function will do required_param('sesskey', ...).
- * @return mixed - false if invalid, otherwise returns record from exescorm_aicc_session table.
+ * @return mixed - false if invalid, otherwise returns record from seledascorm_aicc_session table.
  */
-function exescorm_aicc_confirm_hacp_session($hacpsession) {
+function seledascorm_aicc_confirm_hacp_session($hacpsession) {
     global $DB;
-    $cfgexescorm = get_config('exescorm');
-    if (empty($cfgexescorm->allowaicchacp)) {
+    $cfgseledascorm = get_config('seledascorm');
+    if (empty($cfgseledascorm->allowaicchacp)) {
         return false;
     }
-    $time = time() - ($cfgexescorm->aicchacptimeout * 60);
+    $time = time() - ($cfgseledascorm->aicchacptimeout * 60);
     $sql = "hacpsession = ? AND timemodified > ?";
-    $hacpsession = $DB->get_record_select('exescorm_aicc_session', $sql, array($hacpsession, $time));
+    $hacpsession = $DB->get_record_select('seledascorm_aicc_session', $sql, array($hacpsession, $time));
     if (!empty($hacpsession)) { // Update timemodified as this is still an active session - resets the timeout.
         $hacpsession->timemodified = time();
-        $DB->update_record('exescorm_aicc_session', $hacpsession);
+        $DB->update_record('seledascorm_aicc_session', $hacpsession);
     }
     return $hacpsession;
 }
@@ -456,12 +456,12 @@ function exescorm_aicc_confirm_hacp_session($hacpsession) {
  * structure to wrap around and externally linked
  * AICC package URL
  *
- * @param object $exescorm package record
+ * @param object $seledascorm package record
  */
-function exescorm_aicc_generate_simple_sco($exescorm) {
+function seledascorm_aicc_generate_simple_sco($seledascorm) {
     global $DB;
     // Find the oldest one.
-    $scos = $DB->get_records('exescorm_scoes', array('exescorm' => $exescorm->id), 'id');
+    $scos = $DB->get_records('seledascorm_scoes', array('seledascorm' => $seledascorm->id), 'id');
     if (!empty($scos)) {
         $sco = array_shift($scos);
     } else {
@@ -469,27 +469,27 @@ function exescorm_aicc_generate_simple_sco($exescorm) {
     }
     // Get rid of old ones.
     foreach ($scos as $oldsco) {
-        $DB->delete_records('exescorm_scoes', array('id' => $oldsco->id));
-        $DB->delete_records('exescorm_scoes_track', array('scoid' => $oldsco->id));
+        $DB->delete_records('seledascorm_scoes', array('id' => $oldsco->id));
+        $DB->delete_records('seledascorm_scoes_track', array('scoid' => $oldsco->id));
     }
 
     $sco->identifier = 'A1';
-    $sco->exescorm = $exescorm->id;
+    $sco->seledascorm = $seledascorm->id;
     $sco->organization = '';
-    $sco->title = $exescorm->name;
+    $sco->title = $seledascorm->name;
     $sco->parent = '/';
     // Add the HACP signal to the activity launcher.
-    if (preg_match('/\?/', $exescorm->reference)) {
-        $sco->launch = $exescorm->reference.'&CMI=HACP';
+    if (preg_match('/\?/', $seledascorm->reference)) {
+        $sco->launch = $seledascorm->reference.'&CMI=HACP';
     } else {
-        $sco->launch = $exescorm->reference.'?CMI=HACP';
+        $sco->launch = $seledascorm->reference.'?CMI=HACP';
     }
-    $sco->exescormtype = 'sco';
+    $sco->seledascormtype = 'sco';
     if (isset($sco->id)) {
-        $DB->update_record('exescorm_scoes', $sco);
+        $DB->update_record('seledascorm_scoes', $sco);
         $id = $sco->id;
     } else {
-        $id = $DB->insert_record('exescorm_scoes', $sco);
+        $id = $DB->insert_record('seledascorm_scoes', $sco);
     }
     return $id;
 }
@@ -498,15 +498,15 @@ function exescorm_aicc_generate_simple_sco($exescorm) {
  * Sets up $userdata array and default values for AICC package.
  *
  * @param stdClass $userdata an empty stdClass variable that should be set up with user values
- * @param object $exescorm package record
+ * @param object $seledascorm package record
  * @param string $scoid SCO Id
  * @param string $attempt attempt number for the user
- * @param string $mode exescorm display mode type
+ * @param string $mode seledascorm display mode type
  * @return array The default values that should be used for AICC package
  */
-function get_exescorm_default (&$userdata, $exescorm, $scoid, $attempt, $mode) {
+function get_seledascorm_default (&$userdata, $seledascorm, $scoid, $attempt, $mode) {
     global $USER;
-    $aiccuserid = get_config('exescorm', 'aiccuserid');
+    $aiccuserid = get_config('seledascorm', 'aiccuserid');
     if (!empty($aiccuserid)) {
         $userdata->student_id = $USER->id;
     } else {
@@ -514,7 +514,7 @@ function get_exescorm_default (&$userdata, $exescorm, $scoid, $attempt, $mode) {
     }
     $userdata->student_name = $USER->lastname .', '. $USER->firstname;
 
-    if ($usertrack = exescorm_get_tracks($scoid, $USER->id, $attempt)) {
+    if ($usertrack = seledascorm_get_tracks($scoid, $USER->id, $attempt)) {
         foreach ($usertrack as $key => $value) {
             $userdata->$key = $value;
         }
@@ -523,15 +523,15 @@ function get_exescorm_default (&$userdata, $exescorm, $scoid, $attempt, $mode) {
         $userdata->score_raw = '';
     }
 
-    if ($scodatas = exescorm_get_sco($scoid, EXESCORM_SCO_DATA)) {
+    if ($scodatas = seledascorm_get_sco($scoid, SELEDASCORM_SCO_DATA)) {
         foreach ($scodatas as $key => $value) {
             $userdata->$key = $value;
         }
     } else {
-        throw new \moodle_exception('cannotfindsco', 'exescorm');
+        throw new \moodle_exception('cannotfindsco', 'seledascorm');
     }
-    if (!$sco = exescorm_get_sco($scoid)) {
-        throw new \moodle_exception('cannotfindsco', 'exescorm');
+    if (!$sco = seledascorm_get_sco($scoid)) {
+        throw new \moodle_exception('cannotfindsco', 'seledascorm');
     }
 
     $userdata->mode = 'normal';
@@ -561,23 +561,23 @@ function get_exescorm_default (&$userdata, $exescorm, $scoid, $attempt, $mode) {
     $def['cmi.core.student_name'] = $userdata->student_name;
     $def['cmi.core.credit'] = $userdata->credit;
     $def['cmi.core.entry'] = $userdata->entry;
-    $def['cmi.launch_data'] = exescorm_isset($userdata, 'datafromlms');
+    $def['cmi.launch_data'] = seledascorm_isset($userdata, 'datafromlms');
     $def['cmi.core.lesson_mode'] = $userdata->mode;
-    $def['cmi.student_data.attempt_number'] = exescorm_isset($userdata, 'cmi.student_data.attempt_number');
-    $def['cmi.student_data.mastery_score'] = exescorm_isset($userdata, 'mastery_score');
-    $def['cmi.student_data.max_time_allowed'] = exescorm_isset($userdata, 'max_time_allowed');
-    $def['cmi.student_data.time_limit_action'] = exescorm_isset($userdata, 'time_limit_action');
-    $def['cmi.student_data.tries_during_lesson'] = exescorm_isset($userdata, 'cmi.student_data.tries_during_lesson');
+    $def['cmi.student_data.attempt_number'] = seledascorm_isset($userdata, 'cmi.student_data.attempt_number');
+    $def['cmi.student_data.mastery_score'] = seledascorm_isset($userdata, 'mastery_score');
+    $def['cmi.student_data.max_time_allowed'] = seledascorm_isset($userdata, 'max_time_allowed');
+    $def['cmi.student_data.time_limit_action'] = seledascorm_isset($userdata, 'time_limit_action');
+    $def['cmi.student_data.tries_during_lesson'] = seledascorm_isset($userdata, 'cmi.student_data.tries_during_lesson');
 
-    $def['cmi.core.lesson_location'] = exescorm_isset($userdata, 'cmi.core.lesson_location');
-    $def['cmi.core.lesson_status'] = exescorm_isset($userdata, 'cmi.core.lesson_status');
-    $def['cmi.core.exit'] = exescorm_isset($userdata, 'cmi.core.exit');
-    $def['cmi.core.score.raw'] = exescorm_isset($userdata, 'cmi.core.score.raw');
-    $def['cmi.core.score.max'] = exescorm_isset($userdata, 'cmi.core.score.max');
-    $def['cmi.core.score.min'] = exescorm_isset($userdata, 'cmi.core.score.min');
-    $def['cmi.core.total_time'] = exescorm_isset($userdata, 'cmi.core.total_time', '00:00:00');
-    $def['cmi.suspend_data'] = exescorm_isset($userdata, 'cmi.suspend_data');
-    $def['cmi.comments'] = exescorm_isset($userdata, 'cmi.comments');
+    $def['cmi.core.lesson_location'] = seledascorm_isset($userdata, 'cmi.core.lesson_location');
+    $def['cmi.core.lesson_status'] = seledascorm_isset($userdata, 'cmi.core.lesson_status');
+    $def['cmi.core.exit'] = seledascorm_isset($userdata, 'cmi.core.exit');
+    $def['cmi.core.score.raw'] = seledascorm_isset($userdata, 'cmi.core.score.raw');
+    $def['cmi.core.score.max'] = seledascorm_isset($userdata, 'cmi.core.score.max');
+    $def['cmi.core.score.min'] = seledascorm_isset($userdata, 'cmi.core.score.min');
+    $def['cmi.core.total_time'] = seledascorm_isset($userdata, 'cmi.core.total_time', '00:00:00');
+    $def['cmi.suspend_data'] = seledascorm_isset($userdata, 'cmi.suspend_data');
+    $def['cmi.comments'] = seledascorm_isset($userdata, 'cmi.comments');
 
     return $def;
 }

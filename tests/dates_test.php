@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Contains unit tests for mod_exescorm\dates.
+ * Contains unit tests for mod_seledascorm\dates.
  *
- * @package   mod_exescorm
+ * @package   mod_seledascorm
  * @category  test
  * @copyright 2021 Shamim Rezaie <shamim@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -25,14 +25,14 @@
 
 declare(strict_types=1);
 
-namespace mod_exescorm;
+namespace mod_seledascorm;
 
 use advanced_testcase;
 use cm_info;
 use core\activity_dates;
 
 /**
- * Class for unit testing mod_exescorm\dates.
+ * Class for unit testing mod_seledascorm\dates.
  *
  * @copyright 2021 Shamim Rezaie <shamim@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -89,8 +89,8 @@ class dates_test extends advanced_testcase {
      * Test for get_dates_for_module().
      *
      * @dataProvider get_dates_for_module_provider
-     * @param int|null $timeopen The 'available from' value of the exescorm.
-     * @param int|null $timeclose The 'available to' value of the exescorm.
+     * @param int|null $timeopen The 'available from' value of the seledascorm.
+     * @param int|null $timeclose The 'available to' value of the seledascorm.
      * @param array $expected The expected value of calling get_dates_for_module()
      */
     public function test_get_dates_for_module(?int $timeopen, ?int $timeclose, array $expected) {
@@ -108,11 +108,11 @@ class dates_test extends advanced_testcase {
             $data['timeclose'] = $timeclose;
         }
         $this->setAdminUser();
-        $exescorm = $this->getDataGenerator()->create_module('exescorm', $data);
+        $seledascorm = $this->getDataGenerator()->create_module('seledascorm', $data);
 
         $this->setUser($user);
 
-        $cm = get_coursemodule_from_instance('exescorm', $exescorm->id);
+        $cm = get_coursemodule_from_instance('seledascorm', $seledascorm->id);
         // Make sure we're using a cm_info object.
         $cm = cm_info::create($cm);
 

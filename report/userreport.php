@@ -17,13 +17,13 @@
 /**
  * This page displays the user data from a single attempt
  *
- * @package mod_exescorm
+ * @package mod_seledascorm
  * @copyright 1999 onwards Martin Dougiamas {@link http://moodle.com}
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once("../../../config.php");
-require_once($CFG->dirroot.'/mod/exescorm/locallib.php');
+require_once($CFG->dirroot.'/mod/seledascorm/locallib.php');
 
 $id = required_param('id', PARAM_INT); // Course Module ID.
 $userid = required_param('user', PARAM_INT); // User ID.
@@ -31,31 +31,31 @@ $attempt = optional_param('attempt', 1, PARAM_INT); // Attempt number.
 $mode = optional_param('mode', '', PARAM_ALPHA); // Scorm mode from which reached here.
 
 // Building the url to use for links.+ data details buildup.
-$url = new moodle_url('/mod/exescorm/report/userreport.php', array('id' => $id,
+$url = new moodle_url('/mod/seledascorm/report/userreport.php', array('id' => $id,
     'user' => $userid,
     'attempt' => $attempt));
-$tracksurl = new moodle_url('/mod/exescorm/report/userreporttracks.php', array('id' => $id,
+$tracksurl = new moodle_url('/mod/seledascorm/report/userreporttracks.php', array('id' => $id,
     'user' => $userid,
     'attempt' => $attempt,
      'mode' => $mode));
-$cm = get_coursemodule_from_id('exescorm', $id, 0, false, MUST_EXIST);
+$cm = get_coursemodule_from_id('seledascorm', $id, 0, false, MUST_EXIST);
 $course = get_course($cm->course);
-$exescorm = $DB->get_record('exescorm', array('id' => $cm->instance), '*', MUST_EXIST);
+$seledascorm = $DB->get_record('seledascorm', array('id' => $cm->instance), '*', MUST_EXIST);
 $user = $DB->get_record('user', array('id' => $userid), implode(',', \core_user\fields::get_picture_fields()), MUST_EXIST);
 // Get list of attempts this user has made.
-$attemptids = exescorm_get_all_attempts($exescorm->id, $userid);
+$attemptids = seledascorm_get_all_attempts($seledascorm->id, $userid);
 
 $PAGE->set_url($url);
 // Moodle 4.0+ only.
 if ($CFG->version >= 2022041900) {
-    $PAGE->set_secondary_active_tab('exescormreport');
+    $PAGE->set_secondary_active_tab('seledascormreport');
 }
 // END of url setting + data buildup.
 
 // Checking login +logging +getting context.
 require_login($course, false, $cm);
 $contextmodule = context_module::instance($cm->id);
-require_capability('mod/exescorm:viewreport', $contextmodule);
+require_capability('mod/seledascorm:viewreport', $contextmodule);
 
 // Check user has group access.
 if (!groups_user_groups_visible($course, $userid, $cm)) {
@@ -63,22 +63,22 @@ if (!groups_user_groups_visible($course, $userid, $cm)) {
 }
 
 // Trigger a user report viewed event.
-$event = \mod_exescorm\event\user_report_viewed::create(array(
+$event = \mod_seledascorm\event\user_report_viewed::create(array(
     'context' => $contextmodule,
     'relateduserid' => $userid,
-    'other' => array('attemptid' => $attempt, 'instanceid' => $exescorm->id)
+    'other' => array('attemptid' => $attempt, 'instanceid' => $seledascorm->id)
 ));
 $event->add_record_snapshot('course_modules', $cm);
-$event->add_record_snapshot('exescorm', $exescorm);
+$event->add_record_snapshot('seledascorm', $seledascorm);
 $event->trigger();
 
 // Print the page header.
-$strreport = get_string('report', 'mod_exescorm');
-$strattempt = get_string('attempt', 'mod_exescorm');
+$strreport = get_string('report', 'mod_seledascorm');
+$strattempt = get_string('attempt', 'mod_seledascorm');
 
-$PAGE->set_title("$course->shortname: ".format_string($exescorm->name));
+$PAGE->set_title("$course->shortname: ".format_string($seledascorm->name));
 $PAGE->set_heading($course->fullname);
-$PAGE->navbar->add($strreport, new moodle_url('/mod/exescorm/report.php', array('id' => $cm->id)));
+$PAGE->navbar->add($strreport, new moodle_url('/mod/seledascorm/report.php', array('id' => $cm->id)));
 $PAGE->navbar->add(fullname($user). " - $strattempt $attempt");
 $PAGE->activityheader->set_attrs([
     'hidecompletion' => true,
@@ -89,22 +89,22 @@ echo $OUTPUT->header();
 // End of Print the page header.
 $currenttab = 'scoes';
 
-$renderer = $PAGE->get_renderer('mod_exescorm');
-$useractionreport = new \mod_exescorm\output\userreportsactionbar($id, $userid, $attempt, 'learning', $mode);
+$renderer = $PAGE->get_renderer('mod_seledascorm');
+$useractionreport = new \mod_seledascorm\output\userreportsactionbar($id, $userid, $attempt, 'learning', $mode);
 echo $renderer->user_report_actionbar($useractionreport);
 
 // Printing user details.
-$output = $PAGE->get_renderer('mod_exescorm');
+$output = $PAGE->get_renderer('mod_seledascorm');
 echo $output->view_user_heading($user, $course, $PAGE->url, $attempt, $attemptids);
 
-if ($scoes = $DB->get_records('exescorm_scoes', array('exescorm' => $exescorm->id), 'sortorder, id')) {
+if ($scoes = $DB->get_records('seledascorm_scoes', array('seledascorm' => $seledascorm->id), 'sortorder, id')) {
     // Print general score data.
     $table = new html_table();
     $table->head = array(
-            get_string('title', 'mod_exescorm'),
-            get_string('status', 'mod_exescorm'),
-            get_string('time', 'mod_exescorm'),
-            get_string('score', 'mod_exescorm'),
+            get_string('title', 'mod_seledascorm'),
+            get_string('status', 'mod_seledascorm'),
+            get_string('time', 'mod_seledascorm'),
+            get_string('score', 'mod_seledascorm'),
             '');
     $table->align = array('left', 'center', 'center', 'right', 'left');
     $table->wrap = array('nowrap', 'nowrap', 'nowrap', 'nowrap', 'nowrap');
@@ -114,7 +114,7 @@ if ($scoes = $DB->get_records('exescorm_scoes', array('exescorm' => $exescorm->i
         if ($sco->launch != '') {
             $row = array();
             $score = '&nbsp;';
-            if ($trackdata = exescorm_get_tracks($sco->id, $userid, $attempt)) {
+            if ($trackdata = seledascorm_get_tracks($sco->id, $userid, $attempt)) {
                 if ($trackdata->score_raw != '') {
                     $score = $trackdata->score_raw;
                 }
@@ -126,17 +126,17 @@ if ($scoes = $DB->get_records('exescorm_scoes', array('exescorm' => $exescorm->i
                     }
                 }
                 $tracksurl->param('scoid', $sco->id);
-                $detailslink = html_writer::link($tracksurl, get_string('details', 'mod_exescorm'));
+                $detailslink = html_writer::link($tracksurl, get_string('details', 'mod_seledascorm'));
             } else {
                 $trackdata = new stdClass();
                 $trackdata->status = 'notattempted';
                 $trackdata->total_time = '&nbsp;';
                 $detailslink = '&nbsp;';
             }
-            $strstatus = get_string($trackdata->status, 'mod_exescorm');
-            $row[] = $OUTPUT->pix_icon($trackdata->status, $strstatus, 'exescorm') . '&nbsp;'.format_string($sco->title);
-            $row[] = get_string($trackdata->status, 'mod_exescorm');
-            $row[] = exescorm_format_duration($trackdata->total_time);
+            $strstatus = get_string($trackdata->status, 'mod_seledascorm');
+            $row[] = $OUTPUT->pix_icon($trackdata->status, $strstatus, 'seledascorm') . '&nbsp;'.format_string($sco->title);
+            $row[] = get_string($trackdata->status, 'mod_seledascorm');
+            $row[] = seledascorm_format_duration($trackdata->total_time);
             $row[] = $score;
             $row[] = $detailslink;
         } else {

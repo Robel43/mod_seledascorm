@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * EXESCORM external functions and service definitions.
+ * SELEDASCORM external functions and service definitions.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @category   external
  * @copyright  2015 Juan Leyva <juan@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -28,92 +28,75 @@ defined('MOODLE_INTERNAL') || die();
 
 $functions = [
 
-    'mod_exescorm_manage_embedded_editor_action' => [
-        'classname'   => 'mod_exescorm\external\manage_embedded_editor',
-        'methodname'  => 'execute_action',
-        'description' => 'Execute an install, update, repair, or uninstall action on the embedded eXeLearning editor.',
-        'type'        => 'write',
-        'ajax'        => true,
-        'capabilities' => 'moodle/site:config, mod/exescorm:manageembeddededitor',
-    ],
-    'mod_exescorm_manage_embedded_editor_status' => [
-        'classname'   => 'mod_exescorm\external\manage_embedded_editor',
-        'methodname'  => 'get_status',
-        'description' => 'Return the current installation status of the embedded eXeLearning editor.',
-        'type'        => 'read',
-        'ajax'        => true,
-        'capabilities' => 'moodle/site:config, mod/exescorm:manageembeddededitor',
-    ],
-
-    'mod_exescorm_view_exescorm' => [
-        'classname' => 'mod_exescorm_external',
-        'methodname' => 'view_exescorm',
+    'mod_seledascorm_view_seledascorm' => [
+        'classname' => 'mod_seledascorm_external',
+        'methodname' => 'view_seledascorm',
         'description' => 'Trigger the course module viewed event.',
         'type' => 'write',
         'capabilities' => '',
         'services' => [MOODLE_OFFICIAL_MOBILE_SERVICE],
     ],
 
-    'mod_exescorm_get_exescorm_attempt_count' => [
-        'classname' => 'mod_exescorm_external',
-        'methodname' => 'get_exescorm_attempt_count',
-        'description' => 'Return the number of attempts done by a user in the given EXESCORM.',
+    'mod_seledascorm_get_seledascorm_attempt_count' => [
+        'classname' => 'mod_seledascorm_external',
+        'methodname' => 'get_seledascorm_attempt_count',
+        'description' => 'Return the number of attempts done by a user in the given SELEDASCORM.',
         'type' => 'read',
         'capabilities' => '',
         'services' => [MOODLE_OFFICIAL_MOBILE_SERVICE],
     ],
 
-    'mod_exescorm_get_exescorm_scoes' => [
-        'classname' => 'mod_exescorm_external',
-        'methodname' => 'get_exescorm_scoes',
-        'description' => 'Returns a list containing all the scoes data related to the given exescorm id',
+    'mod_seledascorm_get_seledascorm_scoes' => [
+        'classname' => 'mod_seledascorm_external',
+        'methodname' => 'get_seledascorm_scoes',
+        'description' => 'Returns a list containing all the scoes data related to the given seledascorm id',
         'type' => 'read',
         'capabilities' => '',
         'services' => [MOODLE_OFFICIAL_MOBILE_SERVICE],
     ],
 
-    'mod_exescorm_get_exescorm_user_data' => [
-        'classname' => 'mod_exescorm_external',
-        'methodname' => 'get_exescorm_user_data',
-        'description' => 'Retrieves user tracking and SCO data and default EXESCORM values',
+    'mod_seledascorm_get_seledascorm_user_data' => [
+        'classname' => 'mod_seledascorm_external',
+        'methodname' => 'get_seledascorm_user_data',
+        'description' => 'Retrieves user tracking and SCO data and default SELEDASCORM values',
         'type' => 'read',
         'capabilities' => '',
         'services' => [MOODLE_OFFICIAL_MOBILE_SERVICE],
     ],
 
-    'mod_exescorm_insert_exescorm_tracks' => [
-        'classname' => 'mod_exescorm_external',
-        'methodname' => 'insert_exescorm_tracks',
-        'description' => 'Saves a exescorm tracking record.
+    'mod_seledascorm_insert_seledascorm_tracks' => [
+        'classname' => 'mod_seledascorm_external',
+        'methodname' => 'insert_seledascorm_tracks',
+        'description' => 'Saves a seledascorm tracking record.
                           It will overwrite any existing tracking data for this attempt.
                           Validation should be performed before running the function to ensure the user will not lose any existing
                           attempt data.',
         'type' => 'write',
-        'capabilities' => 'mod/exescorm:savetrack',
+        'capabilities' => 'mod/seledascorm:savetrack',
         'services' => [MOODLE_OFFICIAL_MOBILE_SERVICE],
     ],
 
-    'mod_exescorm_get_exescorm_sco_tracks' => [
-        'classname' => 'mod_exescorm_external',
-        'methodname' => 'get_exescorm_sco_tracks',
+    'mod_seledascorm_get_seledascorm_sco_tracks' => [
+        'classname' => 'mod_seledascorm_external',
+        'methodname' => 'get_seledascorm_sco_tracks',
         'description' => 'Retrieves SCO tracking data for the given user id and attempt number',
         'type' => 'read',
         'capabilities' => '',
         'services' => [MOODLE_OFFICIAL_MOBILE_SERVICE],
     ],
 
-    'mod_exescorm_get_exescorms_by_courses' => [
-        'classname' => 'mod_exescorm_external',
-        'methodname' => 'get_exescorms_by_courses',
-        'description' => 'Returns a list of exescorm instances in a provided set of courses, if
-                            no courses are provided then all the exescorm instances the user has access to will be returned.',
+    'mod_seledascorm_get_seledascorms_by_courses' => [
+        'classname' => 'mod_seledascorm_external',
+        'methodname' => 'get_seledascorms_by_courses',
+        'description' => 'Returns a list of seledascorm instances in a provided set of courses, if
+                            no courses are provided then all the seledascorm instances the user has access to will be returned.',
         'type' => 'read',
         'capabilities' => '',
         'services' => [MOODLE_OFFICIAL_MOBILE_SERVICE],
     ],
 
-    'mod_exescorm_launch_sco' => [
-        'classname' => 'mod_exescorm_external',
+    'mod_seledascorm_launch_sco' => [
+        'classname' => 'mod_seledascorm_external',
         'methodname' => 'launch_sco',
         'description' => 'Trigger the SCO launched event.',
         'type' => 'write',
@@ -121,10 +104,10 @@ $functions = [
         'services' => [MOODLE_OFFICIAL_MOBILE_SERVICE],
     ],
 
-    'mod_exescorm_get_exescorm_access_information' => [
-        'classname' => 'mod_exescorm_external',
-        'methodname' => 'get_exescorm_access_information',
-        'description' => 'Return capabilities information for a given exescorm.',
+    'mod_seledascorm_get_seledascorm_access_information' => [
+        'classname' => 'mod_seledascorm_external',
+        'methodname' => 'get_seledascorm_access_information',
+        'description' => 'Return capabilities information for a given seledascorm.',
         'type' => 'read',
         'services' => [MOODLE_OFFICIAL_MOBILE_SERVICE],
     ],

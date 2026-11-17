@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace mod_exescorm\output;
+namespace mod_seledascorm\output;
 
 use renderable;
 use renderer_base;
@@ -25,7 +25,7 @@ use url_select;
 /**
  * Render HTML elements for reports page on tertiary nav.
  *
- * @package mod_exescorm
+ * @package mod_seledascorm
  * @copyright 2021 Sujith Haridasan <sujith@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -56,7 +56,7 @@ class userreportsactionbar implements renderable, templatable {
      * @param int $attempt Number of attempts.
      * @param string $reporttype The report type can be either learning/interact.
      * @param string $mode The mode view to set the back button.
-     * @param int|null $scoid The exescorm id.
+     * @param int|null $scoid The seledascorm id.
      */
     public function __construct(int $id, int $userid, int $attempt, string $reporttype, string $mode, ?int $scoid = null) {
         $this->id = $id;
@@ -75,24 +75,24 @@ class userreportsactionbar implements renderable, templatable {
      */
     public function export_for_template(renderer_base $output): array {
         $data = [
-            'backurl' => (new moodle_url('/mod/exescorm/report.php', ['id' => $this->id, 'mode' => $this->mode]))->out(false)
+            'backurl' => (new moodle_url('/mod/seledascorm/report.php', ['id' => $this->id, 'mode' => $this->mode]))->out(false)
         ];
 
         if (!$this->scoid) {
-            $learnobjects = new moodle_url('/mod/exescorm/report/userreport.php',
+            $learnobjects = new moodle_url('/mod/seledascorm/report/userreport.php',
                     ['id' => $this->id, 'user' => $this->userid, 'attempt' => $this->attempt, 'mode' => $this->mode]);
-            $interactions = new moodle_url('/mod/exescorm/report/userreportinteractions.php',
+            $interactions = new moodle_url('/mod/seledascorm/report/userreportinteractions.php',
                     ['id' => $this->id, 'user' => $this->userid, 'attempt' => $this->attempt, 'mode' => $this->mode]);
 
-            $reportmenu[$learnobjects->out(false)] = get_string('scoes', 'mod_exescorm');
-            $reportmenu[$interactions->out(false)] = get_string('interactions', 'mod_exescorm');
+            $reportmenu[$learnobjects->out(false)] = get_string('scoes', 'mod_seledascorm');
+            $reportmenu[$interactions->out(false)] = get_string('interactions', 'mod_seledascorm');
 
             if ($this->reporttype === 'learning') {
                 $userreporturl = $learnobjects->out(false);
             } else {
                 $userreporturl = $interactions->out(false);
             }
-            $urlselect = new url_select($reportmenu, $userreporturl, [], 'userexescormreport');
+            $urlselect = new url_select($reportmenu, $userreporturl, [], 'userseledascormreport');
             $data['userreport'] = $urlselect->export_for_template($output);
             $data['heading'] = $reportmenu[$userreporturl] ?? null;
         }

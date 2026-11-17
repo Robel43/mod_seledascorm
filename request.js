@@ -67,15 +67,15 @@ function DoRequest(httpReq, url, param, allowBeaconAPI) {
      * @returns {boolean}
      */
     var useBeaconAPI = function() {
-        if (typeof window.mod_exescorm_useBeaconAPI === 'undefined' || window.mod_exescorm_useBeaconAPI === false) {
-            // Last ditch effort, the EXESCORM package may have introduced its own listeners before our listeners.
+        if (typeof window.mod_seledascorm_useBeaconAPI === 'undefined' || window.mod_seledascorm_useBeaconAPI === false) {
+            // Last ditch effort, the SELEDASCORM package may have introduced its own listeners before our listeners.
             // This is OLD API, window.event is not reliable and is not recommended API.
             // https://developer.mozilla.org/en-US/docs/Web/API/Window/event
             if (window.event && ['beforeunload', 'unload', 'pagehide'].indexOf(window.event.type)) {
-                window.mod_exescorm_useBeaconAPI = true;
+                window.mod_seledascorm_useBeaconAPI = true;
             }
         }
-        return (window.mod_exescorm_useBeaconAPI && canUseBeaconAPI());
+        return (window.mod_seledascorm_useBeaconAPI && canUseBeaconAPI());
     };
 
     /**
@@ -120,7 +120,7 @@ function DoRequest(httpReq, url, param, allowBeaconAPI) {
         var outcome = navigator.sendBeacon(url, formData);
         if (!outcome) {
             if (console && console.log) {
-                console.log('mod_exescorm: Failed to queue navigator.sendBeacon request');
+                console.log('mod_seledascorm: Failed to queue navigator.sendBeacon request');
             }
             return "false\n101";
         }
@@ -142,7 +142,7 @@ function DoRequest(httpReq, url, param, allowBeaconAPI) {
     } catch (e) {
         if (console && console.log) {
             // This may be frivolous as during a shutdown the console log will most likely be lost. But it may help someone.
-            var message = 'XHR request from mod_exescorm::DoRequest failed';
+            var message = 'XHR request from mod_seledascorm::DoRequest failed';
             if (canUseBeaconAPI()) {
                 message += '; attempting to use Beacon API.';
             }
@@ -175,7 +175,7 @@ function popupwin(content) {
  * Global variable to track whether we should use the Beacon API instead of synchronous XHR.
  * This gets set to true in situations where we expect synchronoush XHR requests to fail.
  */
-window.mod_exescorm_useBeaconAPI = false;
+window.mod_seledascorm_useBeaconAPI = false;
 
 /**
  * We wire up a small marker for the unload events triggered when the user is navigating away or closing the tab.
@@ -185,14 +185,14 @@ window.mod_exescorm_useBeaconAPI = false;
  *  - pagehide
  *  - visibilitychange
  */
-function mod_exescorm_monitorForBeaconRequirement(target) {
+function mod_seledascorm_monitorForBeaconRequirement(target) {
 
-    if (typeof target.mod_exescorm_monitoring_for_beacon_requirement !== 'undefined') {
+    if (typeof target.mod_seledascorm_monitoring_for_beacon_requirement !== 'undefined') {
         // We're already observing unload events on this target.
-        console.log('mod_exescorm: unload event handlers already attached');
+        console.log('mod_seledascorm: unload event handlers already attached');
         return;
     }
-    target.mod_exescorm_monitoring_for_beacon_requirement = true;
+    target.mod_seledascorm_monitoring_for_beacon_requirement = true;
 
     // The navigator.sendBeacon API is available in all browsers EXCEPT Internet Explorer (IE)
     // Internet explorer should never get past this check.
@@ -206,14 +206,14 @@ function mod_exescorm_monitorForBeaconRequirement(target) {
      * Turns on the use of the Beacon API.
      */
     var toggleOn = function() {
-        window.mod_exescorm_useBeaconAPI = true;
+        window.mod_seledascorm_useBeaconAPI = true;
     };
 
     /**
      * Turns off the use of the Beacon API.
      */
     var toggleOff = function() {
-        window.mod_exescorm_useBeaconAPI = false;
+        window.mod_seledascorm_useBeaconAPI = false;
     };
 
     /**
@@ -240,7 +240,7 @@ function mod_exescorm_monitorForBeaconRequirement(target) {
     observe('pageshow', toggleOff);
 
     // Finally listen to the visibility change event, and respond to it.
-    // This unfortunately is not ideal, but is required as a EXESCORM package may also be listening to this and
+    // This unfortunately is not ideal, but is required as a SELEDASCORM package may also be listening to this and
     // trying to save content when the user hides the page. As this can occur as part of the page dismissal lifecycle
     // we also need to ensure we use the Beacon API here.
     observe('visibilitychange', function() {
@@ -254,4 +254,4 @@ function mod_exescorm_monitorForBeaconRequirement(target) {
     });
 }
 // Begin monitoring on the main window immediately.
-mod_exescorm_monitorForBeaconRequirement(window);
+mod_seledascorm_monitorForBeaconRequirement(window);

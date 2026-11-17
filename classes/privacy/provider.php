@@ -17,12 +17,12 @@
 /**
  * Privacy class for requesting user data.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  2018 Sara Arjona <sara@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_exescorm\privacy;
+namespace mod_seledascorm\privacy;
 
 use core_privacy\local\metadata\collection;
 use core_privacy\local\request\approved_contextlist;
@@ -51,24 +51,24 @@ class provider implements
      * @return  collection A listing of user data stored through this system.
      */
     public static function get_metadata(collection $collection) : collection {
-        $collection->add_database_table('exescorm_scoes_track', [
+        $collection->add_database_table('seledascorm_scoes_track', [
                 'userid' => 'privacy:metadata:userid',
                 'attempt' => 'privacy:metadata:attempt',
                 'element' => 'privacy:metadata:scoes_track:element',
                 'value' => 'privacy:metadata:scoes_track:value',
                 'timemodified' => 'privacy:metadata:timemodified'
-            ], 'privacy:metadata:exescorm_scoes_track');
+            ], 'privacy:metadata:seledascorm_scoes_track');
 
-        $collection->add_database_table('exescorm_aicc_session', [
+        $collection->add_database_table('seledascorm_aicc_session', [
                 'userid' => 'privacy:metadata:userid',
-                'exescormmode' => 'privacy:metadata:aicc_session:exescormmode',
-                'exescormstatus' => 'privacy:metadata:aicc_session:exescormstatus',
+                'seledascormmode' => 'privacy:metadata:aicc_session:seledascormmode',
+                'seledascormstatus' => 'privacy:metadata:aicc_session:seledascormstatus',
                 'attempt' => 'privacy:metadata:attempt',
                 'lessonstatus' => 'privacy:metadata:aicc_session:lessonstatus',
                 'sessiontime' => 'privacy:metadata:aicc_session:sessiontime',
                 'timecreated' => 'privacy:metadata:aicc_session:timecreated',
                 'timemodified' => 'privacy:metadata:timemodified',
-            ], 'privacy:metadata:exescorm_aicc_session');
+            ], 'privacy:metadata:seledascorm_aicc_session');
 
         $collection->add_external_location_link('aicc', [
                 'data' => 'privacy:metadata:aicc:data'
@@ -87,9 +87,9 @@ class provider implements
         $sql = "SELECT ctx.id
                   FROM {%s} ss
                   JOIN {modules} m
-                    ON m.name = 'exescorm'
+                    ON m.name = 'seledascorm'
                   JOIN {course_modules} cm
-                    ON cm.instance = ss.exescormid
+                    ON cm.instance = ss.seledascormid
                    AND cm.module = m.id
                   JOIN {context} ctx
                     ON ctx.instanceid = cm.id
@@ -98,8 +98,8 @@ class provider implements
 
         $params = ['modlevel' => CONTEXT_MODULE, 'userid' => $userid];
         $contextlist = new contextlist();
-        $contextlist->add_from_sql(sprintf($sql, 'exescorm_scoes_track'), $params);
-        $contextlist->add_from_sql(sprintf($sql, 'exescorm_aicc_session'), $params);
+        $contextlist->add_from_sql(sprintf($sql, 'seledascorm_scoes_track'), $params);
+        $contextlist->add_from_sql(sprintf($sql, 'seledascorm_aicc_session'), $params);
 
         return $contextlist;
     }
@@ -119,9 +119,9 @@ class provider implements
         $sql = "SELECT ss.userid
                   FROM {%s} ss
                   JOIN {modules} m
-                    ON m.name = 'exescorm'
+                    ON m.name = 'seledascorm'
                   JOIN {course_modules} cm
-                    ON cm.instance = ss.exescormid
+                    ON cm.instance = ss.seledascormid
                    AND cm.module = m.id
                   JOIN {context} ctx
                     ON ctx.instanceid = cm.id
@@ -130,8 +130,8 @@ class provider implements
 
         $params = ['modlevel' => CONTEXT_MODULE, 'contextid' => $context->id];
 
-        $userlist->add_from_sql('userid', sprintf($sql, 'exescorm_scoes_track'), $params);
-        $userlist->add_from_sql('userid', sprintf($sql, 'exescorm_aicc_session'), $params);
+        $userlist->add_from_sql('userid', sprintf($sql, 'seledascorm_scoes_track'), $params);
+        $userlist->add_from_sql('userid', sprintf($sql, 'seledascorm_aicc_session'), $params);
     }
 
     /**
@@ -156,7 +156,7 @@ class provider implements
 
         $user = $contextlist->get_user();
         $userid = $user->id;
-        // Get EXESCORM data.
+        // Get SELEDASCORM data.
         foreach ($contexts as $contextid) {
             $context = \context::instance_by_id($contextid);
             $data = helper::get_context_data($context, $user);
@@ -172,9 +172,9 @@ class provider implements
                        ss.value,
                        ss.timemodified,
                        ctx.id as contextid
-                  FROM {exescorm_scoes_track} ss
+                  FROM {seledascorm_scoes_track} ss
                   JOIN {course_modules} cm
-                    ON cm.instance = ss.exescormid
+                    ON cm.instance = ss.seledascormid
                   JOIN {context} ctx
                     ON ctx.instanceid = cm.id
                  WHERE ctx.id $insql
@@ -192,14 +192,14 @@ class provider implements
         }
         $scoestracks->close();
 
-        // The scoes_track data is organised in: {Course name}/{EXESCORM activity name}/{My attempts}/{Attempt X}/data.json
+        // The scoes_track data is organised in: {Course name}/{SELEDASCORM activity name}/{My attempts}/{Attempt X}/data.json
         // where X is the attempt number.
         array_walk($alldata, function($attemptsdata, $contextid) {
             $context = \context::instance_by_id($contextid);
             array_walk($attemptsdata, function($data, $attempt) use ($context) {
                 $subcontext = [
-                    get_string('myattempts', 'mod_exescorm'),
-                    get_string('attempt', 'mod_exescorm'). " $attempt"
+                    get_string('myattempts', 'mod_seledascorm'),
+                    get_string('attempt', 'mod_seledascorm'). " $attempt"
                 ];
                 writer::with_context($context)->export_data(
                     $subcontext,
@@ -210,17 +210,17 @@ class provider implements
 
         // Get aicc_session data.
         $sql = "SELECT ss.id,
-                       ss.exescormmode,
-                       ss.exescormstatus,
+                       ss.seledascormmode,
+                       ss.seledascormstatus,
                        ss.attempt,
                        ss.lessonstatus,
                        ss.sessiontime,
                        ss.timecreated,
                        ss.timemodified,
                        ctx.id as contextid
-                  FROM {exescorm_aicc_session} ss
+                  FROM {seledascorm_aicc_session} ss
                   JOIN {course_modules} cm
-                    ON cm.instance = ss.exescormid
+                    ON cm.instance = ss.seledascormid
                   JOIN {context} ctx
                     ON ctx.instanceid = cm.id
                  WHERE ctx.id $insql
@@ -231,8 +231,8 @@ class provider implements
         $aiccsessions = $DB->get_recordset_sql($sql, $params);
         foreach ($aiccsessions as $aiccsession) {
             $alldata[$aiccsession->contextid][] = (object)[
-                    'exescormmode' => $aiccsession->exescormmode,
-                    'exescormstatus' => $aiccsession->exescormstatus,
+                    'seledascormmode' => $aiccsession->seledascormmode,
+                    'seledascormstatus' => $aiccsession->seledascormstatus,
                     'lessonstatus' => $aiccsession->lessonstatus,
                     'attempt' => $aiccsession->attempt,
                     'sessiontime' => $aiccsession->sessiontime,
@@ -242,12 +242,12 @@ class provider implements
         }
         $aiccsessions->close();
 
-        // The aicc_session data is organised in: {Course name}/{EXESCORM activity name}/{My AICC sessions}/data.json
+        // The aicc_session data is organised in: {Course name}/{SELEDASCORM activity name}/{My AICC sessions}/data.json
         // In this case, the attempt hasn't been included in the json file because it can be null.
         array_walk($alldata, function($data, $contextid) {
             $context = \context::instance_by_id($contextid);
             $subcontext = [
-                get_string('myaiccsessions', 'mod_exescorm')
+                get_string('myaiccsessions', 'mod_seledascorm')
             ];
             writer::with_context($context)->export_data(
                 $subcontext,
@@ -271,15 +271,15 @@ class provider implements
         $sql = "SELECT ss.id
                   FROM {%s} ss
                   JOIN {modules} m
-                    ON m.name = 'exescorm'
+                    ON m.name = 'seledascorm'
                   JOIN {course_modules} cm
-                    ON cm.instance = ss.exescormid
+                    ON cm.instance = ss.seledascormid
                    AND cm.module = m.id
                  WHERE cm.id = :cmid";
         $params = ['cmid' => $context->instanceid];
 
-        static::delete_data('exescorm_scoes_track', $sql, $params);
-        static::delete_data('exescorm_aicc_session', $sql, $params);
+        static::delete_data('seledascorm_scoes_track', $sql, $params);
+        static::delete_data('seledascorm_aicc_session', $sql, $params);
     }
 
     /**
@@ -307,9 +307,9 @@ class provider implements
         $sql = "SELECT ss.id
                   FROM {%s} ss
                   JOIN {modules} m
-                    ON m.name = 'exescorm'
+                    ON m.name = 'seledascorm'
                   JOIN {course_modules} cm
-                    ON cm.instance = ss.exescormid
+                    ON cm.instance = ss.seledascormid
                    AND cm.module = m.id
                   JOIN {context} ctx
                     ON ctx.instanceid = cm.id
@@ -317,8 +317,8 @@ class provider implements
                    AND ctx.id $insql";
         $params = array_merge($inparams, ['userid' => $userid]);
 
-        static::delete_data('exescorm_scoes_track', $sql, $params);
-        static::delete_data('exescorm_aicc_session', $sql, $params);
+        static::delete_data('seledascorm_scoes_track', $sql, $params);
+        static::delete_data('seledascorm_aicc_session', $sql, $params);
     }
 
     /**
@@ -341,9 +341,9 @@ class provider implements
         $sql = "SELECT ss.id
                   FROM {%s} ss
                   JOIN {modules} m
-                    ON m.name = 'exescorm'
+                    ON m.name = 'seledascorm'
                   JOIN {course_modules} cm
-                    ON cm.instance = ss.exescormid
+                    ON cm.instance = ss.seledascormid
                    AND cm.module = m.id
                   JOIN {context} ctx
                     ON ctx.instanceid = cm.id
@@ -351,8 +351,8 @@ class provider implements
                    AND ss.userid $insql";
         $params = array_merge($inparams, ['contextid' => $context->id]);
 
-        static::delete_data('exescorm_scoes_track', $sql, $params);
-        static::delete_data('exescorm_aicc_session', $sql, $params);
+        static::delete_data('seledascorm_scoes_track', $sql, $params);
+        static::delete_data('seledascorm_aicc_session', $sql, $params);
     }
 
     /**

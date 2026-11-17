@@ -15,19 +15,19 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Search area for mod_exescorm activities.
+ * Search area for mod_seledascorm activities.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  2015 David Monllao {@link http://www.davidmonllao.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_exescorm\search;
+namespace mod_seledascorm\search;
 
 /**
- * Search area for mod_exescorm activities.
+ * Search area for mod_seledascorm activities.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  2015 David Monllao {@link http://www.davidmonllao.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

@@ -14,19 +14,19 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 /**
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @author     Ankit Kumar Agarwal
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_exescorm;
+namespace mod_seledascorm;
 
 /*******************************************************************/
 // Default class for Scorm plugins
 //
 // Doesn't do anything on it's own -- it needs to be extended.
-// This class displays exescorm reports. Because it is called from
-// within /mod/exescorm/report.php you can assume that the page header
+// This class displays seledascorm reports. Because it is called from
+// within /mod/seledascorm/report.php you can assume that the page header
 // and footer are taken care of.
 //
 // This file can refer to itself as report.php to pass variables
@@ -36,12 +36,12 @@ namespace mod_exescorm;
 class report {
     /**
      * displays the full report
-     * @param stdClass $exescorm full EXESCORM object
+     * @param stdClass $seledascorm full SELEDASCORM object
      * @param stdClass $cm - full course_module object
      * @param stdClass $course - full course object
      * @param string $download - type of download being requested
      */
-    public function display($exescorm, $cm, $course, $download) {
+    public function display($seledascorm, $cm, $course, $download) {
         // This function just displays the report.
         return true;
     }
@@ -62,10 +62,10 @@ class report {
         global $OUTPUT;
 
         // Build the select/deselect all control.
-        $selectalltext = get_string('selectall', 'mod_exescorm');
-        $deselectalltext = get_string('selectnone', 'mod_exescorm');
-        $mastercheckbox = new \core\output\checkbox_toggleall('exescorm-attempts', true, [
-            'name' => 'exescorm-selectall-attempts',
+        $selectalltext = get_string('selectall', 'mod_seledascorm');
+        $deselectalltext = get_string('selectnone', 'mod_seledascorm');
+        $mastercheckbox = new \core\output\checkbox_toggleall('seledascorm-attempts', true, [
+            'name' => 'seledascorm-selectall-attempts',
             'value' => 1,
             'label' => $selectalltext,
             'labelclasses' => 'accesshide',
@@ -86,7 +86,7 @@ class report {
     protected function generate_row_checkbox(string $name, string $value): string {
         global $OUTPUT;
 
-        $checkbox = new \core\output\checkbox_toggleall('exescorm-attempts', false, [
+        $checkbox = new \core\output\checkbox_toggleall('seledascorm-attempts', false, [
             'name' => $name,
             'value' => $value,
         ]);
@@ -99,10 +99,10 @@ class report {
     protected function generate_delete_selected_button(): string {
         $deleteselectedparams = array(
             'type' => 'submit',
-            'value' => get_string('deleteselected', 'mod_exescorm'),
+            'value' => get_string('deleteselected', 'mod_seledascorm'),
             'class' => 'btn btn-secondary',
             'data-action' => 'toggle',
-            'data-togglegroup' => 'exescorm-attempts',
+            'data-togglegroup' => 'seledascorm-attempts',
             'data-toggle' => 'action',
             'disabled' => true
         );

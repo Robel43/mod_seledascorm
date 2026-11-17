@@ -1,5 +1,5 @@
 {
     "plugintypes": {
-        "exescormreport": "mod\/exescorm\/report"
+        "seledascormreport": "mod\/seledascorm\/report"
     }
 }

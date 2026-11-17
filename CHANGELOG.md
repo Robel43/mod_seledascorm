@@ -1,5 +1,34 @@
 # CHANGELOG
 
+## Unreleased: standalone reporting dashboard
+
+- Add Seleda reports to Moodle's main navigation outside course and activity pages.
+- Browse accessible SCORM activities and explore learner, attempt, active-time and interaction summaries.
+- Add completion, content-block and action charts, filtered learner CSV, and learner/attempt drill-downs.
+- Preserve course, module and separate-group permissions across every dashboard view and export.
+
+---
+
+## Unreleased: per-block usage reporting
+
+- Add independent content-block active time and action logs, plus whole-attempt totals and CSV exports.
+- Merge retry and late saves within their authenticated learner/SCO/attempt without changing grades or completion.
+- Add reporting regression checks while preserving the Seleda component, branding and bundled editor.
+
+---
+
+## Unreleased – Seleda alignment
+
+- Brand the Moodle-facing activity as **Seleda** and remote authoring as **Seleda Studio** while retaining the internal `mod_exescorm` component for compatibility.
+- Integrate Seleda readable interaction reporting into learner-attempt and activity-wide Interactions reports.
+- Preserve attempt-time label metadata during SCORM commits so reports can show human-readable questions, learner responses, correct responses, results and calculated weight.
+- Add Seleda blue/teal visual alignment to the player without changing upstream player identifiers or SCORM APIs.
+- Keep the embedded editor explicitly identified as the upstream eXeLearning-compatible fallback rather than presenting it as the customized Seleda Studio build.
+- Target Moodle 4.5 while preserving existing activity, grade, completion, backup and restore data.
+
+---
+
+
 ## v4.0.6 – 2026-10-29
 
 - Fix "Edit with eXeLearning" in eXeLearning Cloud showing "Access denied" when another teacher was the last to send the activity back from eXeLearning.

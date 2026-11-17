@@ -17,12 +17,12 @@
 /**
  * functions used by SCORM 1.2/2004 packages.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright 1999 onwards Roberto Pinna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-function exescorm_get_resources($blocks) {
+function seledascorm_get_resources($blocks) {
     $resources = array();
     foreach ($blocks as $block) {
         if ($block['name'] == 'RESOURCES' && isset($block['children'])) {
@@ -36,7 +36,7 @@ function exescorm_get_resources($blocks) {
     return $resources;
 }
 
-function exescorm_get_manifest($blocks, $scoes) {
+function seledascorm_get_manifest($blocks, $scoes) {
     global $OUTPUT;
     static $parents = array();
     static $resources;
@@ -73,8 +73,8 @@ function exescorm_get_manifest($blocks, $scoes) {
                     $manifest = $block['attrs']['IDENTIFIER'];
                     $organization = '';
                     $resources = array();
-                    $resources = exescorm_get_resources($block['children']);
-                    $scoes = exescorm_get_manifest($block['children'], $scoes);
+                    $resources = seledascorm_get_resources($block['children']);
+                    $scoes = seledascorm_get_manifest($block['children'], $scoes);
                     if (empty($scoes->elements) || count($scoes->elements) <= 0) {
                         foreach ($resources as $item => $resource) {
                             if (!empty($resource['HREF'])) {
@@ -83,7 +83,7 @@ function exescorm_get_manifest($blocks, $scoes) {
                                 $sco->title = $item;
                                 $sco->parent = '/';
                                 $sco->launch = $resource['HREF'];
-                                $sco->exescormtype = $resource['ADLCP:SCORMTYPE'];
+                                $sco->seledascormtype = $resource['ADLCP:SCORMTYPE'];
                                 $scoes->elements[$manifest][$organization][$item] = $sco;
                             }
                         }
@@ -94,7 +94,7 @@ function exescorm_get_manifest($blocks, $scoes) {
                         $scoes->defaultorg = $block['attrs']['DEFAULT'];
                     }
                     if (!empty($block['children'])) {
-                        $scoes = exescorm_get_manifest($block['children'], $scoes);
+                        $scoes = seledascorm_get_manifest($block['children'], $scoes);
                     }
                 break;
                 case 'ORGANIZATION':
@@ -104,7 +104,7 @@ function exescorm_get_manifest($blocks, $scoes) {
                     $scoes->elements[$manifest][$organization][$identifier]->identifier = $identifier;
                     $scoes->elements[$manifest][$organization][$identifier]->parent = '/';
                     $scoes->elements[$manifest][$organization][$identifier]->launch = '';
-                    $scoes->elements[$manifest][$organization][$identifier]->exescormtype = '';
+                    $scoes->elements[$manifest][$organization][$identifier]->seledascormtype = '';
 
                     $parents = array();
                     $parent = new stdClass();
@@ -114,7 +114,7 @@ function exescorm_get_manifest($blocks, $scoes) {
                     $organization = $identifier;
 
                     if (!empty($block['children'])) {
-                        $scoes = exescorm_get_manifest($block['children'], $scoes);
+                        $scoes = seledascorm_get_manifest($block['children'], $scoes);
                     }
 
                     array_pop($parents);
@@ -137,7 +137,7 @@ function exescorm_get_manifest($blocks, $scoes) {
                     $scoes->elements[$manifest][$organization][$identifier]->parameters = $block['attrs']['PARAMETERS'];
                     if (!isset($block['attrs']['IDENTIFIERREF'])) {
                         $scoes->elements[$manifest][$organization][$identifier]->launch = '';
-                        $scoes->elements[$manifest][$organization][$identifier]->exescormtype = 'asset';
+                        $scoes->elements[$manifest][$organization][$identifier]->seledascormtype = 'asset';
                     } else {
                         $idref = addslashes_js($block['attrs']['IDENTIFIERREF']);
                         $base = '';
@@ -154,7 +154,7 @@ function exescorm_get_manifest($blocks, $scoes) {
                             }
                             $scoes
                                 ->elements[$manifest][$organization][$identifier]
-                                ->exescormtype = $resources[$idref]['ADLCP:SCORMTYPE'];
+                                ->seledascormtype = $resources[$idref]['ADLCP:SCORMTYPE'];
                         }
                     }
 
@@ -164,7 +164,7 @@ function exescorm_get_manifest($blocks, $scoes) {
                     array_push($parents, $parent);
 
                     if (!empty($block['children'])) {
-                        $scoes = exescorm_get_manifest($block['children'], $scoes);
+                        $scoes = seledascorm_get_manifest($block['children'], $scoes);
                     }
 
                     array_pop($parents);
@@ -559,7 +559,7 @@ function exescorm_get_manifest($blocks, $scoes) {
             define('DEBUGGING_PRINTED', 1);
         }
         echo $OUTPUT->notification(
-            get_string('invalidmanifestresource', 'mod_exescorm') . ' ' . implode(', ', $manifestresourcesnotfound)
+            get_string('invalidmanifestresource', 'mod_seledascorm') . ' ' . implode(', ', $manifestresourcesnotfound)
         );
     }
     return $scoes;
@@ -567,12 +567,12 @@ function exescorm_get_manifest($blocks, $scoes) {
 
 /**
  * Sets up SCORM 1.2/2004 packages using the manifest file.
- * Called whenever EXESCORM changes
- * @param object $exescorm instance - fields are updated and changes saved into database
+ * Called whenever SELEDASCORM changes
+ * @param object $seledascorm instance - fields are updated and changes saved into database
  * @param stored_file|string $manifest - path to manifest file or stored_file.
  * @return bool
  */
-function exescorm_parse_scorm(&$exescorm, $manifest) {
+function seledascorm_parse_scorm(&$seledascorm, $manifest) {
     global $CFG, $DB;
 
     // Load manifest into string.
@@ -594,22 +594,22 @@ function exescorm_parse_scorm(&$exescorm, $manifest) {
     $manifests = $objxml->parse($xmltext);
     $scoes = new stdClass();
     $scoes->version = '';
-    $scoes = exescorm_get_manifest($manifests, $scoes);
+    $scoes = seledascorm_get_manifest($manifests, $scoes);
     $newscoes = array();
     $sortorder = 0;
     if (!empty($scoes->elements) && is_iterable($scoes->elements)) {
-        $olditems = $DB->get_records('exescorm_scoes', array('exescorm' => $exescorm->id));
+        $olditems = $DB->get_records('seledascorm_scoes', array('seledascorm' => $seledascorm->id));
         foreach ($scoes->elements as $manifest => $organizations) {
             foreach ($organizations as $organization => $items) {
                 foreach ($items as $identifier => $item) {
                     $sortorder++;
-                    // This new db mngt will support all EXESCORM future extensions.
+                    // This new db mngt will support all SELEDASCORM future extensions.
                     $newitem = new stdClass();
-                    $newitem->exescorm = $exescorm->id;
+                    $newitem->seledascorm = $seledascorm->id;
                     $newitem->manifest = $manifest;
                     $newitem->organization = $organization;
                     $newitem->sortorder = $sortorder;
-                    $standarddatas = array('parent', 'identifier', 'launch', 'exescormtype', 'title');
+                    $standarddatas = array('parent', 'identifier', 'launch', 'seledascormtype', 'title');
                     foreach ($standarddatas as $standarddata) {
                         if (isset($item->$standarddata)) {
                             $newitem->$standarddata = $item->$standarddata;
@@ -625,38 +625,38 @@ function exescorm_parse_scorm(&$exescorm, $manifest) {
                     }
 
                     if (!empty($olditems) &&
-                        ($olditemid = exescorm_array_search('identifier', $newitem->identifier, $olditems))
+                        ($olditemid = seledascorm_array_search('identifier', $newitem->identifier, $olditems))
                     ) {
                         $newitem->id = $olditemid;
                         // Update the Sco sortorder but keep id so that user tracks are kept against the same ids.
-                        $DB->update_record('exescorm_scoes', $newitem);
+                        $DB->update_record('seledascorm_scoes', $newitem);
                         $id = $olditemid;
                         // Remove all old data so we don't duplicate it.
-                        $DB->delete_records('exescorm_scoes_data', array('scoid' => $olditemid));
-                        $DB->delete_records('exescorm_seq_objective', array('scoid' => $olditemid));
-                        $DB->delete_records('exescorm_seq_mapinfo', array('scoid' => $olditemid));
-                        $DB->delete_records('exescorm_seq_ruleconds', array('scoid' => $olditemid));
-                        $DB->delete_records('exescorm_seq_rulecond', array('scoid' => $olditemid));
-                        $DB->delete_records('exescorm_seq_rolluprule', array('scoid' => $olditemid));
-                        $DB->delete_records('exescorm_seq_rllprlcond', array('scoid' => $olditemid));
+                        $DB->delete_records('seledascorm_scoes_data', array('scoid' => $olditemid));
+                        $DB->delete_records('seledascorm_seq_objective', array('scoid' => $olditemid));
+                        $DB->delete_records('seledascorm_seq_mapinfo', array('scoid' => $olditemid));
+                        $DB->delete_records('seledascorm_seq_ruleconds', array('scoid' => $olditemid));
+                        $DB->delete_records('seledascorm_seq_rulecond', array('scoid' => $olditemid));
+                        $DB->delete_records('seledascorm_seq_rolluprule', array('scoid' => $olditemid));
+                        $DB->delete_records('seledascorm_seq_rllprlcond', array('scoid' => $olditemid));
 
                         // Now remove this SCO from the olditems object as we have dealt with it.
                         unset($olditems[$olditemid]);
                     } else {
                         // Insert the new SCO, and retain the link between the old and new for later adjustment.
-                        $id = $DB->insert_record('exescorm_scoes', $newitem);
+                        $id = $DB->insert_record('seledascorm_scoes', $newitem);
                     }
                     // Save this sco in memory so we can use it later.
                     $newscoes[$id] = $newitem;
 
-                    if ($optionaldatas = exescorm_optionals_data($item, $standarddatas)) {
+                    if ($optionaldatas = seledascorm_optionals_data($item, $standarddatas)) {
                         $data = new stdClass();
                         $data->scoid = $id;
                         foreach ($optionaldatas as $optionaldata) {
                             if (isset($item->$optionaldata)) {
                                 $data->name = $optionaldata;
                                 $data->value = $item->$optionaldata;
-                                $dataid = $DB->insert_record('exescorm_scoes_data', $data);
+                                $dataid = $DB->insert_record('seledascorm_scoes_data', $data);
                             }
                         }
                     }
@@ -668,7 +668,7 @@ function exescorm_parse_scorm(&$exescorm, $manifest) {
                             $rule->ruletype = $sequencingrule->type;
                             $rule->conditioncombination = $sequencingrule->conditioncombination;
                             $rule->action = $sequencingrule->action;
-                            $ruleid = $DB->insert_record('exescorm_seq_ruleconds', $rule);
+                            $ruleid = $DB->insert_record('seledascorm_seq_ruleconds', $rule);
                             if (isset($sequencingrule->ruleconditions)) {
                                 foreach ($sequencingrule->ruleconditions as $rulecondition) {
                                     $rulecond = new stdClass();
@@ -678,7 +678,7 @@ function exescorm_parse_scorm(&$exescorm, $manifest) {
                                     $rulecond->measurethreshold = $rulecondition->measurethreshold;
                                     $rulecond->operator = $rulecondition->operator;
                                     $rulecond->cond = $rulecondition->cond;
-                                    $rulecondid = $DB->insert_record('exescorm_seq_rulecond', $rulecond);
+                                    $rulecondid = $DB->insert_record('seledascorm_seq_rulecond', $rulecond);
                                 }
                             }
                         }
@@ -694,7 +694,7 @@ function exescorm_parse_scorm(&$exescorm, $manifest) {
                             $rollup->rollupruleaction = $rolluprule->rollupruleaction;
                             $rollup->conditioncombination = $rolluprule->conditioncombination;
 
-                            $rollupruleid = $DB->insert_record('exescorm_seq_rolluprule', $rollup);
+                            $rollupruleid = $DB->insert_record('seledascorm_seq_rolluprule', $rollup);
                             if (isset($rollup->conditions)) {
                                 foreach ($rollup->conditions as $condition) {
                                     $cond = new stdClass();
@@ -702,7 +702,7 @@ function exescorm_parse_scorm(&$exescorm, $manifest) {
                                     $cond->rollupruleid = $rollupruleid;
                                     $cond->operator = $condition->operator;
                                     $cond->cond = $condition->cond;
-                                    $conditionid = $DB->insert_record('exescorm_seq_rllprlcond', $cond);
+                                    $conditionid = $DB->insert_record('seledascorm_seq_rllprlcond', $cond);
                                 }
                             }
                         }
@@ -716,7 +716,7 @@ function exescorm_parse_scorm(&$exescorm, $manifest) {
                             $obj->satisfiedbumeasure = $objective->satisfiedbymeasure;
                             $obj->objectiveid = $objective->objectiveid;
                             $obj->minnormalizedmeasure = trim($objective->minnormalizedmeasure);
-                            $objectiveid = $DB->insert_record('exescorm_seq_objective', $obj);
+                            $objectiveid = $DB->insert_record('seledascorm_seq_objective', $obj);
                             if (isset($objective->mapinfos)) {
                                 foreach ($objective->mapinfos as $objmapinfo) {
                                     $mapinfo = new stdClass();
@@ -727,7 +727,7 @@ function exescorm_parse_scorm(&$exescorm, $manifest) {
                                     $mapinfo->writesatisfiedstatus = $objmapinfo->writesatisfiedstatus;
                                     $mapinfo->readnormalizedmeasure = $objmapinfo->readnormalizedmeasure;
                                     $mapinfo->writenormalizedmeasure = $objmapinfo->writenormalizedmeasure;
-                                    $mapinfoid = $DB->insert_record('exescorm_seq_mapinfo', $mapinfo);
+                                    $mapinfoid = $DB->insert_record('seledascorm_seq_mapinfo', $mapinfo);
                                 }
                             }
                         }
@@ -740,53 +740,53 @@ function exescorm_parse_scorm(&$exescorm, $manifest) {
         }
         if (!empty($olditems)) {
             foreach ($olditems as $olditem) {
-                $DB->delete_records('exescorm_scoes', array('id' => $olditem->id));
-                $DB->delete_records('exescorm_scoes_data', array('scoid' => $olditem->id));
-                $DB->delete_records('exescorm_scoes_track', array('scoid' => $olditem->id));
-                $DB->delete_records('exescorm_seq_objective', array('scoid' => $olditem->id));
-                $DB->delete_records('exescorm_seq_mapinfo', array('scoid' => $olditem->id));
-                $DB->delete_records('exescorm_seq_ruleconds', array('scoid' => $olditem->id));
-                $DB->delete_records('exescorm_seq_rulecond', array('scoid' => $olditem->id));
-                $DB->delete_records('exescorm_seq_rolluprule', array('scoid' => $olditem->id));
-                $DB->delete_records('exescorm_seq_rllprlcond', array('scoid' => $olditem->id));
+                $DB->delete_records('seledascorm_scoes', array('id' => $olditem->id));
+                $DB->delete_records('seledascorm_scoes_data', array('scoid' => $olditem->id));
+                $DB->delete_records('seledascorm_scoes_track', array('scoid' => $olditem->id));
+                $DB->delete_records('seledascorm_seq_objective', array('scoid' => $olditem->id));
+                $DB->delete_records('seledascorm_seq_mapinfo', array('scoid' => $olditem->id));
+                $DB->delete_records('seledascorm_seq_ruleconds', array('scoid' => $olditem->id));
+                $DB->delete_records('seledascorm_seq_rulecond', array('scoid' => $olditem->id));
+                $DB->delete_records('seledascorm_seq_rolluprule', array('scoid' => $olditem->id));
+                $DB->delete_records('seledascorm_seq_rllprlcond', array('scoid' => $olditem->id));
             }
         }
         if (empty($scoes->version)) {
             $scoes->version = 'SCORM_1.2';
         }
-        $DB->set_field('exescorm', 'version', $scoes->version, array('id' => $exescorm->id));
-        $exescorm->version = $scoes->version;
+        $DB->set_field('seledascorm', 'version', $scoes->version, array('id' => $seledascorm->id));
+        $seledascorm->version = $scoes->version;
     }
-    $exescorm->launch = 0;
+    $seledascorm->launch = 0;
     // Check launch sco is valid.
     if (!empty($defaultorgid) && isset($newscoes[$defaultorgid]) && !empty($newscoes[$defaultorgid]->launch)) {
         // Launch param is valid - do nothing.
-        $exescorm->launch = $defaultorgid;
+        $seledascorm->launch = $defaultorgid;
     } else if (!empty($defaultorgid) && isset($newscoes[$defaultorgid]) && empty($newscoes[$defaultorgid]->launch)) {
         // The launch is probably the default org so we need to find the first launchable item inside this org.
-        $sqlselect = 'exescorm = ? AND sortorder >= ? AND '.$DB->sql_isnotempty('exescorm_scoes', 'launch', false, true);
+        $sqlselect = 'seledascorm = ? AND sortorder >= ? AND '.$DB->sql_isnotempty('seledascorm_scoes', 'launch', false, true);
         // We use get_records here as we need to pass a limit in the query that works cross db.
-        $scoes = $DB->get_records_select('exescorm_scoes', $sqlselect, [$exescorm->id, $firstinorg], 'sortorder', 'id', 0, 1);
+        $scoes = $DB->get_records_select('seledascorm_scoes', $sqlselect, [$seledascorm->id, $firstinorg], 'sortorder', 'id', 0, 1);
         if (!empty($scoes)) {
             $sco = reset($scoes); // We only care about the first record - the above query only returns one.
-            $exescorm->launch = $sco->id;
+            $seledascorm->launch = $sco->id;
         }
     }
-    if (empty($exescorm->launch)) {
+    if (empty($seledascorm->launch)) {
         // No valid Launch is specified - find the first launchable sco instead.
-        $sqlselect = 'exescorm = ? AND '.$DB->sql_isnotempty('exescorm_scoes', 'launch', false, true);
+        $sqlselect = 'seledascorm = ? AND '.$DB->sql_isnotempty('seledascorm_scoes', 'launch', false, true);
         // We use get_records here as we need to pass a limit in the query that works cross db.
-        $scoes = $DB->get_records_select('exescorm_scoes', $sqlselect, array($exescorm->id), 'sortorder', 'id', 0, 1);
+        $scoes = $DB->get_records_select('seledascorm_scoes', $sqlselect, array($seledascorm->id), 'sortorder', 'id', 0, 1);
         if (!empty($scoes)) {
             $sco = reset($scoes); // We only care about the first record - the above query only returns one.
-            $exescorm->launch = $sco->id;
+            $seledascorm->launch = $sco->id;
         }
     }
 
     return true;
 }
 
-function exescorm_optionals_data($item, $standarddata) {
+function seledascorm_optionals_data($item, $standarddata) {
     $result = array();
     $sequencingdata = array('sequencingrules', 'rolluprules', 'objectives');
     foreach ($item as $element => $value) {
@@ -799,31 +799,31 @@ function exescorm_optionals_data($item, $standarddata) {
     return $result;
 }
 
-function exescorm_is_leaf($sco) {
+function seledascorm_is_leaf($sco) {
     global $DB;
 
-    if ($DB->record_exists('exescorm_scoes', ['exescorm' => $sco->exescorm, 'parent' => $sco->identifier])) {
+    if ($DB->record_exists('seledascorm_scoes', ['seledascorm' => $sco->seledascorm, 'parent' => $sco->identifier])) {
         return false;
     }
     return true;
 }
 
-function exescorm_get_parent($sco) {
+function seledascorm_get_parent($sco) {
     global $DB;
 
     if ($sco->parent != '/') {
-        if ($parent = $DB->get_record('exescorm_scoes', ['exescorm' => $sco->exescorm, 'identifier' => $sco->parent])) {
-            return exescorm_get_sco($parent->id);
+        if ($parent = $DB->get_record('seledascorm_scoes', ['seledascorm' => $sco->seledascorm, 'identifier' => $sco->parent])) {
+            return seledascorm_get_sco($parent->id);
         }
     }
     return null;
 }
 
-function exescorm_get_children($sco) {
+function seledascorm_get_children($sco) {
     global $DB;
 
-    $children = $DB->get_records('exescorm_scoes',
-                                ['exescorm' => $sco->exescorm, 'parent' => $sco->identifier],
+    $children = $DB->get_records('seledascorm_scoes',
+                                ['seledascorm' => $sco->seledascorm, 'parent' => $sco->identifier],
                                 'sortorder, id'
                             );
     if (!empty($children)) {
@@ -832,11 +832,11 @@ function exescorm_get_children($sco) {
     return null;
 }
 
-function exescorm_get_available_children($sco) {
+function seledascorm_get_available_children($sco) {
     global $DB;
 
-    $res = $DB->get_records('exescorm_scoes',
-                            ['exescorm' => $sco->exescorm, 'parent' => $sco->identifier],
+    $res = $DB->get_records('seledascorm_scoes',
+                            ['seledascorm' => $sco->seledascorm, 'parent' => $sco->identifier],
                             'sortorder, id'
                         );
     if (!$res || $res == null) {
@@ -849,25 +849,25 @@ function exescorm_get_available_children($sco) {
     }
 }
 
-function exescorm_get_available_descendent($descend, $sco) {
+function seledascorm_get_available_descendent($descend, $sco) {
     if ($sco == null) {
         return $descend;
     } else {
-        $avchildren = exescorm_get_available_children($sco);
+        $avchildren = seledascorm_get_available_children($sco);
         foreach ($avchildren as $avchild) {
             array_push($descend, $avchild);
         }
         foreach ($avchildren as $avchild) {
-            exescorm_get_available_descendent($descend, $avchild);
+            seledascorm_get_available_descendent($descend, $avchild);
         }
     }
 }
 
-function exescorm_get_siblings($sco) {
+function seledascorm_get_siblings($sco) {
     global $DB;
 
-    if ($siblings = $DB->get_records('exescorm_scoes',
-                                    ['exescorm' => $sco->exescorm, 'parent' => $sco->parent],
+    if ($siblings = $DB->get_records('seledascorm_scoes',
+                                    ['seledascorm' => $sco->seledascorm, 'parent' => $sco->parent],
                                     'sortorder, id'
                                     )
     ) {
@@ -879,11 +879,11 @@ function exescorm_get_siblings($sco) {
     return null;
 }
 // Get an array that contains all the parent scos for this sco.
-function exescorm_get_ancestors($sco) {
+function seledascorm_get_ancestors($sco) {
     $ancestors = array();
     $continue = true;
     while ($continue) {
-        $ancestor = exescorm_get_parent($sco);
+        $ancestor = seledascorm_get_parent($sco);
         if (!empty($ancestor) && $ancestor->id !== $sco->id) {
             $sco = $ancestor;
             $ancestors[] = $ancestor;
@@ -897,23 +897,23 @@ function exescorm_get_ancestors($sco) {
     return $ancestors;
 }
 
-function exescorm_get_preorder(&$preorder = array(), $sco = null) {
+function seledascorm_get_preorder(&$preorder = array(), $sco = null) {
     if ($sco != null) {
         array_push($preorder, $sco);
-        if ($children = exescorm_get_children($sco)) {
+        if ($children = seledascorm_get_children($sco)) {
             foreach ($children as $child) {
-                exescorm_get_preorder($preorder, $child);
+                seledascorm_get_preorder($preorder, $child);
             }
         }
     }
     return $preorder;
 }
 
-function exescorm_find_common_ancestor($ancestors, $sco) {
-    $pos = exescorm_array_search('identifier', $sco->parent, $ancestors);
+function seledascorm_find_common_ancestor($ancestors, $sco) {
+    $pos = seledascorm_array_search('identifier', $sco->parent, $ancestors);
     if ($sco->parent != '/') {
         if ($pos === false) {
-            return exescorm_find_common_ancestor($ancestors, exescorm_get_parent($sco));
+            return seledascorm_find_common_ancestor($ancestors, seledascorm_get_parent($sco));
         }
     }
     return $pos;

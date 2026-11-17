@@ -15,13 +15,13 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * A scheduled task for exescorm cron.
+ * A scheduled task for seledascorm cron.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  2017 Abhishek kumar <ganitgenius@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace mod_exescorm\task;
+namespace mod_seledascorm\task;
 
 /**
  * A cron_task class to be used by Tasks API.
@@ -37,16 +37,16 @@ class cron_task extends \core\task\scheduled_task {
      * @return string
      */
     public function get_name() {
-        return get_string('crontask', 'mod_exescorm');
+        return get_string('crontask', 'mod_seledascorm');
     }
 
     /**
-     * Run exescorm cron.
+     * Run seledascorm cron.
      */
     public function execute() {
         global $CFG;
-        require_once($CFG->dirroot . '/mod/exescorm/lib.php');
-        exescorm_cron_scheduled_task();
+        require_once($CFG->dirroot . '/mod/seledascorm/lib.php');
+        seledascorm_cron_scheduled_task();
     }
 
 }

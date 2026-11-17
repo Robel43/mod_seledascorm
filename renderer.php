@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Defines the renderer for the exescorm module.
+ * Defines the renderer for the seledascorm module.
  *
- * @package mod_exescorm
+ * @package mod_seledascorm
  * @copyright 2013 Dan Marsden
  * @author Dan Marsden <dan@danmarsden.com>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -25,15 +25,15 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-use mod_exescorm\exeonline\exescorm_redirector;
+use mod_seledascorm\exeonline\seledascorm_redirector;
 
 /**
- * The renderer for the exescorm module.
+ * The renderer for the seledascorm module.
  *
  * @copyright 2013 Dan Marsden
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_exescorm_renderer extends plugin_renderer_base {
+class mod_seledascorm_renderer extends plugin_renderer_base {
     public function view_user_heading($user, $course, $baseurl, $attempt, $attemptids) {
         $output = '';
         $output .= $this->box_start('generalbox boxaligncenter');
@@ -42,25 +42,25 @@ class mod_exescorm_renderer extends plugin_renderer_base {
         $url = new moodle_url('/user/view.php', array('id' => $user->id, 'course' => $course->id));
         $output .= html_writer::link($url, fullname($user));
         $baseurl->param('attempt', '');
-        $pb = new mod_exescorm_attempt_bar($attemptids, $attempt, $baseurl, 'attempt');
+        $pb = new mod_seledascorm_attempt_bar($attemptids, $attempt, $baseurl, 'attempt');
         $output .= $this->render($pb);
         $output .= html_writer::end_tag('div');
         $output .= $this->box_end();
         return $output;
     }
     /**
-     * exescorm attempt bar renderer
+     * seledascorm attempt bar renderer
      *
-     * @param mod_exescorm_attempt_bar $attemptbar
+     * @param mod_seledascorm_attempt_bar $attemptbar
      * @return string
      */
-    protected function render_mod_exescorm_attempt_bar(mod_exescorm_attempt_bar $attemptbar) {
+    protected function render_mod_seledascorm_attempt_bar(mod_seledascorm_attempt_bar $attemptbar) {
         $output = '';
         $attemptbar = clone($attemptbar);
         $attemptbar->prepare($this, $this->page, $this->target);
 
         if (count($attemptbar->attemptids) > 1) {
-            $output .= get_string('attempt', 'mod_exescorm') . ':';
+            $output .= get_string('attempt', 'mod_seledascorm') . ':';
 
             if (!empty($attemptbar->previouslink)) {
                 $output .= '&#160;(' . $attemptbar->previouslink . ')&#160;';
@@ -81,26 +81,26 @@ class mod_exescorm_renderer extends plugin_renderer_base {
     /**
      * Rendered HTML for the report action is provided.
      *
-     * @param \mod_exescorm\output\actionbar $actionbar actionbar object.
+     * @param \mod_seledascorm\output\actionbar $actionbar actionbar object.
      * @return bool|string rendered HTML for the report action.
      */
-    public function report_actionbar(\mod_exescorm\output\actionbar $actionbar): string {
-        return $this->render_from_template('mod_exescorm/report_actionbar', $actionbar->export_for_template($this));
+    public function report_actionbar(\mod_seledascorm\output\actionbar $actionbar): string {
+        return $this->render_from_template('mod_seledascorm/report_actionbar', $actionbar->export_for_template($this));
     }
 
     /**
      * Rendered HTML for the user report action is provided
      *
-     * @param \mod_exescorm\output\userreportsactionbar $userreportsactionbar userreportsactionbar object
+     * @param \mod_seledascorm\output\userreportsactionbar $userreportsactionbar userreportsactionbar object
      * @return string rendered HTML for the user report action.
      */
-    public function user_report_actionbar(\mod_exescorm\output\userreportsactionbar $userreportsactionbar): string {
-        return $this->render_from_template('mod_exescorm/user_report_actionbar',
+    public function user_report_actionbar(\mod_seledascorm\output\userreportsactionbar $userreportsactionbar): string {
+        return $this->render_from_template('mod_seledascorm/user_report_actionbar',
                                             $userreportsactionbar->export_for_template($this));
     }
 
     /**
-     * Generate the EXESCORM's "Edit on Exescorm" and  "Exit activity" buttons
+     * Generate the SELEDASCORM's "Edit on Exescorm" and  "Exit activity" buttons
      *
      * @param string $url The url to be hooked up to the exit button
      * @param stdClass $cm The course module viewed.
@@ -112,47 +112,47 @@ class mod_exescorm_renderer extends plugin_renderer_base {
     public function generate_editexitbar(string $url, \stdClass $cm): string {
         $context = ['returnaction' => $url];
 
-        // Check if this exescorm activity has grades to determine if show a confirmation modal.
+        // Check if this seledascorm activity has grades to determine if show a confirmation modal.
         global $DB;
-        $exescorm = $DB->get_record("exescorm", array("id" => $cm->instance));
-        $context['hasgrades'] = exescorm_get_user_grades($exescorm, 0);
+        $seledascorm = $DB->get_record("seledascorm", array("id" => $cm->instance));
+        $context['hasgrades'] = seledascorm_get_user_grades($seledascorm, 0);
 
         $capability = has_capability('moodle/course:update', context_course::instance($cm->course));
         if ($capability) {
-            if (exescorm_online_editor_available()) {
-                $returnto = new moodle_url("/mod/exescorm/view.php", ['id' => $cm->id, 'forceview' => 1]);
-                $context['editaction'] = exescorm_redirector::get_redirection_url($cm->id, $returnto)->out(false);
-            } else if (exescorm_embedded_editor_available()) {
-                $context['editorurl'] = (new moodle_url('/mod/exescorm/editor/index.php', [
+            if (seledascorm_online_editor_available()) {
+                $returnto = new moodle_url("/mod/seledascorm/view.php", ['id' => $cm->id, 'forceview' => 1]);
+                $context['editaction'] = seledascorm_redirector::get_redirection_url($cm->id, $returnto)->out(false);
+            } else if (seledascorm_embedded_editor_available()) {
+                $context['editorurl'] = (new moodle_url('/mod/seledascorm/editor/index.php', [
                     'id' => $cm->id,
                     'sesskey' => sesskey(),
                 ]))->out(false);
                 $context['cmid'] = $cm->id;
-                $context['activityname'] = $exescorm ? format_string($exescorm->name) : '';
+                $context['activityname'] = $seledascorm ? format_string($seledascorm->name) : '';
             }
         }
-        return $this->render_from_template('mod_exescorm/player_editexitbar', $context);
+        return $this->render_from_template('mod_seledascorm/player_editexitbar', $context);
     }
 
     /**
-     * Generate the EXESCORM's "togle full screen" button
+     * Generate the SELEDASCORM's "togle full screen" button
      *
      * @return string
      */
     public function generate_tocbox_action_buttons(): string {
         $context = [];
-        return $this->render_from_template('mod_exescorm/player_tocbox_action_buttons', $context);
+        return $this->render_from_template('mod_seledascorm/player_tocbox_action_buttons', $context);
     }
 }
 
 /**
- * Component representing a EXESCORM attempts bar.
+ * Component representing a SELEDASCORM attempts bar.
  *
  * @copyright 2013 Dan Marsden
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @package mod_exescorm
+ * @package mod_seledascorm
  */
-class mod_exescorm_attempt_bar implements renderable {
+class mod_seledascorm_attempt_bar implements renderable {
 
     /**
      * @var array An array of the attemptids
@@ -194,7 +194,7 @@ class mod_exescorm_attempt_bar implements renderable {
     public $attemptlinks = array();
 
     /**
-     * Constructor mod_exescorm_attempt_bar with only the required params.
+     * Constructor mod_seledascorm_attempt_bar with only the required params.
      *
      * @param array $attemptids an array of attempts the user has made
      * @param int $attempt The attempt you are currently viewing
@@ -209,9 +209,9 @@ class mod_exescorm_attempt_bar implements renderable {
     }
 
     /**
-     * Prepares the exescorm attempt bar for output.
+     * Prepares the seledascorm attempt bar for output.
      *
-     * This method validates the arguments set up for the exescorm attempt bar and then
+     * This method validates the arguments set up for the seledascorm attempt bar and then
      * produces fragments of HTML to assist display later on.
      *
      * @param renderer_base $output
@@ -221,13 +221,13 @@ class mod_exescorm_attempt_bar implements renderable {
      */
     public function prepare(renderer_base $output, moodle_page $page, $target) {
         if (empty($this->attemptids)) {
-            throw new coding_exception('mod_exescorm_attempt_bar requires a attemptids value.');
+            throw new coding_exception('mod_seledascorm_attempt_bar requires a attemptids value.');
         }
         if (!isset($this->attempt) || is_null($this->attempt)) {
-            throw new coding_exception('mod_exescorm_attempt_bar requires a attempt value.');
+            throw new coding_exception('mod_seledascorm_attempt_bar requires a attempt value.');
         }
         if (empty($this->baseurl)) {
-            throw new coding_exception('mod_exescorm_attempt_bar requires a baseurl value.');
+            throw new coding_exception('mod_seledascorm_attempt_bar requires a baseurl value.');
         }
 
         if (count($this->attemptids) > 1) {

@@ -15,25 +15,25 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file contains tests for exescorm events.
+ * This file contains tests for seledascorm events.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  2013 onwards Ankit Agarwal
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_exescorm\event;
+namespace mod_seledascorm\event;
 
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
-require_once($CFG->dirroot . '/mod/exescorm/locallib.php');
-require_once($CFG->dirroot . '/mod/exescorm/lib.php');
+require_once($CFG->dirroot . '/mod/seledascorm/locallib.php');
+require_once($CFG->dirroot . '/mod/seledascorm/lib.php');
 
 /**
  * Test class for various events related to Scorm.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  2013 onwards Ankit Agarwal
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -45,8 +45,8 @@ class events_test extends \advanced_testcase {
     /** @var stdClass store user object */
     protected $eventuser;
 
-    /** @var stdClass store exescorm object */
-    protected $eventexescorm;
+    /** @var stdClass store seledascorm object */
+    protected $eventseledascorm;
 
     /** @var stdClass store course module object */
     protected $eventcm;
@@ -57,8 +57,8 @@ class events_test extends \advanced_testcase {
         $this->eventuser = $this->getDataGenerator()->create_user();
         $record = new \stdClass();
         $record->course = $this->eventcourse->id;
-        $this->eventexescorm = $this->getDataGenerator()->create_module('exescorm', $record);
-        $this->eventcm = get_coursemodule_from_instance('exescorm', $this->eventexescorm->id);
+        $this->eventseledascorm = $this->getDataGenerator()->create_module('seledascorm', $record);
+        $this->eventcm = get_coursemodule_from_instance('seledascorm', $this->eventseledascorm->id);
     }
 
     /**
@@ -69,28 +69,28 @@ class events_test extends \advanced_testcase {
         global $USER;
 
         $this->resetAfterTest();
-        exescorm_insert_track(2, $this->eventexescorm->id, 1, 4, 'cmi.core.score.raw', 10);
+        seledascorm_insert_track(2, $this->eventseledascorm->id, 1, 4, 'cmi.core.score.raw', 10);
         $sink = $this->redirectEvents();
-        exescorm_delete_attempt(2, $this->eventexescorm, 4);
+        seledascorm_delete_attempt(2, $this->eventseledascorm, 4);
         $events = $sink->get_events();
         $sink->close();
         $event = reset($events);
 
         // Verify data.
         $this->assertCount(3, $events);
-        $this->assertInstanceOf('\mod_exescorm\event\attempt_deleted', $event);
+        $this->assertInstanceOf('\mod_seledascorm\event\attempt_deleted', $event);
         $this->assertEquals($USER->id, $event->userid);
         $this->assertEquals(\context_module::instance($this->eventcm->id), $event->get_context());
         $this->assertEquals(4, $event->other['attemptid']);
         $this->assertEquals(2, $event->relateduserid);
-        $expected = array($this->eventcourse->id, 'exescorm', 'delete attempts', 'report.php?id=' . $this->eventcm->id,
+        $expected = array($this->eventcourse->id, 'seledascorm', 'delete attempts', 'report.php?id=' . $this->eventcm->id,
                 4, $this->eventcm->id);
         $this->assertEventLegacyLogData($expected, $events[0]);
         $this->assertEventContextNotUsed($event);
 
         // Test event validations.
         $this->expectException(\coding_exception::class);
-        \mod_exescorm\event\attempt_deleted::create(array(
+        \mod_seledascorm\event\attempt_deleted::create(array(
             'contextid' => 5,
             'relateduserid' => 2
         ));
@@ -103,8 +103,8 @@ class events_test extends \advanced_testcase {
      */
     public function test_course_module_viewed_event() {
         $this->resetAfterTest();
-        $event = \mod_exescorm\event\course_module_viewed::create(array(
-            'objectid' => $this->eventexescorm->id,
+        $event = \mod_seledascorm\event\course_module_viewed::create(array(
+            'objectid' => $this->eventseledascorm->id,
             'context' => \context_module::instance($this->eventcm->id),
             'courseid' => $this->eventcourse->id
         ));
@@ -116,8 +116,8 @@ class events_test extends \advanced_testcase {
         $event = reset($events);
 
         // Check that the legacy log data is valid.
-        $expected = array($this->eventcourse->id, 'exescorm', 'pre-view', 'view.php?id=' . $this->eventcm->id,
-                $this->eventexescorm->id, $this->eventcm->id);
+        $expected = array($this->eventcourse->id, 'seledascorm', 'pre-view', 'view.php?id=' . $this->eventcm->id,
+                $this->eventseledascorm->id, $this->eventcm->id);
         $this->assertEventLegacyLogData($expected, $event);
         $this->assertEventContextNotUsed($event);
     }
@@ -129,7 +129,7 @@ class events_test extends \advanced_testcase {
      */
     public function test_course_module_instance_list_viewed_event() {
         $this->resetAfterTest();
-        $event = \mod_exescorm\event\course_module_instance_list_viewed::create(array(
+        $event = \mod_seledascorm\event\course_module_instance_list_viewed::create(array(
             'context' => \context_course::instance($this->eventcourse->id),
             'courseid' => $this->eventcourse->id
         ));
@@ -141,7 +141,7 @@ class events_test extends \advanced_testcase {
         $event = reset($events);
 
         // Check that the legacy log data is valid.
-        $expected = array($this->eventcourse->id, 'exescorm', 'view all', 'index.php?id=' . $this->eventcourse->id, '');
+        $expected = array($this->eventcourse->id, 'seledascorm', 'view all', 'index.php?id=' . $this->eventcourse->id, '');
         $this->assertEventLegacyLogData($expected, $event);
         $this->assertEventContextNotUsed($event);
     }
@@ -153,11 +153,11 @@ class events_test extends \advanced_testcase {
      */
     public function test_interactions_viewed_event() {
         $this->resetAfterTest();
-        $event = \mod_exescorm\event\interactions_viewed::create(array(
+        $event = \mod_seledascorm\event\interactions_viewed::create(array(
             'relateduserid' => 5,
             'context' => \context_module::instance($this->eventcm->id),
             'courseid' => $this->eventcourse->id,
-            'other' => array('attemptid' => 2, 'instanceid' => $this->eventexescorm->id)
+            'other' => array('attemptid' => 2, 'instanceid' => $this->eventseledascorm->id)
         ));
 
         // Trigger and capture the event.
@@ -167,8 +167,8 @@ class events_test extends \advanced_testcase {
         $event = reset($events);
 
         // Check that the legacy log data is valid.
-        $expected = array($this->eventcourse->id, 'exescorm', 'userreportinteractions', 'report/userreportinteractions.php?id=' .
-                $this->eventcm->id . '&user=5&attempt=' . 2, $this->eventexescorm->id, $this->eventcm->id);
+        $expected = array($this->eventcourse->id, 'seledascorm', 'userreportinteractions', 'report/userreportinteractions.php?id=' .
+                $this->eventcm->id . '&user=5&attempt=' . 2, $this->eventseledascorm->id, $this->eventcm->id);
         $this->assertEventLegacyLogData($expected, $event);
         $this->assertEventContextNotUsed($event);
     }
@@ -179,23 +179,23 @@ class events_test extends \advanced_testcase {
     public function test_interactions_viewed_event_validations() {
         $this->resetAfterTest();
         try {
-            \mod_exescorm\event\interactions_viewed::create(array(
+            \mod_seledascorm\event\interactions_viewed::create(array(
                 'context' => \context_module::instance($this->eventcm->id),
                 'courseid' => $this->eventcourse->id,
                 'other' => array('attemptid' => 2)
             ));
-            $this->fail("Event validation should not allow \\mod_exescorm\\event\\interactions_viewed to be triggered without
+            $this->fail("Event validation should not allow \\mod_seledascorm\\event\\interactions_viewed to be triggered without
                     other['instanceid']");
         } catch (\Exception $e) {
             $this->assertInstanceOf('coding_exception', $e);
         }
         try {
-            \mod_exescorm\event\interactions_viewed::create(array(
+            \mod_seledascorm\event\interactions_viewed::create(array(
                 'context' => \context_module::instance($this->eventcm->id),
                 'courseid' => $this->eventcourse->id,
                 'other' => array('instanceid' => 2)
             ));
-            $this->fail("Event validation should not allow \\mod_exescorm\\event\\interactions_viewed to be triggered without
+            $this->fail("Event validation should not allow \\mod_seledascorm\\event\\interactions_viewed to be triggered without
                     other['attemptid']");
         } catch (\Exception $e) {
             $this->assertInstanceOf('coding_exception', $e);
@@ -208,11 +208,11 @@ class events_test extends \advanced_testcase {
      */
     public function test_report_viewed_event() {
         $this->resetAfterTest();
-        $event = \mod_exescorm\event\report_viewed::create(array(
+        $event = \mod_seledascorm\event\report_viewed::create(array(
              'context' => \context_module::instance($this->eventcm->id),
              'courseid' => $this->eventcourse->id,
              'other' => array(
-                 'exescormid' => $this->eventexescorm->id,
+                 'seledascormid' => $this->eventseledascorm->id,
                  'mode' => 'basic'
              )
         ));
@@ -224,8 +224,8 @@ class events_test extends \advanced_testcase {
         $event = reset($events);
 
         // Check that the legacy log data is valid.
-        $expected = array($this->eventcourse->id, 'exescorm', 'report', 'report.php?id=' . $this->eventcm->id . '&mode=basic',
-                $this->eventexescorm->id, $this->eventcm->id);
+        $expected = array($this->eventcourse->id, 'seledascorm', 'report', 'report.php?id=' . $this->eventcm->id . '&mode=basic',
+                $this->eventseledascorm->id, $this->eventcm->id);
         $this->assertEventLegacyLogData($expected, $event);
         $this->assertEventContextNotUsed($event);
     }
@@ -236,7 +236,7 @@ class events_test extends \advanced_testcase {
      */
     public function test_sco_launched_event() {
         $this->resetAfterTest();
-        $event = \mod_exescorm\event\sco_launched::create(array(
+        $event = \mod_seledascorm\event\sco_launched::create(array(
              'objectid' => 2,
              'context' => \context_module::instance($this->eventcm->id),
              'courseid' => $this->eventcourse->id,
@@ -250,15 +250,15 @@ class events_test extends \advanced_testcase {
         $event = reset($events);
 
         // Check that the legacy log data is valid.
-        $expected = array($this->eventcourse->id, 'exescorm', 'launch', 'view.php?id=' . $this->eventcm->id,
+        $expected = array($this->eventcourse->id, 'seledascorm', 'launch', 'view.php?id=' . $this->eventcm->id,
                           'url_to_content_that_was_laoded.php', $this->eventcm->id);
         $this->assertEventLegacyLogData($expected, $event);
         $this->assertEventContextNotUsed($event);
 
         // Test validations.
         $this->expectException(\coding_exception::class);
-        \mod_exescorm\event\sco_launched::create(array(
-             'objectid' => $this->eventexescorm->id,
+        \mod_seledascorm\event\sco_launched::create(array(
+             'objectid' => $this->eventseledascorm->id,
              'context' => \context_module::instance($this->eventcm->id),
              'courseid' => $this->eventcourse->id,
         ));
@@ -271,11 +271,11 @@ class events_test extends \advanced_testcase {
      */
     public function test_tracks_viewed_event() {
         $this->resetAfterTest();
-        $event = \mod_exescorm\event\tracks_viewed::create(array(
+        $event = \mod_seledascorm\event\tracks_viewed::create(array(
             'relateduserid' => 5,
             'context' => \context_module::instance($this->eventcm->id),
             'courseid' => $this->eventcourse->id,
-            'other' => array('attemptid' => 2, 'instanceid' => $this->eventexescorm->id, 'scoid' => 3, 'mode' => 'interactions')
+            'other' => array('attemptid' => 2, 'instanceid' => $this->eventseledascorm->id, 'scoid' => 3, 'mode' => 'interactions')
         ));
 
         // Trigger and capture the event.
@@ -285,9 +285,9 @@ class events_test extends \advanced_testcase {
         $event = reset($events);
 
         // Check that the legacy log data is valid.
-        $expected = array($this->eventcourse->id, 'exescorm', 'userreporttracks', 'report/userreporttracks.php?id=' .
+        $expected = array($this->eventcourse->id, 'seledascorm', 'userreporttracks', 'report/userreporttracks.php?id=' .
                 $this->eventcm->id . '&user=5&attempt=' . 2 . '&scoid=3' . '&mode=interactions',
-                $this->eventexescorm->id, $this->eventcm->id);
+                $this->eventseledascorm->id, $this->eventcm->id);
         $this->assertEventLegacyLogData($expected, $event);
         $this->assertEventContextNotUsed($event);
     }
@@ -298,35 +298,35 @@ class events_test extends \advanced_testcase {
     public function test_tracks_viewed_event_validations() {
         $this->resetAfterTest();
         try {
-            \mod_exescorm\event\tracks_viewed::create(array(
+            \mod_seledascorm\event\tracks_viewed::create(array(
                 'context' => \context_module::instance($this->eventcm->id),
                 'courseid' => $this->eventcourse->id,
                 'other' => array('attemptid' => 2, 'scoid' => 2)
             ));
-            $this->fail("Event validation should not allow \\mod_exescorm\\event\\tracks_viewed to be triggered without
+            $this->fail("Event validation should not allow \\mod_seledascorm\\event\\tracks_viewed to be triggered without
                     other['instanceid']");
         } catch (\Exception $e) {
             $this->assertInstanceOf('coding_exception', $e);
         }
         try {
-            \mod_exescorm\event\tracks_viewed::create(array(
+            \mod_seledascorm\event\tracks_viewed::create(array(
                 'context' => \context_module::instance($this->eventcm->id),
                 'courseid' => $this->eventcourse->id,
                 'other' => array('instanceid' => 2, 'scoid' => 2)
             ));
-            $this->fail("Event validation should not allow \\mod_exescorm\\event\\tracks_viewed to be triggered without
+            $this->fail("Event validation should not allow \\mod_seledascorm\\event\\tracks_viewed to be triggered without
                     other['attemptid']");
         } catch (\Exception $e) {
             $this->assertInstanceOf('coding_exception', $e);
         }
 
         try {
-            \mod_exescorm\event\tracks_viewed::create(array(
+            \mod_seledascorm\event\tracks_viewed::create(array(
                 'context' => \context_module::instance($this->eventcm->id),
                 'courseid' => $this->eventcourse->id,
                 'other' => array('attemptid' => 2, 'instanceid' => 2)
             ));
-            $this->fail("Event validation should not allow \\mod_exescorm\\event\\tracks_viewed to be triggered without
+            $this->fail("Event validation should not allow \\mod_seledascorm\\event\\tracks_viewed to be triggered without
                     other['scoid']");
         } catch (\Exception $e) {
             $this->assertInstanceOf('coding_exception', $e);
@@ -340,11 +340,11 @@ class events_test extends \advanced_testcase {
      */
     public function test_user_report_viewed_event() {
         $this->resetAfterTest();
-        $event = \mod_exescorm\event\user_report_viewed::create(array(
+        $event = \mod_seledascorm\event\user_report_viewed::create(array(
             'relateduserid' => 5,
             'context' => \context_module::instance($this->eventcm->id),
             'courseid' => $this->eventcourse->id,
-            'other' => array('attemptid' => 2, 'instanceid' => $this->eventexescorm->id)
+            'other' => array('attemptid' => 2, 'instanceid' => $this->eventseledascorm->id)
         ));
 
         // Trigger and capture the event.
@@ -354,8 +354,8 @@ class events_test extends \advanced_testcase {
         $event = reset($events);
 
         // Check that the legacy log data is valid.
-        $expected = array($this->eventcourse->id, 'exescorm', 'userreport', 'report/userreport.php?id=' .
-                $this->eventcm->id . '&user=5&attempt=' . 2, $this->eventexescorm->id, $this->eventcm->id);
+        $expected = array($this->eventcourse->id, 'seledascorm', 'userreport', 'report/userreport.php?id=' .
+                $this->eventcm->id . '&user=5&attempt=' . 2, $this->eventseledascorm->id, $this->eventcm->id);
         $this->assertEventLegacyLogData($expected, $event);
         $this->assertEventContextNotUsed($event);
     }
@@ -366,23 +366,23 @@ class events_test extends \advanced_testcase {
     public function test_user_report_viewed_event_validations() {
         $this->resetAfterTest();
         try {
-            \mod_exescorm\event\user_report_viewed::create(array(
+            \mod_seledascorm\event\user_report_viewed::create(array(
                 'context' => \context_module::instance($this->eventcm->id),
                 'courseid' => $this->eventcourse->id,
                 'other' => array('attemptid' => 2)
             ));
-            $this->fail("Event validation should not allow \\mod_exescorm\\event\\user_report_viewed to be triggered without
+            $this->fail("Event validation should not allow \\mod_seledascorm\\event\\user_report_viewed to be triggered without
                     other['instanceid']");
         } catch (\Exception $e) {
             $this->assertInstanceOf('coding_exception', $e);
         }
         try {
-            \mod_exescorm\event\user_report_viewed::create(array(
+            \mod_seledascorm\event\user_report_viewed::create(array(
                 'context' => \context_module::instance($this->eventcm->id),
                 'courseid' => $this->eventcourse->id,
                 'other' => array('instanceid' => 2)
             ));
-            $this->fail("Event validation should not allow \\mod_exescorm\\event\\user_report_viewed to be triggered without
+            $this->fail("Event validation should not allow \\mod_seledascorm\\event\\user_report_viewed to be triggered without
                     other['attemptid']");
         } catch (\Exception $e) {
             $this->assertInstanceOf('coding_exception', $e);
@@ -425,9 +425,9 @@ class events_test extends \advanced_testcase {
      */
     public function test_scoreraw_submitted_event($cmielement, $cmivalue) {
         $this->resetAfterTest();
-        $event = \mod_exescorm\event\scoreraw_submitted::create(array(
+        $event = \mod_seledascorm\event\scoreraw_submitted::create(array(
             'other' => array('attemptid' => '2', 'cmielement' => $cmielement, 'cmivalue' => $cmivalue),
-            'objectid' => $this->eventexescorm->id,
+            'objectid' => $this->eventseledascorm->id,
             'context' => \context_module::instance($this->eventcm->id),
             'relateduserid' => $this->eventuser->id
         ));
@@ -454,21 +454,21 @@ class events_test extends \advanced_testcase {
         return array(
             'scoreraw_submitted => missing cmielement' => array(
                 null, '50',
-                "Event validation should not allow \\mod_exescorm\\event\\scoreraw_submitted " .
+                "Event validation should not allow \\mod_seledascorm\\event\\scoreraw_submitted " .
                     "to be triggered without other['cmielement']",
                 'Coding error detected, it must be fixed by a programmer: ' .
                     "The 'cmielement' must be set in other."
             ),
             'scoreraw_submitted => missing cmivalue' => array(
                 'cmi.core.score.raw', null,
-                "Event validation should not allow \\mod_exescorm\\event\\scoreraw_submitted " .
+                "Event validation should not allow \\mod_seledascorm\\event\\scoreraw_submitted " .
                     "to be triggered without other['cmivalue']",
                 'Coding error detected, it must be fixed by a programmer: ' .
                     "The 'cmivalue' must be set in other."
             ),
             'scoreraw_submitted => wrong CMI element' => array(
                 'cmi.core.lesson_status', '50',
-                "Event validation should not allow \\mod_exescorm\\event\\scoreraw_submitted " .
+                "Event validation should not allow \\mod_seledascorm\\event\\scoreraw_submitted " .
                     'to be triggered with a CMI element not representing a raw score',
                 'Coding error detected, it must be fixed by a programmer: ' .
                     "The 'cmielement' must represents a valid CMI raw score (cmi.core.lesson_status)."
@@ -500,7 +500,7 @@ class events_test extends \advanced_testcase {
             if ($cmivalue != null) {
                 $data['other']['cmivalue'] = $cmivalue;
             }
-            \mod_exescorm\event\scoreraw_submitted::create($data);
+            \mod_seledascorm\event\scoreraw_submitted::create($data);
             $this->fail($failmessage);
         } catch (\Exception $e) {
             $this->assertInstanceOf('coding_exception', $e);
@@ -546,9 +546,9 @@ class events_test extends \advanced_testcase {
      */
     public function test_status_submitted_event($cmielement, $cmivalue) {
         $this->resetAfterTest();
-        $event = \mod_exescorm\event\status_submitted::create(array(
+        $event = \mod_seledascorm\event\status_submitted::create(array(
             'other' => array('attemptid' => '2', 'cmielement' => $cmielement, 'cmivalue' => $cmivalue),
-            'objectid' => $this->eventexescorm->id,
+            'objectid' => $this->eventseledascorm->id,
             'context' => \context_module::instance($this->eventcm->id),
             'relateduserid' => $this->eventuser->id
         ));
@@ -575,28 +575,28 @@ class events_test extends \advanced_testcase {
         return array(
             'status_submitted => missing cmielement' => array(
                 null, 'passed',
-                "Event validation should not allow \\mod_exescorm\\event\\status_submitted " .
+                "Event validation should not allow \\mod_seledascorm\\event\\status_submitted " .
                     "to be triggered without other['cmielement']",
                 'Coding error detected, it must be fixed by a programmer: ' .
                     "The 'cmielement' must be set in other."
             ),
             'status_submitted => missing cmivalue' => array(
                 'cmi.core.lesson_status', null,
-                "Event validation should not allow \\mod_exescorm\\event\\status_submitted " .
+                "Event validation should not allow \\mod_seledascorm\\event\\status_submitted " .
                     "to be triggered without other['cmivalue']",
                 'Coding error detected, it must be fixed by a programmer: ' .
                     "The 'cmivalue' must be set in other."
             ),
             'status_submitted => wrong CMI element' => array(
                 'cmi.core.score.raw', 'passed',
-                "Event validation should not allow \\mod_exescorm\\event\\status_submitted " .
+                "Event validation should not allow \\mod_seledascorm\\event\\status_submitted " .
                     'to be triggered with a CMI element not representing a valid CMI status element',
                 'Coding error detected, it must be fixed by a programmer: ' .
                     "The 'cmielement' must represents a valid CMI status element (cmi.core.score.raw)."
             ),
             'status_submitted => wrong CMI value' => array(
                 'cmi.core.lesson_status', 'blahblahblah',
-                "Event validation should not allow \\mod_exescorm\\event\\status_submitted " .
+                "Event validation should not allow \\mod_seledascorm\\event\\status_submitted " .
                     'to be triggered with a CMI element not representing a valid CMI status',
                 'Coding error detected, it must be fixed by a programmer: ' .
                     "The 'cmivalue' must represents a valid CMI status value (blahblahblah)."
@@ -628,7 +628,7 @@ class events_test extends \advanced_testcase {
             if ($cmivalue != null) {
                 $data['other']['cmivalue'] = $cmivalue;
             }
-            \mod_exescorm\event\status_submitted::create($data);
+            \mod_seledascorm\event\status_submitted::create($data);
             $this->fail($failmessage);
         } catch (\Exception $e) {
             $this->assertInstanceOf('coding_exception', $e);

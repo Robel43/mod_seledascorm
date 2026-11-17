@@ -26,7 +26,7 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
- use \mod_exescorm\exeonline\token_manager;
+ use \mod_seledascorm\exeonline\token_manager;
 
 // @codingStandardsIgnoreLine as we validate via account id, HMAC keys, etc.
 require_once(__DIR__ . '/../../config.php');
@@ -69,13 +69,13 @@ if ($payload->pkgtype !== 'scorm') {
 }
 
 // Validate payload course module and userid.
-if (! $cm = get_coursemodule_from_id('exescorm', $payload->cmid, 0, true)) {
+if (! $cm = get_coursemodule_from_id('seledascorm', $payload->cmid, 0, true)) {
     $resultmsg['description'] = 'KO. Invalid ode_id.';
     echo json_encode($errormsg);
     exit(1);
 }
 
-if (! $exescorm = $DB->get_record('exescorm', ['id' => $cm->instance])) {
+if (! $seledascorm = $DB->get_record('seledascorm', ['id' => $cm->instance])) {
     $resultmsg['description'] = 'KO. Invalid ode_id.';
     echo json_encode($errormsg);
     exit(1);
@@ -96,7 +96,7 @@ if (! $user) {
 }
 
 $context = context_module::instance($cm->id);
-if (! has_capability('mod/exescorm:addinstance', $context, $user)) {
+if (! has_capability('mod/seledascorm:addinstance', $context, $user)) {
     $resultmsg['description'] = 'KO. Forbidden.';
     echo json_encode($errormsg);
     exit(1);
@@ -104,7 +104,7 @@ if (! has_capability('mod/exescorm:addinstance', $context, $user)) {
 
 // Lookup area files.
 $fs = get_file_storage();
-$files = $fs->get_area_files($context->id, 'mod_exescorm', 'package', 0, '', false);
+$files = $fs->get_area_files($context->id, 'mod_seledascorm', 'package', 0, '', false);
 $file = reset($files);
 if ($file) {
     $contents = $file->get_content();

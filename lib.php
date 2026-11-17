@@ -15,49 +15,99 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package   mod_exescorm
+ * @package   mod_seledascorm
  * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die();
 
-/** EXESCORM_TYPE_LOCAL = local */
-define('EXESCORM_TYPE_LOCAL', 'local');
-/** EXESCORM_TYPE_EXESCORMNET = exescorm */
-define('EXESCORM_TYPE_EXESCORMNET', 'exescormnet');
-/** EXESCORM_TYPE_LOCALSYNC = localsync */
-define('EXESCORM_TYPE_LOCALSYNC', 'localsync');
-/** EXESCORM_TYPE_EXTERNAL = external */
-define('EXESCORM_TYPE_EXTERNAL', 'external');
-/** EXESCORM_TYPE_AICCURL = external AICC url */
-define('EXESCORM_TYPE_AICCURL', 'aiccurl');
-/** EXESCORM_TYPE_EMBEDDED = embedded static editor */
-define('EXESCORM_TYPE_EMBEDDED', 'embedded');
+/** SELEDASCORM_TYPE_LOCAL = local */
+define('SELEDASCORM_TYPE_LOCAL', 'local');
+/** SELEDASCORM_TYPE_SELEDASCORMNET = seledascorm */
+define('SELEDASCORM_TYPE_SELEDASCORMNET', 'seledascormnet');
+/** SELEDASCORM_TYPE_LOCALSYNC = localsync */
+define('SELEDASCORM_TYPE_LOCALSYNC', 'localsync');
+/** SELEDASCORM_TYPE_EXTERNAL = external */
+define('SELEDASCORM_TYPE_EXTERNAL', 'external');
+/** SELEDASCORM_TYPE_AICCURL = external AICC url */
+define('SELEDASCORM_TYPE_AICCURL', 'aiccurl');
+/** SELEDASCORM_TYPE_EMBEDDED = embedded static editor */
+define('SELEDASCORM_TYPE_EMBEDDED', 'embedded');
 
-define('EXESCORM_TOC_SIDE', 0);
-define('EXESCORM_TOC_HIDDEN', 1);
-define('EXESCORM_TOC_POPUP', 2);
-define('EXESCORM_TOC_DISABLED', 3);
+define('SELEDASCORM_TOC_SIDE', 0);
+define('SELEDASCORM_TOC_HIDDEN', 1);
+define('SELEDASCORM_TOC_POPUP', 2);
+define('SELEDASCORM_TOC_DISABLED', 3);
 
 // Used to show/hide navigation buttons and set their position.
-define('EXESCORM_NAV_DISABLED', 0);
-define('EXESCORM_NAV_UNDER_CONTENT', 1);
-define('EXESCORM_NAV_FLOATING', 2);
+define('SELEDASCORM_NAV_DISABLED', 0);
+define('SELEDASCORM_NAV_UNDER_CONTENT', 1);
+define('SELEDASCORM_NAV_FLOATING', 2);
 
 // Used to check what SCORM version is being used.
-define('EXESCORM_SCORM_12', 1);
-define('EXESCORM_SCORM_13', 2);
-define('EXESCORM_SCORM_AICC', 3);
+define('SELEDASCORM_SCORM_12', 1);
+define('SELEDASCORM_SCORM_13', 2);
+define('SELEDASCORM_SCORM_AICC', 3);
 
 
 // List of possible attemptstatusdisplay options.
-define('EXESCORM_DISPLAY_ATTEMPTSTATUS_NO', 0);
-define('EXESCORM_DISPLAY_ATTEMPTSTATUS_ALL', 1);
-define('EXESCORM_DISPLAY_ATTEMPTSTATUS_MY', 2);
-define('EXESCORM_DISPLAY_ATTEMPTSTATUS_ENTRY', 3);
+define('SELEDASCORM_DISPLAY_ATTEMPTSTATUS_NO', 0);
+define('SELEDASCORM_DISPLAY_ATTEMPTSTATUS_ALL', 1);
+define('SELEDASCORM_DISPLAY_ATTEMPTSTATUS_MY', 2);
+define('SELEDASCORM_DISPLAY_ATTEMPTSTATUS_ENTRY', 3);
 
-define('EXESCORM_EVENT_TYPE_OPEN', 'open');
-define('EXESCORM_EVENT_TYPE_CLOSE', 'close');
+define('SELEDASCORM_EVENT_TYPE_OPEN', 'open');
+
+/**
+ * Return the site-specific product name used by the embedded Seleda editor.
+ *
+ * The technical Moodle component remains mod_seledascorm; this setting controls
+ * only product-facing branding owned by the plugin/editor.
+ *
+ * @return string
+ */
+function seledascorm_get_brand_name(): string {
+    $name = trim((string) get_config('mod_seledascorm', 'brandname'));
+    return $name !== '' ? $name : 'Seleda';
+}
+
+/**
+ * Return the configured branding logo URL, or null when the bundled Seleda
+ * logo should be used.
+ *
+ * @return moodle_url|null
+ */
+function seledascorm_get_brand_logo_url(): ?moodle_url {
+    $context = context_system::instance();
+    $fs = get_file_storage();
+    $files = $fs->get_area_files(
+        $context->id,
+        'mod_seledascorm',
+        'brandinglogo',
+        0,
+        'sortorder, filepath, filename',
+        false
+    );
+    if (!$files) {
+        return null;
+    }
+
+    /** @var stored_file $file */
+    $file = reset($files);
+    $url = moodle_url::make_pluginfile_url(
+        $file->get_contextid(),
+        $file->get_component(),
+        $file->get_filearea(),
+        $file->get_itemid(),
+        $file->get_filepath(),
+        $file->get_filename(),
+        false
+    );
+    $url->param('rev', $file->get_timemodified());
+    return $url;
+}
+
+define('SELEDASCORM_EVENT_TYPE_CLOSE', 'close');
 
 require_once(__DIR__ . '/deprecatedlib.php');
 
@@ -69,7 +119,7 @@ require_once(__DIR__ . '/deprecatedlib.php');
  * @param   bool    $with_strings   (optional)
  * @return  array
  */
-function exescorm_status_options($withstrings = false) {
+function seledascorm_status_options($withstrings = false) {
     // Id's are important as they are bits.
     $options = array(
         2 => 'passed',
@@ -78,7 +128,7 @@ function exescorm_status_options($withstrings = false) {
 
     if ($withstrings) {
         foreach ($options as $key => $value) {
-            $options[$key] = get_string('completionstatus_'.$value, 'mod_exescorm');
+            $options[$key] = get_string('completionstatus_'.$value, 'mod_seledascorm');
         }
     }
 
@@ -95,58 +145,58 @@ function exescorm_status_options($withstrings = false) {
  * @global stdClass
  * @global object
  * @uses CONTEXT_MODULE
- * @uses EXESCORM_TYPE_LOCAL
- * @uses EXESCORM_TYPE_LOCALSYNC
- * @uses EXESCORM_TYPE_EXTERNAL
- * @param object $exescorm Form data
+ * @uses SELEDASCORM_TYPE_LOCAL
+ * @uses SELEDASCORM_TYPE_LOCALSYNC
+ * @uses SELEDASCORM_TYPE_EXTERNAL
+ * @param object $seledascorm Form data
  * @param object $mform
  * @return int new instance id
  */
-function exescorm_add_instance($exescorm, $mform=null) {
+function seledascorm_add_instance($seledascorm, $mform=null) {
     global $CFG, $DB, $USER;
 
-    require_once($CFG->dirroot.'/mod/exescorm/locallib.php');
+    require_once($CFG->dirroot.'/mod/seledascorm/locallib.php');
 
-    if (empty($exescorm->timeopen)) {
-        $exescorm->timeopen = 0;
+    if (empty($seledascorm->timeopen)) {
+        $seledascorm->timeopen = 0;
     }
-    if (empty($exescorm->timeclose)) {
-        $exescorm->timeclose = 0;
+    if (empty($seledascorm->timeclose)) {
+        $seledascorm->timeclose = 0;
     }
-    if (empty($exescorm->completionstatusallscos)) {
-        $exescorm->completionstatusallscos = 0;
+    if (empty($seledascorm->completionstatusallscos)) {
+        $seledascorm->completionstatusallscos = 0;
     }
-    $cmid = $exescorm->coursemodule;
-    $cmidnumber = $exescorm->cmidnumber;
-    $courseid = $exescorm->course;
+    $cmid = $seledascorm->coursemodule;
+    $cmidnumber = $seledascorm->cmidnumber;
+    $courseid = $seledascorm->course;
 
     $context = context_module::instance($cmid);
 
-    $exescorm = exescorm_option2text($exescorm);
-    $exescorm->width = (int)str_replace('%', '', $exescorm->width);
-    $exescorm->height = (int)str_replace('%', '', $exescorm->height);
+    $seledascorm = seledascorm_option2text($seledascorm);
+    $seledascorm->width = (int)str_replace('%', '', $seledascorm->width);
+    $seledascorm->height = (int)str_replace('%', '', $seledascorm->height);
 
-    if (!isset($exescorm->whatgrade)) {
-        $exescorm->whatgrade = 0;
+    if (!isset($seledascorm->whatgrade)) {
+        $seledascorm->whatgrade = 0;
     }
 
-    $id = $DB->insert_record('exescorm', $exescorm);
+    $id = $DB->insert_record('seledascorm', $seledascorm);
 
     // Update course module record - from now on this instance properly exists and all function may be used.
     $DB->set_field('course_modules', 'instance', $id, array('id' => $cmid));
 
-    // Reload exescorm instance.
-    $record = $DB->get_record('exescorm', array('id' => $id));
+    // Reload seledascorm instance.
+    $record = $DB->get_record('seledascorm', array('id' => $id));
 
-    if ($exescorm->exescormtype === EXESCORM_TYPE_EXESCORMNET) {
-        $record->exescormtype = EXESCORM_TYPE_LOCAL;
+    if ($seledascorm->seledascormtype === SELEDASCORM_TYPE_SELEDASCORMNET) {
+        $record->seledascormtype = SELEDASCORM_TYPE_LOCAL;
 
         $fs = get_file_storage();
-        $templatename = get_config('exescorm', 'template');
+        $templatename = get_config('seledascorm', 'template');
         $templatefile = false;
         $fileinfo = [
             'contextid' => $context->id,
-            'component' => 'mod_exescorm',
+            'component' => 'mod_seledascorm',
             'filearea' => 'package',
             'itemid' => 0,
             'filepath' => '/',
@@ -158,13 +208,13 @@ function exescorm_add_instance($exescorm, $mform=null) {
         ];
 
         if (! empty($templatename)) {
-            $templatefile = $fs->get_file(1, 'exescorm', 'config', 0, '/', ltrim($templatename, '/'));
+            $templatefile = $fs->get_file(1, 'seledascorm', 'config', 0, '/', ltrim($templatename, '/'));
         }
 
         if ($templatefile) {
             $file = $fs->create_file_from_storedfile($fileinfo, $templatefile);
         } else {
-            $defaultpackagepath = $CFG->dirroot . '/mod/exescorm/data/default_package.zip';
+            $defaultpackagepath = $CFG->dirroot . '/mod/seledascorm/data/default_package.zip';
 
             $file = $fs->create_file_from_pathname($fileinfo, $defaultpackagepath);
         }
@@ -173,14 +223,14 @@ function exescorm_add_instance($exescorm, $mform=null) {
         if ($filename !== false) {
             $record->reference = $filename;
         }
-    } else if ($exescorm->exescormtype === EXESCORM_TYPE_EMBEDDED) {
+    } else if ($seledascorm->seledascormtype === SELEDASCORM_TYPE_EMBEDDED) {
         // Embedded type: user may optionally upload an .elpx project file.
-        if (!empty($exescorm->packagefile)) {
+        if (!empty($seledascorm->packagefile)) {
             $fs = get_file_storage();
-            $fs->delete_area_files($context->id, 'mod_exescorm', 'package');
-            file_save_draft_area_files($exescorm->packagefile, $context->id, 'mod_exescorm', 'package',
+            $fs->delete_area_files($context->id, 'mod_seledascorm', 'package');
+            file_save_draft_area_files($seledascorm->packagefile, $context->id, 'mod_seledascorm', 'package',
                 0, array('subdirs' => 0, 'maxfiles' => 1));
-            $files = $fs->get_area_files($context->id, 'mod_exescorm', 'package', 0, '', false);
+            $files = $fs->get_area_files($context->id, 'mod_seledascorm', 'package', 0, '', false);
             $file = reset($files);
             if ($file) {
                 $record->reference = $file->get_filename();
@@ -188,11 +238,11 @@ function exescorm_add_instance($exescorm, $mform=null) {
         } else {
             // No file uploaded: create default package so there is something to parse.
             $fs = get_file_storage();
-            $templatename = get_config('exescorm', 'template');
+            $templatename = get_config('seledascorm', 'template');
             $templatefile = false;
             $fileinfo = [
                 'contextid' => $context->id,
-                'component' => 'mod_exescorm',
+                'component' => 'mod_seledascorm',
                 'filearea' => 'package',
                 'itemid' => 0,
                 'filepath' => '/',
@@ -203,25 +253,25 @@ function exescorm_add_instance($exescorm, $mform=null) {
                 'license' => 'unknown',
             ];
             if (! empty($templatename)) {
-                $templatefile = $fs->get_file(1, 'exescorm', 'config', 0, '/', ltrim($templatename, '/'));
+                $templatefile = $fs->get_file(1, 'seledascorm', 'config', 0, '/', ltrim($templatename, '/'));
             }
             if ($templatefile) {
                 $file = $fs->create_file_from_storedfile($fileinfo, $templatefile);
             } else {
-                $defaultpackagepath = $CFG->dirroot . '/mod/exescorm/data/default_package.zip';
+                $defaultpackagepath = $CFG->dirroot . '/mod/seledascorm/data/default_package.zip';
                 $file = $fs->create_file_from_pathname($fileinfo, $defaultpackagepath);
             }
             $record->reference = $file->get_filename();
         }
-    } else if ($record->exescormtype === EXESCORM_TYPE_LOCAL) {
+    } else if ($record->seledascormtype === SELEDASCORM_TYPE_LOCAL) {
         // Store the package and verify.
-        if (!empty($exescorm->packagefile)) {
+        if (!empty($seledascorm->packagefile)) {
             $fs = get_file_storage();
-            $fs->delete_area_files($context->id, 'mod_exescorm', 'package');
-            file_save_draft_area_files($exescorm->packagefile, $context->id, 'mod_exescorm', 'package',
+            $fs->delete_area_files($context->id, 'mod_seledascorm', 'package');
+            file_save_draft_area_files($seledascorm->packagefile, $context->id, 'mod_seledascorm', 'package',
                 0, array('subdirs' => 0, 'maxfiles' => 1));
             // Get filename of zip that was uploaded.
-            $files = $fs->get_area_files($context->id, 'mod_exescorm', 'package', 0, '', false);
+            $files = $fs->get_area_files($context->id, 'mod_seledascorm', 'package', 0, '', false);
             $file = reset($files);
             $filename = $file->get_filename();
             if ($filename !== false) {
@@ -229,19 +279,19 @@ function exescorm_add_instance($exescorm, $mform=null) {
             }
         }
 
-    } else if ($record->exescormtype === EXESCORM_TYPE_LOCALSYNC) {
-        $record->reference = $exescorm->packageurl;
-    } else if ($record->exescormtype === EXESCORM_TYPE_EXTERNAL) {
-        $record->reference = $exescorm->packageurl;
-    } else if ($record->exescormtype === EXESCORM_TYPE_AICCURL) {
-        $record->reference = $exescorm->packageurl;
-        $record->hidetoc = EXESCORM_TOC_DISABLED; // TOC is useless for direct AICCURL so disable it.
+    } else if ($record->seledascormtype === SELEDASCORM_TYPE_LOCALSYNC) {
+        $record->reference = $seledascorm->packageurl;
+    } else if ($record->seledascormtype === SELEDASCORM_TYPE_EXTERNAL) {
+        $record->reference = $seledascorm->packageurl;
+    } else if ($record->seledascormtype === SELEDASCORM_TYPE_AICCURL) {
+        $record->reference = $seledascorm->packageurl;
+        $record->hidetoc = SELEDASCORM_TOC_DISABLED; // TOC is useless for direct AICCURL so disable it.
     } else {
         return false;
     }
 
     // Save reference.
-    $DB->update_record('exescorm', $record);
+    $DB->update_record('seledascorm', $record);
 
     // Extra fields required in grade related functions.
     $record->course = $courseid;
@@ -258,13 +308,13 @@ function exescorm_add_instance($exescorm, $mform=null) {
         }
     }
     if (!$skipparse) {
-        exescorm_parse($record, true);
+        seledascorm_parse($record, true);
     }
 
-    exescorm_grade_item_update($record);
-    exescorm_update_calendar($record, $cmid);
-    if (!empty($exescorm->completionexpected)) {
-        \core_completion\api::update_completion_date_event($cmid, 'exescorm', $record, $exescorm->completionexpected);
+    seledascorm_grade_item_update($record);
+    seledascorm_update_calendar($record, $cmid);
+    if (!empty($seledascorm->completionexpected)) {
+        \core_completion\api::update_completion_date_event($cmid, 'seledascorm', $record, $seledascorm->completionexpected);
     }
 
     return $record->id;
@@ -278,117 +328,117 @@ function exescorm_add_instance($exescorm, $mform=null) {
  * @global stdClass
  * @global object
  * @uses CONTEXT_MODULE
- * @uses EXESCORM_TYPE_LOCAL
- * @uses EXESCORM_TYPE_LOCALSYNC
- * @uses EXESCORM_TYPE_EXTERNAL
- * @param object $exescorm Form data
+ * @uses SELEDASCORM_TYPE_LOCAL
+ * @uses SELEDASCORM_TYPE_LOCALSYNC
+ * @uses SELEDASCORM_TYPE_EXTERNAL
+ * @param object $seledascorm Form data
  * @param object $mform
  * @return bool
  */
-function exescorm_update_instance($exescorm, $mform=null) {
+function seledascorm_update_instance($seledascorm, $mform=null) {
     global $CFG, $DB;
 
-    require_once($CFG->dirroot.'/mod/exescorm/locallib.php');
+    require_once($CFG->dirroot.'/mod/seledascorm/locallib.php');
 
-    if (empty($exescorm->timeopen)) {
-        $exescorm->timeopen = 0;
+    if (empty($seledascorm->timeopen)) {
+        $seledascorm->timeopen = 0;
     }
-    if (empty($exescorm->timeclose)) {
-        $exescorm->timeclose = 0;
+    if (empty($seledascorm->timeclose)) {
+        $seledascorm->timeclose = 0;
     }
-    if (empty($exescorm->completionstatusallscos)) {
-        $exescorm->completionstatusallscos = 0;
+    if (empty($seledascorm->completionstatusallscos)) {
+        $seledascorm->completionstatusallscos = 0;
     }
 
-    $cmid = $exescorm->coursemodule;
-    $cmidnumber = $exescorm->cmidnumber;
-    $courseid = $exescorm->course;
+    $cmid = $seledascorm->coursemodule;
+    $cmidnumber = $seledascorm->cmidnumber;
+    $courseid = $seledascorm->course;
 
-    $exescorm->id = $exescorm->instance;
+    $seledascorm->id = $seledascorm->instance;
 
     $context = context_module::instance($cmid);
 
-    if ($exescorm->exescormtype === EXESCORM_TYPE_EXESCORMNET) {
-        $exescorm->exescormtype = EXESCORM_TYPE_LOCAL;
+    if ($seledascorm->seledascormtype === SELEDASCORM_TYPE_SELEDASCORMNET) {
+        $seledascorm->seledascormtype = SELEDASCORM_TYPE_LOCAL;
     }
 
-    if ($exescorm->exescormtype === EXESCORM_TYPE_EMBEDDED) {
+    if ($seledascorm->seledascormtype === SELEDASCORM_TYPE_EMBEDDED) {
         // Embedded editor saves are handled via editor/save.php.
         // But user may re-upload an .elpx file via the settings form.
-        if (!empty($exescorm->packagefile)) {
+        if (!empty($seledascorm->packagefile)) {
             $fs = get_file_storage();
-            $fs->delete_area_files($context->id, 'mod_exescorm', 'package');
-            file_save_draft_area_files($exescorm->packagefile, $context->id, 'mod_exescorm', 'package',
+            $fs->delete_area_files($context->id, 'mod_seledascorm', 'package');
+            file_save_draft_area_files($seledascorm->packagefile, $context->id, 'mod_seledascorm', 'package',
                 0, array('subdirs' => 0, 'maxfiles' => 1));
-            $files = $fs->get_area_files($context->id, 'mod_exescorm', 'package', 0, '', false);
+            $files = $fs->get_area_files($context->id, 'mod_seledascorm', 'package', 0, '', false);
             $file = reset($files);
             if ($file) {
-                $exescorm->reference = $file->get_filename();
+                $seledascorm->reference = $file->get_filename();
             }
         }
-    } else if ($exescorm->exescormtype === EXESCORM_TYPE_LOCAL) {
-        if (!empty($exescorm->packagefile)) {
+    } else if ($seledascorm->seledascormtype === SELEDASCORM_TYPE_LOCAL) {
+        if (!empty($seledascorm->packagefile)) {
             $fs = get_file_storage();
-            $fs->delete_area_files($context->id, 'mod_exescorm', 'package');
-            file_save_draft_area_files($exescorm->packagefile, $context->id, 'mod_exescorm', 'package',
+            $fs->delete_area_files($context->id, 'mod_seledascorm', 'package');
+            file_save_draft_area_files($seledascorm->packagefile, $context->id, 'mod_seledascorm', 'package',
                 0, array('subdirs' => 0, 'maxfiles' => 1));
             // Get filename of zip that was uploaded.
-            $files = $fs->get_area_files($context->id, 'mod_exescorm', 'package', 0, '', false);
+            $files = $fs->get_area_files($context->id, 'mod_seledascorm', 'package', 0, '', false);
             $file = reset($files);
             $filename = $file->get_filename();
             if ($filename !== false) {
-                $exescorm->reference = $filename;
+                $seledascorm->reference = $filename;
             }
         }
 
-    } else if ($exescorm->exescormtype === EXESCORM_TYPE_LOCALSYNC) {
-        $exescorm->reference = $exescorm->packageurl;
-    } else if ($exescorm->exescormtype === EXESCORM_TYPE_EXTERNAL) {
-        $exescorm->reference = $exescorm->packageurl;
-    } else if ($exescorm->exescormtype === EXESCORM_TYPE_AICCURL) {
-        $exescorm->reference = $exescorm->packageurl;
-        $exescorm->hidetoc = EXESCORM_TOC_DISABLED; // TOC is useless for direct AICCURL so disable it.
+    } else if ($seledascorm->seledascormtype === SELEDASCORM_TYPE_LOCALSYNC) {
+        $seledascorm->reference = $seledascorm->packageurl;
+    } else if ($seledascorm->seledascormtype === SELEDASCORM_TYPE_EXTERNAL) {
+        $seledascorm->reference = $seledascorm->packageurl;
+    } else if ($seledascorm->seledascormtype === SELEDASCORM_TYPE_AICCURL) {
+        $seledascorm->reference = $seledascorm->packageurl;
+        $seledascorm->hidetoc = SELEDASCORM_TOC_DISABLED; // TOC is useless for direct AICCURL so disable it.
     } else {
         return false;
     }
 
-    $exescorm = exescorm_option2text($exescorm);
-    $exescorm->width = (int)str_replace('%', '', $exescorm->width);
-    $exescorm->height = (int)str_replace('%', '', $exescorm->height);
-    $exescorm->timemodified = time();
+    $seledascorm = seledascorm_option2text($seledascorm);
+    $seledascorm->width = (int)str_replace('%', '', $seledascorm->width);
+    $seledascorm->height = (int)str_replace('%', '', $seledascorm->height);
+    $seledascorm->timemodified = time();
 
-    if (!isset($exescorm->whatgrade)) {
-        $exescorm->whatgrade = 0;
+    if (!isset($seledascorm->whatgrade)) {
+        $seledascorm->whatgrade = 0;
     }
 
-    $DB->update_record('exescorm', $exescorm);
+    $DB->update_record('seledascorm', $seledascorm);
     // We need to find this out before we blow away the form data.
-    $completionexpected = (!empty($exescorm->completionexpected)) ? $exescorm->completionexpected : null;
+    $completionexpected = (!empty($seledascorm->completionexpected)) ? $seledascorm->completionexpected : null;
 
-    $exescorm = $DB->get_record('exescorm', array('id' => $exescorm->id));
+    $seledascorm = $DB->get_record('seledascorm', array('id' => $seledascorm->id));
 
     // Extra fields required in grade related functions.
-    $exescorm->course = $courseid;
-    $exescorm->idnumber = $cmidnumber;
-    $exescorm->cmid = $cmid;
+    $seledascorm->course = $courseid;
+    $seledascorm->idnumber = $cmidnumber;
+    $seledascorm->cmid = $cmid;
 
     // Skip parse for .elpx files: they are eXeLearning project files, not SCORM packages.
     // The embedded editor will import the .elpx and export a proper SCORM package on save.
     $skipparse = false;
-    if (!empty($exescorm->reference)) {
-        $ext = strtolower(pathinfo($exescorm->reference, PATHINFO_EXTENSION));
+    if (!empty($seledascorm->reference)) {
+        $ext = strtolower(pathinfo($seledascorm->reference, PATHINFO_EXTENSION));
         if ($ext === 'elpx') {
             $skipparse = true;
         }
     }
     if (!$skipparse) {
-        exescorm_parse($exescorm, (bool)$exescorm->updatefreq);
+        seledascorm_parse($seledascorm, (bool)$seledascorm->updatefreq);
     }
 
-    exescorm_grade_item_update($exescorm);
-    exescorm_update_grades($exescorm);
-    exescorm_update_calendar($exescorm, $cmid);
-    \core_completion\api::update_completion_date_event($cmid, 'exescorm', $exescorm, $completionexpected);
+    seledascorm_grade_item_update($seledascorm);
+    seledascorm_update_grades($seledascorm);
+    seledascorm_update_calendar($seledascorm, $cmid);
+    \core_completion\api::update_completion_date_event($cmid, 'seledascorm', $seledascorm, $completionexpected);
 
     return true;
 }
@@ -403,32 +453,32 @@ function exescorm_update_instance($exescorm, $mform=null) {
  * @param int $id Scorm instance id
  * @return boolean
  */
-function exescorm_delete_instance($id) {
+function seledascorm_delete_instance($id) {
     global $CFG, $DB;
 
-    if (! $exescorm = $DB->get_record('exescorm', array('id' => $id))) {
+    if (! $seledascorm = $DB->get_record('seledascorm', array('id' => $id))) {
         return false;
     }
 
     $result = true;
 
     // Delete any dependent records.
-    if (! $DB->delete_records('exescorm_scoes_track', array('exescormid' => $exescorm->id))) {
+    if (! $DB->delete_records('seledascorm_scoes_track', array('seledascormid' => $seledascorm->id))) {
         $result = false;
     }
-    if ($scoes = $DB->get_records('exescorm_scoes', array('exescorm' => $exescorm->id))) {
+    if ($scoes = $DB->get_records('seledascorm_scoes', array('seledascorm' => $seledascorm->id))) {
         foreach ($scoes as $sco) {
-            if (! $DB->delete_records('exescorm_scoes_data', array('scoid' => $sco->id))) {
+            if (! $DB->delete_records('seledascorm_scoes_data', array('scoid' => $sco->id))) {
                 $result = false;
             }
         }
-        $DB->delete_records('exescorm_scoes', array('exescorm' => $exescorm->id));
+        $DB->delete_records('seledascorm_scoes', array('seledascorm' => $seledascorm->id));
     }
 
-    exescorm_grade_item_delete($exescorm);
+    seledascorm_grade_item_delete($seledascorm);
 
     // We must delete the module record after we delete the grade item.
-    if (! $DB->delete_records('exescorm', array('id' => $exescorm->id))) {
+    if (! $DB->delete_records('seledascorm', array('id' => $seledascorm->id))) {
         $result = false;
     }
 
@@ -444,25 +494,25 @@ function exescorm_delete_instance($id) {
  * @param stdClass $course Course object
  * @param stdClass $user User object
  * @param int $mod
- * @param stdClass $exescorm The exescorm object
+ * @param stdClass $seledascorm The seledascorm object
  * @return mixed
  */
-function exescorm_user_outline($course, $user, $mod, $exescorm) {
+function seledascorm_user_outline($course, $user, $mod, $seledascorm) {
     global $CFG;
-    require_once($CFG->dirroot.'/mod/exescorm/locallib.php');
+    require_once($CFG->dirroot.'/mod/seledascorm/locallib.php');
 
     require_once("$CFG->libdir/gradelib.php");
     /** @var Object $grades */
-    $grades = grade_get_grades($course->id, 'mod', 'exescorm', $exescorm->id, $user->id);
+    $grades = grade_get_grades($course->id, 'mod', 'seledascorm', $seledascorm->id, $user->id);
     if (!empty($grades->items[0]->grades)) {
         $grade = reset(($grades->items[0])->grades);
         $result = (object) [
             'time' => grade_get_date_for_user_grade($grade, $user),
         ];
         if (!$grade->hidden || has_capability('moodle/grade:viewhidden', context_course::instance($course->id))) {
-            $result->info = get_string('gradenoun', 'mod_exescorm') . ': ' . $grade->str_long_grade;
+            $result->info = get_string('gradenoun', 'mod_seledascorm') . ': ' . $grade->str_long_grade;
         } else {
-            $result->info = get_string('gradenoun', 'mod_exescorm') . ': ' . get_string('hidden', 'grades');
+            $result->info = get_string('gradenoun', 'mod_seledascorm') . ': ' . get_string('hidden', 'grades');
         }
 
         return $result;
@@ -479,10 +529,10 @@ function exescorm_user_outline($course, $user, $mod, $exescorm) {
  * @param object $course
  * @param object $user
  * @param object $mod
- * @param object $exescorm
+ * @param object $seledascorm
  * @return boolean
  */
-function exescorm_user_complete($course, $user, $mod, $exescorm) {
+function seledascorm_user_complete($course, $user, $mod, $seledascorm) {
     global $CFG, $DB, $OUTPUT;
     require_once("$CFG->libdir/gradelib.php");
 
@@ -494,28 +544,28 @@ function exescorm_user_complete($course, $user, $mod, $exescorm) {
     $report = '';
 
     // First Access and Last Access dates for SCOs.
-    require_once($CFG->dirroot.'/mod/exescorm/locallib.php');
-    $timetracks = exescorm_get_sco_runtime($exescorm->id, false, $user->id);
+    require_once($CFG->dirroot.'/mod/seledascorm/locallib.php');
+    $timetracks = seledascorm_get_sco_runtime($seledascorm->id, false, $user->id);
     $firstmodify = $timetracks->start;
     $lastmodify = $timetracks->finish;
     /** @var Object $grades */
-    $grades = grade_get_grades($course->id, 'mod', 'exescorm', $exescorm->id, $user->id);
+    $grades = grade_get_grades($course->id, 'mod', 'seledascorm', $seledascorm->id, $user->id);
     if (!empty($grades->items[0]->grades)) {
         $grade = reset($grades->items[0]->grades);
         if (!$grade->hidden || has_capability('moodle/grade:viewhidden', context_course::instance($course->id))) {
-            echo $OUTPUT->container(get_string('gradenoun', 'mod_exescorm') . ': ' . $grade->str_long_grade);
+            echo $OUTPUT->container(get_string('gradenoun', 'mod_seledascorm') . ': ' . $grade->str_long_grade);
             if ($grade->str_feedback) {
                 echo $OUTPUT->container(get_string('feedback').': '.$grade->str_feedback);
             }
         } else {
-            echo $OUTPUT->container(get_string('gradenoun', 'mod_exescorm') . ': ' . get_string('hidden', 'grades'));
+            echo $OUTPUT->container(get_string('gradenoun', 'mod_seledascorm') . ': ' . get_string('hidden', 'grades'));
         }
     }
 
-    if ($orgs = $DB->get_records_select('exescorm_scoes', 'exescorm = ? AND '.
-                                         $DB->sql_isempty('exescorm_scoes', 'launch', false, true).' AND '.
-                                         $DB->sql_isempty('exescorm_scoes', 'organization', false, false),
-                                         array($exescorm->id), 'sortorder, id', 'id, identifier, title')) {
+    if ($orgs = $DB->get_records_select('seledascorm_scoes', 'seledascorm = ? AND '.
+                                         $DB->sql_isempty('seledascorm_scoes', 'launch', false, true).' AND '.
+                                         $DB->sql_isempty('seledascorm_scoes', 'organization', false, false),
+                                         array($seledascorm->id), 'sortorder, id', 'id, identifier, title')) {
         if (count($orgs) <= 1) {
             unset($orgs);
             $orgs = array();
@@ -523,7 +573,7 @@ function exescorm_user_complete($course, $user, $mod, $exescorm) {
             $org->identifier = '';
             $orgs[] = $org;
         }
-        $report .= html_writer::start_div('mod-exescorm');
+        $report .= html_writer::start_div('mod-seledascorm');
         foreach ($orgs as $org) {
             $conditions = array();
             $currentorg = '';
@@ -533,8 +583,8 @@ function exescorm_user_complete($course, $user, $mod, $exescorm) {
                 $conditions['organization'] = $currentorg;
             }
             $report .= html_writer::start_tag('ul', array('id' => '0', 'class' => $liststyle));
-                $conditions['exescorm'] = $exescorm->id;
-            if ($scoes = $DB->get_records('exescorm_scoes', $conditions, "sortorder, id")) {
+                $conditions['seledascorm'] = $seledascorm->id;
+            if ($scoes = $DB->get_records('seledascorm_scoes', $conditions, "sortorder, id")) {
                 // Drop keys so that we can access array sequentially.
                 $scoes = array_values($scoes);
                 $level = 0;
@@ -579,24 +629,24 @@ function exescorm_user_complete($course, $user, $mod, $exescorm) {
                     if ($sco->launch) {
                         $score = '';
                         $totaltime = '';
-                        if ($usertrack = exescorm_get_tracks($sco->id, $user->id)) {
+                        if ($usertrack = seledascorm_get_tracks($sco->id, $user->id)) {
                             if ($usertrack->status == '') {
                                 $usertrack->status = 'notattempted';
                             }
-                            $strstatus = get_string($usertrack->status, 'mod_exescorm');
-                            $report .= $OUTPUT->pix_icon($usertrack->status, $strstatus, 'exescorm');
+                            $strstatus = get_string($usertrack->status, 'mod_seledascorm');
+                            $report .= $OUTPUT->pix_icon($usertrack->status, $strstatus, 'seledascorm');
                         } else {
-                            if ($sco->exescormtype == 'sco') {
+                            if ($sco->seledascormtype == 'sco') {
                                 $report .= $OUTPUT->pix_icon(
                                             'notattempted',
-                                            get_string('notattempted', 'mod_exescorm'),
-                                            'exescorm'
+                                            get_string('notattempted', 'mod_seledascorm'),
+                                            'seledascorm'
                                         );
                             } else {
                                 $report .= $OUTPUT->pix_icon(
                                             'asset',
-                                            get_string('asset', 'mod_exescorm'),
-                                            'exescorm'
+                                            get_string('asset', 'mod_seledascorm'),
+                                            'seledascorm'
                                         );
                             }
                         }
@@ -626,17 +676,17 @@ function exescorm_user_complete($course, $user, $mod, $exescorm) {
     if ($sometoreport) {
         if ($firstmodify < $now) {
             $timeago = format_time($now - $firstmodify);
-            echo get_string('firstaccess', 'mod_exescorm') . ': ' . userdate($firstmodify) . ' (' . $timeago . ")"
+            echo get_string('firstaccess', 'mod_seledascorm') . ': ' . userdate($firstmodify) . ' (' . $timeago . ")"
                 . html_writer::empty_tag('br');
         }
         if ($lastmodify > 0) {
             $timeago = format_time($now - $lastmodify);
-            echo get_string('lastaccess', 'mod_exescorm').': '.userdate($lastmodify).' ('.$timeago.")".html_writer::empty_tag('br');
+            echo get_string('lastaccess', 'mod_seledascorm').': '.userdate($lastmodify).' ('.$timeago.")".html_writer::empty_tag('br');
         }
-        echo get_string('report', 'mod_exescorm').":".html_writer::empty_tag('br');
+        echo get_string('report', 'mod_seledascorm').":".html_writer::empty_tag('br');
         echo $report;
     } else {
-        print_string('noactivity', 'mod_exescorm');
+        print_string('noactivity', 'mod_seledascorm');
     }
 
     return true;
@@ -651,37 +701,37 @@ function exescorm_user_complete($course, $user, $mod, $exescorm) {
  * @global object
  * @return boolean
  */
-function exescorm_cron_scheduled_task () {
+function seledascorm_cron_scheduled_task () {
     global $CFG, $DB;
 
-    require_once($CFG->dirroot.'/mod/exescorm/locallib.php');
+    require_once($CFG->dirroot.'/mod/seledascorm/locallib.php');
 
     $sitetimezone = core_date::get_server_timezone();
-    // Now see if there are any exescorm updates to be done.
+    // Now see if there are any seledascorm updates to be done.
 
-    if (!isset($CFG->exescorm_updatetimelast)) {    // To catch the first time.
-        set_config('exescorm_updatetimelast', 0);
+    if (!isset($CFG->seledascorm_updatetimelast)) {    // To catch the first time.
+        set_config('seledascorm_updatetimelast', 0);
     }
 
     $timenow = time();
     $updatetime = usergetmidnight($timenow, $sitetimezone);
 
-    if ($CFG->exescorm_updatetimelast < $updatetime && $timenow > $updatetime) {
+    if ($CFG->seledascorm_updatetimelast < $updatetime && $timenow > $updatetime) {
 
-        set_config('exescorm_updatetimelast', $timenow);
+        set_config('seledascorm_updatetimelast', $timenow);
 
-        mtrace('Updating exescorm packages which require daily update');// We are updating.
+        mtrace('Updating seledascorm packages which require daily update');// We are updating.
 
-        $exescormsupdate = $DB->get_records('exescorm', array('updatefreq' => EXESCORM_UPDATE_EVERYDAY));
-        foreach ($exescormsupdate as $exescormupdate) {
-            exescorm_parse($exescormupdate, true);
+        $seledascormsupdate = $DB->get_records('seledascorm', array('updatefreq' => SELEDASCORM_UPDATE_EVERYDAY));
+        foreach ($seledascormsupdate as $seledascormupdate) {
+            seledascorm_parse($seledascormupdate, true);
         }
 
         // Now clear out AICC session table with old session data.
-        $cfgexescorm = get_config('exescorm');
-        if (!empty($cfgexescorm->allowaicchacp)) {
-            $expiretime = time() - ($cfgexescorm->aicchacpkeepsessiondata * 24 * 60 * 60);
-            $DB->delete_records_select('exescorm_aicc_session', 'timemodified < ?', array($expiretime));
+        $cfgseledascorm = get_config('seledascorm');
+        if (!empty($cfgseledascorm->allowaicchacp)) {
+            $expiretime = time() - ($cfgseledascorm->aicchacpkeepsessiondata * 24 * 60 * 60);
+            $DB->delete_records_select('seledascorm_aicc_session', 'timemodified < ?', array($expiretime));
         }
     }
 
@@ -693,39 +743,39 @@ function exescorm_cron_scheduled_task () {
  *
  * @global stdClass
  * @global object
- * @param int $exescormid id of exescorm
+ * @param int $seledascormid id of seledascorm
  * @param int $userid optional user id, 0 means all users
  * @return array array of grades, false if none
  */
-function exescorm_get_user_grades($exescorm, $userid=0) {
+function seledascorm_get_user_grades($seledascorm, $userid=0) {
     global $CFG, $DB;
-    require_once($CFG->dirroot.'/mod/exescorm/locallib.php');
+    require_once($CFG->dirroot.'/mod/seledascorm/locallib.php');
 
     $grades = array();
     if (empty($userid)) {
-        $scousers = $DB->get_records_select('exescorm_scoes_track', "exescormid=? GROUP BY userid",
-                                            array($exescorm->id), "", "userid,null");
+        $scousers = $DB->get_records_select('seledascorm_scoes_track', "seledascormid=? GROUP BY userid",
+                                            array($seledascorm->id), "", "userid,null");
         if ($scousers) {
             foreach ($scousers as $scouser) {
                 $grades[$scouser->userid] = new stdClass();
                 $grades[$scouser->userid]->id = $scouser->userid;
                 $grades[$scouser->userid]->userid = $scouser->userid;
-                $grades[$scouser->userid]->rawgrade = exescorm_grade_user($exescorm, $scouser->userid);
+                $grades[$scouser->userid]->rawgrade = seledascorm_grade_user($seledascorm, $scouser->userid);
             }
         } else {
             return false;
         }
 
     } else {
-        $preattempt = $DB->get_records_select('exescorm_scoes_track', "exescormid=? AND userid=? GROUP BY userid",
-                                                array($exescorm->id, $userid), "", "userid,null");
+        $preattempt = $DB->get_records_select('seledascorm_scoes_track', "seledascormid=? AND userid=? GROUP BY userid",
+                                                array($seledascorm->id, $userid), "", "userid,null");
         if (!$preattempt) {
             return false; // No attempt yet.
         }
         $grades[$userid] = new stdClass();
         $grades[$userid]->id = $userid;
         $grades[$userid]->userid = $userid;
-        $grades[$userid]->rawgrade = exescorm_grade_user($exescorm, $userid);
+        $grades[$userid]->rawgrade = seledascorm_grade_user($seledascorm, $userid);
     }
 
     return $grades;
@@ -735,56 +785,56 @@ function exescorm_get_user_grades($exescorm, $userid=0) {
  * Update grades in central gradebook
  *
  * @category grade
- * @param object $exescorm
+ * @param object $seledascorm
  * @param int $userid specific user only, 0 mean all
  * @param bool $nullifnone
  */
-function exescorm_update_grades($exescorm, $userid=0, $nullifnone=true) {
+function seledascorm_update_grades($seledascorm, $userid=0, $nullifnone=true) {
     global $CFG;
     require_once($CFG->libdir.'/gradelib.php');
     require_once($CFG->libdir.'/completionlib.php');
 
-    if ($grades = exescorm_get_user_grades($exescorm, $userid)) {
-        exescorm_grade_item_update($exescorm, $grades);
+    if ($grades = seledascorm_get_user_grades($seledascorm, $userid)) {
+        seledascorm_grade_item_update($seledascorm, $grades);
         // Set complete.
-        exescorm_set_completion($exescorm, $userid, COMPLETION_COMPLETE, $grades);
+        seledascorm_set_completion($seledascorm, $userid, COMPLETION_COMPLETE, $grades);
     } else if ($userid && $nullifnone) {
         $grade = new stdClass();
         $grade->userid = $userid;
         $grade->rawgrade = null;
-        exescorm_grade_item_update($exescorm, $grade);
+        seledascorm_grade_item_update($seledascorm, $grade);
         // Set incomplete.
-        exescorm_set_completion($exescorm, $userid, COMPLETION_INCOMPLETE);
+        seledascorm_set_completion($seledascorm, $userid, COMPLETION_INCOMPLETE);
     } else {
-        exescorm_grade_item_update($exescorm);
+        seledascorm_grade_item_update($seledascorm);
     }
 }
 
 /**
- * Update/create grade item for given exescorm
+ * Update/create grade item for given seledascorm
  *
  * @category grade
  * @uses GRADE_TYPE_VALUE
  * @uses GRADE_TYPE_NONE
- * @param object $exescorm object with extra cmidnumber
+ * @param object $seledascorm object with extra cmidnumber
  * @param mixed $grades optional array/object of grade(s); 'reset' means reset grades in gradebook
  * @return object grade_item
  */
-function exescorm_grade_item_update($exescorm, $grades=null) {
+function seledascorm_grade_item_update($seledascorm, $grades=null) {
     global $CFG, $DB;
-    require_once($CFG->dirroot.'/mod/exescorm/locallib.php');
+    require_once($CFG->dirroot.'/mod/seledascorm/locallib.php');
     if (!function_exists('grade_update')) { // Workaround for buggy PHP versions.
         require_once($CFG->libdir.'/gradelib.php');
     }
 
-    $params = array('itemname' => $exescorm->name);
-    if (isset($exescorm->cmidnumber)) {
-        $params['idnumber'] = $exescorm->cmidnumber;
+    $params = array('itemname' => $seledascorm->name);
+    if (isset($seledascorm->cmidnumber)) {
+        $params['idnumber'] = $seledascorm->cmidnumber;
     }
 
-    if ($exescorm->grademethod == EXESCORM_GRADESCOES) {
-        $maxgrade = $DB->count_records_select('exescorm_scoes', 'exescorm = ? AND '
-                    . $DB->sql_isnotempty('exescorm_scoes', 'launch', false, true), array($exescorm->id));
+    if ($seledascorm->grademethod == SELEDASCORM_GRADESCOES) {
+        $maxgrade = $DB->count_records_select('seledascorm_scoes', 'seledascorm = ? AND '
+                    . $DB->sql_isnotempty('seledascorm_scoes', 'launch', false, true), array($seledascorm->id));
         if ($maxgrade) {
             $params['gradetype'] = GRADE_TYPE_VALUE;
             $params['grademax'] = $maxgrade;
@@ -794,7 +844,7 @@ function exescorm_grade_item_update($exescorm, $grades=null) {
         }
     } else {
         $params['gradetype'] = GRADE_TYPE_VALUE;
-        $params['grademax'] = $exescorm->maxgrade;
+        $params['grademax'] = $seledascorm->maxgrade;
         $params['grademin'] = 0;
     }
 
@@ -803,26 +853,26 @@ function exescorm_grade_item_update($exescorm, $grades=null) {
         $grades = null;
     }
 
-    return grade_update('mod/exescorm', $exescorm->course, 'mod', 'exescorm', $exescorm->id, 0, $grades, $params);
+    return grade_update('mod/seledascorm', $seledascorm->course, 'mod', 'seledascorm', $seledascorm->id, 0, $grades, $params);
 }
 
 /**
- * Delete grade item for given exescorm
+ * Delete grade item for given seledascorm
  *
  * @category grade
- * @param object $exescorm object
+ * @param object $seledascorm object
  * @return object grade_item
  */
-function exescorm_grade_item_delete($exescorm) {
+function seledascorm_grade_item_delete($seledascorm) {
     global $CFG;
     require_once($CFG->libdir.'/gradelib.php');
 
     return grade_update(
-        'mod/exescorm',
-        $exescorm->course,
+        'mod/seledascorm',
+        $seledascorm->course,
         'mod',
-        'exescorm',
-        $exescorm->id,
+        'seledascorm',
+        $seledascorm->id,
         0,
         null,
         array('deleted' => 1)
@@ -839,7 +889,7 @@ function exescorm_grade_item_delete($exescorm) {
  *
  * @return array
  */
-function exescorm_get_view_actions() {
+function seledascorm_get_view_actions() {
     return array('pre-view', 'view', 'view all', 'report');
 }
 
@@ -853,47 +903,47 @@ function exescorm_get_view_actions() {
  *
  * @return array
  */
-function exescorm_get_post_actions() {
+function seledascorm_get_post_actions() {
     return array();
 }
 
 /**
- * @param object $exescorm
- * @return object $exescorm
+ * @param object $seledascorm
+ * @return object $seledascorm
  */
-function exescorm_option2text($exescorm) {
-    $exescormpopoupoptions = exescorm_get_popup_options_array();
+function seledascorm_option2text($seledascorm) {
+    $seledascormpopoupoptions = seledascorm_get_popup_options_array();
 
-    if (isset($exescorm->popup)) {
-        if ($exescorm->popup == 1) {
+    if (isset($seledascorm->popup)) {
+        if ($seledascorm->popup == 1) {
             $optionlist = array();
-            foreach ($exescormpopoupoptions as $name => $option) {
-                if (isset($exescorm->$name)) {
-                    $optionlist[] = $name.'='.$exescorm->$name;
+            foreach ($seledascormpopoupoptions as $name => $option) {
+                if (isset($seledascorm->$name)) {
+                    $optionlist[] = $name.'='.$seledascorm->$name;
                 } else {
                     $optionlist[] = $name.'=0';
                 }
             }
-            $exescorm->options = implode(',', $optionlist);
+            $seledascorm->options = implode(',', $optionlist);
         } else {
-            $exescorm->options = '';
+            $seledascorm->options = '';
         }
     } else {
-        $exescorm->popup = 0;
-        $exescorm->options = '';
+        $seledascorm->popup = 0;
+        $seledascorm->options = '';
     }
-    return $exescorm;
+    return $seledascorm;
 }
 
 /**
  * Implementation of the function for printing the form elements that control
- * whether the course reset functionality affects the exescorm.
+ * whether the course reset functionality affects the seledascorm.
  *
  * @param object $mform form passed by reference
  */
-function exescorm_reset_course_form_definition(&$mform) {
-    $mform->addElement('header', 'exescormheader', get_string('modulenameplural', 'mod_exescorm'));
-    $mform->addElement('advcheckbox', 'reset_exescorm', get_string('deleteallattempts', 'mod_exescorm'));
+function seledascorm_reset_course_form_definition(&$mform) {
+    $mform->addElement('header', 'seledascormheader', get_string('modulenameplural', 'mod_seledascorm'));
+    $mform->addElement('advcheckbox', 'reset_seledascorm', get_string('deleteallattempts', 'mod_seledascorm'));
 }
 
 /**
@@ -901,8 +951,8 @@ function exescorm_reset_course_form_definition(&$mform) {
  *
  * @return array
  */
-function exescorm_reset_course_form_defaults($course) {
-    return array('reset_exescorm' => 1);
+function seledascorm_reset_course_form_defaults($course) {
+    return array('reset_seledascorm' => 1);
 }
 
 /**
@@ -913,53 +963,53 @@ function exescorm_reset_course_form_defaults($course) {
  * @param int $courseid
  * @param string optional type
  */
-function exescorm_reset_gradebook($courseid, $type='') {
+function seledascorm_reset_gradebook($courseid, $type='') {
     global $CFG, $DB;
 
     $sql = "SELECT s.*, cm.idnumber as cmidnumber, s.course as courseid
-              FROM {exescorm} s, {course_modules} cm, {modules} m
-             WHERE m.name='exescorm' AND m.id=cm.module AND cm.instance=s.id AND s.course=?";
+              FROM {seledascorm} s, {course_modules} cm, {modules} m
+             WHERE m.name='seledascorm' AND m.id=cm.module AND cm.instance=s.id AND s.course=?";
 
-    if ($exescorms = $DB->get_records_sql($sql, array($courseid))) {
-        foreach ($exescorms as $exescorm) {
-            exescorm_grade_item_update($exescorm, 'reset');
+    if ($seledascorms = $DB->get_records_sql($sql, array($courseid))) {
+        foreach ($seledascorms as $seledascorm) {
+            seledascorm_grade_item_update($seledascorm, 'reset');
         }
     }
 }
 
 /**
  * Actual implementation of the reset course functionality, delete all the
- * exescorm attempts for course $data->courseid.
+ * seledascorm attempts for course $data->courseid.
  *
  * @global stdClass
  * @global object
  * @param object $data the data submitted from the reset course.
  * @return array status array
  */
-function exescorm_reset_userdata($data) {
+function seledascorm_reset_userdata($data) {
     global $CFG, $DB;
 
-    $componentstr = get_string('modulenameplural', 'mod_exescorm');
+    $componentstr = get_string('modulenameplural', 'mod_seledascorm');
     $status = array();
 
-    if (!empty($data->reset_exescorm)) {
-        $exescormssql = "SELECT s.id
-                         FROM {exescorm} s
+    if (!empty($data->reset_seledascorm)) {
+        $seledascormssql = "SELECT s.id
+                         FROM {seledascorm} s
                         WHERE s.course=?";
 
-        $DB->delete_records_select('exescorm_scoes_track', "exescormid IN ($exescormssql)", array($data->courseid));
+        $DB->delete_records_select('seledascorm_scoes_track', "seledascormid IN ($seledascormssql)", array($data->courseid));
 
         // Remove all grades from gradebook.
         if (empty($data->reset_gradebook_grades)) {
-            exescorm_reset_gradebook($data->courseid);
+            seledascorm_reset_gradebook($data->courseid);
         }
 
-        $status[] = ['component' => $componentstr, 'item' => get_string('deleteallattempts', 'mod_exescorm'), 'error' => false];
+        $status[] = ['component' => $componentstr, 'item' => get_string('deleteallattempts', 'mod_seledascorm'), 'error' => false];
     }
 
     // Any changes to the list of dates that needs to be rolled should be same during course restore and course reset.
     // See MDL-9367.
-    shift_course_mod_dates('exescorm', array('timeopen', 'timeclose'), $data->timeshift, $data->courseid);
+    shift_course_mod_dates('seledascorm', array('timeopen', 'timeclose'), $data->timeshift, $data->courseid);
     $status[] = array('component' => $componentstr, 'item' => get_string('datechanged'), 'error' => false);
 
     return $status;
@@ -973,17 +1023,17 @@ function exescorm_reset_userdata($data) {
  * @param object $context
  * @return array
  */
-function exescorm_get_file_areas($course, $cm, $context) {
+function seledascorm_get_file_areas($course, $cm, $context) {
     $areas = array();
-    $areas['content'] = get_string('areacontent', 'mod_exescorm');
-    $areas['package'] = get_string('areapackage', 'mod_exescorm');
+    $areas['content'] = get_string('areacontent', 'mod_seledascorm');
+    $areas['package'] = get_string('areapackage', 'mod_seledascorm');
     return $areas;
 }
 
 /**
- * File browsing support for EXESCORM file areas
+ * File browsing support for SELEDASCORM file areas
  *
- * @package  mod_exescorm
+ * @package  mod_seledascorm
  * @category files
  * @param file_browser $browser file browser instance
  * @param array $areas file areas
@@ -996,7 +1046,7 @@ function exescorm_get_file_areas($course, $cm, $context) {
  * @param string $filename file name
  * @return file_info instance or null if not found
  */
-function exescorm_get_file_info($browser, $areas, $course, $cm, $context, $filearea, $itemid, $filepath, $filename) {
+function seledascorm_get_file_info($browser, $areas, $course, $cm, $context, $filearea, $itemid, $filepath, $filename) {
     global $CFG;
 
     if (!has_capability('moodle/course:managefiles', $context)) {
@@ -1013,16 +1063,16 @@ function exescorm_get_file_info($browser, $areas, $course, $cm, $context, $filea
         $filename = is_null($filename) ? '.' : $filename;
 
         $urlbase = $CFG->wwwroot.'/pluginfile.php';
-        if (!$storedfile = $fs->get_file($context->id, 'mod_exescorm', 'content', 0, $filepath, $filename)) {
+        if (!$storedfile = $fs->get_file($context->id, 'mod_seledascorm', 'content', 0, $filepath, $filename)) {
             if ($filepath === '/' && $filename === '.') {
-                $storedfile = new virtual_root_file($context->id, 'mod_exescorm', 'content', 0);
+                $storedfile = new virtual_root_file($context->id, 'mod_seledascorm', 'content', 0);
             } else {
                 // Not found.
                 return null;
             }
         }
-        require_once("$CFG->dirroot/mod/exescorm/locallib.php");
-        return new exescorm_package_file_info(
+        require_once("$CFG->dirroot/mod/seledascorm/locallib.php");
+        return new seledascorm_package_file_info(
             $browser, $context, $storedfile, $urlbase, $areas[$filearea], true, true, false, false
         );
 
@@ -1031,9 +1081,9 @@ function exescorm_get_file_info($browser, $areas, $course, $cm, $context, $filea
         $filename = is_null($filename) ? '.' : $filename;
 
         $urlbase = $CFG->wwwroot.'/pluginfile.php';
-        if (!$storedfile = $fs->get_file($context->id, 'mod_exescorm', 'package', 0, $filepath, $filename)) {
+        if (!$storedfile = $fs->get_file($context->id, 'mod_seledascorm', 'package', 0, $filepath, $filename)) {
             if ($filepath === '/' && $filename === '.') {
-                $storedfile = new virtual_root_file($context->id, 'mod_exescorm', 'package', 0);
+                $storedfile = new virtual_root_file($context->id, 'mod_seledascorm', 'package', 0);
             } else {
                 // Not found.
                 return null;
@@ -1048,9 +1098,9 @@ function exescorm_get_file_info($browser, $areas, $course, $cm, $context, $filea
 }
 
 /**
- * Serves exescorm content, introduction images and packages. Implements needed access control ;-)
+ * Serves seledascorm content, introduction images and packages. Implements needed access control ;-)
  *
- * @package  mod_exescorm
+ * @package  mod_seledascorm
  * @category files
  * @param stdClass $course course object
  * @param stdClass $cm course module object
@@ -1061,8 +1111,39 @@ function exescorm_get_file_info($browser, $areas, $course, $cm, $context, $filea
  * @param array $options additional options affecting the file serving
  * @return bool false if file not found, does not return if found - just send the file
  */
-function exescorm_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options=array()) {
+function seledascorm_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options=array()) {
     global $CFG, $DB;
+
+    // Site branding logo is stored in system context because it belongs to the
+    // Seleda plugin as a whole rather than to a single course activity.
+    if ($context->contextlevel === CONTEXT_SYSTEM && $filearea === 'brandinglogo') {
+        require_login();
+
+        $itemid = (int) array_shift($args);
+        if ($itemid !== 0 || empty($args)) {
+            return false;
+        }
+
+        $filename = array_pop($args);
+        $filepath = $args ? '/' . implode('/', $args) . '/' : '/';
+        $fs = get_file_storage();
+        $file = $fs->get_file(
+            $context->id,
+            'mod_seledascorm',
+            'brandinglogo',
+            0,
+            $filepath,
+            $filename
+        );
+        if (!$file || $file->is_directory()) {
+            return false;
+        }
+
+        // Branding images are uploaded by a site administrator and are rendered
+        // as image/background assets inside the same-origin embedded editor.
+        $options['dontforcesvgdownload'] = true;
+        send_stored_file($file, DAYSECS, 0, false, $options);
+    }
 
     if ($context->contextlevel != CONTEXT_MODULE) {
         return false;
@@ -1073,12 +1154,12 @@ function exescorm_pluginfile($course, $cm, $context, $filearea, $args, $forcedow
     $canmanageactivity = has_capability('moodle/course:manageactivities', $context);
     $lifetime = null;
 
-    // Check EXESCORM availability.
+    // Check SELEDASCORM availability.
     if (!$canmanageactivity) {
-        require_once($CFG->dirroot.'/mod/exescorm/locallib.php');
+        require_once($CFG->dirroot.'/mod/seledascorm/locallib.php');
 
-        $exescorm = $DB->get_record('exescorm', array('id' => $cm->instance), 'id, timeopen, timeclose', MUST_EXIST);
-        list($available, $warnings) = exescorm_get_availability_status($exescorm);
+        $seledascorm = $DB->get_record('seledascorm', array('id' => $cm->instance), 'id, timeopen, timeclose', MUST_EXIST);
+        list($available, $warnings) = seledascorm_get_availability_status($seledascorm);
         if (!$available) {
             return false;
         }
@@ -1087,22 +1168,22 @@ function exescorm_pluginfile($course, $cm, $context, $filearea, $args, $forcedow
     if ($filearea === 'content') {
         $revision = (int)array_shift($args); // Prevents caching problems - ignored here.
         $relativepath = implode('/', $args);
-        $fullpath = "/$context->id/mod_exescorm/content/0/$relativepath";
+        $fullpath = "/$context->id/mod_seledascorm/content/0/$relativepath";
         $options['immutable'] = true; // Add immutable option, $relativepath changes on file update.
 
     } else if ($filearea === 'package') {
         // Check if the global setting for disabling package downloads is enabled.
-        $protectpackagedownloads = get_config('exescorm', 'protectpackagedownloads');
+        $protectpackagedownloads = get_config('seledascorm', 'protectpackagedownloads');
         if ($protectpackagedownloads && !$canmanageactivity) {
             return false;
         }
         $revision = (int)array_shift($args); // Prevents caching problems - ignored here.
         $relativepath = implode('/', $args);
         // Try with revision first (used by embedded editor), fallback to itemid=0.
-        $fullpath = "/$context->id/mod_exescorm/package/$revision/$relativepath";
+        $fullpath = "/$context->id/mod_seledascorm/package/$revision/$relativepath";
         $fs = get_file_storage();
         if (!$fs->get_file_by_hash(sha1($fullpath))) {
-            $fullpath = "/$context->id/mod_exescorm/package/0/$relativepath";
+            $fullpath = "/$context->id/mod_seledascorm/package/0/$relativepath";
         }
         $lifetime = 0; // No caching here.
 
@@ -1112,7 +1193,7 @@ function exescorm_pluginfile($course, $cm, $context, $filearea, $args, $forcedow
 
         // Get imsmanifest file.
         $fs = get_file_storage();
-        $files = $fs->get_area_files($context->id, 'mod_exescorm', 'package', 0, '', false);
+        $files = $fs->get_area_files($context->id, 'mod_seledascorm', 'package', 0, '', false);
         $file = reset($files);
 
         // Check that the package file is an imsmanifest.xml file - if not then this method is not allowed.
@@ -1135,7 +1216,7 @@ function exescorm_pluginfile($course, $cm, $context, $filearea, $args, $forcedow
         return false;
     }
 
-    // Allow SVG files to be loaded within EXESCORM content, instead of forcing download.
+    // Allow SVG files to be loaded within SELEDASCORM content, instead of forcing download.
     $options['dontforcesvgdownload'] = true;
 
     // Finally send the file.
@@ -1153,7 +1234,7 @@ function exescorm_pluginfile($course, $cm, $context, $filearea, $args, $forcedow
  * @param string $feature FEATURE_xx constant for requested feature
  * @return mixed True if module supports feature, false if not, null if doesn't know or string for the module purpose.
  */
-function exescorm_supports($feature) {
+function seledascorm_supports($feature) {
     global $CFG;
     // Features from version 4.0. This hack is avoid warnings.
     if ($CFG->version < 2022041900) {
@@ -1182,14 +1263,14 @@ function exescorm_supports($feature) {
 /**
  * Get the filename for a temp log file
  *
- * @param string $type - type of log(aicc,exescorm12,exescorm13) used as prefix for filename
+ * @param string $type - type of log(aicc,seledascorm12,seledascorm13) used as prefix for filename
  * @param integer $scoid - scoid of object this log entry is for
  * @return string The filename as an absolute path
  */
-function exescorm_debug_log_filename($type, $scoid) {
+function seledascorm_debug_log_filename($type, $scoid) {
     global $CFG, $USER;
 
-    $logpath = $CFG->tempdir.'/exescormlogs';
+    $logpath = $CFG->tempdir.'/seledascormlogs';
     $logfile = $logpath.'/'.$type.'debug_'.$USER->id.'_'.$scoid.'.log';
     return $logfile;
 }
@@ -1197,19 +1278,19 @@ function exescorm_debug_log_filename($type, $scoid) {
 /**
  * writes log output to a temp log file
  *
- * @param string $type - type of log(aicc,exescorm12,exescorm13) used as prefix for filename
+ * @param string $type - type of log(aicc,seledascorm12,seledascorm13) used as prefix for filename
  * @param string $text - text to be written to file.
  * @param integer $scoid - scoid of object this log entry is for.
  */
-function exescorm_debug_log_write($type, $text, $scoid) {
+function seledascorm_debug_log_write($type, $text, $scoid) {
     global $CFG;
 
-    $debugenablelog = get_config('exescorm', 'allowapidebug');
+    $debugenablelog = get_config('seledascorm', 'allowapidebug');
     if (!$debugenablelog || empty($text)) {
         return;
     }
-    if (make_temp_directory('exescormlogs/')) {
-        $logfile = exescorm_debug_log_filename($type, $scoid);
+    if (make_temp_directory('seledascormlogs/')) {
+        $logfile = seledascorm_debug_log_filename($type, $scoid);
         @file_put_contents($logfile, date('Y/m/d H:i:s O')." DEBUG $text\r\n", FILE_APPEND);
         @chmod($logfile, $CFG->filepermissions);
     }
@@ -1218,14 +1299,14 @@ function exescorm_debug_log_write($type, $text, $scoid) {
 /**
  * Remove debug log file
  *
- * @param string $type - type of log(aicc,exescorm12,exescorm13) used as prefix for filename
+ * @param string $type - type of log(aicc,seledascorm12,seledascorm13) used as prefix for filename
  * @param integer $scoid - scoid of object this log entry is for
  * @return boolean True if the file is successfully deleted, false otherwise
  */
-function exescorm_debug_log_remove($type, $scoid) {
+function seledascorm_debug_log_remove($type, $scoid) {
 
-    $debugenablelog = get_config('exescorm', 'allowapidebug');
-    $logfile = exescorm_debug_log_filename($type, $scoid);
+    $debugenablelog = get_config('seledascorm', 'allowapidebug');
+    $logfile = seledascorm_debug_log_filename($type, $scoid);
     if (!$debugenablelog || !file_exists($logfile)) {
         return false;
     }
@@ -1239,38 +1320,38 @@ function exescorm_debug_log_remove($type, $scoid) {
  * @param stdClass $parentcontext Block's parent context
  * @param stdClass $currentcontext Current context of block
  */
-function exescorm_page_type_list($pagetype, $parentcontext, $currentcontext) {
-    $modulepagetype = array('mod-exescorm-*' => get_string('page-mod-exescorm-x', 'mod_exescorm'));
+function seledascorm_page_type_list($pagetype, $parentcontext, $currentcontext) {
+    $modulepagetype = array('mod-seledascorm-*' => get_string('page-mod-seledascorm-x', 'mod_seledascorm'));
     return $modulepagetype;
 }
 
 /**
- * Returns the EXESCORM version used.
- * @param string $exescormversion comes from $exescorm->version
+ * Returns the SELEDASCORM version used.
+ * @param string $seledascormversion comes from $seledascorm->version
  * @param string $version one of the defined vars SCORM_12, SCORM_13, SCORM_AICC (or empty)
  * @return Scorm version.
  */
-function exescorm_version_check($exescormversion, $version='') {
-    $exescormversion = trim(strtolower($exescormversion));
-    if (empty($version) || $version == EXESCORM_SCORM_12) {
-        if ($exescormversion == 'SCORM_12' || $exescormversion == 'scorm_1.2') {
-            return EXESCORM_SCORM_12;
+function seledascorm_version_check($seledascormversion, $version='') {
+    $seledascormversion = trim(strtolower($seledascormversion));
+    if (empty($version) || $version == SELEDASCORM_SCORM_12) {
+        if ($seledascormversion == 'SCORM_12' || $seledascormversion == 'scorm_1.2') {
+            return SELEDASCORM_SCORM_12;
         }
         if (!empty($version)) {
             return false;
         }
     }
-    if (empty($version) || $version == EXESCORM_SCORM_13) {
-        if ($exescormversion == 'SCORM_13' || $exescormversion == 'scorm_1.3') {
-            return EXESCORM_SCORM_13;
+    if (empty($version) || $version == SELEDASCORM_SCORM_13) {
+        if ($seledascormversion == 'SCORM_13' || $seledascormversion == 'scorm_1.3') {
+            return SELEDASCORM_SCORM_13;
         }
         if (!empty($version)) {
             return false;
         }
     }
-    if (empty($version) || $version == EXESCORM_SCORM_AICC) {
-        if (strpos($exescormversion, 'aicc')) {
-            return EXESCORM_SCORM_AICC;
+    if (empty($version) || $version == SELEDASCORM_SCORM_AICC) {
+        if (strpos($seledascormversion, 'aicc')) {
+            return SELEDASCORM_SCORM_AICC;
         }
         if (!empty($version)) {
             return false;
@@ -1283,10 +1364,10 @@ function exescorm_version_check($exescormversion, $version='') {
  * Register the ability to handle drag and drop file uploads
  * @return array containing details of the files / types the mod can handle
  */
-function exescorm_dndupload_register() {
+function seledascorm_dndupload_register() {
     return array('files' => array(
-        array('extension' => 'zip', 'message' => get_string('dnduploadexescorm', 'mod_exescorm')),
-        array('extension' => 'elpx', 'message' => get_string('dnduploadexescorm', 'mod_exescorm')),
+        array('extension' => 'zip', 'message' => get_string('dnduploadseledascorm', 'mod_seledascorm')),
+        array('extension' => 'elpx', 'message' => get_string('dnduploadseledascorm', 'mod_seledascorm')),
     ));
 }
 
@@ -1295,45 +1376,45 @@ function exescorm_dndupload_register() {
  * @param object $uploadinfo details of the file / content that has been uploaded
  * @return int instance id of the newly created mod
  */
-function exescorm_dndupload_handle($uploadinfo) {
+function seledascorm_dndupload_handle($uploadinfo) {
 
     $context = context_module::instance($uploadinfo->coursemodule);
-    file_save_draft_area_files($uploadinfo->draftitemid, $context->id, 'mod_exescorm', 'package', 0);
+    file_save_draft_area_files($uploadinfo->draftitemid, $context->id, 'mod_seledascorm', 'package', 0);
     $fs = get_file_storage();
-    $files = $fs->get_area_files($context->id, 'mod_exescorm', 'package', 0, 'sortorder, itemid, filepath, filename', false);
+    $files = $fs->get_area_files($context->id, 'mod_seledascorm', 'package', 0, 'sortorder, itemid, filepath, filename', false);
     $file = reset($files);
 
-    // Validate the file, make sure it's a valid EXESCORM package!
-    $errors = exescorm_validate_package($file);
+    // Validate the file, make sure it's a valid SELEDASCORM package!
+    $errors = seledascorm_validate_package($file);
     if (!empty($errors)) {
         return false;
     }
-    // Create a default exescorm object to pass to exescorm_add_instance()!
-    $exescorm = get_config('exescorm');
-    $exescorm->course = $uploadinfo->course->id;
-    $exescorm->coursemodule = $uploadinfo->coursemodule;
-    $exescorm->cmidnumber = '';
-    $exescorm->name = $uploadinfo->displayname;
-    $exescorm->exescormtype = EXESCORM_TYPE_LOCAL;
-    $exescorm->reference = $file->get_filename();
-    $exescorm->intro = '';
-    $exescorm->width = $exescorm->framewidth;
-    $exescorm->height = $exescorm->frameheight;
+    // Create a default seledascorm object to pass to seledascorm_add_instance()!
+    $seledascorm = get_config('seledascorm');
+    $seledascorm->course = $uploadinfo->course->id;
+    $seledascorm->coursemodule = $uploadinfo->coursemodule;
+    $seledascorm->cmidnumber = '';
+    $seledascorm->name = $uploadinfo->displayname;
+    $seledascorm->seledascormtype = SELEDASCORM_TYPE_LOCAL;
+    $seledascorm->reference = $file->get_filename();
+    $seledascorm->intro = '';
+    $seledascorm->width = $seledascorm->framewidth;
+    $seledascorm->height = $seledascorm->frameheight;
 
-    return exescorm_add_instance($exescorm, null);
+    return seledascorm_add_instance($seledascorm, null);
 }
 
 /**
  * Sets activity completion state
  *
- * @param object $exescorm object
+ * @param object $seledascorm object
  * @param int $userid User ID
  * @param int $completionstate Completion state
  * @param array $grades grades array of users with grades - used when $userid = 0
  */
-function exescorm_set_completion($exescorm, $userid, $completionstate = COMPLETION_COMPLETE, $grades = array()) {
+function seledascorm_set_completion($seledascorm, $userid, $completionstate = COMPLETION_COMPLETE, $grades = array()) {
     $course = new stdClass();
-    $course->id = $exescorm->course;
+    $course->id = $seledascorm->course;
     $completion = new completion_info($course);
 
     // Check if completion is enabled site-wide, or for the course.
@@ -1341,7 +1422,7 @@ function exescorm_set_completion($exescorm, $userid, $completionstate = COMPLETI
         return;
     }
 
-    $cm = get_coursemodule_from_instance('exescorm', $exescorm->id, $exescorm->course);
+    $cm = get_coursemodule_from_instance('seledascorm', $seledascorm->id, $seledascorm->course);
     if (empty($cm) || !$completion->is_enabled($cm)) {
             return;
     }
@@ -1356,12 +1437,12 @@ function exescorm_set_completion($exescorm, $userid, $completionstate = COMPLETI
 }
 
 /**
- * Check that a Zip file contains a valid EXESCORM package
+ * Check that a Zip file contains a valid SELEDASCORM package
  *
  * @param \stored_file $file A Zip file.
  * @return array empty if no issue is found. Array of error message otherwise
  */
-function exescorm_validate_package($file) {
+function seledascorm_validate_package($file) {
     $packer = get_file_packer('application/zip');
     $errors = [];
     if ($file->is_external_file()) { // Get zip file so we can check it is correct.
@@ -1370,10 +1451,10 @@ function exescorm_validate_package($file) {
     $filelist = $file->list_files($packer);
 
     if (!is_array($filelist)) {
-        $errors['packagefile'] = get_string('badarchive', 'mod_exescorm');
+        $errors['packagefile'] = get_string('badarchive', 'mod_seledascorm');
         return $errors;
     }
-    $errors = \mod_exescorm\exescorm_package::validate_file_list($filelist);
+    $errors = \mod_seledascorm\seledascorm_package::validate_file_list($filelist);
     if (!empty($errors)) {
         return $errors;
     }
@@ -1393,9 +1474,9 @@ function exescorm_validate_package($file) {
     }
     if (!$aiccfound) {
         if ($badmanifestpresent) {
-            $errors['packagefile'] = get_string('badimsmanifestlocation', 'mod_exescorm');
+            $errors['packagefile'] = get_string('badimsmanifestlocation', 'mod_seledascorm');
         } else {
-            $errors['packagefile'] = get_string('nomanifest', 'mod_exescorm');
+            $errors['packagefile'] = get_string('nomanifest', 'mod_seledascorm');
         }
     }
 
@@ -1403,19 +1484,19 @@ function exescorm_validate_package($file) {
 }
 
 /**
- * Check and set the correct mode and attempt when entering a EXESCORM package.
+ * Check and set the correct mode and attempt when entering a SELEDASCORM package.
  *
- * @param object $exescorm object
+ * @param object $seledascorm object
  * @param string $newattempt should a new attempt be generated here.
  * @param int $attempt the attempt number this is for.
  * @param int $userid the userid of the user.
  * @param string $mode the current mode that has been selected.
  */
-function exescorm_check_mode($exescorm, &$newattempt, &$attempt, $userid, &$mode) {
+function seledascorm_check_mode($seledascorm, &$newattempt, &$attempt, $userid, &$mode) {
     global $DB;
 
     if (($mode == 'browse')) {
-        if ($exescorm->hidebrowse == 1) {
+        if ($seledascorm->hidebrowse == 1) {
             // Prevent Browse mode if hidebrowse is set.
             $mode = 'normal';
         } else {
@@ -1424,14 +1505,14 @@ function exescorm_check_mode($exescorm, &$newattempt, &$attempt, $userid, &$mode
         }
     }
 
-    if ($exescorm->forcenewattempt == EXESCORM_FORCEATTEMPT_ALWAYS) {
-        // This EXESCORM is configured to force a new attempt on every re-entry.
+    if ($seledascorm->forcenewattempt == SELEDASCORM_FORCEATTEMPT_ALWAYS) {
+        // This SELEDASCORM is configured to force a new attempt on every re-entry.
         $newattempt = 'on';
         $mode = 'normal';
         if ($attempt == 1) {
             // Check if the user has any existing data or if this is really the first attempt.
             $exists = $DB->record_exists(
-                'exescorm_scoes_track', array('userid' => $userid, 'exescormid' => $exescorm->id)
+                'seledascorm_scoes_track', array('userid' => $userid, 'seledascormid' => $seledascorm->id)
             );
             if (!$exists) {
                 // No records yet - Attempt should == 1.
@@ -1442,32 +1523,32 @@ function exescorm_check_mode($exescorm, &$newattempt, &$attempt, $userid, &$mode
 
         return;
     }
-    // Check if the exescorm module is incomplete (used to validate user request to start a new attempt).
+    // Check if the seledascorm module is incomplete (used to validate user request to start a new attempt).
     $incomplete = true;
 
-    // Note - inEXESCORM_SCORM_13 the cmi-core.lesson_status field was split into
+    // Note - inSELEDASCORM_SCORM_13 the cmi-core.lesson_status field was split into
     // 'cmi.completion_status' and 'cmi.success_status'.
     // 'cmi.completion_status' can only contain values 'completed', 'incomplete', 'not attempted' or 'unknown'.
-    // This means the values 'passed' or 'failed' will never be reported for a track inEXESCORM_SCORM_13 and
+    // This means the values 'passed' or 'failed' will never be reported for a track inSELEDASCORM_SCORM_13 and
     // the only status that will be treated as complete is 'completed'.
 
     $completionelements = array(
-       EXESCORM_SCORM_12 => 'cmi.core.lesson_status',
-       EXESCORM_SCORM_13 => 'cmi.completion_status',
-       EXESCORM_SCORM_AICC => 'cmi.core.lesson_status'
+       SELEDASCORM_SCORM_12 => 'cmi.core.lesson_status',
+       SELEDASCORM_SCORM_13 => 'cmi.completion_status',
+       SELEDASCORM_SCORM_AICC => 'cmi.core.lesson_status'
     );
-    $exescormversion = exescorm_version_check($exescorm->version);
-    if ($exescormversion === false) {
-        $exescormversion = EXESCORM_SCORM_12;
+    $seledascormversion = seledascorm_version_check($seledascorm->version);
+    if ($seledascormversion === false) {
+        $seledascormversion = SELEDASCORM_SCORM_12;
     }
-    $completionelement = $completionelements[$exescormversion];
+    $completionelement = $completionelements[$seledascormversion];
 
     $sql = "SELECT sc.id, t.value
-              FROM {exescorm_scoes} sc
-         LEFT JOIN {exescorm_scoes_track} t ON sc.exescorm = t.exescormid AND sc.id = t.scoid
+              FROM {seledascorm_scoes} sc
+         LEFT JOIN {seledascorm_scoes_track} t ON sc.seledascorm = t.seledascormid AND sc.id = t.scoid
                    AND t.element = ? AND t.userid = ? AND t.attempt = ?
-             WHERE sc.exescormtype = 'sco' AND sc.exescorm = ?";
-    $tracks = $DB->get_recordset_sql($sql, array($completionelement, $userid, $attempt, $exescorm->id));
+             WHERE sc.seledascormtype = 'sco' AND sc.seledascorm = ?";
+    $tracks = $DB->get_recordset_sql($sql, array($completionelement, $userid, $attempt, $seledascorm->id));
 
     foreach ($tracks as $track) {
         if (($track->value == 'completed') || ($track->value == 'passed') || ($track->value == 'failed')) {
@@ -1483,12 +1564,12 @@ function exescorm_check_mode($exescorm, &$newattempt, &$attempt, $userid, &$mode
     if ($incomplete === true) {
         // The option to start a new attempt should never have been presented. Force false.
         $newattempt = 'off';
-    } else if (!empty($exescorm->forcenewattempt)) {
+    } else if (!empty($seledascorm->forcenewattempt)) {
         // A new attempt should be forced for already completed attempts.
         $newattempt = 'on';
     }
 
-    if (($newattempt == 'on') && (($attempt < $exescorm->maxattempt) || ($exescorm->maxattempt == 0))) {
+    if (($newattempt == 'on') && (($attempt < $seledascorm->maxattempt) || ($seledascorm->maxattempt == 0))) {
         $attempt++;
         $mode = 'normal';
     } else { // Check if review mode should be set.
@@ -1503,24 +1584,24 @@ function exescorm_check_mode($exescorm, &$newattempt, &$attempt, $userid, &$mode
 /**
  * Trigger the course_module_viewed event.
  *
- * @param  stdClass $exescorm        exescorm object
+ * @param  stdClass $seledascorm        seledascorm object
  * @param  stdClass $course     course object
  * @param  stdClass $cm         course module object
  * @param  stdClass $context    context object
  * @since Moodle 3.0
  */
-function exescorm_view($exescorm, $course, $cm, $context) {
+function seledascorm_view($seledascorm, $course, $cm, $context) {
 
     // Trigger course_module_viewed event.
     $params = array(
         'context' => $context,
-        'objectid' => $exescorm->id
+        'objectid' => $seledascorm->id
     );
 
-    $event = \mod_exescorm\event\course_module_viewed::create($params);
+    $event = \mod_seledascorm\event\course_module_viewed::create($params);
     $event->add_record_snapshot('course_modules', $cm);
     $event->add_record_snapshot('course', $course);
-    $event->add_record_snapshot('exescorm', $exescorm);
+    $event->add_record_snapshot('seledascorm', $seledascorm);
     $event->trigger();
 }
 
@@ -1533,31 +1614,31 @@ function exescorm_view($exescorm, $course, $cm, $context) {
  * @return stdClass an object with the different type of areas indicating if they were updated or not
  * @since Moodle 3.2
  */
-function exescorm_check_updates_since(cm_info $cm, $from, $filter = array()) {
+function seledascorm_check_updates_since(cm_info $cm, $from, $filter = array()) {
     global $DB, $USER, $CFG;
-    require_once($CFG->dirroot . '/mod/exescorm/locallib.php');
+    require_once($CFG->dirroot . '/mod/seledascorm/locallib.php');
 
-    $exescorm = $DB->get_record($cm->modname, array('id' => $cm->instance), '*', MUST_EXIST);
+    $seledascorm = $DB->get_record($cm->modname, array('id' => $cm->instance), '*', MUST_EXIST);
     $updates = new stdClass();
-    list($available, $warnings) = exescorm_get_availability_status($exescorm, true, $cm->context);
+    list($available, $warnings) = seledascorm_get_availability_status($seledascorm, true, $cm->context);
     if (!$available) {
         return $updates;
     }
     $updates = course_check_module_updates_since($cm, $from, array('package'), $filter);
 
     $updates->tracks = (object) array('updated' => false);
-    $select = 'exescormid = ? AND userid = ? AND timemodified > ?';
-    $params = array($exescorm->id, $USER->id, $from);
-    $tracks = $DB->get_records_select('exescorm_scoes_track', $select, $params, '', 'id');
+    $select = 'seledascormid = ? AND userid = ? AND timemodified > ?';
+    $params = array($seledascorm->id, $USER->id, $from);
+    $tracks = $DB->get_records_select('seledascorm_scoes_track', $select, $params, '', 'id');
     if (!empty($tracks)) {
         $updates->tracks->updated = true;
         $updates->tracks->itemids = array_keys($tracks);
     }
 
     // Now, teachers should see other students updates.
-    if (has_capability('mod/exescorm:viewreport', $cm->context)) {
-        $select = 'exescormid = ? AND timemodified > ?';
-        $params = array($exescorm->id, $from);
+    if (has_capability('mod/seledascorm:viewreport', $cm->context)) {
+        $select = 'seledascormid = ? AND timemodified > ?';
+        $params = array($seledascorm->id, $from);
 
         if (groups_get_activity_groupmode($cm) == SEPARATEGROUPS) {
             $groupusers = array_keys(groups_get_activity_shared_group_members($cm));
@@ -1570,7 +1651,7 @@ function exescorm_check_updates_since(cm_info $cm, $from, $filter = array()) {
         }
 
         $updates->usertracks = (object) array('updated' => false);
-        $tracks = $DB->get_records_select('exescorm_scoes_track', $select, $params, '', 'id');
+        $tracks = $DB->get_records_select('seledascorm_scoes_track', $select, $params, '', 'id');
         if (!empty($tracks)) {
             $updates->usertracks->updated = true;
             $updates->usertracks->itemids = array_keys($tracks);
@@ -1582,54 +1663,54 @@ function exescorm_check_updates_since(cm_info $cm, $from, $filter = array()) {
 /**
  * Get icon mapping for font-awesome.
  */
-function mod_exescorm_get_fontawesome_icon_map() {
+function mod_seledascorm_get_fontawesome_icon_map() {
     return [
-        'mod_exescorm:assetc' => 'fa-file-archive-o',
-        'mod_exescorm:asset' => 'fa-file-archive-o',
-        'mod_exescorm:browsed' => 'fa-book',
-        'mod_exescorm:completed' => 'fa-check-square-o',
-        'mod_exescorm:failed' => 'fa-times',
-        'mod_exescorm:incomplete' => 'fa-pencil-square-o',
-        'mod_exescorm:minus' => 'fa-minus',
-        'mod_exescorm:notattempted' => 'fa-square-o',
-        'mod_exescorm:passed' => 'fa-check',
-        'mod_exescorm:plus' => 'fa-plus',
-        'mod_exescorm:popdown' => 'fa-window-close-o',
-        'mod_exescorm:popup' => 'fa-window-restore',
-        'mod_exescorm:suspend' => 'fa-pause',
-        'mod_exescorm:wait' => 'fa-clock-o',
+        'mod_seledascorm:assetc' => 'fa-file-archive-o',
+        'mod_seledascorm:asset' => 'fa-file-archive-o',
+        'mod_seledascorm:browsed' => 'fa-book',
+        'mod_seledascorm:completed' => 'fa-check-square-o',
+        'mod_seledascorm:failed' => 'fa-times',
+        'mod_seledascorm:incomplete' => 'fa-pencil-square-o',
+        'mod_seledascorm:minus' => 'fa-minus',
+        'mod_seledascorm:notattempted' => 'fa-square-o',
+        'mod_seledascorm:passed' => 'fa-check',
+        'mod_seledascorm:plus' => 'fa-plus',
+        'mod_seledascorm:popdown' => 'fa-window-close-o',
+        'mod_seledascorm:popup' => 'fa-window-restore',
+        'mod_seledascorm:suspend' => 'fa-pause',
+        'mod_seledascorm:wait' => 'fa-clock-o',
     ];
 }
 
 /**
  * This standard function will check all instances of this module
  * and make sure there are up-to-date events created for each of them.
- * If courseid = 0, then every exescorm event in the site is checked, else
- * only exescorm events belonging to the course specified are checked.
+ * If courseid = 0, then every seledascorm event in the site is checked, else
+ * only seledascorm events belonging to the course specified are checked.
  *
  * @param int $courseid
- * @param int|stdClass $instance exescorm module instance or ID.
+ * @param int|stdClass $instance seledascorm module instance or ID.
  * @param int|stdClass $cm Course module object or ID.
  * @return bool
  */
-function exescorm_refresh_events($courseid = 0, $instance = null, $cm = null) {
+function seledascorm_refresh_events($courseid = 0, $instance = null, $cm = null) {
     global $CFG, $DB;
 
-    require_once($CFG->dirroot . '/mod/exescorm/locallib.php');
+    require_once($CFG->dirroot . '/mod/seledascorm/locallib.php');
 
     // If we have instance information then we can just update the one event instead of updating all events.
     if (isset($instance)) {
         if (!is_object($instance)) {
-            $instance = $DB->get_record('exescorm', array('id' => $instance), '*', MUST_EXIST);
+            $instance = $DB->get_record('seledascorm', array('id' => $instance), '*', MUST_EXIST);
         }
         if (isset($cm)) {
             if (!is_object($cm)) {
                 $cm = (object)array('id' => $cm);
             }
         } else {
-            $cm = get_coursemodule_from_instance('exescorm', $instance->id);
+            $cm = get_coursemodule_from_instance('seledascorm', $instance->id);
         }
-        exescorm_update_calendar($instance, $cm->id);
+        seledascorm_update_calendar($instance, $cm->id);
         return true;
     }
 
@@ -1638,18 +1719,18 @@ function exescorm_refresh_events($courseid = 0, $instance = null, $cm = null) {
         if (!is_numeric($courseid)) {
             return false;
         }
-        if (!$exescorms = $DB->get_records('exescorm', array('course' => $courseid))) {
+        if (!$seledascorms = $DB->get_records('seledascorm', array('course' => $courseid))) {
             return false;
         }
     } else {
-        if (!$exescorms = $DB->get_records('exescorm')) {
+        if (!$seledascorms = $DB->get_records('seledascorm')) {
             return false;
         }
     }
 
-    foreach ($exescorms as $exescorm) {
-        $cm = get_coursemodule_from_instance('exescorm', $exescorm->id);
-        exescorm_update_calendar($exescorm, $cm->id);
+    foreach ($seledascorms as $seledascorm) {
+        $cm = get_coursemodule_from_instance('seledascorm', $seledascorm->id);
+        seledascorm_update_calendar($seledascorm, $cm->id);
     }
 
     return true;
@@ -1666,20 +1747,20 @@ function exescorm_refresh_events($courseid = 0, $instance = null, $cm = null) {
  * @param int $userid User id override
  * @return \core_calendar\local\event\entities\action_interface|null
  */
-function mod_exescorm_core_calendar_provide_event_action(calendar_event $event,
+function mod_seledascorm_core_calendar_provide_event_action(calendar_event $event,
                                                       \core_calendar\action_factory $factory, $userid = null) {
     global $CFG, $USER;
 
-    require_once($CFG->dirroot . '/mod/exescorm/locallib.php');
+    require_once($CFG->dirroot . '/mod/seledascorm/locallib.php');
 
     if (empty($userid)) {
         $userid = $USER->id;
     }
 
-    $cm = get_fast_modinfo($event->courseid, $userid)->instances['exescorm'][$event->instance];
+    $cm = get_fast_modinfo($event->courseid, $userid)->instances['seledascorm'][$event->instance];
 
-    if (has_capability('mod/exescorm:viewreport', $cm->context, $userid)) {
-        // Teachers do not need to be reminded to complete a exescorm.
+    if (has_capability('mod/seledascorm:viewreport', $cm->context, $userid)) {
+        // Teachers do not need to be reminded to complete a seledascorm.
         return null;
     }
 
@@ -1692,28 +1773,28 @@ function mod_exescorm_core_calendar_provide_event_action(calendar_event $event,
     }
 
     if (!empty($cm->customdata['timeclose']) && $cm->customdata['timeclose'] < time()) {
-        // The exescorm has closed so the user can no longer submit anything.
+        // The seledascorm has closed so the user can no longer submit anything.
         return null;
     }
 
-    // Restore exescorm object from cached values in $cm, we only need id, timeclose and timeopen.
+    // Restore seledascorm object from cached values in $cm, we only need id, timeclose and timeopen.
     $customdata = $cm->customdata ?: [];
     $customdata['id'] = $cm->instance;
-    $exescorm = (object)($customdata + ['timeclose' => 0, 'timeopen' => 0]);
+    $seledascorm = (object)($customdata + ['timeclose' => 0, 'timeopen' => 0]);
 
-    // Check that the EXESCORM activity is open.
-    list($actionable, $warnings) = exescorm_get_availability_status($exescorm, false, null, $userid);
+    // Check that the SELEDASCORM activity is open.
+    list($actionable, $warnings) = seledascorm_get_availability_status($seledascorm, false, null, $userid);
 
     return $factory->create_instance(
-        get_string('enter', 'mod_exescorm'),
-        new \moodle_url('/mod/exescorm/view.php', array('id' => $cm->id)),
+        get_string('enter', 'mod_seledascorm'),
+        new \moodle_url('/mod/seledascorm/view.php', array('id' => $cm->id)),
         1,
         $actionable
     );
 }
 
 /**
- * Add a get_coursemodule_info function in case any EXESCORM type wants to add 'extra' information
+ * Add a get_coursemodule_info function in case any SELEDASCORM type wants to add 'extra' information
  * for the course (see resource).
  *
  * Given a course_module object, this function returns any "extra" information that may be needed
@@ -1723,36 +1804,36 @@ function mod_exescorm_core_calendar_provide_event_action(calendar_event $event,
  * @return cached_cm_info An object on information that the courses
  *                        will know about (most noticeably, an icon).
  */
-function exescorm_get_coursemodule_info($coursemodule) {
+function seledascorm_get_coursemodule_info($coursemodule) {
     global $DB;
 
     $dbparams = ['id' => $coursemodule->instance];
     $fields = 'id, name, intro, introformat, completionstatusrequired, completionscorerequired, completionstatusallscos, '.
         'timeopen, timeclose';
-    if (!$exescorm = $DB->get_record('exescorm', $dbparams, $fields)) {
+    if (!$seledascorm = $DB->get_record('seledascorm', $dbparams, $fields)) {
         return false;
     }
 
     $result = new cached_cm_info();
-    $result->name = $exescorm->name;
+    $result->name = $seledascorm->name;
 
     if ($coursemodule->showdescription) {
         // Convert intro to html. Do not filter cached version, filters run at display time.
-        $result->content = format_module_intro('exescorm', $exescorm, $coursemodule->id, false);
+        $result->content = format_module_intro('seledascorm', $seledascorm, $coursemodule->id, false);
     }
 
     // Populate the custom completion rules as key => value pairs, but only if the completion mode is 'automatic'.
     if ($coursemodule->completion == COMPLETION_TRACKING_AUTOMATIC) {
-        $result->customdata['customcompletionrules']['completionstatusrequired'] = $exescorm->completionstatusrequired;
-        $result->customdata['customcompletionrules']['completionscorerequired'] = $exescorm->completionscorerequired;
-        $result->customdata['customcompletionrules']['completionstatusallscos'] = $exescorm->completionstatusallscos;
+        $result->customdata['customcompletionrules']['completionstatusrequired'] = $seledascorm->completionstatusrequired;
+        $result->customdata['customcompletionrules']['completionscorerequired'] = $seledascorm->completionscorerequired;
+        $result->customdata['customcompletionrules']['completionstatusallscos'] = $seledascorm->completionstatusallscos;
     }
     // Populate some other values that can be used in calendar or on dashboard.
-    if ($exescorm->timeopen) {
-        $result->customdata['timeopen'] = $exescorm->timeopen;
+    if ($seledascorm->timeopen) {
+        $result->customdata['timeopen'] = $seledascorm->timeopen;
     }
-    if ($exescorm->timeclose) {
-        $result->customdata['timeclose'] = $exescorm->timeclose;
+    if ($seledascorm->timeclose) {
+        $result->customdata['timeclose'] = $seledascorm->timeclose;
     }
 
     return $result;
@@ -1764,7 +1845,7 @@ function exescorm_get_coursemodule_info($coursemodule) {
  * @param cm_info|stdClass $cm object with fields ->completion and ->customdata['customcompletionrules']
  * @return array $descriptions the array of descriptions for the custom rules.
  */
-function mod_exescorm_get_completion_active_rule_descriptions($cm) {
+function mod_seledascorm_get_completion_active_rule_descriptions($cm) {
     // Values will be present in cm_info, and we assume these are up to date.
     if (empty($cm->customdata['customcompletionrules'])
         || $cm->completion != COMPLETION_TRACKING_AUTOMATIC) {
@@ -1778,23 +1859,23 @@ function mod_exescorm_get_completion_active_rule_descriptions($cm) {
                 if (!is_null($val)) {
                     // Determine the selected statuses using a bitwise operation.
                     $cvalues = array();
-                    foreach (exescorm_status_options(true) as $bit => $string) {
+                    foreach (seledascorm_status_options(true) as $bit => $string) {
                         if (($val & $bit) == $bit) {
                             $cvalues[] = $string;
                         }
                     }
                     $statusstring = implode(', ', $cvalues);
-                    $descriptions[] = get_string('completionstatusrequireddesc', 'mod_exescorm', $statusstring);
+                    $descriptions[] = get_string('completionstatusrequireddesc', 'mod_seledascorm', $statusstring);
                 }
                 break;
             case 'completionscorerequired':
                 if (!is_null($val)) {
-                    $descriptions[] = get_string('completionscorerequireddesc', 'mod_exescorm', $val);
+                    $descriptions[] = get_string('completionscorerequireddesc', 'mod_seledascorm', $val);
                 }
                 break;
             case 'completionstatusallscos':
                 if (!empty($val)) {
-                    $descriptions[] = get_string('completionstatusallscos', 'mod_exescorm');
+                    $descriptions[] = get_string('completionstatusallscos', 'mod_seledascorm');
                 }
                 break;
             default:
@@ -1805,28 +1886,28 @@ function mod_exescorm_get_completion_active_rule_descriptions($cm) {
 }
 
 /**
- * This function will update the exescorm module according to the
+ * This function will update the seledascorm module according to the
  * event that has been modified.
  *
- * It will set the timeopen or timeclose value of the exescorm instance
+ * It will set the timeopen or timeclose value of the seledascorm instance
  * according to the type of event provided.
  *
  * @throws \moodle_exception
  * @param \calendar_event $event
- * @param stdClass $exescorm The module instance to get the range from
+ * @param stdClass $seledascorm The module instance to get the range from
  */
-function mod_exescorm_core_calendar_event_timestart_updated(\calendar_event $event, \stdClass $exescorm) {
+function mod_seledascorm_core_calendar_event_timestart_updated(\calendar_event $event, \stdClass $seledascorm) {
     global $DB;
 
-    if (empty($event->instance) || $event->modulename != 'exescorm') {
+    if (empty($event->instance) || $event->modulename != 'seledascorm') {
         return;
     }
 
-    if ($event->instance != $exescorm->id) {
+    if ($event->instance != $seledascorm->id) {
         return;
     }
 
-    if (!in_array($event->eventtype, [EXESCORM_EVENT_TYPE_OPEN, EXESCORM_EVENT_TYPE_CLOSE])) {
+    if (!in_array($event->eventtype, [SELEDASCORM_EVENT_TYPE_OPEN, SELEDASCORM_EVENT_TYPE_CLOSE])) {
         return;
     }
 
@@ -1843,28 +1924,28 @@ function mod_exescorm_core_calendar_event_timestart_updated(\calendar_event $eve
         return;
     }
 
-    if ($event->eventtype == EXESCORM_EVENT_TYPE_OPEN) {
-        // If the event is for the exescorm activity opening then we should
-        // set the start time of the exescorm activity to be the new start
+    if ($event->eventtype == SELEDASCORM_EVENT_TYPE_OPEN) {
+        // If the event is for the seledascorm activity opening then we should
+        // set the start time of the seledascorm activity to be the new start
         // time of the event.
-        if ($exescorm->timeopen != $event->timestart) {
-            $exescorm->timeopen = $event->timestart;
-            $exescorm->timemodified = time();
+        if ($seledascorm->timeopen != $event->timestart) {
+            $seledascorm->timeopen = $event->timestart;
+            $seledascorm->timemodified = time();
             $modified = true;
         }
-    } else if ($event->eventtype == EXESCORM_EVENT_TYPE_CLOSE) {
-        // If the event is for the exescorm activity closing then we should
-        // set the end time of the exescorm activity to be the new start
+    } else if ($event->eventtype == SELEDASCORM_EVENT_TYPE_CLOSE) {
+        // If the event is for the seledascorm activity closing then we should
+        // set the end time of the seledascorm activity to be the new start
         // time of the event.
-        if ($exescorm->timeclose != $event->timestart) {
-            $exescorm->timeclose = $event->timestart;
+        if ($seledascorm->timeclose != $event->timestart) {
+            $seledascorm->timeclose = $event->timestart;
             $modified = true;
         }
     }
 
     if ($modified) {
-        $exescorm->timemodified = time();
-        $DB->update_record('exescorm', $exescorm);
+        $seledascorm->timemodified = time();
+        $DB->update_record('seledascorm', $seledascorm);
         $event = \core\event\course_module_updated::create_from_cm($coursemodule, $context);
         $event->trigger();
     }
@@ -1891,26 +1972,26 @@ function mod_exescorm_core_calendar_event_timestart_updated(\calendar_event $eve
  * @param \stdClass $instance The module instance to get the range from
  * @return array Returns an array with min and max date.
  */
-function mod_exescorm_core_calendar_get_valid_event_timestart_range(\calendar_event $event, \stdClass $instance) {
+function mod_seledascorm_core_calendar_get_valid_event_timestart_range(\calendar_event $event, \stdClass $instance) {
     $mindate = null;
     $maxdate = null;
 
-    if ($event->eventtype == EXESCORM_EVENT_TYPE_OPEN) {
+    if ($event->eventtype == SELEDASCORM_EVENT_TYPE_OPEN) {
         // The start time of the open event can't be equal to or after the
-        // close time of the exescorm activity.
+        // close time of the seledascorm activity.
         if (!empty($instance->timeclose)) {
             $maxdate = [
                 $instance->timeclose,
-                get_string('openafterclose', 'mod_exescorm')
+                get_string('openafterclose', 'mod_seledascorm')
             ];
         }
-    } else if ($event->eventtype == EXESCORM_EVENT_TYPE_CLOSE) {
+    } else if ($event->eventtype == SELEDASCORM_EVENT_TYPE_CLOSE) {
         // The start time of the close event can't be equal to or earlier than the
-        // open time of the exescorm activity.
+        // open time of the seledascorm activity.
         if (!empty($instance->timeopen)) {
             $mindate = [
                 $instance->timeopen,
-                get_string('closebeforeopen', 'mod_exescorm')
+                get_string('closebeforeopen', 'mod_seledascorm')
             ];
         }
     }
@@ -1925,8 +2006,8 @@ function mod_exescorm_core_calendar_get_valid_event_timestart_range(\calendar_ev
  * @param  array  $args The path (the part after the filearea and before the filename).
  * @return array The itemid and the filepath inside the $args path, for the defined filearea.
  */
-function mod_exescorm_get_path_from_pluginfile(string $filearea, array $args) : array {
-    // EXESCORM never has an itemid (the number represents the revision but it's not stored in database).
+function mod_seledascorm_get_path_from_pluginfile(string $filearea, array $args) : array {
+    // SELEDASCORM never has an itemid (the number represents the revision but it's not stored in database).
     array_shift($args);
 
     // Get the filepath.
@@ -1948,21 +2029,21 @@ function mod_exescorm_get_path_from_pluginfile(string $filearea, array $args) : 
  * @param string $eventtype The event type.
  * @return lang_string The event type lang string.
  */
-function mod_exescorm_core_calendar_get_event_action_string(string $eventtype): string {
-    $modulename = get_string('modulename', 'mod_exescorm');
+function mod_seledascorm_core_calendar_get_event_action_string(string $eventtype): string {
+    $modulename = get_string('modulename', 'mod_seledascorm');
 
     switch ($eventtype) {
-        case EXESCORM_EVENT_TYPE_OPEN:
+        case SELEDASCORM_EVENT_TYPE_OPEN:
             $identifier = 'calendarstart';
             break;
-        case EXESCORM_EVENT_TYPE_CLOSE:
+        case SELEDASCORM_EVENT_TYPE_CLOSE:
             $identifier = 'calendarend';
             break;
         default:
             return get_string('requiresaction', 'calendar', $modulename);
     }
 
-    return get_string($identifier, 'mod_exescorm', $modulename);
+    return get_string($identifier, 'mod_seledascorm', $modulename);
 }
 
 /**
@@ -1970,13 +2051,13 @@ function mod_exescorm_core_calendar_get_event_action_string(string $eventtype): 
  *
  * @return string
  */
-function exescorm_get_embedded_editor_local_static_dir(): string {
-    $dir = \mod_exescorm\local\embedded_editor_source_resolver::get_active_dir();
+function seledascorm_get_embedded_editor_local_static_dir(): string {
+    $dir = \mod_seledascorm\local\embedded_editor_source_resolver::get_active_dir();
     if ($dir !== null) {
         return $dir;
     }
 
-    return \mod_exescorm\local\embedded_editor_source_resolver::get_bundled_dir();
+    return \mod_seledascorm\local\embedded_editor_source_resolver::get_bundled_dir();
 }
 
 /**
@@ -1984,8 +2065,8 @@ function exescorm_get_embedded_editor_local_static_dir(): string {
  *
  * @return bool
  */
-function exescorm_embedded_editor_uses_local_assets(): bool {
-    return \mod_exescorm\local\embedded_editor_source_resolver::has_local_source();
+function seledascorm_embedded_editor_uses_local_assets(): bool {
+    return \mod_seledascorm\local\embedded_editor_source_resolver::has_local_source();
 }
 
 /**
@@ -1993,8 +2074,8 @@ function exescorm_embedded_editor_uses_local_assets(): bool {
  *
  * @return string|null
  */
-function exescorm_get_embedded_editor_index_source(): ?string {
-    return \mod_exescorm\local\embedded_editor_source_resolver::get_index_source();
+function seledascorm_get_embedded_editor_index_source(): ?string {
+    return \mod_seledascorm\local\embedded_editor_source_resolver::get_index_source();
 }
 
 /**
@@ -2004,8 +2085,8 @@ function exescorm_get_embedded_editor_index_source(): ?string {
  *
  * @return bool True if the editor mode is 'embedded'.
  */
-function exescorm_embedded_editor_available() {
-    $mode = get_config('exescorm', 'editormode');
+function seledascorm_embedded_editor_available() {
+    $mode = get_config('seledascorm', 'editormode');
     if ($mode === false) {
         $mode = 'online';
     }
@@ -2019,31 +2100,31 @@ function exescorm_embedded_editor_available() {
  *
  * @return bool True if online editor mode is active and base URI is configured.
  */
-function exescorm_online_editor_available() {
-    $mode = get_config('exescorm', 'editormode');
+function seledascorm_online_editor_available() {
+    $mode = get_config('seledascorm', 'editormode');
     if ($mode === false) {
         $mode = 'online';
     }
-    return ($mode !== 'embedded') && !empty(get_config('exescorm', 'exeonlinebaseuri'));
+    return ($mode !== 'embedded') && !empty(get_config('seledascorm', 'exeonlinebaseuri'));
 }
 
 /**
- * Get the URL for the package file of an exescorm instance.
+ * Get the URL for the package file of an seledascorm instance.
  *
- * @param stdClass $exescorm The exescorm record.
+ * @param stdClass $seledascorm The seledascorm record.
  * @param context_module $context The module context.
  * @return moodle_url|null The URL to the package file, or null if not found.
  */
-function exescorm_get_package_url($exescorm, $context) {
+function seledascorm_get_package_url($seledascorm, $context) {
     $fs = get_file_storage();
-    $files = $fs->get_area_files($context->id, 'mod_exescorm', 'package', false, 'sortorder DESC, id ASC', false);
+    $files = $fs->get_area_files($context->id, 'mod_seledascorm', 'package', false, 'sortorder DESC, id ASC', false);
     $package = reset($files);
     if (!$package) {
         return null;
     }
-    $revision = isset($exescorm->revision) ? $exescorm->revision : 0;
+    $revision = isset($seledascorm->revision) ? $seledascorm->revision : 0;
     return moodle_url::make_pluginfile_url(
-        $context->id, 'mod_exescorm', 'package', $revision,
+        $context->id, 'mod_seledascorm', 'package', $revision,
         $package->get_filepath(), $package->get_filename()
     );
 }
@@ -2055,10 +2136,10 @@ function exescorm_get_package_url($exescorm, $context) {
  * context when this is called
  *
  * @param settings_navigation $settings navigation_node object.
- * @param navigation_node $exescormnode navigation_node object.
+ * @param navigation_node $seledascormnode navigation_node object.
  * @return void
  */
-function exescorm_extend_settings_navigation(settings_navigation $settings, navigation_node $exescormnode): void {
+function seledascorm_extend_settings_navigation(settings_navigation $settings, navigation_node $seledascormnode): void {
     global $PAGE, $CFG;
     // Features from version 4.0. This hack is avoid errors.
     if ($CFG->version < 2022041900) {
@@ -2071,8 +2152,8 @@ function exescorm_extend_settings_navigation(settings_navigation $settings, navi
         $page = $settings->get_page();
     }
 
-    if (has_capability('mod/exescorm:viewreport', $page->cm->context)) {
-        $url = new moodle_url('/mod/exescorm/report.php', ['id' => $page->cm->id]);
-        $exescormnode->add(get_string("reports", "mod_exescorm"), $url, navigation_node::TYPE_CUSTOM, null, 'exescormreport');
+    if (has_capability('mod/seledascorm:viewreport', $page->cm->context)) {
+        $url = new moodle_url('/mod/seledascorm/report.php', ['id' => $page->cm->id]);
+        $seledascormnode->add(get_string("reports", "mod_seledascorm"), $url, navigation_node::TYPE_CUSTOM, null, 'seledascormreport');
     }
 }

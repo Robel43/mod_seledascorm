@@ -17,7 +17,7 @@
 /**
  * Admin page for managing eXeLearning styles exposed to the embedded editor.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  2025 eXeLearning
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -25,17 +25,17 @@
 require('../../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
 
-use mod_exescorm\local\styles_service;
+use mod_seledascorm\local\styles_service;
 
-admin_externalpage_setup('mod_exescorm_styles');
+admin_externalpage_setup('mod_seledascorm_styles');
 
 $context = \context_system::instance();
 require_capability('moodle/site:config', $context);
-require_capability('mod/exescorm:manageembeddededitor', $context);
+require_capability('mod/seledascorm:manageembeddededitor', $context);
 
 $action = optional_param('action', '', PARAM_ALPHA);
-$returnurl = new moodle_url('/mod/exescorm/admin/styles.php');
-$settingsurl = new moodle_url('/admin/settings.php', ['section' => 'modsettingexescorm']);
+$returnurl = new moodle_url('/mod/seledascorm/admin/styles.php');
+$settingsurl = new moodle_url('/admin/settings.php', ['section' => 'modsettingseledascorm']);
 
 // --------------------------------------------------------------------
 // Toggle/delete actions use GET + sesskey (simple URL handlers).
@@ -62,7 +62,7 @@ if ($action !== '') {
             $slug = required_param('slug', PARAM_TEXT);
             styles_service::delete_uploaded($slug);
             redirect($returnurl,
-                get_string('stylesdelete_success', 'mod_exescorm'),
+                get_string('stylesdelete_success', 'mod_seledascorm'),
                 null,
                 \core\output\notification::NOTIFY_SUCCESS
             );
@@ -74,51 +74,51 @@ if ($action !== '') {
 // Render.
 // --------------------------------------------------------------------
 echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('stylesmanager', 'mod_exescorm'));
+echo $OUTPUT->heading(get_string('stylesmanager', 'mod_seledascorm'));
 
-if (get_config('exescorm', 'editormode') !== 'embedded') {
-    echo $OUTPUT->notification(get_string('stylesonlywhenembedded', 'mod_exescorm'),
+if (get_config('seledascorm', 'editormode') !== 'embedded') {
+    echo $OUTPUT->notification(get_string('stylesonlywhenembedded', 'mod_seledascorm'),
         \core\output\notification::NOTIFY_WARNING);
 }
 
-echo html_writer::tag('p', get_string('stylesmanager_intro', 'mod_exescorm'));
+echo html_writer::tag('p', get_string('stylesmanager_intro', 'mod_seledascorm'));
 
 // Point admins at the inline uploader on the plugin settings page —
 // the filemanager there is the single entry point for uploading styles.
 echo html_writer::tag('p',
     html_writer::link(
         $settingsurl,
-        get_string('stylesupload_goto_settings', 'mod_exescorm'),
+        get_string('stylesupload_goto_settings', 'mod_seledascorm'),
         ['class' => 'btn btn-secondary']
     )
 );
 
 // Uploaded styles table.
 $uploaded = styles_service::list_uploaded_styles();
-echo $OUTPUT->heading(get_string('stylesuploaded', 'mod_exescorm'), 3);
+echo $OUTPUT->heading(get_string('stylesuploaded', 'mod_seledascorm'), 3);
 if (empty($uploaded)) {
-    echo html_writer::tag('p', get_string('stylesuploaded_empty', 'mod_exescorm'), ['class' => 'text-muted']);
+    echo html_writer::tag('p', get_string('stylesuploaded_empty', 'mod_seledascorm'), ['class' => 'text-muted']);
 } else {
     $table = new html_table();
     $table->head = [
-        get_string('stylestable_title', 'mod_exescorm'),
-        get_string('stylestable_id', 'mod_exescorm'),
-        get_string('stylestable_version', 'mod_exescorm'),
-        get_string('stylestable_installed', 'mod_exescorm'),
-        get_string('stylestable_enabled', 'mod_exescorm'),
-        get_string('stylestable_actions', 'mod_exescorm'),
+        get_string('stylestable_title', 'mod_seledascorm'),
+        get_string('stylestable_id', 'mod_seledascorm'),
+        get_string('stylestable_version', 'mod_seledascorm'),
+        get_string('stylestable_installed', 'mod_seledascorm'),
+        get_string('stylestable_enabled', 'mod_seledascorm'),
+        get_string('stylestable_actions', 'mod_seledascorm'),
     ];
     foreach ($uploaded as $style) {
-        $toggleurl = new moodle_url('/mod/exescorm/admin/styles.php', [
+        $toggleurl = new moodle_url('/mod/seledascorm/admin/styles.php', [
             'action' => 'toggleuploaded',
             'slug' => $style['id'],
             'enabled' => empty($style['enabled']) ? 1 : 0,
             'sesskey' => sesskey(),
         ]);
         $togglelabel = empty($style['enabled'])
-            ? get_string('stylesenable', 'mod_exescorm')
-            : get_string('stylesdisable', 'mod_exescorm');
-        $deleteurl = new moodle_url('/mod/exescorm/admin/styles.php', [
+            ? get_string('stylesenable', 'mod_seledascorm')
+            : get_string('stylesdisable', 'mod_seledascorm');
+        $deleteurl = new moodle_url('/mod/seledascorm/admin/styles.php', [
             'action' => 'delete',
             'slug' => $style['id'],
             'sesskey' => sesskey(),
@@ -131,11 +131,11 @@ if (empty($uploaded)) {
             html_writer::link($toggleurl, $togglelabel, ['class' => 'btn btn-secondary btn-sm']),
             html_writer::link(
                 $deleteurl,
-                get_string('stylesdelete', 'mod_exescorm'),
+                get_string('stylesdelete', 'mod_seledascorm'),
                 [
                     'class' => 'btn btn-danger btn-sm',
                     'onclick' => "return confirm('"
-                        . addslashes_js(get_string('stylesdelete_confirm', 'mod_exescorm'))
+                        . addslashes_js(get_string('stylesdelete_confirm', 'mod_seledascorm'))
                         . "');",
                 ]
             ),
@@ -146,30 +146,30 @@ if (empty($uploaded)) {
 
 // Built-in styles table.
 $builtins = styles_service::list_builtin_themes();
-echo $OUTPUT->heading(get_string('stylesbuiltin', 'mod_exescorm'), 3);
+echo $OUTPUT->heading(get_string('stylesbuiltin', 'mod_seledascorm'), 3);
 if (empty($builtins)) {
-    echo html_writer::tag('p', get_string('stylesbuiltin_empty', 'mod_exescorm'), ['class' => 'text-muted']);
+    echo html_writer::tag('p', get_string('stylesbuiltin_empty', 'mod_seledascorm'), ['class' => 'text-muted']);
 } else {
     $registry = styles_service::get_registry();
     $disabledlist = $registry['disabled_builtins'];
     $table = new html_table();
     $table->head = [
-        get_string('stylestable_title', 'mod_exescorm'),
-        get_string('stylestable_id', 'mod_exescorm'),
-        get_string('stylestable_version', 'mod_exescorm'),
-        get_string('stylestable_enabled', 'mod_exescorm'),
+        get_string('stylestable_title', 'mod_seledascorm'),
+        get_string('stylestable_id', 'mod_seledascorm'),
+        get_string('stylestable_version', 'mod_seledascorm'),
+        get_string('stylestable_enabled', 'mod_seledascorm'),
     ];
     foreach ($builtins as $style) {
         $isdisabled = in_array($style['id'], $disabledlist, true);
-        $toggleurl = new moodle_url('/mod/exescorm/admin/styles.php', [
+        $toggleurl = new moodle_url('/mod/seledascorm/admin/styles.php', [
             'action' => 'togglebuiltin',
             'id' => $style['id'],
             'enabled' => $isdisabled ? 1 : 0,
             'sesskey' => sesskey(),
         ]);
         $togglelabel = $isdisabled
-            ? get_string('stylesenable', 'mod_exescorm')
-            : get_string('stylesdisable', 'mod_exescorm');
+            ? get_string('stylesenable', 'mod_seledascorm')
+            : get_string('stylesdisable', 'mod_seledascorm');
         $table->data[] = [
             s($style['title']),
             html_writer::tag('code', s($style['id'])),

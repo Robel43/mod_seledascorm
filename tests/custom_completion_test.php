@@ -16,24 +16,24 @@
 
 declare(strict_types = 1);
 
-namespace mod_exescorm;
+namespace mod_seledascorm;
 
 use advanced_testcase;
 use cm_info;
 use coding_exception;
-use mod_exescorm\completion\custom_completion;
+use mod_seledascorm\completion\custom_completion;
 use moodle_exception;
 
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once($CFG->libdir . '/completionlib.php');
-require_once($CFG->dirroot.'/mod/exescorm/locallib.php');
+require_once($CFG->dirroot.'/mod/seledascorm/locallib.php');
 
 /**
- * Class for unit testing mod_exescorm/custom_completion.
+ * Class for unit testing mod_seledascorm/custom_completion.
  *
- * @package   mod_exescorm
+ * @package   mod_seledascorm
  * @copyright 2021 Michael Hawkins <michaelh@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -46,7 +46,7 @@ class custom_completion_test extends advanced_testcase {
      */
     public function get_state_provider(): array {
 
-        // Prepare various reusable user exescorm track data used to mock various completion states/requirements.
+        // Prepare various reusable user seledascorm track data used to mock various completion states/requirements.
         $completionincomplete = (object) [
             'id' => 1,
             'scoid' => 1,
@@ -190,7 +190,7 @@ class custom_completion_test extends advanced_testcase {
                 ['instance', 1],
             ]));
 
-        // Mock the DB call fetching user's EXESCORM track data.
+        // Mock the DB call fetching user's SELEDASCORM track data.
         $DB = $this->createMock(get_class($DB));
         $DB->expects($this->atMost(1))
             ->method('get_records_sql')
@@ -211,16 +211,16 @@ class custom_completion_test extends advanced_testcase {
 
         // Anything not complete will check if attempts have been exhausted, mock the DB calls for that check.
         if ($status != COMPLETION_COMPLETE) {
-            $mockexescorm = (object) [
+            $mockseledascorm = (object) [
                 'id' => 1,
-                'version' => EXESCORM_SCORM_13,
-                'grademethod' => EXESCORM_GRADESCOES,
+                'version' => SELEDASCORM_SCORM_13,
+                'grademethod' => SELEDASCORM_GRADESCOES,
                 'maxattempt' => $maxattempts,
             ];
 
             $DB->expects($this->atMost(1))
                 ->method('get_record')
-                ->willReturn($mockexescorm);
+                ->willReturn($mockseledascorm);
 
             $DB->expects($this->atMost(1))
                 ->method('count_records_sql')

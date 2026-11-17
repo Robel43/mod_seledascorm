@@ -53,20 +53,7 @@ require_login($course, false, $cm);
 if (confirm_sesskey() && (!empty($scoid))) {
     $result = true;
     $request = null;
-    $usagepayload = optional_param('seleda_usage', '', PARAM_RAW);
     if (has_capability('mod/exescorm:savetrack', context_module::instance($cm->id))) {
-        if ($usagepayload !== '') {
-            require_once(__DIR__ . '/report/timhirt_reporting.php');
-            require_once(__DIR__ . '/report/seleda_usage.php');
-            try {
-                if (optional_param('seleda_student', '', PARAM_RAW) !== (string)$USER->username) { throw new \RuntimeException('Learner session changed'); }
-                \mod_exescorm\local\seleda_usage::save((int)$USER->id, (int)$exescorm->id, (int)$scoid, (int)$attempt, $usagepayload);
-            }
-            catch (\Throwable $error) { $result = false; error_log('[Seleda reporting] Usage snapshot could not be saved.'); }
-            // Usage-only requests never enter the grade or SCORM commit pipeline.
-            echo $result ? "true\n0" : "false\n101";
-            exit;
-        }
         // Preload all current tracking data.
         $trackdata = $DB->get_records('exescorm_scoes_track',
                                     ['userid' => $USER->id, 'exescormid' => $exescorm->id, 'scoid' => $scoid,
@@ -103,15 +90,7 @@ if (confirm_sesskey() && (!empty($scoid))) {
                 }
             }
         }
-        // Seleda: preserve label metadata with this learner/SCO/attempt.
-        require_once(__DIR__ . '/report/timhirt_reporting.php');
-        try {
-            \mod_exescorm\local\timhirt_reporting::snapshot(context_module::instance($cm->id), $exescorm, (int)$scoid, (int)$USER->id, (int)$attempt);
-        } catch (\Throwable $error) {
-            // A metadata problem must never corrupt the SCORM commit response.
-            error_log('[Seleda reporting] Could not preserve the attempt label catalog.');
-        }
-    } else if ($usagepayload !== '') { $result = false; }
+    }
     if ($result) {
         echo "true\n0";
     } else {

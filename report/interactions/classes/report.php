@@ -26,71 +26,8 @@ namespace exescormreport_interactions;
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/mod/exescorm/report/interactions/responsessettings_form.php');
-require_once($CFG->dirroot.'/mod/exescorm/report/timhirt_reporting.php');
-require_once($CFG->dirroot.'/mod/exescorm/report/seleda_usage.php');
-use mod_exescorm\local\timhirt_reporting;
-use mod_exescorm\local\seleda_usage;
 
 class report extends \mod_exescorm\report {
-    /** Read only the authorised report attempts, in one query for a bounded chunk. */
-    private function load_track_batch($activityid, array $attempts) {
-        global $DB;
-        $clauses = []; $params = ['activity' => $activityid];
-        foreach ($attempts as $i => $attempt) {
-            if (empty($attempt->attempt)) { continue; }
-            $clauses[] = "(userid = :user$i AND attempt = :attempt$i)";
-            $params["user$i"] = $attempt->userid;
-            $params["attempt$i"] = $attempt->attempt;
-        }
-        if (!$clauses) { return []; }
-        $sql = 'SELECT * FROM {exescorm_scoes_track} WHERE exescormid = :activity AND (' . implode(' OR ', $clauses) . ') ORDER BY element ASC';
-        $records = $DB->get_recordset_sql($sql, $params);
-        $batch = []; $raw = [];
-        try {
-            foreach ($records as $track) {
-                $key = $track->userid . ':' . $track->attempt;
-                if (!isset($batch[$key])) {
-                    $batch[$key] = ['runtime' => (object)['start' => $track->timemodified, 'finish' => $track->timemodified], 'scoes' => []];
-                }
-                $runtime = $batch[$key]['runtime'];
-                $runtime->start = min($runtime->start, $track->timemodified);
-                $runtime->finish = max($runtime->finish, $track->timemodified);
-                $raw[$key][$track->scoid][] = $track;
-            }
-        } finally { $records->close(); }
-        foreach ($raw as $key => $scoes) {
-            $usagetracks = [];
-            foreach ($scoes as $scoid => $tracks) {
-                $usagetracks = array_merge($usagetracks, $tracks);
-                // Native formatter retains SCORM 1.2/2004 status and interaction semantics.
-                $formatted = exescorm_format_interactions($tracks);
-                $formatted->userid = $tracks[0]->userid;
-                $formatted->scoid = $scoid;
-                $batch[$key]['scoes'][$scoid] = $formatted;
-            }
-            $batch[$key]['usage'] = seleda_usage::summary($usagetracks);
-        }
-        return $batch;
-    }
-
-    /** Same grading methods as exescorm_grade_user_attempt, using the batch above. */
-    private function batch_grade($activity, $scoes, $tracks) {
-        $count = 0; $values = 0; $sum = 0; $max = 0;
-        foreach ($scoes as $sco) {
-            if (!$data = ($tracks[$sco->id] ?? false)) { continue; }
-            if ($data->status === 'completed' || $data->status === 'passed') { $count++; }
-            if (isset($data->score_raw) && $data->score_raw !== '') {
-                $values++; $sum += $data->score_raw; $max = max($max, $data->score_raw);
-            }
-        }
-        switch ($activity->grademethod) {
-            case EXESCORM_GRADEAVERAGE: return $values ? $sum / $values : 0;
-            case EXESCORM_GRADESUM: return $sum;
-            case EXESCORM_GRADESCOES: return $count;
-            default: return (float)$max;
-        }
-    }
-
     /**
      * displays the full report
      * @param \stdClass $exescorm full EXESCORM object
@@ -137,10 +74,10 @@ class report extends \mod_exescorm\report {
             set_user_preference('exescorm_report_interactions_result', $includeresult);
         } else {
             $pagesize = get_user_preferences('exescorm_report_pagesize', 0);
-            $includeqtext = get_user_preferences('exescorm_report_interactions_qtext', 1);
+            $includeqtext = get_user_preferences('exescorm_report_interactions_qtext', 0);
             $includeresp = get_user_preferences('exescorm_report_interactions_resp', 1);
-            $includeright = get_user_preferences('exescorm_report_interactions_right', 1);
-            $includeresult = get_user_preferences('exescorm_report_interactions_result', 1);
+            $includeright = get_user_preferences('exescorm_report_interactions_right', 0);
+            $includeresult = get_user_preferences('exescorm_report_interactions_result', 0);
         }
         if ($pagesize < 1) {
             $pagesize = EXESCORM_REPORT_DEFAULT_PAGE_SIZE;
@@ -217,9 +154,13 @@ class report extends \mod_exescorm\report {
             $headers[] = get_string('last', 'mod_exescorm');
             $columns[] = 'score';
             $headers[] = get_string('score', 'mod_exescorm');
-            $columns = array_merge($columns, ['seleda_time', 'seleda_interactions', 'seleda_blocks']);
-            $headers = array_merge($headers, [get_string('usageactivetime', 'mod_exescorm'), get_string('usageinteractions', 'mod_exescorm'), get_string('usageblocks', 'mod_exescorm')]);
             $scoes = $DB->get_records('exescorm_scoes', array("exescorm" => $exescorm->id), 'sortorder, id');
+            foreach ($scoes as $sco) {
+                if ($sco->launch != '') {
+                    $columns[] = 'scograde'.$sco->id;
+                    $headers[] = format_string($sco->title, '', $formattextoptions);
+                }
+            }
 
             // Construct the SQL.
             $select = 'SELECT DISTINCT '.$DB->sql_concat('u.id', '\'#\'', 'COALESCE(st.attempt, 0)').' AS uniqueid, ';
@@ -251,22 +192,23 @@ class report extends \mod_exescorm\report {
             $countsql .= 'COUNT(DISTINCT(u.id)) AS nbusers ';
             $countsql .= $from.$where;
             $questioncount = get_exescorm_question_count($exescorm->id);
-            $catalogs = [];
-            $interactioncolumns = [];
-            foreach ($scoes as $sco) {
-                if ($sco->launch === '') { continue; }
-                $columns[] = 'scograde' . $sco->id;
-                $headers[] = format_string($sco->title, '', $formattextoptions);
-                $catalogs[$sco->id] = timhirt_reporting::packagecatalog($contextmodule, $exescorm, (int)$sco->id);
-                for ($index = 0; $index < $questioncount; $index++) {
-                    foreach (['qtext' => 'questionx', 'resp' => 'responsex', 'right' => 'rightanswerx', 'result' => 'resultx'] as $option => $label) {
-                        if (empty($displayoptions[$option])) { continue; }
-                        $column = 'interaction_' . $sco->id . '_' . $index . '_' . $option;
-                        $columns[] = $column;
-                        $interactioncolumns[] = $column;
-                        // Display one-based numbering, keeping each SCO's cells aligned with its header.
-                        $headers[] = get_string($label, 'exescormreport_interactions', $index + 1);
-                    }
+            $nbmaincolumns = count($columns);
+            for ($id = 0; $id < $questioncount; $id++) {
+                if ($displayoptions['qtext']) {
+                    $columns[] = 'question' . $id;
+                    $headers[] = get_string('questionx', 'exescormreport_interactions', $id);
+                }
+                if ($displayoptions['resp']) {
+                    $columns[] = 'response' . $id;
+                    $headers[] = get_string('responsex', 'exescormreport_interactions', $id);
+                }
+                if ($displayoptions['right']) {
+                    $columns[] = 'right' . $id;
+                    $headers[] = get_string('rightanswerx', 'exescormreport_interactions', $id);
+                }
+                if ($displayoptions['result']) {
+                    $columns[] = 'result' . $id;
+                    $headers[] = get_string('resultx', 'exescormreport_interactions', $id);
                 }
             }
 
@@ -293,8 +235,19 @@ class report extends \mod_exescorm\report {
                 $table->no_sorting('checkbox');
                 $table->no_sorting('picture');
 
-                foreach ($interactioncolumns as $column) {
-                    $table->no_sorting($column);
+                for ($id = 0; $id < $questioncount; $id++) {
+                    if ($displayoptions['qtext']) {
+                        $table->no_sorting('question'.$id);
+                    }
+                    if ($displayoptions['resp']) {
+                        $table->no_sorting('response'.$id);
+                    }
+                    if ($displayoptions['right']) {
+                        $table->no_sorting('right'.$id);
+                    }
+                    if ($displayoptions['result']) {
+                        $table->no_sorting('result'.$id);
+                    }
                 }
 
                 foreach ($scoes as $sco) {
@@ -462,17 +415,10 @@ class report extends \mod_exescorm\report {
                 $attempts = $DB->get_records_sql($select.$from.$where.$sort, $params);
             }
             if ($attempts) {
-                $pagedattempts = array_values($attempts);
-                foreach ($pagedattempts as $rowindex => $scouser) {
-                    // Limit raw interaction memory during downloads as well as on paged reports.
-                    if ($rowindex % 25 === 0) {
-                        $trackbatch = $this->load_track_batch($exescorm->id, array_slice($pagedattempts, $rowindex, 25));
-                    }
-                    $attemptkey = $scouser->userid . ':' . $scouser->attempt;
-                    $attempttracks = $trackbatch[$attemptkey] ?? ['runtime' => (object)['start' => false, 'finish' => false], 'scoes' => []];
+                foreach ($attempts as $scouser) {
                     $row = array();
                     if (!empty($scouser->attempt)) {
-                        $timetracks = $attempttracks['runtime'];
+                        $timetracks = exescorm_get_sco_runtime($exescorm->id, false, $scouser->userid, $scouser->attempt);
                     } else {
                         $timetracks = '';
                     }
@@ -525,22 +471,13 @@ class report extends \mod_exescorm\report {
                         } else {
                             $row[] = userdate($timetracks->finish);
                         }
-                        $row[] = $this->batch_grade($exescorm, $scoes, $attempttracks['scoes']);
+                        $row[] = exescorm_grade_user_attempt($exescorm, $scouser->userid, $scouser->attempt);
                     }
-                    $usage = $attempttracks['usage'] ?? seleda_usage::summary([]);
-                    $pages = []; foreach ($scoes as $page) { $pages[$page->id] = $page->title; }
-                    $row[] = $usage['available'] ? seleda_usage::duration($usage['ms']) : '-';
-                    $row[] = $usage['available'] ? $usage['interactions'] : '-';
-                    if ($download) { $row[] = timhirt_reporting::exportcell(seleda_usage::compact($usage, $pages)); }
-                    else if ($usage['available']) {
-                        $detailurl = new \moodle_url('/mod/exescorm/report/userreportinteractions.php', ['id'=>$cm->id, 'user'=>$scouser->userid, 'attempt'=>$scouser->attempt]);
-                        $row[] = '<details><summary>' . s(get_string('usageviewblocks', 'mod_exescorm')) . '</summary>' . seleda_usage::table($usage, $pages) . \html_writer::link($detailurl, get_string('usageviewlog', 'mod_exescorm')) . '</details>';
-                    } else { $row[] = '-'; }
                     // Print out all scores of attempt.
                     $emptyrow = $download ? '' : '&nbsp;';
                     foreach ($scoes as $sco) {
                         if ($sco->launch != '') {
-                            if (!empty($scouser->attempt) && ($trackdata = ($attempttracks['scoes'][$sco->id] ?? false))) {
+                            if ($trackdata = exescorm_get_tracks($sco->id, $scouser->userid, $scouser->attempt)) {
                                 if ($trackdata->status == '') {
                                     $trackdata->status = 'notattempted';
                                 }
@@ -564,11 +501,50 @@ class report extends \mod_exescorm\report {
                                 } else {
                                     $row[] = $score;
                                 }
-                                // Use the same decoder and attempt snapshots as the learner detail report.
-                                $cells = timhirt_reporting::overviewcells((int)$sco->id, $trackdata,
-                                    $catalogs[$sco->id] ?? [], $questioncount, $displayoptions);
-                                foreach ($cells as $cell) {
-                                    $row[] = $download ? timhirt_reporting::exportcell($cell) : s($cell);
+                                // Interaction data.
+                                for ($i = 0; $i < $questioncount; $i++) {
+                                    if ($displayoptions['qtext']) {
+                                        $element = 'cmi.interactions_'.$i.'.id';
+                                        if (isset($trackdata->$element)) {
+                                            $row[] = s($trackdata->$element);
+                                        } else {
+                                            $row[] = $emptyrow;
+                                        }
+                                    }
+                                    if ($displayoptions['resp']) {
+                                        $element = 'cmi.interactions_'.$i.'.student_response';
+                                        if (isset($trackdata->$element)) {
+                                            $row[] = s($trackdata->$element);
+                                        } else {
+                                            $row[] = $emptyrow;
+                                        }
+                                    }
+                                    if ($displayoptions['right']) {
+                                        $j = 0;
+                                        $element = 'cmi.interactions_'.$i.'.correct_responses_'.$j.'.pattern';
+                                        $rightans = '';
+                                        if (isset($trackdata->$element)) {
+                                            while (isset($trackdata->$element)) {
+                                                if ($j > 0) {
+                                                    $rightans .= ',';
+                                                }
+                                                $rightans .= s($trackdata->$element);
+                                                $j++;
+                                                $element = 'cmi.interactions_'.$i.'.correct_responses_'.$j.'.pattern';
+                                            }
+                                            $row[] = $rightans;
+                                        } else {
+                                            $row[] = $emptyrow;
+                                        }
+                                    }
+                                    if ($displayoptions['result']) {
+                                        $element = 'cmi.interactions_'.$i.'.result';
+                                        if (isset($trackdata->$element)) {
+                                            $row[] = s($trackdata->$element);
+                                        } else {
+                                            $row[] = $emptyrow;
+                                        }
+                                    }
                                 }
                                 // End of interaction data.
                             } else {
@@ -580,16 +556,13 @@ class report extends \mod_exescorm\report {
                                     $row[] = $strstatus;
                                 }
                                 // Complete the empty cells.
-                                for ($i = 0; $i < $questioncount * count(array_filter(array_intersect_key($displayoptions, array_flip(['qtext', 'resp', 'right', 'result'])))); $i++) {
+                                for ($i = 0; $i < count($columns) - $nbmaincolumns; $i++) {
                                     $row[] = $emptyrow;
                                 }
                             }
                         }
                     }
 
-                    if ($download) {
-                        $row = array_map([timhirt_reporting::class, 'exportcell'], array_map('strval', $row));
-                    }
                     if (!$download) {
                         $table->add_data($row);
                     } else if ($download == 'Excel' || $download == 'ODS') {

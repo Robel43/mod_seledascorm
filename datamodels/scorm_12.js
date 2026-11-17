@@ -660,6 +660,27 @@ function scormAPI1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, seledasco
     }
 
     this.LMSInitialize = LMSInitialize;
+    // Bind a document to its original server-provided learner/SCO/attempt.
+    // This stays valid for a final keepalive after the player advances, without
+    // initializing SCORM, changing grades, or using the next page's parameters.
+    this.SeledaCreateUsageSender = function() {
+        var usageSco = (seledascorm_current_node && seledascorm_current_node.scoid) || scoid;
+        var defaults = def[usageSco];
+        if (!defaults || defaults['cmi.core.lesson_mode'] === 'review' || defaults['cmi.core.lesson_mode'] === 'browse') return null;
+        var params = 'id=' + cmid + '&a=' + seledascormid + '&sesskey=' + encodeURIComponent(sesskey) + '&attempt=' + attempt + '&scoid=' + usageSco;
+        var student = String(defaults['cmi.core.student_id']);
+        return function(payload, closing) {
+            var body = params + '&seleda_student=' + encodeURIComponent(student) + '&seleda_usage=' + encodeURIComponent(JSON.stringify(payload));
+            return fetch(datamodelurl, {method:'POST', credentials:'same-origin', keepalive:!!closing,
+                headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'}, body:body})
+                .then(function(response) { if (!response.ok) return false; return response.text().then(function(text) { return text.trim() === 'true\n0'; }); })
+                .catch(function() { return false; });
+        };
+    };
+    this.SeledaSaveUsage = function(payload, closing) {
+        var sender = this.SeledaCreateUsageSender();
+        return sender ? sender(payload, closing) : Promise.resolve(false);
+    };
     this.LMSFinish = LMSFinish;
     this.LMSGetValue = LMSGetValue;
     this.LMSSetValue = LMSSetValue;

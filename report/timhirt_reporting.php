@@ -184,7 +184,10 @@ final class timhirt_reporting {
             foreach ($interactions as $index => $interaction) {
                 $id = $interaction['id'] ?? '';
                 if ($id === '') { continue; }
-                $definition = $catalogs[$scoid][$id] ?? [];
+                $baseid = $id; $activityattempt = 0;
+                if (preg_match('/^(.*)-a([1-9][0-9]*)$/', $id, $attemptmatch)) { $baseid = $attemptmatch[1]; $activityattempt = (int)$attemptmatch[2]; }
+                $catalogid = isset($catalogs[$scoid][$id]) ? $id : $baseid;
+                $definition = $catalogs[$scoid][$catalogid] ?? [];
                 $type = $interaction['type'] ?? $definition['type'] ?? 'performance';
                 $definition['type'] = $type;
                 $response = $interaction['student_response'] ?? $interaction['learner_response'] ?? '';
@@ -197,13 +200,14 @@ final class timhirt_reporting {
                 $credit = $result === 'correct' ? 1 : (is_numeric($result) ? max(0, min(1, (float)$result)) : 0);
                 $rows[] = [
                     'scoid' => $scoid, 'index' => $index, 'id' => $id, 'resolved' => !empty($definition['prompt']),
-                    'legacy' => !empty($definition['legacy']), 'labelSource' => isset($snapshots[$scoid][$id]) ? 'snapshot' : ($definition ? 'package' : 'unavailable'),
+                    'legacy' => !empty($definition['legacy']), 'labelSource' => isset($snapshots[$scoid][$catalogid]) ? 'snapshot' : ($definition ? 'package' : 'unavailable'),
                     'block' => $definition['block'] ?? '', 'type' => $type,
-                    'question' => $definition['prompt'] ?? $id,
+                    'question' => ($definition['prompt'] ?? $id) . ($activityattempt ? ' (' . get_string('reportingactivityattempt', 'mod_seledascorm') . ' ' . $activityattempt . ')' : ''),
+                    'activityAttempt' => $activityattempt,
                     'response' => self::response($response, $definition),
                     'correct' => implode(' OR ', array_map(function($value) use ($definition) { return self::response($value, $definition); }, $correct)),
-                    'result' => ['correct' => 'Correct', 'wrong' => 'Incorrect', 'incorrect' => 'Incorrect', 'neutral' => 'Recorded',
-                        'unanticipated' => 'Unexpected response'][$result] ?? (is_numeric($result) ? 'Partial credit (' . round($credit * 100) . '%)' : $result),
+                    'result' => ['correct' => get_string('reportingcorrect', 'mod_seledascorm'), 'wrong' => get_string('reportingincorrect', 'mod_seledascorm'), 'incorrect' => get_string('reportingincorrect', 'mod_seledascorm'), 'neutral' => get_string('reportingrecorded', 'mod_seledascorm'),
+                        'unanticipated' => get_string('reportingunexpected', 'mod_seledascorm')][$result] ?? (is_numeric($result) ? get_string('reportingpartial', 'mod_seledascorm') . ' (' . round($credit * 100) . '%)' : $result),
                     'weight' => $credit * (float)($interaction['weighting'] ?? 1),
                 ];
             }

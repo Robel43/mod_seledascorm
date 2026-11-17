@@ -27,9 +27,70 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/mod/seledascorm/report/interactions/responsessettings_form.php');
 require_once($CFG->dirroot.'/mod/seledascorm/report/timhirt_reporting.php');
+require_once($CFG->dirroot.'/mod/seledascorm/report/seleda_usage.php');
 use mod_seledascorm\local\timhirt_reporting;
+use mod_seledascorm\local\seleda_usage;
 
 class report extends \mod_seledascorm\report {
+    /** Read only the authorised report attempts, in one query for a bounded chunk. */
+    private function load_track_batch($activityid, array $attempts) {
+        global $DB;
+        $clauses = []; $params = ['activity' => $activityid];
+        foreach ($attempts as $i => $attempt) {
+            if (empty($attempt->attempt)) { continue; }
+            $clauses[] = "(userid = :user$i AND attempt = :attempt$i)";
+            $params["user$i"] = $attempt->userid;
+            $params["attempt$i"] = $attempt->attempt;
+        }
+        if (!$clauses) { return []; }
+        $sql = 'SELECT * FROM {seledascorm_scoes_track} WHERE seledascormid = :activity AND (' . implode(' OR ', $clauses) . ') ORDER BY element ASC';
+        $records = $DB->get_recordset_sql($sql, $params);
+        $batch = []; $raw = [];
+        try {
+            foreach ($records as $track) {
+                $key = $track->userid . ':' . $track->attempt;
+                if (!isset($batch[$key])) {
+                    $batch[$key] = ['runtime' => (object)['start' => $track->timemodified, 'finish' => $track->timemodified], 'scoes' => []];
+                }
+                $runtime = $batch[$key]['runtime'];
+                $runtime->start = min($runtime->start, $track->timemodified);
+                $runtime->finish = max($runtime->finish, $track->timemodified);
+                $raw[$key][$track->scoid][] = $track;
+            }
+        } finally { $records->close(); }
+        foreach ($raw as $key => $scoes) {
+            $usagetracks = [];
+            foreach ($scoes as $scoid => $tracks) {
+                $usagetracks = array_merge($usagetracks, $tracks);
+                // Native formatter retains SCORM 1.2/2004 status and interaction semantics.
+                $formatted = seledascorm_format_interactions($tracks);
+                $formatted->userid = $tracks[0]->userid;
+                $formatted->scoid = $scoid;
+                $batch[$key]['scoes'][$scoid] = $formatted;
+            }
+            $batch[$key]['usage'] = seleda_usage::summary($usagetracks);
+        }
+        return $batch;
+    }
+
+    /** Same grading methods as seledascorm_grade_user_attempt, using the batch above. */
+    private function batch_grade($activity, $scoes, $tracks) {
+        $count = 0; $values = 0; $sum = 0; $max = 0;
+        foreach ($scoes as $sco) {
+            if (!$data = ($tracks[$sco->id] ?? false)) { continue; }
+            if ($data->status === 'completed' || $data->status === 'passed') { $count++; }
+            if (isset($data->score_raw) && $data->score_raw !== '') {
+                $values++; $sum += $data->score_raw; $max = max($max, $data->score_raw);
+            }
+        }
+        switch ($activity->grademethod) {
+            case SELEDASCORM_GRADEAVERAGE: return $values ? $sum / $values : 0;
+            case SELEDASCORM_GRADESUM: return $sum;
+            case SELEDASCORM_GRADESCOES: return $count;
+            default: return (float)$max;
+        }
+    }
+
     /**
      * displays the full report
      * @param \stdClass $seledascorm full SELEDASCORM object
@@ -156,6 +217,8 @@ class report extends \mod_seledascorm\report {
             $headers[] = get_string('last', 'mod_seledascorm');
             $columns[] = 'score';
             $headers[] = get_string('score', 'mod_seledascorm');
+            $columns = array_merge($columns, ['seleda_time', 'seleda_interactions', 'seleda_blocks']);
+            $headers = array_merge($headers, [get_string('usageactivetime', 'mod_seledascorm'), get_string('usageinteractions', 'mod_seledascorm'), get_string('usageblocks', 'mod_seledascorm')]);
             $scoes = $DB->get_records('seledascorm_scoes', array("seledascorm" => $seledascorm->id), 'sortorder, id');
 
             // Construct the SQL.
@@ -399,10 +462,17 @@ class report extends \mod_seledascorm\report {
                 $attempts = $DB->get_records_sql($select.$from.$where.$sort, $params);
             }
             if ($attempts) {
-                foreach ($attempts as $scouser) {
+                $pagedattempts = array_values($attempts);
+                foreach ($pagedattempts as $rowindex => $scouser) {
+                    // Limit raw interaction memory during downloads as well as on paged reports.
+                    if ($rowindex % 25 === 0) {
+                        $trackbatch = $this->load_track_batch($seledascorm->id, array_slice($pagedattempts, $rowindex, 25));
+                    }
+                    $attemptkey = $scouser->userid . ':' . $scouser->attempt;
+                    $attempttracks = $trackbatch[$attemptkey] ?? ['runtime' => (object)['start' => false, 'finish' => false], 'scoes' => []];
                     $row = array();
                     if (!empty($scouser->attempt)) {
-                        $timetracks = seledascorm_get_sco_runtime($seledascorm->id, false, $scouser->userid, $scouser->attempt);
+                        $timetracks = $attempttracks['runtime'];
                     } else {
                         $timetracks = '';
                     }
@@ -455,13 +525,22 @@ class report extends \mod_seledascorm\report {
                         } else {
                             $row[] = userdate($timetracks->finish);
                         }
-                        $row[] = seledascorm_grade_user_attempt($seledascorm, $scouser->userid, $scouser->attempt);
+                        $row[] = $this->batch_grade($seledascorm, $scoes, $attempttracks['scoes']);
                     }
+                    $usage = $attempttracks['usage'] ?? seleda_usage::summary([]);
+                    $pages = []; foreach ($scoes as $page) { $pages[$page->id] = $page->title; }
+                    $row[] = $usage['available'] ? seleda_usage::duration($usage['ms']) : '-';
+                    $row[] = $usage['available'] ? $usage['interactions'] : '-';
+                    if ($download) { $row[] = timhirt_reporting::exportcell(seleda_usage::compact($usage, $pages)); }
+                    else if ($usage['available']) {
+                        $detailurl = new \moodle_url('/mod/seledascorm/report/userreportinteractions.php', ['id'=>$cm->id, 'user'=>$scouser->userid, 'attempt'=>$scouser->attempt]);
+                        $row[] = '<details><summary>' . s(get_string('usageviewblocks', 'mod_seledascorm')) . '</summary>' . seleda_usage::table($usage, $pages) . \html_writer::link($detailurl, get_string('usageviewlog', 'mod_seledascorm')) . '</details>';
+                    } else { $row[] = '-'; }
                     // Print out all scores of attempt.
                     $emptyrow = $download ? '' : '&nbsp;';
                     foreach ($scoes as $sco) {
                         if ($sco->launch != '') {
-                            if (!empty($scouser->attempt) && ($trackdata = seledascorm_get_tracks($sco->id, $scouser->userid, $scouser->attempt))) {
+                            if (!empty($scouser->attempt) && ($trackdata = ($attempttracks['scoes'][$sco->id] ?? false))) {
                                 if ($trackdata->status == '') {
                                     $trackdata->status = 'notattempted';
                                 }

@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## Unreleased: per-block usage reporting
+
+- Add independent content-block active time and action logs, plus whole-attempt totals and CSV exports.
+- Merge retry and late saves within their authenticated learner/SCO/attempt without changing grades or completion.
+- Add reporting regression checks while preserving the Seleda component, branding and bundled editor.
+
+---
+
 ## Unreleased – Seleda alignment
 
 - Brand the Moodle-facing activity as **Seleda** and remote authoring as **Seleda Studio** while retaining the internal `mod_exescorm` component for compatibility.

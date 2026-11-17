@@ -1,0 +1,32 @@
+name: Seleda reporting checks
+on:
+  push:
+    branches: [feature/seleda-alignment]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reporting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: mbstring
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: PHP syntax
+        run: |
+          php -l datamodel.php
+          find report tests/reporting -name '*.php' -print0 | xargs -0 -n1 php -l
+          php -l lang/en/seledascorm.php
+      - name: Reporting, storage, permissions and API regression checks
+        run: |
+          php tests/reporting/readable-reporting.php
+          php tests/reporting/block-usage.php
+          php tests/reporting/overview-reporting.php
+          php tests/reporting/overview-reporting.php --csv
+          node --test tests/reporting/*.test.cjs

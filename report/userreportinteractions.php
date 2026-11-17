@@ -27,7 +27,9 @@ require_once($CFG->dirroot.'/mod/seledascorm/locallib.php');
 require_once($CFG->dirroot.'/mod/seledascorm/report/reportlib.php');
 require_once($CFG->libdir . '/tablelib.php');
 require_once(__DIR__ . '/timhirt_reporting.php');
+require_once(__DIR__ . '/seleda_usage.php');
 use mod_seledascorm\local\timhirt_reporting;
+use mod_seledascorm\local\seleda_usage;
 
 $id = required_param('id', PARAM_INT); // Course Module ID.
 $userid = required_param('user', PARAM_INT); // User ID.
@@ -84,6 +86,9 @@ foreach ($trackdata as $track) {
     }
 }
 $reportrows = timhirt_reporting::rows($trackdata, $catalogs);
+$usage = seleda_usage::summary($trackdata);
+$pages = [];
+foreach ($DB->get_records('seledascorm_scoes', ['seledascorm'=>$seledascorm->id], 'sortorder, id') as $sco) { $pages[$sco->id] = $sco->title; }
 $PAGE->requires->css(new moodle_url('/mod/seledascorm/report/timhirt-report.css'));
 
 $courseshortname = format_string($course->shortname, true,
@@ -123,28 +128,46 @@ if (!$table->is_downloading($download, $exportfilename)) {
     // Printing user details.
     $output = $PAGE->get_renderer('mod_seledascorm');
     echo $output->view_user_heading($user, $course, $PAGE->url, $attempt, $attemptids);
+    echo '<h3>' . s(get_string('usageattempt', 'mod_seledascorm')) . '</h3>' . seleda_usage::table($usage, $pages, true);
 
 }
 $table->define_baseurl($PAGE->url);
-$table->define_columns(['block', 'type', 'question', 'studentanswer', 'correctanswer', 'result', 'calcweight']);
-$table->define_headers(['Content Block', 'Interaction type', 'Question / activity', get_string('response', 'mod_seledascorm'),
-    get_string('rightanswer', 'mod_seledascorm'), get_string('result', 'mod_seledascorm'), get_string('calculatedweight', 'mod_seledascorm')]);
+if ($table->is_downloading()) {
+    $table->define_columns(['record', 'page', 'block', 'type', 'time', 'visits', 'interactions', 'question', 'studentanswer', 'correctanswer', 'result', 'calcweight']);
+    $table->define_headers([get_string('usagerecord', 'mod_seledascorm'), get_string('usagepage', 'mod_seledascorm'), 'Content Block', get_string('usageinteractiontype', 'mod_seledascorm'), get_string('usageoffset', 'mod_seledascorm'), get_string('usagevisits', 'mod_seledascorm'), get_string('usageinteractions', 'mod_seledascorm'), get_string('usagequestionactivity', 'mod_seledascorm'), get_string('response', 'mod_seledascorm'),
+        get_string('rightanswer', 'mod_seledascorm'), get_string('result', 'mod_seledascorm'), get_string('calculatedweight', 'mod_seledascorm')]);
+} else {
+    $table->define_columns(['block', 'type', 'question', 'studentanswer', 'correctanswer', 'result', 'calcweight']);
+    $table->define_headers(['Content Block', get_string('usageinteractiontype', 'mod_seledascorm'), get_string('usagequestionactivity', 'mod_seledascorm'), get_string('response', 'mod_seledascorm'),
+        get_string('rightanswer', 'mod_seledascorm'), get_string('result', 'mod_seledascorm'), get_string('calculatedweight', 'mod_seledascorm')]);
+}
 $table->set_attribute('class', 'generaltable generalbox timhirt-readable-report');
 $table->show_download_buttons_at([TABLE_P_BOTTOM]);
 $table->setup();
+if ($table->is_downloading() && $usage['available']) {
+    $table->add_data([get_string('usagetotal', 'mod_seledascorm'), '', '', '', seleda_usage::duration($usage['ms']), $usage['visits'], $usage['interactions'], '', '', '', '', '']);
+    foreach ($usage['blocks'] as $block) {
+        $table->add_data(array_map([timhirt_reporting::class, 'exportcell'], [get_string('usageblockrow', 'mod_seledascorm'), $pages[$block['scoid']] ?? '', $block['title'], $block['type'], seleda_usage::duration($block['ms']), $block['visits'], $block['interactions'], '', '', '', '', '']));
+        foreach ($block['events'] as $event) {
+            $table->add_data(array_map([timhirt_reporting::class, 'exportcell'], [get_string('usageaction', 'mod_seledascorm'), $pages[$block['scoid']] ?? '', $block['title'], $event['action'], seleda_usage::duration((int)$event['at']), $event['visit'], '', $event['label'], $event['value'], '', '', '']));
+        }
+    }
+}
 
 if (!$table->is_downloading() && array_filter($reportrows, function($row) { return !$row['resolved']; })) {
-    echo $OUTPUT->notification('Some interactions have no matching label metadata. Their original IDs are preserved below.', 'info');
+    echo $OUTPUT->notification(get_string('reportingunresolved', 'mod_seledascorm'), 'info');
 }
 if (!$table->is_downloading() && array_filter($reportrows, function($row) { return $row['legacy'] && $row['labelSource'] === 'package'; })) {
-    echo $OUTPUT->notification('Some older interactions use labels from the current package. Original wording may be unavailable if that package was edited.', 'info');
+    echo $OUTPUT->notification(get_string('reportinglegacy', 'mod_seledascorm'), 'info');
 }
 foreach ($reportrows as $row) {
-    $values = [$row['block'], $row['type'], $row['question'], $row['response'], $row['correct'], $row['result'], (string)$row['weight']];
+    $values = [get_string('usagequestion', 'mod_seledascorm'), $pages[$row['scoid']] ?? '', $row['block'], $row['type'], '', '', '', $row['question'], $row['response'], $row['correct'], $row['result'], (string)$row['weight']];
     $values = array_map(function($value) use ($table) {
         return $table->is_downloading() ? timhirt_reporting::exportcell($value) : s($value);
     }, $values);
     if (!$table->is_downloading()) {
+        $values = [$row['block'], $row['type'], $row['question'], $row['response'], $row['correct'], $row['result'], (string)$row['weight']];
+        $values = array_map('s', $values);
         $class = $row['result'] === 'Correct' ? 'correct' : ($row['result'] === 'Incorrect' ? 'incorrect' : 'recorded');
         $values[5] = html_writer::span($values[5], 'timhirt-result timhirt-result-' . $class);
     }

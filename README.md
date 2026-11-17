@@ -556,3 +556,40 @@ Protected operations remain behind Moodle:
 - `REQUEST_EXPORT`;
 - `Save to Moodle`;
 - activity/package persistence.
+
+## Per-block active time and interaction reporting
+
+The reporting integration is part of this feature branch. No separate Moodle
+overlay is needed. A fresh SCORM 1.2 export from the updated Seleda Studio supplies
+usage for every content-block type, including ungraded text and image blocks.
+
+Open the activity's **Interactions** report for learner-attempt totals and expand
+**View block usage** for independent block totals. **View interaction log** opens
+the detailed attempt report with block/action logs and CSV downloads. Question
+and answer labels are preserved per learner, SCO and attempt across package edits.
+
+Usage measures one visible block at a time and pauses in hidden/unfocused tabs or
+after 60 seconds of inactivity. It does not change grades or completion. Actions
+include clicks, committed answers, drag/drop, hotspot hover and HTML audio/video.
+Cross-origin tools may expose only launch/focus. Up to 2,000 event details per
+block visit session are retained; omitted details are counted and cumulative
+totals preserved. Offline exits or browser crashes can lose the unsaved tail.
+Historical packages cannot retrospectively supply usage; the extra usage bridge
+currently targets SCORM 1.2, leaving native SCORM 2004 behavior intact.
+
+This branch retains **mod_seledascorm**, its **mod/seledascorm** installation path,
+Moodle 4.5+ support, bundled editor architecture and existing Seleda branding.
+It must not be installed as mod_exescorm. Use the existing feature-branch release
+build to package the bundled editor; source-only ZIPs are not complete releases.
+
+Usage and label snapshots live in seledascorm_scoes_track. Existing privacy
+exports/deletions, attempt deletion and course reset include these records.
+Learner-entered text may be present in action details. Reports retain capability
+and group access checks and escape HTML and spreadsheet formula values.
+
+See tests/reporting/README.md for standalone storage, reporting, endpoint and API
+regression checks. These use Moodle boundary fixtures and complement, rather than
+replace, live Moodle acceptance with multiple learners and attempts.
+
+Sibling review: mod_exeweb has no SCORM datamodel endpoint or CMI Interactions
+report, so this SCORM bridge does not apply to its native web-package delivery.

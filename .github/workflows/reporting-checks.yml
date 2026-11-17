@@ -65,6 +65,8 @@ jobs:
           extensions: mysqli, mbstring, intl, gd, zip, soap, exif, sodium
           ini-values: max_input_vars=5000, memory_limit=512M
           coverage: none
+      - name: Install Moodle PHPUnit locales
+        run: sudo locale-gen en_AU.UTF-8 en_US.UTF-8
       - name: Prepare Moodle 4.5 with this plugin
         run: |
           git clone --depth 1 --branch MOODLE_405_STABLE https://github.com/moodle/moodle.git "$RUNNER_TEMP/moodle"

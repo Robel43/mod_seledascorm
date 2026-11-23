@@ -173,9 +173,9 @@ $completion->set_module_viewed($cm);
 // Generate the exit button.
 $exiturl = "";
 if (empty($seledascorm->popup) || $displaymode == 'popup') {
-    if ($course->format == 'singleactivity' && $seledascorm->skipview == SELEDASCORM_SKIPVIEW_ALWAYS
-        && !has_capability('mod/seledascorm:viewreport', context_module::instance($cm->id))) {
-        // Redirect students back to site home to avoid redirect loop.
+    if ($course->format == 'singleactivity') {
+        // Course links now launch directly for every role and skipview setting.
+        // Returning to a single-activity course would immediately relaunch it.
         $exiturl = $CFG->wwwroot;
     } else {
         // Redirect back to the correct section if one section per page is being used.

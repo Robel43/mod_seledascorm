@@ -7,6 +7,53 @@ defined('MOODLE_INTERNAL') || die();
  * @covers \mod_seledascorm\local\reporting_dashboard
  */
 final class dashboard_test extends \advanced_testcase {
+    public function test_direct_entry_preserves_native_attempt_selection(): void {
+        global $DB, $CFG;
+        require_once($CFG->dirroot . '/mod/seledascorm/locallib.php');
+        require_once($CFG->dirroot . '/mod/seledascorm/datamodels/scorm_12lib.php');
+        $this->resetAfterTest(true);
+        $this->setAdminUser();
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course();
+        $activity = $generator->create_module('seledascorm', [
+            'course'=>$course->id, 'skipview'=>0, 'forcenewattempt'=>0, 'popup'=>0,
+        ]);
+        $student = $generator->create_user();
+        $teacher = $generator->create_user();
+        $generator->enrol_user($student->id, $course->id, 'student');
+        $generator->enrol_user($teacher->id, $course->id, 'editingteacher');
+        foreach ([$student, $teacher, get_admin()] as $user) {
+            $this->setUser($user);
+            $url = direct_launch::url($activity, $user, (int)$activity->cmid);
+            $this->assertNotNull($url);
+            $this->assertSame('normal', $url->get_param('mode'));
+            $this->assertEquals($activity->cmid, $url->get_param('cm'));
+            $this->assertTrue($DB->record_exists('seledascorm_scoes', [
+                'id'=>$url->get_param('scoid'), 'seledascorm'=>$activity->id,
+            ]));
+            $this->assertNull($url->get_param('newattempt'));
+        }
+        $this->assertEquals(0, $DB->count_records('seledascorm_scoes_track', ['seledascormid'=>$activity->id]));
+        $this->setUser($student);
+        $scoid = direct_launch::url($activity, $student, (int)$activity->cmid)->get_param('scoid');
+        $DB->insert_record('seledascorm_scoes_track', (object)[
+            'userid'=>$student->id, 'seledascormid'=>$activity->id, 'scoid'=>$scoid,
+            'attempt'=>1, 'element'=>'cmi.core.lesson_status', 'value'=>'incomplete', 'timemodified'=>time(),
+        ]);
+        $activity->forcenewattempt = SELEDASCORM_FORCEATTEMPT_ONCOMPLETE;
+        $this->assertNull(direct_launch::url($activity, $student, (int)$activity->cmid)->get_param('newattempt'));
+        $DB->set_field('seledascorm_scoes_track', 'value', 'completed', [
+            'seledascormid'=>$activity->id, 'userid'=>$student->id, 'element'=>'cmi.core.lesson_status',
+        ]);
+        $this->assertSame('on', direct_launch::url($activity, $student, (int)$activity->cmid)->get_param('newattempt'));
+        $activity->forcenewattempt = SELEDASCORM_FORCEATTEMPT_ALWAYS;
+        $activity->popup = 1;
+        $url = direct_launch::url($activity, $student, (int)$activity->cmid);
+        $this->assertSame('on', $url->get_param('newattempt'));
+        $this->assertSame('popup', $url->get_param('display'));
+        $activity->reference = 'unpublished.elpx';
+        $this->assertNull(direct_launch::url($activity, $student, (int)$activity->cmid));
+    }
     public function test_catalogue_and_group_scoped_usage(): void {
         global $DB;
         $this->resetAfterTest(true);

@@ -67,6 +67,17 @@ $contextmodule = context_module::instance($cm->id);
 // Check if package is an .elpx file (eXeLearning project, not yet converted to SCORM).
 $iselpx = !empty($seledascorm->reference) && strtolower(pathinfo($seledascorm->reference, PATHINFO_EXTENSION)) === 'elpx';
 
+// A course activity link opens its content directly for learners and staff.
+// Keep explicit overview/action requests and unpublished projects available.
+if (empty($preventskip) && $action === '' && !$iselpx) {
+    $directurl = \mod_seledascorm\local\direct_launch::url($seledascorm, $USER, (int)$cm->id);
+    if ($directurl) {
+        seledascorm_view($seledascorm, $course, $cm, $contextmodule);
+        unset($SESSION->seledascorm);
+        redirect($directurl);
+    }
+}
+
 $launch = false; // Does this automatically trigger a launch based on skipview.
 if (!empty($seledascorm->popup) && !$iselpx) {
     $scoid = 0;
@@ -88,7 +99,7 @@ if (!empty($seledascorm->popup) && !$iselpx) {
         }
     }
 
-    if (empty($preventskip) && $seledascorm->skipview >= SELEDASCORM_SKIPVIEW_FIRST &&
+    if (empty($preventskip) && $action === '' && $seledascorm->skipview >= SELEDASCORM_SKIPVIEW_FIRST &&
         has_capability('mod/seledascorm:skipview', $contextmodule) &&
         !has_capability('mod/seledascorm:viewreport', $contextmodule)) { // Don't skip users with the capability to view reports.
 
@@ -131,7 +142,7 @@ $pagetitle = strip_tags($shortname.': '.format_string($seledascorm->name));
 // Trigger module viewed event.
 seledascorm_view($seledascorm, $course, $cm, $contextmodule);
 
-if (empty($preventskip) && empty($launch) && !$iselpx && (has_capability('mod/seledascorm:skipview', $contextmodule))) {
+if (empty($preventskip) && $action === '' && empty($launch) && !$iselpx && (has_capability('mod/seledascorm:skipview', $contextmodule))) {
     seledascorm_simple_play($seledascorm, $USER, $contextmodule, $cm->id);
 }
 

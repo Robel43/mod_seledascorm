@@ -56,6 +56,18 @@ for($offset=0;$offset<2001;$offset+=40){
 }
 $long=usage::summary(array_values(array_filter($DB->records,fn($r)=>$r->attempt===3)));
 ensure($long['interactions']===2001&&count($long['blocks'][0]['events'])===2000&&$long['blocks'][0]['omitted']===1,'Event retention must keep complete counters and show omitted details');
+$assessment=$block; $assessment['id']='assessed'; $assessment['ms']=0; $assessment['visits']=0;
+$assessment['actions']=['answer'=>1];
+$assessment['events']=[['n'=>1,'at'=>1000,'action'=>'answer','label'=>'Question <script>','value'=>'<b>answer</b>','expected'=>'<b>expected</b>','result'=>'incorrect']];
+usage::save(4,9,7,5,payload($assessment)); usage::save(4,9,7,5,payload($assessment));
+$assessed=usage::summary(array_values(array_filter($DB->records,fn($r)=>$r->attempt===5)));
+ensure($assessed['ms']===0 && $assessed['visits']===0 && $assessed['interactions']===1,'Assessment streams must not duplicate active time or visits');
+ensure($assessed['blocks'][0]['events'][0]['result']==='incorrect' && $assessed['blocks'][0]['events'][0]['expected']==='<b>expected</b>','Assessment details lost');
+require_once(__DIR__.'/../../classes/output/dashboard_detail.php');
+$detail=\mod_seledascorm\output\dashboard_detail::usage($assessed,[7=>'Page']);
+ensure(strpos($detail,'Incorrect')!==false && strpos($detail,'&lt;b&gt;expected&lt;/b&gt;')!==false && strpos($detail,'<script>')===false,'Assessment report unsafe or missing results');
+$assessment['events'][0]['result']='invented';$failed=false;try { usage::save(4,9,7,5,payload($assessment)); } catch(Throwable $e) { $failed=true; }
+ensure($failed,'Unknown assessment result accepted');
 $writes=$DB->writes;
 foreach(['wrong-sco','negative','too-many','unknown-action','bad-session','bad-json','oversize'] as $case){
     $bad=$block;$sco=7;$raw=payload($bad);

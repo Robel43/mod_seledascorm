@@ -108,7 +108,7 @@ $saveurl = new moodle_url('/mod/seledascorm/editor/save.php');
 // Site-specific Seleda branding configured during plugin installation.
 $brandname = seledascorm_get_brand_name();
 $brandlogourl = seledascorm_get_brand_logo_url();
-$brandlogourlstring = $brandlogourl ? $brandlogourl->out(false) : '';
+$brandlogourlstring = $brandlogourl ? $brandlogourl->out(false) : $CFG->wwwroot . '/mod/seledascorm/pix/icon.svg';
 $brandingconfig = json_encode([
     'name' => $brandname,
     'logoUrl' => $brandlogourlstring,

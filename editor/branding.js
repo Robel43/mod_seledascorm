@@ -25,10 +25,18 @@
     }
 
     function applyDocumentTitle() {
+        var icons = document.querySelectorAll('link[rel="icon"],link[rel="shortcut icon"]');
+        if (logoUrl && (icons.length !== 1 || icons[0].getAttribute('href') !== logoUrl)) {
+            document.querySelectorAll('link[rel="icon"],link[rel="shortcut icon"]').forEach(function(link) { link.remove(); });
+            var favicon = document.createElement('link');
+            favicon.rel = 'icon'; favicon.href = logoUrl;
+            document.head.appendChild(favicon);
+        }
         if (config.activityName) {
-            document.title = name + ' — ' + String(config.activityName);
+            var activityTitle = name + ' — ' + String(config.activityName);
+            if (document.title !== activityTitle) document.title = activityTitle;
         } else {
-            document.title = name;
+            if (document.title !== name) document.title = name;
         }
     }
 
@@ -64,7 +72,8 @@
     function applyName() {
         // The About modal is the main product-name surface inside the static editor.
         document.querySelectorAll('#modalAbout .help-modal-content h1').forEach(function(el) {
-            el.textContent = replaceBrandText(el.textContent);
+            var replacement = replaceBrandText(el.textContent);
+            if (el.textContent !== replacement) el.textContent = replacement;
         });
 
         // Replace product branding only in UI attributes, never in authored content.

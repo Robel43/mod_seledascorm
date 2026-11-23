@@ -45,15 +45,16 @@ final class dashboard_detail {
         foreach ($usage['blocks'] as $block) {
             if (!$block['events']) { continue; }
             $html .= '<details><summary>' . $h(($pages[$block['scoid']] ?? '') . ' · ' . $block['title']) . '</summary><div class="sd-event-log"><table class="sd-table"><thead><tr>';
-            foreach (['eventtime','eventaction','question','eventanswer','eventresult'] as $key) {
+            foreach (['eventtime','eventaction','question','eventanswer','eventexpected','eventresult'] as $key) {
                 $html .= '<th scope="col">' . $h(get_string('dash' . $key, 'mod_seledascorm')) . '</th>';
             }
             $html .= '</tr></thead><tbody>';
             foreach ($block['events'] as $event) {
                 $label = preg_replace('/^(\d+)(?=[A-Za-z])/', '$1 · ', $event['label']);
-                $html .= '<tr><td>' . (int)$event['visit'] . ' · +' . \mod_seledascorm\local\seleda_usage::duration((int)$event['at']) .
+                $result = $event['action'] === 'answer' ? (['correct'=>'reportingcorrect', 'incorrect'=>'reportingincorrect', 'neutral'=>'dashrecorded'][$event['result'] ?? 'neutral'] ?? 'dashrecorded') : 'dashrecorded';
+                $html .= '<tr><td>' . ($event['visit'] ? (int)$event['visit'] . ' · +' : '+') . \mod_seledascorm\local\seleda_usage::duration((int)$event['at']) .
                     '</td><td>' . $h(get_string('dashaction' . $event['action'], 'mod_seledascorm')) . '</td><td>' . $h($label) .
-                    '</td><td>' . $h($event['value']) . '</td><td>' . $h(get_string('dashrecorded', 'mod_seledascorm')) . '</td></tr>';
+                    '</td><td>' . $h($event['value']) . '</td><td>' . $h($event['expected'] ?? '') . '</td><td>' . $h(get_string($result, 'mod_seledascorm')) . '</td></tr>';
             }
             $html .= '</tbody></table></div>' . (!empty($block['omitted']) ? '<p>' . (int)$block['omitted'] . ' ' . $h(get_string('usageomitted','mod_seledascorm')) . '</p>' : '') . '</details>';
         }

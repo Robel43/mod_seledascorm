@@ -195,6 +195,8 @@ $PAGE->requires->data_for_js('seledascormplayerdata', Array('launch' => false,
                                                        'cheight' => $seledascorm->height,
                                                        'popupoptions' => $seledascorm->options), true);
 $PAGE->requires->js('/mod/seledascorm/request.js', true);
+$PAGE->requires->js('/mod/seledascorm/player-compatibility.js', true);
+$PAGE->requires->js('/mod/seledascorm/custom-activity-reporting.js', true);
 $PAGE->requires->js('/lib/cookies.js', true);
 
 if (file_exists($CFG->dirroot.'/mod/seledascorm/datamodels/'.$seledascorm->version.'.js')) {

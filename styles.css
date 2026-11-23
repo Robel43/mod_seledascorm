@@ -796,3 +796,4 @@
 .seleda-usage summary { cursor: pointer; font-weight: 600; }
 .seleda-usage li { margin: .4rem 0; overflow-wrap: anywhere; }
 .seleda-usage-note { color: #536179; font-size: .9rem; margin-bottom: 0; }
+.activityiconcontainer.seledascorm img.activityicon{filter:none!important}

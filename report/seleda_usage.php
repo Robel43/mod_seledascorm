@@ -5,7 +5,7 @@ defined('MOODLE_INTERNAL') || die();
 
 final class seleda_usage {
     const PREFIX = 'seleda.usage.v1.';
-    const ACTIONS = ['click', 'change', 'dragstart', 'drop', 'hover', 'play', 'pause', 'ended', 'seeked', 'embed'];
+    const ACTIONS = ['click', 'change', 'dragstart', 'drop', 'hover', 'play', 'pause', 'ended', 'seeked', 'embed', 'answer'];
 
     private static function text($value, int $limit): string {
         if (!is_string($value)) { throw new \InvalidArgumentException('Invalid usage text'); }
@@ -45,7 +45,13 @@ final class seleda_usage {
                 if ($n <= $previous || !in_array($event['action'] ?? null, self::ACTIONS, true)) { throw new \InvalidArgumentException('Invalid event sequence'); }
                 $previous = $n;
                 $clean['events'][] = ['n'=>$n, 'at'=>self::integer($event['at'] ?? null, 31536000000), 'action'=>$event['action'],
-                    'label'=>self::text($event['label'] ?? null, 160), 'value'=>self::text($event['value'] ?? '', 160)];
+                    'label'=>self::text($event['label'] ?? null, 160), 'value'=>self::text($event['value'] ?? '', $event['action'] === 'answer' ? 1000 : 160)];
+                if ($event['action'] === 'answer') {
+                    if (!in_array($event['result'] ?? null, ['correct', 'incorrect', 'neutral'], true)) { throw new \InvalidArgumentException('Invalid assessment result'); }
+                    $last = count($clean['events']) - 1;
+                    $clean['events'][$last]['result'] = $event['result'];
+                    $clean['events'][$last]['expected'] = self::text($event['expected'] ?? '', 1000);
+                }
             }
             $blocks[] = $clean;
         }
@@ -106,14 +112,14 @@ final class seleda_usage {
             $b = &$blocks[$key]; $b['ms'] += max(0, (int)($data['ms'] ?? 0)); $b['visits'] += (int)($data['visits'] ?? 0);
             foreach (($data['actions'] ?? []) as $action => $count) { $b['actions'][$action] = ($b['actions'][$action] ?? 0) + (int)$count; $b['interactions'] += (int)$count; }
             $session = substr($track->element, -24);
-            $b['sessions'][$session] = $data['started'] ?? 0;
+            if (!empty($data['visits'])) { $b['sessions'][$session] = $data['started'] ?? 0; }
             foreach (($data['events'] ?? []) as $event) { $b['events'][] = $event + ['started'=>$data['started'] ?? 0, 'session'=>$session]; }
             $b['omitted'] += (int)($data['omitted'] ?? 0) + (int)($data['dropped'] ?? 0);
             unset($b);
         }
         foreach ($blocks as &$block) {
-            asort($block['sessions']); $visits = array_flip(array_keys($block['sessions']));
-            foreach ($block['events'] as &$event) { $event['visit'] = $visits[$event['session']] + 1; } unset($event);
+            $block['sessions'] = $block['sessions'] ?? []; asort($block['sessions']); $visits = array_flip(array_keys($block['sessions']));
+            foreach ($block['events'] as &$event) { $event['visit'] = isset($visits[$event['session']]) ? $visits[$event['session']] + 1 : 0; } unset($event);
             usort($block['events'], function($a,$b) { return [$a['started'],$a['visit'],$a['at'],$a['n']] <=> [$b['started'],$b['visit'],$b['at'],$b['n']]; });
             unset($block['sessions']);
         } unset($block);
@@ -146,7 +152,10 @@ final class seleda_usage {
         if ($events) {
             foreach ($usage['blocks'] as $b) {
                 $html .= '<details><summary>' . $s($b['title']) . ': ' . $label('usagelog') . ' (' . $b['interactions'] . ')</summary><ol>';
-                foreach ($b['events'] as $e) { $html .= '<li>' . $label('usagevisit') . ' ' . $e['visit'] . ' · +' . self::duration((int)$e['at']) . ' · ' . $s($e['action']) . ': ' . $s($e['label']) . ($e['value'] !== '' ? ' · ' . $s($e['value']) : '') . '</li>'; }
+                foreach ($b['events'] as $e) {
+                    $result = isset($e['result']) ? ' · ' . $label(['correct'=>'reportingcorrect', 'incorrect'=>'reportingincorrect', 'neutral'=>'dashrecorded'][$e['result']] ?? 'dashrecorded') . ' · ' . $label('dasheventexpected') . ': ' . $s($e['expected'] ?? '') : '';
+                    $html .= '<li>' . ($e['visit'] ? $label('usagevisit') . ' ' . $e['visit'] . ' · +' : '+') . self::duration((int)$e['at']) . ' · ' . $s($e['action']) . ': ' . $s($e['label']) . ($e['value'] !== '' ? ' · ' . $s($e['value']) : '') . $result . '</li>';
+                }
                 $html .= '</ol>' . ($b['omitted'] ? '<p>' . $b['omitted'] . ' ' . $label('usageomitted') . '</p>' : '') . '</details>';
             }
         }

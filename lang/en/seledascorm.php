@@ -795,3 +795,6 @@ $string['dashrecorded'] = 'Recorded (not graded)';
 
 $string['dashallcourses'] = 'All permitted courses';
 $string['dashalltypes'] = 'All block types';
+
+$string['dashactionanswer'] = 'Checked answer';
+$string['dasheventexpected'] = 'Correct answer / sample';

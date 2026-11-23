@@ -42,7 +42,7 @@ test('dashboard fits smaller viewports while only the learner table scrolls hori
     for (const width of [320,375,768,1024]) {
         await page.setViewportSize({width,height:1000});
         await page.setContent(html);
-        const sizes = await page.evaluate(() => ({width:innerWidth,body:document.documentElement.scrollWidth}));
+        const sizes = await page.evaluate(() => ({width:innerWidth,body:document.documentElement.scrollWidth,overflow:[...document.querySelectorAll("body *")].filter(e=>e.getBoundingClientRect().right>innerWidth+1).slice(0,15).map(e=>({tag:e.tagName,cls:e.className,width:e.getBoundingClientRect().width,text:e.textContent.slice(0,40)}))}));
         assert.ok(sizes.body <= sizes.width + 1, JSON.stringify(sizes));
         assert.equal(await page.locator('.sd-table').count(), 1);
         await page.getByRole('button', {name:'Interactions', exact:true}).click();

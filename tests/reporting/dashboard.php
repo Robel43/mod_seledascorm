@@ -133,6 +133,23 @@ $model = ['filters' => ['id' => 1, 'q' => '', 'catalogpage' => 0, 'group' => 0, 
     'activity' => (object)['name' => 'English practice'], 'coursename' => 'English 101', 'metrics' => $data,
     'rows' => array_values($data['learners']), 'filteredcount' => 3];
 $html = \mod_seledascorm\output\reporting_dashboard::render($model);
+// Date filters use immutable visit starts, never a row's overwritten save timestamp.
+$dated = array_map(function($row) {
+    $row = clone $row;
+    if (strpos($row->element, 'seleda.usage.v1.') === 0) {
+        $value = json_decode($row->value, true); $value['started'] = $row->attempt === 1 ? 1000 : 3000;
+        $value['type'] = 'text'; $row->value = json_encode($value);
+    }
+    return $row;
+}, $tracks);
+$window = dashboard::summarise(dashboard::filter_records($dated, $cm, ['fromts'=>900,'tots'=>2000,'staff'=>1]), $pages);
+ensure($window['ms'] === 18000 && $window['learners'][4]['latest'] === 1, 'Date range mixed visits or native attempt status');
+$none = iterator_to_array(dashboard::filter_records($dated, $cm, ['staff'=>0]));
+ensure(!$none, 'Staff/test attempts must be excluded when requested');
+$oneblock = dashboard::summarise(dashboard::filter_records($dated, $cm, ['block'=>hash('sha256','8:quiz'),'staff'=>1]), $pages);
+ensure($oneblock['ms'] === 6000 && count($oneblock['learners']) === 1, 'Chart drill-down did not restrict its block/learners');
+$unknown = dashboard::summarise(dashboard::filter_records($tracks, $cm, ['fromts'=>900,'staff'=>1]), $pages);
+ensure(!$unknown['tracked'], 'Undated history was assigned an invented date');
 ensure(strpos($html, '<script>window.injected') === false && strpos($html, '&lt;img') !== false, 'Stored labels execute HTML');
 ensure(strpos($html, '00:00:20') !== false && strpos($html, 'No usage data') !== false, 'Totals or missing-data state lost in UI');
 $empty = $model;

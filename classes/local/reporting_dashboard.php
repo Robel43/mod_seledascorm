@@ -38,7 +38,7 @@ final class reporting_dashboard {
     }
 
     /** Searchable, permission-filtered catalogue; no hidden activity names leak. */
-    public static function catalogue(string $search = '', int $page = 0, int $size = 30): array {
+    public static function catalogue(string $search = '', int $page = 0, int $size = 30, int $courseid = 0): array {
         global $DB;
         [$scope, $params] = self::capability_scope();
         if ($scope === false) {
@@ -46,9 +46,10 @@ final class reporting_dashboard {
         }
         $where = '';
         $params = array_merge(['seledascorm'], $params);
+        if ($courseid) { $where .= ' AND s.course = ?'; $params[] = $courseid; }
         if ($search !== '') {
             $like = '%' . $DB->sql_like_escape($search) . '%';
-            $where = ' AND (' . $DB->sql_like('s.name', '?', false) . ' OR ' . $DB->sql_like('c.fullname', '?', false) . ')';
+            $where .= ' AND (' . $DB->sql_like('s.name', '?', false) . ' OR ' . $DB->sql_like('c.fullname', '?', false) . ')';
             $params = array_merge($params, [$like, $like]);
         }
         $records = $DB->get_recordset_sql('SELECT cm.id, s.name, s.course, c.fullname AS coursename
@@ -125,7 +126,7 @@ final class reporting_dashboard {
     }
 
     /** Stream all allowed learners without retaining their full action histories in memory. */
-    public static function overview($activity, $cm, int $group = 0): array {
+    public static function overview($activity, $cm, int $group = 0, array $options = []): array {
         global $DB;
         require_capability('mod/seledascorm:viewreport', $cm->context);
         [$groups, $where, $params] = self::group_scope($cm, $group);
@@ -137,12 +138,48 @@ final class reporting_dashboard {
                 ORDER BY t.userid, t.attempt, t.scoid, t.id', $params);
         $pages = $DB->get_records('seledascorm_scoes', ['seledascorm' => $activity->id], 'sortorder, id');
         try {
-            $result = self::summarise($tracks, $pages);
+            $result = self::summarise(self::filter_records($tracks, $cm, $options), $pages);
         } finally {
             $tracks->close();
         }
         $result['groups'] = $groups;
         return $result;
+    }
+
+    /** Filter immutable visit-start dates, block identity and staff without weakening group scope. */
+    public static function filter_records(iterable $records, $cm, array $options): iterable {
+        $batch = []; $key = null; $staff = [];
+        $flush = function($batch) use ($cm, $options, &$staff) {
+            if (!$batch) { return []; }
+            $userid = (int)$batch[0]->userid;
+            if (!isset($staff[$userid])) {
+                $staff[$userid] = is_siteadmin($userid) || has_capability('mod/seledascorm:viewreport', $cm->context, $userid);
+            }
+            if (isset($options['staff']) && !$options['staff'] && $staff[$userid]) { return []; }
+            $restricted = !empty($options['fromts']) || !empty($options['tots']) || !empty($options['block']) || !empty($options['type']);
+            $matched = !$restricted; $out = [];
+            foreach ($batch as $record) {
+                $record = clone $record; $record->dashboardstaff = $staff[$userid];
+                if (strpos($record->element, 'seleda.usage.v1.') === 0) {
+                    $data = json_decode($record->value, true);
+                    if (!is_array($data)) { continue; }
+                    $started = (int)($data['started'] ?? 0);
+                    if ((!empty($options['fromts']) && $started < $options['fromts']) ||
+                            (!empty($options['tots']) && (!$started || $started >= $options['tots'])) ||
+                            (!empty($options['type']) && ($data['type'] ?? '') !== $options['type']) ||
+                            (!empty($options['block']) && hash('sha256', $record->scoid . ':' . $data['id']) !== $options['block'])) { continue; }
+                    $matched = true;
+                }
+                $out[] = $record;
+            }
+            return $matched ? $out : [];
+        };
+        foreach ($records as $record) {
+            $next = $record->userid . ':' . $record->attempt;
+            if ($key !== null && $next !== $key) { yield from $flush($batch); $batch = []; }
+            $key = $next; $batch[] = $record;
+        }
+        yield from $flush($batch);
     }
 
     /** Pure aggregation: cumulative usage across attempts, completion from the latest attempt. */
@@ -158,7 +195,7 @@ final class reporting_dashboard {
             if (!isset($learners[$userid])) {
                 $learners[$userid] = ['id' => $userid, 'name' => fullname($track), 'attempts' => [], 'latest' => 0,
                     'first' => (int)$track->timemodified, 'last' => 0, 'ms' => 0, 'interactions' => 0,
-                    'visits' => 0, 'tracked' => false, 'statuses' => [], 'scores' => []];
+                    'visits' => 0, 'tracked' => false, 'staff' => !empty($track->dashboardstaff), 'visited' => [], 'statuses' => [], 'scores' => []];
             }
             $learner = &$learners[$userid];
             $attempt = (int)$track->attempt;
@@ -188,6 +225,7 @@ final class reporting_dashboard {
                 continue;
             }
             $learner['tracked'] = true;
+            $learner['visited'][$track->scoid] = true;
             $ms = max(0, (int)($data['ms'] ?? 0));
             $count = array_sum(array_map('intval', $data['actions'] ?? []));
             $learner['ms'] += $ms;
@@ -195,7 +233,7 @@ final class reporting_dashboard {
             $learner['visits'] += (int)($data['visits'] ?? 0);
             $key = $track->scoid . ':' . $data['id'];
             if (!isset($blocks[$key])) {
-                $blocks[$key] = ['title' => $data['title'], 'page' => $pages[$track->scoid]->title ?? '',
+                $blocks[$key] = ['title' => in_array(strtolower(trim($data['title'])), ['text', 'untitled', '']) ? (($pages[$track->scoid]->title ?? 'Content') . ' · ' . ($data['type'] ?? 'text') . ' · ' . substr(hash('sha256', $data['id']), 0, 5)) : $data['title'], 'page' => $pages[$track->scoid]->title ?? '', 'generic' => in_array(strtolower(trim($data['title'])), ['text','untitled','']), 'scoid' => (int)$track->scoid, 'key' => hash('sha256', $key), 'type' => $data['type'] ?? '',
                     'ms' => 0, 'interactions' => 0, 'learners' => []];
             }
             $blocks[$key]['ms'] += $ms;

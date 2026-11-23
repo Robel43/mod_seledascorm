@@ -1,5 +1,30 @@
 # Standalone Seleda reporting dashboard
 
+## Dashboard usability update
+
+Generic block labels resolve to a heading or paragraph in the current packaged
+HTML, with a page/type/identity fallback. Historical named labels are preserved.
+Logs use a structured offset/action/label/value/result table. Content clicks are
+labelled as recorded, ungraded interactions; only native question results supply
+accuracy. Learner details distinguish pages visited, SCORM pages completed and
+assessment answers, and explain absent scores.
+
+The compact heading and collapsible activity catalogue reduce scrolling. The
+catalogue has a permission-filtered course selector. Visit-date, block-type and
+audience filters apply to the overview, matching learner list and CSV. Staff
+(administrators or users with the activity's report capability) are excluded by
+default and can be included explicitly. Staff records then carry a visible label.
+Completion legend links filter learners; block chart links filter that block's
+visits and learners. Clear-block links return to the wider view.
+
+Date filters use persisted usage visit-start timestamps in the viewer's Moodle
+timezone, with an inclusive end date. Old records without a visit-start timestamp
+are excluded from date-filtered results. Active time is assigned to the visit's
+start date; it is not a reconstruction of daily activity from overwritten save
+timestamps. Native completion/score refer to the full qualifying attempt, and
+learner details deliberately show the full selected attempt. No historical dates
+or grades are fabricated. Group and module permission checks remain mandatory.
+
 The **Seleda reports** item in Moodle's main navigation opens
 `/mod/seledascorm/dashboard.php`. It is independent of a course page and the
 activity's existing Reports tab. Administrators and users with

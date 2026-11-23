@@ -41,6 +41,9 @@ final class dashboard_test extends \advanced_testcase {
         $metrics = reporting_dashboard::overview($allowed, $cm);
         $this->assertSame([(int)$one->id], array_keys($metrics['learners']));
         $this->assertSame(0, $metrics['tracked']);
+        $this->assertEmpty(reporting_dashboard::catalogue('', 0, 30, $othercourse->id)['items']);
+        $studentmetrics = reporting_dashboard::overview($allowed, $cm, 0, ['staff'=>0]);
+        $this->assertSame([(int)$one->id], array_keys($studentmetrics['learners']));
         $this->assertEmpty($metrics['blocks']);
         $this->expectException(\moodle_exception::class);
         reporting_dashboard::detail($allowed, $cm, $two->id, 1);

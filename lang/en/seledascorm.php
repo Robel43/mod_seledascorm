@@ -771,3 +771,27 @@ $string['reportingrecorded'] = 'Recorded';
 $string['reportingunexpected'] = 'Unexpected response';
 $string['reportingpartial'] = 'Partial credit';
 $string['reportingactivityattempt'] = 'Activity attempt';
+
+$string['dashstafflabel'] = 'Staff / test access';
+$string['dashnoscore'] = 'No scored answers recorded';
+$string['dashpagesvisited'] = 'Pages visited';
+$string['dashanswered'] = 'Questions answered';
+$string['dashaccuracy'] = 'Answer accuracy';
+$string['dashfrom'] = 'Visit start: from';
+$string['dashto'] = 'Visit start: through';
+$string['dashaudience'] = 'Audience';
+$string['dashlearnersonly'] = 'Learners only';
+$string['dashincludestaff'] = 'Include staff';
+$string['dashtype'] = 'Content-block type';
+$string['dashclearblock'] = 'Clear block filter';
+$string['dashdatenote'] = 'Dates use saved visit-start timestamps in your timezone. Older records without these timestamps are excluded when dates are selected. Completion and scores refer to the full qualifying attempt; details show the full selected attempt.';
+$string['dasheventtime'] = 'Offset';
+$string['dasheventaction'] = 'Action';
+$string['dasheventanswer'] = 'Answer / value';
+$string['dasheventresult'] = 'Result';
+$string['dashnavigation'] = 'Content interaction';
+$string['dashsubmitted'] = 'Committed input';
+$string['dashrecorded'] = 'Recorded (not graded)';
+
+$string['dashallcourses'] = 'All permitted courses';
+$string['dashalltypes'] = 'All block types';

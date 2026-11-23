@@ -16,6 +16,12 @@ if (isguestuser()) {
     throw new required_capability_exception(context_system::instance(), 'mod/seledascorm:viewreport', 'nopermissions', '');
 }
 $filters = [
+    'course' => optional_param('course', 0, PARAM_INT),
+    'from' => optional_param('from', '', PARAM_TEXT),
+    'to' => optional_param('to', '', PARAM_TEXT),
+    'staff' => optional_param('staff', 0, PARAM_BOOL),
+    'block' => optional_param('block', '', PARAM_ALPHANUM),
+    'type' => optional_param('type', '', PARAM_ALPHANUMEXT),
     'id' => max(0, optional_param('id', 0, PARAM_INT)),
     'q' => optional_param('q', '', PARAM_TEXT),
     'catalogpage' => max(0, optional_param('catalogpage', 0, PARAM_INT)),
@@ -26,13 +32,26 @@ $filters = [
     'learner' => max(0, optional_param('learner', 0, PARAM_INT)),
     'attempt' => max(0, optional_param('attempt', 0, PARAM_INT)),
 ];
+$options = $filters;
+foreach (['from', 'to'] as $datekey) {
+    if ($filters[$datekey] !== '') {
+        $date = DateTimeImmutable::createFromFormat('!Y-m-d', $filters[$datekey], core_date::get_user_timezone_object());
+        if (!$date || $date->format('Y-m-d') !== $filters[$datekey]) { throw new moodle_exception('invalidparameter'); }
+        $options[$datekey === 'from' ? 'fromts' : 'tots'] = ($datekey === 'to' ? $date->modify('+1 day') : $date)->getTimestamp();
+    }
+}
+if (!empty($options['fromts']) && !empty($options['tots']) && $options['fromts'] >= $options['tots']) { throw new moodle_exception('invalidparameter'); }
 $download = optional_param('download', '', PARAM_ALPHA);
 $model = ['filters' => $filters, 'activity' => null];
 if ($filters['id']) {
     [$activity, $cm, $course] = service::activity($filters['id']);
-    $metrics = service::overview($activity, $cm, $filters['group']);
+    $metrics = service::overview($activity, $cm, $filters['group'], $options);
     $model['activity'] = $activity;
     $model['coursename'] = $course->fullname;
+    $titlepages = array_intersect_key($metrics['pages'], array_flip(array_column(array_filter($metrics['blocks'], function($b) { return !empty($b['generic']); }), 'scoid')));
+    $titles = \mod_seledascorm\output\dashboard_detail::titles($cm->context, $titlepages);
+    // Keys are hashes for links; resolve package IDs to the same hash namespace.
+    foreach ($titles as $key => $title) { foreach ($metrics['blocks'] as &$block) { if (!empty($block['generic']) && $block['key'] === hash('sha256', $key)) { $block['title'] = $title; } } unset($block); }
     $model['metrics'] = $metrics;
     $matching = array_filter($metrics['learners'], function($learner) use ($filters) {
         return ($filters['state'] === '' || $filters['state'] === $learner['status']) &&
@@ -86,19 +105,28 @@ if ($filters['id']) {
         if (!$hasscore && $activity->grademethod != SELEDASCORM_GRADESCOES) {
             $grade = null;
         }
+        $usage = seleda_usage::summary($tracks);
+        foreach ($usage['blocks'] as &$block) { $key = $block['scoid'] . ':' . $block['id']; if (isset($titles[$key]) && in_array(strtolower($block['title']), ['text','untitled',''])) { $block['title'] = $titles[$key]; } } unset($block);
         $model['detail'] = ['name' => $learner['name'], 'attempts' => array_keys($learner['attempts']),
+            'active' => $usage['available'] ? seleda_usage::duration($usage['ms']) : get_string('dashnodata','mod_seledascorm'),
+            'completion' => \mod_seledascorm\output\dashboard_detail::completion($tracks, $metrics['pages']),
+            'visited' => count(array_filter(array_unique(array_map(function($t) { return strpos($t->element, 'seleda.usage.v1.') === 0 ? $t->scoid : null; }, $tracks)))), 'questionsanswered' => count($questions),
+            'graded' => count(array_filter($questions, function($q) { return in_array($q['result'], [get_string('reportingcorrect','mod_seledascorm'),get_string('reportingincorrect','mod_seledascorm')]); })),
+            'correct' => count(array_filter($questions, function($q) { return $q['result'] === get_string('reportingcorrect', 'mod_seledascorm'); })),
             'score' => $grade === false || $grade === null ? null : $grade,
-            'usagehtml' => seleda_usage::table(seleda_usage::summary($tracks), $pages, true), 'questions' => $questions];
+            'usagehtml' => \mod_seledascorm\output\dashboard_detail::usage($usage, $pages), 'questions' => $questions];
     }
 } else if (!service::can_open()) {
     throw new required_capability_exception(context_system::instance(), 'mod/seledascorm:viewreport', 'nopermissions', '');
 }
-$model['catalogue'] = service::catalogue($filters['q'], $filters['catalogpage']);
+$model['catalogue'] = service::catalogue($filters['q'], $filters['catalogpage'], 30, $filters['course']);
+$model['courses'] = [];
+foreach (service::catalogue('', 0, PHP_INT_MAX)['items'] as $item) { $model['courses'][$item->course] = $item->coursename; }
 $PAGE->set_url(new moodle_url('/mod/seledascorm/dashboard.php', $model['filters']));
 $PAGE->set_context(context_system::instance());
 $PAGE->set_pagelayout('report');
 $PAGE->set_title(get_string('dashboardtitle', 'mod_seledascorm'));
-$PAGE->set_heading(seledascorm_get_brand_name());
+$PAGE->set_heading(get_string('dashboardtitle', 'mod_seledascorm'));
 $PAGE->requires->css(new moodle_url('/mod/seledascorm/dashboard.css'));
 $PAGE->requires->js_call_amd('mod_seledascorm/reporting_dashboard', 'init');
 $PAGE->set_cacheable(false);

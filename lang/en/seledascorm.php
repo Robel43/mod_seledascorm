@@ -791,10 +791,19 @@ $string['dasheventanswer'] = 'Answer / value';
 $string['dasheventresult'] = 'Result';
 $string['dashnavigation'] = 'Content interaction';
 $string['dashsubmitted'] = 'Committed input';
-$string['dashrecorded'] = 'Recorded (not graded)';
+$string['dashrecorded'] = 'Action recorded (no assessment result)';
 
 $string['dashallcourses'] = 'All permitted courses';
 $string['dashalltypes'] = 'All block types';
 
 $string['dashactionanswer'] = 'Checked answer';
 $string['dasheventexpected'] = 'Correct answer / sample';
+
+$string['dashtracking'] = 'LMS tracking';
+$string['dashmodegraded'] = 'Graded';
+$string['dashmodecompletion'] = 'Completion only';
+$string['dashmodeoff'] = 'Off';
+$string['dashawaitingscore'] = 'No score recorded yet';
+$string['dashnotapplicable'] = 'Not applicable';
+
+$string['dashblockscore'] = 'Content block score';

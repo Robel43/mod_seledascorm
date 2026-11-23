@@ -111,10 +111,10 @@ if ($filters['id']) {
             'active' => $usage['available'] ? seleda_usage::duration($usage['ms']) : get_string('dashnodata','mod_seledascorm'),
             'completion' => \mod_seledascorm\output\dashboard_detail::completion($tracks, $metrics['pages']),
             'visited' => count(array_filter(array_unique(array_map(function($t) { return strpos($t->element, 'seleda.usage.v1.') === 0 ? $t->scoid : null; }, $tracks)))), 'questionsanswered' => count(array_filter($questions, function($q) { return trim($q['response']) !== ''; })),
-            'graded' => count(array_filter($questions, function($q) { return in_array($q['result'], [get_string('reportingcorrect','mod_seledascorm'),get_string('reportingincorrect','mod_seledascorm')]); })),
+            'graded' => count(array_filter($questions, function($q) { return !empty($q['graded']); })),
             'correct' => count(array_filter($questions, function($q) { return $q['result'] === get_string('reportingcorrect', 'mod_seledascorm'); })),
             'score' => $grade === false || $grade === null ? null : $grade,
-            'usagehtml' => \mod_seledascorm\output\dashboard_detail::usage($usage, $pages), 'questions' => $questions];
+            'usagehtml' => \mod_seledascorm\output\dashboard_detail::tracking(timhirt_reporting::blockstates($tracks, $catalogues), $pages) . \mod_seledascorm\output\dashboard_detail::usage($usage, $pages), 'questions' => $questions];
     }
 } else if (!service::can_open()) {
     throw new required_capability_exception(context_system::instance(), 'mod/seledascorm:viewreport', 'nopermissions', '');

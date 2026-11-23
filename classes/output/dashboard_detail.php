@@ -5,6 +5,19 @@ defined('MOODLE_INTERNAL') || die();
 
 /** Human-readable usage details without treating content clicks as graded answers. */
 final class dashboard_detail {
+    public static function tracking(array $blocks, array $pages): string {
+        if (!$blocks) { return ''; }
+        $h = function($value) { return htmlspecialchars((string)$value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); };
+        $html = '<h4>' . $h(get_string('dashtracking', 'mod_seledascorm')) . '</h4><div class="sd-table-scroll"><table class="sd-table"><thead><tr>';
+        foreach (['dashpage','dashblock','dashtracking','dashblockscore'] as $key) { $html .= '<th scope="col">' . $h(get_string($key, 'mod_seledascorm')) . '</th>'; }
+        $html .= '</tr></thead><tbody>';
+        foreach ($blocks as $block) {
+            $html .= '<tr><td>' . $h($pages[$block['scoid']] ?? '') . '</td><td>' . $h($block['title']) . '</td><td>' .
+                $h(get_string('dashmode' . $block['mode'], 'mod_seledascorm')) . '</td><td>' .
+                $h($block['score'] === null ? get_string($block['mode'] === 'graded' ? 'dashawaitingscore' : 'dashnotapplicable', 'mod_seledascorm') : $block['score'] . '%') . '</td></tr>';
+        }
+        return $html . '</tbody></table></div>';
+    }
     public static function completion(array $tracks, array $pages): string {
         $done = [];
         foreach ($tracks as $track) {

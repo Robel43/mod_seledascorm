@@ -8,7 +8,7 @@ permissions:
   contents: read
 jobs:
   reporting:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
@@ -43,7 +43,7 @@ jobs:
           node --test tests/reporting/*.test.cjs
   moodle-dashboard:
     if: github.event_name != 'pull_request' || github.head_ref != 'feature/seleda-alignment'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     services:
       mariadb:

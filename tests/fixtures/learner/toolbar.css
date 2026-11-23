@@ -1,0 +1,42 @@
+/* Seleda accessibility toolbar v1 */
+#eXeAtools{--seleda-access-primary:var(--brand-primary,#2f6df6);--seleda-access-on-primary:#fff;--seleda-access-line:#dbe3ef;font:14px/1.4 system-ui,sans-serif!important;color:#17243b;z-index:999999;text-transform:none;letter-spacing:normal}
+#eXeAtools #eXeAtoolsBtnSet,#eXeAtools #eXeAtoolsSet{position:fixed!important;left:auto!important;bottom:auto!important;right:max(14px,env(safe-area-inset-right))!important;top:50%!important;transform:translateY(-50%)!important;z-index:999999;background:#fff;border:1px solid var(--seleda-access-line);box-shadow:0 8px 32px #17243b24;border-radius:16px;box-sizing:border-box;width:auto;height:auto;white-space:normal}
+#eXeAtools #eXeAtoolsBtnSet{width:52px;height:52px;border-radius:16px;background:var(--seleda-access-primary);border:0}
+#eXeAtools #eXeAtoolsSet{display:none;width:220px;max-width:calc(100vw - 28px);max-height:calc(100dvh - 28px);overflow-y:auto;padding:12px;overscroll-behavior:contain}
+.exe-atools-on #eXeAtools #eXeAtoolsSet{display:flex;flex-direction:column;gap:4px}.exe-atools-on #eXeAtools #eXeAtoolsBtnSet{display:none}
+#eXeAtools span{background:none;width:auto;height:auto;cursor:inherit;font:inherit;display:inline}
+#eXeAtools button{position:static;margin:0;padding:10px 12px;border:1px solid transparent;background:none!important;color:#334155;border-radius:10px;width:100%;height:auto;min-height:42px;display:flex;align-items:center;justify-content:flex-start;gap:12px;cursor:pointer;font:600 14px/1.4 system-ui,sans-serif;text-align:left;box-sizing:border-box}
+#eXeAtools button:after{display:none!important}
+#eXeAtools svg{display:block;width:22px;height:22px;flex:0 0 22px;pointer-events:none;margin:0;position:static}
+#eXeAtools button .seleda-access-label{white-space:normal;overflow-wrap:anywhere}
+#eXeAtools #eXeAtoolsBtn{position:static;display:grid;place-items:center;width:52px;height:52px;padding:0;border:0;color:var(--seleda-access-on-primary);border-radius:16px}
+#eXeAtools #eXeAtoolsBtn .seleda-access-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+#eXeAtools #eXeAtoolsBtn svg{width:28px;height:28px}
+#eXeAtools .seleda-access-title{font:750 14px/1.4 system-ui,sans-serif;margin:2px 6px 8px;padding:0;color:#17243b;position:static;clip:auto;width:auto;height:auto}
+#eXeAtools #eXeAtoolsFont{display:block;position:static;box-sizing:border-box;width:100%;max-width:100%;top:auto;margin:0 0 6px;padding:10px 8px;background:#f8fafc;color:#17243b;border:1px solid var(--seleda-access-line);border-radius:10px;font:14px/1.4 system-ui,sans-serif;min-height:42px}
+#eXeAtools button:hover:enabled{background:#f1f5f9!important;opacity:1}
+#eXeAtools #eXeAtoolsBtn:hover{background:var(--seleda-access-primary)!important;filter:brightness(.95)}
+#eXeAtools :is(button,select):focus-visible{outline:3px solid var(--seleda-access-accent,var(--seleda-access-primary));outline-offset:2px;box-shadow:none}
+#eXeAtools button:focus{box-shadow:none}
+#eXeAtools button[aria-pressed=true],#eXeAtools .eXeAtoolsReading{color:var(--seleda-access-accent,var(--seleda-access-primary));background:color-mix(in srgb,var(--seleda-access-primary) 9%,white)!important;border-color:var(--seleda-access-accent,var(--seleda-access-primary))}
+#eXeAtools button:disabled{opacity:.45;cursor:default}
+#eXeAtools #eXeAtoolsCloseBtn{border-top:1px solid var(--seleda-access-line);border-radius:0 0 10px 10px;margin-top:4px}
+@media(max-height:480px){#eXeAtools #eXeAtoolsSet{max-height:calc(100dvh - 16px);padding:8px}#eXeAtools button{min-height:40px;padding:7px 10px}}
+@media print{#eXeAtools{display:none!important}}
+
+/* Compact edge dock. The controls overlay the page without shrinking its layout. */
+#eXeAtools #eXeAtoolsBtnSet,#eXeAtools #eXeAtoolsSet{right:0!important;top:var(--seleda-access-top,50%)!important;transform:none!important}
+#eXeAtools #eXeAtoolsBtnSet{display:block!important;transform:translateY(-50%)!important;box-shadow:0 3px 14px #17243b20}
+#eXeAtools #eXeAtoolsBtnSet,#eXeAtools #eXeAtoolsBtn{box-sizing:border-box!important;width:36px!important;height:44px!important;min-width:36px!important;max-width:36px!important;min-height:44px!important;max-height:44px!important;border-radius:22px 0 0 22px!important}
+#eXeAtools #eXeAtoolsBtn{display:flex!important;align-items:center!important;justify-content:center!important;gap:0!important;padding:0!important;margin:0!important;line-height:1!important;transform:none!important}
+#eXeAtools #eXeAtoolsBtn .seleda-access-symbol{flex:0 0 24px!important;width:24px!important;height:24px!important}
+#eXeAtools #eXeAtoolsSet{top:calc(var(--seleda-access-top,50%) + 26px)!important;width:40px;max-width:40px;padding:2px;gap:2px;border-radius:18px 0 0 18px;max-height:calc(100dvh - var(--seleda-access-top,50%) - 32px);overflow-x:hidden;box-shadow:0 3px 14px #17243b20}
+#eXeAtools #eXeAtoolsSet button{width:34px;height:34px;min-height:34px;flex:0 0 34px;padding:6px;gap:0;justify-content:center;border-radius:10px}
+#eXeAtools .seleda-access-label,#eXeAtools .seleda-access-title{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip-path:inset(50%)!important;padding:0!important;margin:0!important}
+#eXeAtools #eXeAtoolsCloseBtn{border:0;margin:0}
+#eXeAtools #eXeAtoolsFont{display:none}
+#eXeAtools.seleda-font-open #eXeAtoolsFont{display:block;position:fixed;right:44px;top:var(--seleda-access-top,50%);width:180px;max-width:calc(100vw - 52px);margin:0;box-shadow:0 3px 14px #17243b20}
+
+/* Fixed tooltip sits outside the narrow dock's scrolling area. */
+#eXeAtools #seleda-access-tooltip{position:fixed;z-index:1000000;display:block;box-sizing:border-box;max-width:calc(100vw - 56px);padding:8px 12px;border:1px solid var(--seleda-access-line);border-radius:8px;background:#17243b;color:#fff;font:500 13px/1.4 system-ui,sans-serif;text-align:left;white-space:normal;overflow-wrap:anywhere;pointer-events:none;box-shadow:0 3px 12px #17243b26}
+#eXeAtools #seleda-access-tooltip[hidden]{display:none!important}

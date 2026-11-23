@@ -213,6 +213,7 @@ if ($CFG->version >= 2022041900) { // Moodle 4+.
 
     $activityheader->set_attrs($headerconfig);
 }
+$PAGE->requires->css('/mod/seledascorm/learner-layout.css');
 echo $OUTPUT->header();
 $PAGE->requires->string_for_js('navigation', 'mod_seledascorm');
 $PAGE->requires->string_for_js('toc', 'mod_seledascorm');
@@ -323,6 +324,11 @@ if (file_exists($CFG->dirroot.'/mod/seledascorm/datamodels/'.$seledascorm->versi
 \core\session\manager::keepalive('networkdropped', 'mod_seledascorm', 30, 10);
 
 $PAGE->requires->js_call_amd('mod_seledascorm/fullscreen', 'init');
+$PAGE->requires->js_call_amd('mod_seledascorm/learner_layout', 'init', [[
+    'contents' => get_string('learnercontents', 'mod_seledascorm'),
+    'open' => get_string('learneropencontents', 'mod_seledascorm'),
+    'close' => get_string('learnerclosecontents', 'mod_seledascorm'),
+]]);
 
 echo $OUTPUT->footer();
 

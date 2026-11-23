@@ -44,13 +44,11 @@ define([
             let btnToggle = document.getElementById('toggleFullscreen');
             let page = document.getElementById('seledascormpage');
 
-            if (page.classList.contains('fullscreen')) {
-                btnToggle.classList.remove('actived');
-                page.classList.remove('fullscreen');
-            } else {
-                btnToggle.classList.add('actived');
-                page.classList.add('fullscreen');
-            }
+            if (!page) return;
+            const active = (document.fullscreenElement || document.webkitFullscreenElement ||
+                document.mozFullScreenElement || document.msFullscreenElement) === page;
+            page.classList.toggle('fullscreen', active);
+            if (btnToggle) btnToggle.classList.toggle('actived', active);
         };
 
         Fullscreen.prototype.toggleFullScreen = function(e) {

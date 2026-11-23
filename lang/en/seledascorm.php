@@ -807,3 +807,7 @@ $string['dashawaitingscore'] = 'No score recorded yet';
 $string['dashnotapplicable'] = 'Not applicable';
 
 $string['dashblockscore'] = 'Content block score';
+
+$string['learnercontents'] = 'Course contents';
+$string['learneropencontents'] = 'Open course contents';
+$string['learnerclosecontents'] = 'Close course contents';

@@ -17,3 +17,4 @@
 .sd-catalogue select{width:100%}.sd-context{scroll-margin-top:80px}#sd-learners{scroll-margin-top:85px}.sd-dashboard .sd-table td{overflow-wrap:anywhere}
 .sd-filters,.sd-filters label{min-width:0;max-width:100%}.sd-filters input,.sd-filters select{min-width:0;width:100%}.sd-filters label{overflow:hidden}@media(max-width:700px){.sd-filters label{width:100%}}
 @media(max-width:700px){.sd-filters{flex-wrap:nowrap}.sd-filters>p{flex:0 0 auto;width:100%}.sd-filters label:not(.sr-only){width:100%}}.sd-filters .sr-only{width:1px!important;max-width:1px!important}
+.sd-bars li,.sd-donut:not(.is-empty){cursor:pointer}

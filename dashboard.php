@@ -110,7 +110,7 @@ if ($filters['id']) {
         $model['detail'] = ['name' => $learner['name'], 'attempts' => array_keys($learner['attempts']),
             'active' => $usage['available'] ? seleda_usage::duration($usage['ms']) : get_string('dashnodata','mod_seledascorm'),
             'completion' => \mod_seledascorm\output\dashboard_detail::completion($tracks, $metrics['pages']),
-            'visited' => count(array_filter(array_unique(array_map(function($t) { return strpos($t->element, 'seleda.usage.v1.') === 0 ? $t->scoid : null; }, $tracks)))), 'questionsanswered' => count($questions),
+            'visited' => count(array_filter(array_unique(array_map(function($t) { return strpos($t->element, 'seleda.usage.v1.') === 0 ? $t->scoid : null; }, $tracks)))), 'questionsanswered' => count(array_filter($questions, function($q) { return trim($q['response']) !== ''; })),
             'graded' => count(array_filter($questions, function($q) { return in_array($q['result'], [get_string('reportingcorrect','mod_seledascorm'),get_string('reportingincorrect','mod_seledascorm')]); })),
             'correct' => count(array_filter($questions, function($q) { return $q['result'] === get_string('reportingcorrect', 'mod_seledascorm'); })),
             'score' => $grade === false || $grade === null ? null : $grade,

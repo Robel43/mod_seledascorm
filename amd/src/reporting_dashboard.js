@@ -6,6 +6,20 @@ export const init = () => {
     if (!chart) {
         return;
     }
+    chart.addEventListener('click', event => {
+        const row = event.target.closest('li');
+        if (row && !event.target.closest('a')) row.querySelector('a')?.click();
+    });
+    const donut = document.querySelector('.sd-donut:not(.is-empty)');
+    donut?.addEventListener('click', event => {
+        const box = donut.getBoundingClientRect();
+        const angle = (Math.atan2(event.clientY - box.top - box.height / 2,
+            event.clientX - box.left - box.width / 2) * 180 / Math.PI + 450) % 360 / 3.6;
+        const style = getComputedStyle(donut);
+        const index = angle < parseFloat(style.getPropertyValue('--done')) ? 0 :
+            angle < parseFloat(style.getPropertyValue('--progress')) ? 1 : 2;
+        document.querySelectorAll('.sd-legend a')[index]?.click();
+    });
     const duration = ms => {
         const seconds = Math.floor(ms / 1000);
         return [Math.floor(seconds / 3600), Math.floor(seconds / 60) % 60, seconds % 60]

@@ -114,7 +114,7 @@ if ($filters['id']) {
             'graded' => count(array_filter($questions, function($q) { return !empty($q['graded']); })),
             'correct' => count(array_filter($questions, function($q) { return $q['result'] === get_string('reportingcorrect', 'mod_seledascorm'); })),
             'score' => $grade === false || $grade === null ? null : $grade,
-            'usagehtml' => \mod_seledascorm\output\dashboard_detail::tracking(timhirt_reporting::blockstates($tracks, $catalogues), $pages) . \mod_seledascorm\output\dashboard_detail::usage($usage, $pages), 'questions' => $questions];
+            'usagehtml' => \mod_seledascorm\output\dashboard_detail::tracking(timhirt_reporting::blockstates($tracks, $catalogues), $pages) . \mod_seledascorm\output\dashboard_detail::usage($usage, $pages, $questions), 'questions' => $questions];
     }
 } else if (!service::can_open()) {
     throw new required_capability_exception(context_system::instance(), 'mod/seledascorm:viewreport', 'nopermissions', '');

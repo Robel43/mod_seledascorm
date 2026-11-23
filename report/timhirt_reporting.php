@@ -135,7 +135,7 @@ final class timhirt_reporting {
                     $label = $xpath->query('.//*[contains(concat(" ", normalize-space(@class), " "), " mcqf-choice-text ")]', $choice)->item(0);
                     if ($label) { $options[$choice->getAttribute('data-cid')] = self::text($label->textContent); }
                 }
-                $catalog[$id] = ['block' => $heading ? self::text($heading->textContent) : 'Multiple Choice',
+                $catalog[$id] = ['block' => $heading ? self::text($heading->textContent) : 'Multiple Choice', 'blockid'=>$node->getAttribute('id'),
                     'prompt' => $prompt ? self::text($prompt->textContent) : $id, 'type' => 'choice',
                     'options' => $options, 'legacy' => true];
             }
@@ -232,6 +232,11 @@ final class timhirt_reporting {
                 if (preg_match('/^(.*)-a([1-9][0-9]*)$/', $id, $attemptmatch)) { $baseid = $attemptmatch[1]; $activityattempt = (int)$attemptmatch[2]; }
                 $catalogid = isset($catalogs[$scoid][$id]) ? $id : $baseid;
                 $definition = $catalogs[$scoid][$catalogid] ?? [];
+                // Older immutable label snapshots predate block grouping. Fill
+                // identity only from the exact matching catalog key, not titles.
+                if (empty($definition['blockid']) && isset($fallback[$scoid][$catalogid]['blockid'])) {
+                    $definition['blockid'] = $fallback[$scoid][$catalogid]['blockid'];
+                }
                 $type = $interaction['type'] ?? $definition['type'] ?? 'performance';
                 $definition['type'] = $type;
                 $response = $interaction['student_response'] ?? $interaction['learner_response'] ?? '';
@@ -245,7 +250,7 @@ final class timhirt_reporting {
                 $rows[] = [
                     'scoid' => $scoid, 'index' => $index, 'id' => $id, 'resolved' => !empty($definition['prompt']),
                     'legacy' => !empty($definition['legacy']), 'labelSource' => isset($snapshots[$scoid][$catalogid]) ? 'snapshot' : ($definition ? 'package' : 'unavailable'),
-                    'block' => $definition['block'] ?? '', 'type' => $type,
+                    'block' => $definition['block'] ?? '', 'blockid' => $definition['blockid'] ?? '', 'type' => $type,
                     'question' => ($definition['prompt'] ?? $id) . ($activityattempt ? ' (' . get_string('reportingactivityattempt', 'mod_seledascorm') . ' ' . $activityattempt . ')' : ''),
                     'activityAttempt' => $activityattempt,
                     'response' => self::response($response, $definition),

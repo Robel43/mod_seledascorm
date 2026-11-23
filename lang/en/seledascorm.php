@@ -811,3 +811,8 @@ $string['dashblockscore'] = 'Content block score';
 $string['learnercontents'] = 'Course contents';
 $string['learneropencontents'] = 'Open course contents';
 $string['learnerclosecontents'] = 'Close course contents';
+
+$string['dashcheckedanswers'] = 'Checked answers';
+$string['dashinteractionhistory'] = 'Interaction history (clicks and input changes)';
+$string['dashnosubmittedresults'] = 'No submitted question results recorded for this content block yet.';
+$string['dasheventdetails'] = 'Interaction details';

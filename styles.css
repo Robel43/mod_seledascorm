@@ -797,3 +797,13 @@
 .seleda-usage li { margin: .4rem 0; overflow-wrap: anywhere; }
 .seleda-usage-note { color: #536179; font-size: .9rem; margin-bottom: 0; }
 .activityiconcontainer.seledascorm img.activityicon{filter:none!important}
+
+/* Preserve full-colour icons in chooser, course listings and activity headers.
+ * Moodle uses purpose classes (content), not a .seledascorm class on the slot. */
+.activityiconcontainer.modicon_seledascorm img,
+.modtype_seledascorm .activityiconcontainer img,
+img.icon[src*="/seledascorm/"][src*="/icon"],
+img.icon[src*="/seledascorm/"][src*="/monologo"],
+img.activityicon[src*="/seledascorm/"],
+img.icon[src*="component=seledascorm"][src*="image=icon"],
+img.icon[src*="component=seledascorm"][src*="image=monologo"] { filter:none!important; object-fit:contain; }

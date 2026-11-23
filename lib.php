@@ -1223,6 +1223,11 @@ function seledascorm_pluginfile($course, $cm, $context, $filearea, $args, $force
     send_stored_file($file, $lifetime, 0, false, $options);
 }
 
+/** Preserve the supplied full-colour product icon in Moodle activity surfaces. */
+function seledascorm_is_branded(): bool {
+    return true;
+}
+
 /**
  * @uses FEATURE_GROUPS
  * @uses FEATURE_GROUPINGS

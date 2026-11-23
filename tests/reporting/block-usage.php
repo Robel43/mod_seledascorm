@@ -66,6 +66,16 @@ ensure($assessed['blocks'][0]['events'][0]['result']==='incorrect' && $assessed[
 require_once(__DIR__.'/../../classes/output/dashboard_detail.php');
 $detail=\mod_seledascorm\output\dashboard_detail::usage($assessed,[7=>'Page']);
 ensure(strpos($detail,'Incorrect')!==false && strpos($detail,'&lt;b&gt;expected&lt;/b&gt;')!==false && strpos($detail,'<script>')===false,'Assessment report unsafe or missing results');
+$questions=[
+ ['scoid'=>7,'blockid'=>'assessed','block'=>'Same title','question'=>'Question one','response'=>'First response','correct'=>'First key','result'=>'Correct'],
+ ['scoid'=>8,'blockid'=>'assessed','block'=>'Same title','question'=>'Question two','response'=>'Second response','correct'=>'Second key','result'=>'Incorrect'],
+];
+$grouped=\mod_seledascorm\output\dashboard_detail::usage($assessed,[7=>'First page',8=>'Second page'],$questions);
+$dom=new DOMDocument();@$dom->loadHTML($grouped);$xpath=new DOMXPath($dom);
+$panels=$xpath->query('//details[@class="sd-block-detail"]');
+ensure($panels->length===2,'Same block IDs on different SCOs must have independent dropdowns');
+ensure(strpos($panels->item(0)->textContent,'Question one')!==false && strpos($panels->item(0)->textContent,'Question two')===false,'Another SCO question leaked into the first dropdown');
+ensure(strpos($panels->item(1)->textContent,'Question two')!==false && strpos($panels->item(1)->textContent,'Question one')===false,'Another SCO question leaked into the second dropdown');
 $assessment['events'][0]['result']='invented';$failed=false;try { usage::save(4,9,7,5,payload($assessment)); } catch(Throwable $e) { $failed=true; }
 ensure($failed,'Unknown assessment result accepted');
 $writes=$DB->writes;

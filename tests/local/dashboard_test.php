@@ -7,6 +7,9 @@ defined('MOODLE_INTERNAL') || die();
  * @covers \mod_seledascorm\local\reporting_dashboard
  */
 final class dashboard_test extends \advanced_testcase {
+    public function test_activity_is_branded_for_moodle_icon_rendering(): void {
+        $this->assertTrue(component_callback('mod_seledascorm', 'is_branded', [], false));
+    }
     public function test_direct_entry_preserves_native_attempt_selection(): void {
         global $DB, $CFG;
         require_once($CFG->dirroot . '/mod/seledascorm/locallib.php');

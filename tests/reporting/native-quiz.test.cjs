@@ -43,6 +43,18 @@ test('existing JSON quiz exports produce readable questions, choices, retries an
         assert.equal(result.rows[1].graded,true);assert.match(result.rows[1].result,/50%/);
         assert.equal(result.blocks[0].mode,'graded');assert.equal(result.blocks[0].score,75);
         assert.match(result.html,/>Graded</);assert.match(result.html,/75%/);assert.doesNotMatch(result.html,/not graded/i);
+        const report=await browser.newPage();await report.setContent(result.usagehtml);
+        assert.equal(await report.locator('.sd-block-detail').count(),1);
+        const displayed=await report.locator('.sd-submitted-results tbody tr').allTextContents();
+        assert.equal(displayed.length,result.rows.length);
+        for(let i=0;i<result.rows.length;i++) {
+            const cells=await report.locator('.sd-submitted-results tbody tr').nth(i).locator('td').allTextContents();
+            assert.deepEqual(cells,['question','response','correct','result'].map(key=>result.rows[i][key]));
+        }
+        assert.equal(await report.locator('.sd-interaction-history').count(),1);
+        assert.match(await report.locator('.sd-interaction-history').textContent(),/Selected option.*on/s);
+        assert.doesNotMatch(await report.locator('.sd-submitted-results').textContent(),/no assessment result|Checked|Selected option/);
+        await report.close();
         // The configured mode is visible before a submission, but never invents a score.
         const pending=decode({});assert.equal(pending.blocks[0].mode,'graded');assert.equal(pending.blocks[0].score,null);
         // A saved zero is a legitimate graded result; completion/off are distinct modes.

@@ -52,24 +52,58 @@ final class dashboard_detail {
         return $titles;
     }
 
-    public static function usage(array $usage, array $pages): string {
+    public static function usage(array $usage, array $pages, array $questions = []): string {
         $html = \mod_seledascorm\local\seleda_usage::table($usage, $pages, false);
         $h = function($v) { return htmlspecialchars((string)$v, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); };
-        foreach ($usage['blocks'] as $block) {
-            if (!$block['events']) { continue; }
-            $html .= '<details><summary>' . $h(($pages[$block['scoid']] ?? '') . ' · ' . $block['title']) . '</summary><div class="sd-event-log"><table class="sd-table"><thead><tr>';
-            foreach (['eventtime','eventaction','question','eventanswer','eventexpected','eventresult'] as $key) {
-                $html .= '<th scope="col">' . $h(get_string('dash' . $key, 'mod_seledascorm')) . '</th>';
+        $label = function($key) use ($h) { return $h(get_string('dash' . $key, 'mod_seledascorm')); };
+        $results = []; $blocks = [];
+        foreach ($usage['blocks'] as $block) { $blocks[$block['scoid'] . ':' . $block['id']] = $block; }
+        foreach ($questions as $question) {
+            if (empty($question['blockid'])) { continue; }
+            $key = $question['scoid'] . ':' . $question['blockid'];
+            $results[$key][] = $question;
+            // Results remain available even if this package did not collect usage.
+            if (!isset($blocks[$key])) { $blocks[$key] = ['scoid'=>$question['scoid'], 'id'=>$question['blockid'], 'title'=>$question['block'], 'events'=>[], 'omitted'=>0]; }
+        }
+        foreach ($blocks as $key => $block) {
+            $submitted = $results[$key] ?? [];
+            $answers = array_filter($block['events'], function($event) { return $event['action'] === 'answer'; });
+            $history = array_filter($block['events'], function($event) { return $event['action'] !== 'answer'; });
+            if (!$block['events'] && !$submitted) { continue; }
+            $html .= '<details class="sd-block-detail"><summary>' . $h(($pages[$block['scoid']] ?? '') . ' · ' . $block['title']) . '</summary>';
+            if ($submitted) {
+                $html .= '<h4>' . $label('questionresults') . '</h4><div class="sd-event-log"><table class="sd-table sd-submitted-results"><thead><tr>';
+                foreach (['question','response','correctanswer','result'] as $name) { $html .= '<th scope="col">' . $label($name) . '</th>'; }
+                $html .= '</tr></thead><tbody>';
+                foreach ($submitted as $question) {
+                    $html .= '<tr>';
+                    foreach (['question','response','correct','result'] as $name) { $html .= '<td>' . $h($question[$name]) . '</td>'; }
+                    $html .= '</tr>';
+                }
+                $html .= '</tbody></table></div>';
             }
-            $html .= '</tr></thead><tbody>';
-            foreach ($block['events'] as $event) {
-                $label = preg_replace('/^(\d+)(?=[A-Za-z])/', '$1 · ', $event['label']);
-                $result = $event['action'] === 'answer' ? (['correct'=>'reportingcorrect', 'incorrect'=>'reportingincorrect', 'neutral'=>'dashrecorded'][$event['result'] ?? 'neutral'] ?? 'dashrecorded') : 'dashrecorded';
-                $html .= '<tr><td>' . ($event['visit'] ? (int)$event['visit'] . ' · +' : '+') . \mod_seledascorm\local\seleda_usage::duration((int)$event['at']) .
-                    '</td><td>' . $h(get_string('dashaction' . $event['action'], 'mod_seledascorm')) . '</td><td>' . $h($label) .
-                    '</td><td>' . $h($event['value']) . '</td><td>' . $h($event['expected'] ?? '') . '</td><td>' . $h(get_string($result, 'mod_seledascorm')) . '</td></tr>';
+            if ($answers) {
+                $html .= '<h4>' . $label('checkedanswers') . '</h4><div class="sd-event-log"><table class="sd-table"><thead><tr>';
+                foreach (['eventtime','question','eventanswer','eventexpected','eventresult'] as $name) { $html .= '<th scope="col">' . $label($name) . '</th>'; }
+                $html .= '</tr></thead><tbody>';
+                foreach ($answers as $event) {
+                    $result = ['correct'=>'reportingcorrect','incorrect'=>'reportingincorrect','neutral'=>'dashrecorded'][$event['result'] ?? 'neutral'] ?? 'dashrecorded';
+                    $html .= '<tr><td>+' . \mod_seledascorm\local\seleda_usage::duration((int)$event['at']) . '</td><td>' . $h($event['label']) . '</td><td>' . $h($event['value']) . '</td><td>' . $h($event['expected'] ?? '') . '</td><td>' . $h(get_string($result, 'mod_seledascorm')) . '</td></tr>';
+                }
+                $html .= '</tbody></table></div>';
             }
-            $html .= '</tbody></table></div>' . (!empty($block['omitted']) ? '<p>' . (int)$block['omitted'] . ' ' . $h(get_string('usageomitted','mod_seledascorm')) . '</p>' : '') . '</details>';
+            if (!$submitted && !$answers) { $html .= '<p class="sd-note">' . $label('nosubmittedresults') . '</p>'; }
+            if ($history) {
+                $html .= '<details class="sd-interaction-history"><summary>' . $label('interactionhistory') . '</summary><div class="sd-event-log"><table class="sd-table"><thead><tr>';
+                foreach (['eventtime','eventaction','eventdetails','eventanswer'] as $name) { $html .= '<th scope="col">' . $label($name) . '</th>'; }
+                $html .= '</tr></thead><tbody>';
+                foreach ($history as $event) {
+                    $html .= '<tr><td>' . ($event['visit'] ? (int)$event['visit'] . ' · +' : '+') . \mod_seledascorm\local\seleda_usage::duration((int)$event['at']) . '</td><td>' .
+                        $h(get_string('dashaction' . $event['action'], 'mod_seledascorm')) . '</td><td>' . $h($event['label']) . '</td><td>' . $h($event['value']) . '</td></tr>';
+                }
+                $html .= '</tbody></table></div></details>';
+            }
+            $html .= (!empty($block['omitted']) ? '<p>' . (int)$block['omitted'] . ' ' . $h(get_string('usageomitted','mod_seledascorm')) . '</p>' : '') . '</details>';
         }
         return $html;
     }

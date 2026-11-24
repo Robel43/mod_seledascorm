@@ -140,7 +140,7 @@ clean-editor:
 # -------------------------------------------------------
 
 PLUGIN_NAME = mod_seledascorm
-VERSION_SUFFIX ?= 13
+VERSION_SUFFIX ?= 14
 
 # Create a distributable ZIP package
 # Usage: make package RELEASE=0.0.2

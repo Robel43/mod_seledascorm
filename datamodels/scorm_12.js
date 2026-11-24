@@ -125,6 +125,20 @@ function scormAPI1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, seledasco
     }
 
     var cmi, nav;
+    var savedModels = {};
+    function refreshToc() {
+        if (String(hidetoc) === '3') return;
+        var sequence = window.seledaTocRefreshSequence = (window.seledaTocRefreshSequence || 0) + 1;
+        var url = prerequrl + '&seleda_refresh=' + sequence;
+        YUI().use('io-base', function(Y) {
+            if (sequence !== window.seledaTocRefreshSequence) return;
+            Y.io(url, {on: {success: function(id, response) {
+                if (sequence === window.seledaTocRefreshSequence && response.responseText) {
+                    M.mod_seledascorm.connectPrereqCallback.success.call(Y, id, response);
+                }
+            }}});
+        });
+    }
     function initdatamodel(scoid){
         prerequrl = cfgwwwroot + "/mod/seledascorm/prereqs.php?a=" + seledascormid + "&scoid=" + scoid + "&attempt=" + attempt + "&mode=" + viewmode + "&currentorg=" + currentorg + "&sesskey=" + sesskey;
         datamodelurlparams = "id=" + cmid + "&a=" + seledascormid + "&sesskey=" + sesskey + "&attempt=" + attempt + "&scoid=" + scoid;
@@ -158,6 +172,7 @@ function scormAPI1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, seledasco
 
         eval(cmiobj[scoid]);
         eval(cmiint[scoid]);
+        if (savedModels[scoid]) cmi = JSON.parse(JSON.stringify(savedModels[scoid]));
 
         if (cmi.core.lesson_status == '') {
             cmi.core.lesson_status = 'not attempted';
@@ -220,12 +235,7 @@ function scormAPI1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, seledasco
                     LogAPICall("LMSFinish", "result", result, 0);
                     LogAPICall("LMSFinish", param, "", 0);
                 }
-                // trigger TOC update
-                var callback = M.mod_seledascorm.connectPrereqCallback;
-                YUI().use('io-base', function(Y) {
-                    Y.on('io:complete', callback.success, Y);
-                    Y.io(prerequrl);
-                });
+                if (result === 'true') refreshToc();
                 return result;
             } else {
                 errorCode = "301";
@@ -414,17 +424,7 @@ function scormAPI1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, seledasco
         if (param == "") {
             if (Initialized) {
                 result = StoreData(cmi,false);
-                // Trigger TOC update only if TOC is displayed.
-                // Checks against setting Display course structure in player:
-                // 0 = To the side, 1 = Hidden, 2 = In a drop down menu, 3 = Disabled
-                if (hidetoc !== '3') {
-                    Y.log('Refreshing toc');
-                    var callback = M.mod_seledascorm.connectPrereqCallback;
-                    YUI().use('io-base', function(Y) {
-                        Y.on('io:complete', callback.success, Y);
-                        Y.io(prerequrl);
-                    });
-                }
+                if (result === 'true') refreshToc();
                 if (seledascormdebugging) {
                     LogAPICall("Commit", param, "", 0);
                 }
@@ -619,6 +619,7 @@ function scormAPI1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, seledasco
     }
 
     function StoreData(data,storetotaltime) {
+        var previousModel = CloneObj(datamodel[scoid]);
         var datastring = '';
         if (storetotaltime) {
             if (cmi.core.lesson_status == 'not attempted') {
@@ -648,14 +649,23 @@ function scormAPI1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, seledasco
 
         var myRequest = NewHttpReq();
         //alert('going to:' + "<?php p($CFG->wwwroot) ?>/mod/seledascorm/datamodel.php" + "id=<?php p($id) ?>&a=<?php p($a) ?>&sesskey=<?php echo sesskey() ?>"+datastring);
-        var result = DoRequest(myRequest, datamodelurl, datamodelurlparams + datastring);
+        var result;
+        try {
+            result = DoRequest(myRequest, datamodelurl, datamodelurlparams + datastring);
+        } catch (error) {
+            datamodel[scoid] = previousModel;
+            return false;
+        }
 
         if (result === false) {
+            datamodel[scoid] = previousModel;
             return false;
         }
 
         results = String(result).split('\n');
         errorCode = results[1];
+        if (results[0] === 'true') savedModels[scoid] = JSON.parse(JSON.stringify(cmi));
+        else datamodel[scoid] = previousModel;
         return results[0];
     }
 

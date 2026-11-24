@@ -32,7 +32,7 @@
 #page-mod-seledascorm-player #seledascormpage #seledascorm_toc_toggle_btn {
     width:34px; height:44px; border:0; border-radius:10px; box-shadow:0 3px 12px #17243b18;
     background-color:var(--seleda-primary,#2f6df6)!important; color:transparent;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M5 6h14M5 12h14M5 18h14'/%3E%3C/svg%3E");
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='m9 6 6 6-6 6'/%3E%3C/svg%3E");
     background-position:center; background-repeat:no-repeat; background-size:22px;
 }
 #page-mod-seledascorm-player #seledascormpage #seledascorm_toc_toggle_btn[aria-expanded="true"] {
@@ -77,3 +77,43 @@
 @media(prefers-reduced-motion:reduce) {
     #page-mod-seledascorm-player #seledascormpage #seledascorm_toc { transition:none; }
 }
+/* Chapter cards, right-side disclosure arrows and compact completion badges. */
+#page-mod-seledascorm-player #seledascormpage #seledascorm_toc { overflow-x:hidden!important; }
+#page-mod-seledascorm-player #seledascorm_tree,
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-label,
+#page-mod-seledascorm-player #seledascorm_tree a { font-family:system-ui,-apple-system,"Segoe UI",sans-serif!important; }
+#page-mod-seledascorm-player #seledascorm_tree *,
+#page-mod-seledascorm-player #seledascorm_tree *::before,
+#page-mod-seledascorm-player #seledascorm_tree *::after { box-sizing:border-box; }
+#page-mod-seledascorm-player #seledascorm_tree ul,
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-children { width:auto!important; max-width:100%; min-width:0; margin:0!important; padding:0!important; }
+#page-mod-seledascorm-player #seledascorm_tree li { min-width:0; max-width:100%; width:auto!important; margin:0; list-style:none; }
+#page-mod-seledascorm-player #seledascorm_tree li.yui3-treeview-has-children { border:1px solid #dfe5ed; border-radius:8px; margin:0 0 8px; background:#fff; overflow:hidden; }
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-row { display:grid!important; grid-template-columns:minmax(0,1fr) 32px; align-items:center; gap:4px; margin:0; border:0; border-radius:0; padding:12px 10px; background:#fff; min-width:0; width:100%; }
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-children .yui3-treeview-row { border-bottom:1px dotted #e0e5ec; }
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-has-children > .yui3-treeview-row { background:#f5f7f9; padding:12px 10px; }
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-has-children > .yui3-treeview-row .yui3-treeview-label { font-weight:650; font-size:15px; }
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-row > .yui3-treeview-icon { display:none!important; }
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-label { grid-column:1; grid-row:1; min-width:0!important; width:auto!important; margin:0!important; padding:0!important; white-space:normal!important; overflow-wrap:anywhere; text-align:left; line-height:1.6; }
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-label a { display:grid; grid-template-columns:20px minmax(0,1fr); gap:10px; align-items:start; min-width:0; max-width:100%; white-space:normal!important; overflow-wrap:anywhere; word-break:normal; text-decoration:none; }
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-label a:not(:has(.seleda-status)) { display:block; }
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-selected > .yui3-treeview-row { background:#edf3ff; box-shadow:inset 3px 0 var(--seleda-primary,#2f6df6); }
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-row > .yui3-treeview-indicator { grid-column:2; grid-row:1; position:static!important; float:none; width:32px!important; height:36px!important; display:flex!important; align-items:center; justify-content:center; cursor:pointer; margin:0!important; background:none!important; }
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-indicator s { display:none!important; }
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-has-children > .yui3-treeview-row > .yui3-treeview-indicator::after { content:""; width:10px; height:10px; border-right:2px solid #243b56; border-bottom:2px solid #243b56; transform:rotate(45deg); }
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-has-children[aria-expanded="false"] > .yui3-treeview-row > .yui3-treeview-indicator::after { transform:rotate(-45deg); }
+#page-mod-seledascorm-player #seledascorm_tree .seleda-status-source { display:none!important; }
+#page-mod-seledascorm-player #seledascorm_tree .seleda-status { position:relative!important; display:inline-block!important; top:4px!important; left:auto!important; width:16px!important; height:16px!important; margin:0!important; padding:0!important; border:1.5px solid #66758a; border-radius:4px; background:#fff!important; background-image:none!important; font-size:0!important; }
+#page-mod-seledascorm-player #seledascorm_tree .seleda-status::before { content:none!important; }
+#page-mod-seledascorm-player #seledascorm_tree .seleda-status::after { content:none!important; }
+#page-mod-seledascorm-player #seledascorm_tree .seleda-status[data-state="complete"] { border-color:#087f6b; background:#087f6b!important; }
+#page-mod-seledascorm-player #seledascorm_tree .seleda-status[data-state="complete"]::after { content:""!important; position:absolute; left:4px; top:1px; width:5px; height:9px; border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg); }
+#page-mod-seledascorm-player #seledascorm_tree .seleda-status[data-state="inprogress"] { border-color:#3b82f6; background:#eff6ff!important; }
+#page-mod-seledascorm-player #seledascorm_tree .seleda-status[data-state="inprogress"]::after { content:""!important; position:absolute; left:3px; right:3px; top:6px; height:2px; background:#2563eb; }
+#page-mod-seledascorm-player #seledascorm_tree .seleda-status[data-state="failed"] { border-color:#dc5050; background:#fff1f1!important; }
+#page-mod-seledascorm-player #seledascorm_tree .seleda-status[data-state="failed"]::after { content:""!important; position:absolute; left:6px; top:3px; width:2px; height:7px; background:#c33; }
+@media(prefers-reduced-motion:reduce) { #page-mod-seledascorm-player #seledascorm_tree * { transition:none!important; } }
+#page-mod-seledascorm-player #seledascormpage #seledascorm_tree { margin:0!important; min-width:0; max-width:100%; }
+/* Leaf pages use the full label width; only chapter headings reserve an arrow. */
+#page-mod-seledascorm-player #seledascorm_tree li:not(.yui3-treeview-has-children) > .yui3-treeview-row { grid-template-columns:minmax(0,1fr); }
+#page-mod-seledascorm-player #seledascorm_tree li:not(.yui3-treeview-has-children) > .yui3-treeview-row > .yui3-treeview-indicator { display:none!important; }

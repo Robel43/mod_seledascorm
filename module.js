@@ -956,6 +956,13 @@ M.mod_seledascorm.init = function(Y, nav_display, navposition_left, navposition_
 M.mod_seledascorm.connectPrereqCallback = {
 
     success: function(id, o) {
+        var Y = this && typeof this.one === 'function' ? this : window.Y;
+        if (!Y || !o.responseText) return;
+        var el_new_tree = document.createElement('div');
+        el_new_tree.innerHTML = o.responseText;
+        if (!el_new_tree.querySelector(':scope > ul')) return;
+        var collapsed = Array.from(document.querySelectorAll('#seledascorm_tree li[aria-expanded="false"]'))
+            .map(function(li) { var link = li.querySelector(':scope > .yui3-treeview-row a'); return link && link.getAttribute('title'); }).filter(Boolean);
         if (o.responseText !== undefined) {
             var snode = null,
                 stitle = null;
@@ -973,7 +980,6 @@ M.mod_seledascorm.connectPrereqCallback = {
             if (el_old_tree) {
                 el_old_tree.parentNode.removeChild(el_old_tree);
             }
-            var el_new_tree = document.createElement('div');
             var pagecontent = document.getElementById("page-content");
             if (!pagecontent) {
                 pagecontent = document.getElementById("content");
@@ -982,13 +988,13 @@ M.mod_seledascorm.connectPrereqCallback = {
                 pagecontent = document.getElementById("seledascormpage");
             }
             el_new_tree.setAttribute('id','seledascormtree123');
-            el_new_tree.innerHTML = o.responseText;
             // Make sure it does not show.
             el_new_tree.style.display = 'none';
             pagecontent.appendChild(el_new_tree);
             // Ignore the first level element as this is the title.
-            var startNode = el_new_tree.firstChild.firstChild;
-            if (startNode.tagName == 'LI') {
+            if (!el_new_tree.firstElementChild) { el_new_tree.remove(); return; }
+            var startNode = el_new_tree.firstElementChild.firstElementChild;
+            if (startNode && startNode.tagName == 'LI') {
                 // Go back to the beginning.
                 startNode = el_new_tree;
             }
@@ -999,11 +1005,15 @@ M.mod_seledascorm.connectPrereqCallback = {
             el.parentNode.removeChild(el);
             seledascorm_tree_node.render();
             seledascorm_tree_node.openAll();
+            collapsed.forEach(function(title) { var node = seledascorm_tree_node.getNodeByAttribute('title', title); if (node) node.close(); });
             if (stitle !== null) {
                 snode = seledascorm_tree_node.getNodeByAttribute('title', stitle);
                 // Do not let destroyed node to be selected.
                 if (snode && !snode.state.destroyed) {
                     snode.select();
+                    window.seledascorm_current_node = snode;
+                    var currentLink = document.getElementById(snode.id)?.querySelector('a');
+                    if (currentLink) { currentLink.setAttribute('aria-current', 'page'); currentLink.setAttribute('aria-selected', 'true'); }
                     var toc_disabled = Y.one('#seledascorm_toc').hasClass('disabled');
                     if (!toc_disabled) {
                         if (!snode.state.selected) {

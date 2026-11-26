@@ -147,6 +147,8 @@ $model = ['filters' => ['id' => 1, 'q' => '', 'catalogpage' => 0, 'group' => 0, 
     'activity' => (object)['name' => 'English practice'], 'coursename' => 'English 101', 'metrics' => $data,
     'rows' => array_values($data['learning']['learners']), 'filteredcount' => 3];
 $html = \mod_seledascorm\output\reporting_dashboard::render($model);
+$narrow=$model;$narrow['rows']=array_slice($model['rows'],0,1);$narrow['filteredcount']=1;
+ensure(strpos(\mod_seledascorm\output\reporting_dashboard::render($narrow),'Showing 1 of 3')!==false,'Status/search table subtitle must retain the full scope denominator');
 // Date filters use immutable visit starts, never a row's overwritten save timestamp.
 $dated = array_map(function($row) {
     $row = clone $row;

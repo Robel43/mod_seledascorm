@@ -26,7 +26,7 @@ test('actual dashboard renders safe labels, focused figures and accessible navig
     assert.equal(await page.locator('select:visible').count(), 0);
     const graphs = await page.locator('.sd-visuals svg').evaluateAll(nodes=>nodes.map(n=>({width:n.getBoundingClientRect().width,height:n.getBoundingClientRect().height,marks:n.querySelectorAll('circle,rect').length})));
     assert.ok(graphs.every(g=>g.width>100&&g.height>50&&g.marks>1),JSON.stringify(graphs));
-    assert.equal(await page.locator('.sd-completion-svg circle').count(), 4);
+    assert.equal(await page.locator('.sd-completion-svg circle').count(), 3);
     assert.equal(await page.getByRole('button', {name:'Interactions',exact:true}).count(), 0);
     assert.equal(await page.locator('.sd-table td').filter({hasText:'No score recorded'}).count(), 2);
     const analysis = page.getByRole('link', {name:'Question analysis',exact:true});

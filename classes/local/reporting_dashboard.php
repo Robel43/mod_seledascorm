@@ -8,6 +8,13 @@ defined('MOODLE_INTERNAL') || die();
 
 /** Standalone reporting with module permissions and activity-group scoping. */
 final class reporting_dashboard {
+    private static $roles = [];
+    private static function user_role($cm, int $userid): string {
+        $key=$cm->context->id . ':' . $userid;
+        if (!isset(self::$roles[$key])) self::$roles[$key]=is_siteadmin($userid) ? 'admin' :
+            (has_capability('mod/seledascorm:viewreport',$cm->context,$userid)?'staff':'learner');
+        return self::$roles[$key];
+    }
     /** Discover permitted module contexts without requiring a course page. */
     private static function capability_scope(): array {
         global $USER;
@@ -35,6 +42,13 @@ final class reporting_dashboard {
                 JOIN {context} x ON x.instanceid = cm.id AND x.contextlevel = ' . CONTEXT_MODULE . '
                 WHERE m.name = ? AND cm.deletioninprogress = 0 AND (' . $scope . ')',
             array_merge(['seledascorm'], $params));
+    }
+
+    public static function matches_role(string $role, string $filter): bool {
+        return $filter === 'all' || ($filter === 'staff' ? $role !== 'learner' : $role === 'learner');
+    }
+    public static function activities_for_filter(int $courseid = 0, int $limit = 200): array {
+        return self::catalogue('', 0, min(200, max(1, $limit)), $courseid);
     }
 
     /** Searchable, permission-filtered catalogue; no hidden activity names leak. */
@@ -129,6 +143,7 @@ final class reporting_dashboard {
     public static function overview($activity, $cm, int $group = 0, array $options = []): array {
         global $DB;
         require_capability('mod/seledascorm:viewreport', $cm->context);
+        self::$roles=[];
         [$groups, $where, $params] = self::group_scope($cm, $group);
         $params['activity'] = $activity->id;
         $namefields = \core_user\fields::get_name_fields();
@@ -163,8 +178,9 @@ final class reporting_dashboard {
             WHERE u.deleted = 0 AND u.suspended = 0' . str_replace('t.userid', 'u.id', $where),
             array_merge($enrolledparams, $params));
         foreach ($users as $id => $user) {
-            $user->dashboardstaff = is_siteadmin($id) || has_capability('mod/seledascorm:viewreport', $cm->context, $id);
-            if (empty($options['staff']) && $user->dashboardstaff) unset($users[$id]);
+            $user->dashboardrole = self::user_role($cm,(int)$id);
+            $user->dashboardstaff = $user->dashboardrole !== 'learner';
+            if (!self::matches_role($user->dashboardrole, $options['role'] ?? 'all')) unset($users[$id]);
         }
         return $users;
     }
@@ -176,13 +192,13 @@ final class reporting_dashboard {
             if (!$batch) { return []; }
             $userid = (int)$batch[0]->userid;
             if (!isset($staff[$userid])) {
-                $staff[$userid] = is_siteadmin($userid) || has_capability('mod/seledascorm:viewreport', $cm->context, $userid);
+                $staff[$userid] = self::user_role($cm,$userid);
             }
-            if (isset($options['staff']) && !$options['staff'] && $staff[$userid]) { return []; }
+            if (!self::matches_role($staff[$userid], $options['role'] ?? 'all')) { return []; }
             $restricted = !empty($options['fromts']) || !empty($options['tots']) || !empty($options['block']) || !empty($options['type']);
             $matched = !$restricted; $out = [];
             foreach ($batch as $record) {
-                $record = clone $record; $record->dashboardstaff = $staff[$userid];
+                $record = clone $record; $record->dashboardrole = $staff[$userid]; $record->dashboardstaff = $staff[$userid] !== 'learner';
                 if (strpos($record->element, 'seleda.usage.v1.') === 0) {
                     $data = json_decode($record->value, true);
                     if (!is_array($data)) { continue; }

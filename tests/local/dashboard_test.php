@@ -102,11 +102,14 @@ final class dashboard_test extends \advanced_testcase {
         $this->assertSame([(int)$one->id], array_keys($studentmetrics['learners']));
         $this->assertEmpty($metrics['blocks']);
         $this->assertSame('notstarted', $studentmetrics['learning']['learners'][$notstarted->id]['status']);
-        $this->assertSame(2, $studentmetrics['learning']['roster']);
+        $this->assertSame(3, $studentmetrics['learning']['roster']);
         $this->assertSame(1, $studentmetrics['learning']['started']);
         $this->assertArrayNotHasKey($two->id, $studentmetrics['learning']['learners']);
         $this->assertArrayNotHasKey($suspended->id, $studentmetrics['learning']['learners']);
-        $this->assertArrayNotHasKey($teacher->id, $studentmetrics['learning']['learners']);
+        $this->assertSame('staff', $studentmetrics['learning']['learners'][$teacher->id]['role']);
+        $onlylearners=reporting_dashboard::overview($allowed,$cm,0,['role'=>'learner']);
+        $this->assertArrayNotHasKey($teacher->id,$onlylearners['learning']['learners']);
+        $this->assertSame($metrics['learning']['roster'],$studentmetrics['learning']['roster']);
         $this->expectException(\moodle_exception::class);
         reporting_dashboard::detail($allowed, $cm, $two->id, 1);
     }

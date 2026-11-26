@@ -154,8 +154,8 @@ $dated = array_map(function($row) {
 }, $tracks);
 $window = dashboard::summarise(dashboard::filter_records($dated, $cm, ['fromts'=>900,'tots'=>2000,'staff'=>1]), $pages);
 ensure($window['ms'] === 18000 && $window['learners'][4]['latest'] === 1, 'Date range mixed visits or native attempt status');
-$none = iterator_to_array(dashboard::filter_records($dated, $cm, ['staff'=>0]));
-ensure(!$none, 'Staff/test attempts must be excluded when requested');
+$none = iterator_to_array(dashboard::filter_records($dated, $cm, ['role'=>'learner']));
+ensure(!$none, 'Role filter must exclude staff when learners are requested');
 $oneblock = dashboard::summarise(dashboard::filter_records($dated, $cm, ['block'=>hash('sha256','8:quiz'),'staff'=>1]), $pages);
 ensure($oneblock['ms'] === 6000 && count($oneblock['learners']) === 1, 'Chart drill-down did not restrict its block/learners');
 $unknown = dashboard::summarise(dashboard::filter_records($tracks, $cm, ['fromts'=>900,'staff'=>1]), $pages);

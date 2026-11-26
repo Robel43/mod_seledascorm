@@ -126,6 +126,18 @@ final class seleda_usage {
         return ['blocks'=>array_values($blocks), 'ms'=>array_sum(array_column($blocks, 'ms')), 'interactions'=>array_sum(array_column($blocks, 'interactions')),
             'visits'=>array_sum(array_column($blocks, 'visits')), 'available'=>(bool)$blocks];
     }
+    /** Main packaged runtime generates one 24-hex session per page load; assessment-only rows do not count. */
+    public static function page_visits(iterable $tracks): array {
+        $sessions=[];
+        foreach ($tracks as $track) {
+            if (strpos($track->element,self::PREFIX)!==0 || !preg_match('/\.([a-f0-9]{24})$/D',$track->element,$match)) continue;
+            $data=json_decode($track->value,true);
+            if (($data['v'] ?? null)!==1 || empty($data['visits'])) continue;
+            $sessions[$track->scoid][$match[1]]=true;
+        }
+        return array_map('count',$sessions);
+    }
+
     public static function duration(int $ms): string {
         $seconds = (int)floor($ms / 1000);
         return sprintf('%02d:%02d:%02d', intdiv($seconds, 3600), intdiv($seconds % 3600, 60), $seconds % 60);

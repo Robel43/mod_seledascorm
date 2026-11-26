@@ -3,7 +3,7 @@
 define('MOODLE_INTERNAL', true);
 function reporting_string($key, $value = null) { $string = []; require(__DIR__ . '/../../lang/en/seledascorm.php'); return $string[$key] ?? ($key . ($value === null || is_object($value) ? '' : $value)); }
 
-define('SELEDASCORM_GRADEHIGHEST', 0); define('SELEDASCORM_GRADEAVERAGE', 1); define('SELEDASCORM_GRADESUM', 2); define('SELEDASCORM_GRADESCOES', 3);
+define('SELEDASCORM_GRADEHIGHEST', 1); define('SELEDASCORM_GRADEAVERAGE', 2); define('SELEDASCORM_GRADESUM', 3); define('SELEDASCORM_GRADESCOES', 0);
 define('PARAM_ALPHA', 1); define('PARAM_RAW', 2); define('PARAM_INT', 3);
 define('SELEDASCORM_REPORT_ATTEMPTS_ALL_STUDENTS', 0);
 define('SELEDASCORM_REPORT_ATTEMPTS_STUDENTS_WITH', 1);
@@ -144,3 +144,6 @@ ob_start();
 ob_end_clean();
 checkoutput($overviewtable->headers, $overviewtable->rows, false);
 echo "PASS: overview HTML renderer, multi-SCO alignment, snapshots, learner/group scope and pagination\n";
+
+require_once(__DIR__.'/redesign-data-cases.php');
+redesign_data_cases();

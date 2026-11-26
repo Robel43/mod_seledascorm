@@ -138,12 +138,35 @@ final class reporting_dashboard {
                 ORDER BY t.userid, t.attempt, t.scoid, t.id', $params);
         $pages = $DB->get_records('seledascorm_scoes', ['seledascorm' => $activity->id], 'sortorder, id');
         try {
-            $result = self::summarise(self::filter_records($tracks, $cm, $options), $pages);
+            $insights = new learning_insights($pages, $activity,
+                function($sco) use ($cm, $activity) { return timhirt_reporting::packagecatalog($cm->context, $activity, $sco); },
+                !empty($options['questions']));
+            $result = self::summarise($insights->observe(self::filter_records($tracks, $cm, $options)), $pages);
         } finally {
             $tracks->close();
         }
+        // A date/block filter selects recorded attempts, not the entire enrolled class.
+        $restricted = !empty($options['fromts']) || !empty($options['tots']) || !empty($options['block']) || !empty($options['type']);
+        $result['learning'] = $insights->report($restricted ? [] : self::roster($cm, $group, $options));
+        $result['learning']['recordedonly'] = $restricted;
         $result['groups'] = $groups;
         return $result;
+    }
+
+    /** Active enrolled learners with the same report and separate-group boundaries as tracks. */
+    public static function roster($cm, int $group = 0, array $options = []): array {
+        global $DB;
+        require_capability('mod/seledascorm:viewreport', $cm->context);
+        [, $where, $params] = self::group_scope($cm, $group);
+        [$enrolledsql, $enrolledparams] = get_enrolled_sql($cm->context, 'mod/seledascorm:savetrack', 0, true);
+        $users = $DB->get_records_sql('SELECT u.* FROM {user} u JOIN (' . $enrolledsql . ') e ON e.id = u.id
+            WHERE u.deleted = 0 AND u.suspended = 0' . str_replace('t.userid', 'u.id', $where),
+            array_merge($enrolledparams, $params));
+        foreach ($users as $id => $user) {
+            $user->dashboardstaff = is_siteadmin($id) || has_capability('mod/seledascorm:viewreport', $cm->context, $id);
+            if (empty($options['staff']) && $user->dashboardstaff) unset($users[$id]);
+        }
+        return $users;
     }
 
     /** Filter immutable visit-start dates, block identity and staff without weakening group scope. */

@@ -11,23 +11,22 @@ test.before(async() => {
     browser = await chromium.launch({headless:true, ...(process.env.TIMHIRT_BROWSER_CHANNEL ? {channel:process.env.TIMHIRT_BROWSER_CHANNEL} : {})});
 });
 test.after(async() => browser?.close());
-test('actual dashboard renders safe labels, matching figures and working chart controls', async() => {
+test('actual dashboard renders safe labels, focused figures and accessible navigation', async() => {
     const page = await browser.newPage({viewport:{width:1440,height:1100}});
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
     await page.setContent(html);
     assert.equal(await page.locator('.sd-kpi').count(), 4);
-    assert.match(await page.locator('.sd-kpi').nth(2).innerText(), /00:00:20/);
+    assert.match(await page.locator('.sd-kpi').nth(3).innerText(), /00:00:20/);
     assert.equal(await page.locator('.sd-learner-name').count(), 3);
     assert.equal(await page.evaluate(() => window.injected), undefined);
     assert.equal(await page.locator('.sd-table img').count(), 0);
-    const interactions = page.getByRole('button', {name:'Interactions', exact:true});
-    await interactions.focus();
-    await page.keyboard.press('Enter');
-    assert.equal(await interactions.getAttribute('aria-pressed'), 'true');
-    assert.equal(await page.locator('#sd-block-bars .sd-bar-value').first().textContent(), '3');
-    await page.getByRole('button', {name:'Time', exact:true}).click();
-    assert.equal(await page.locator('#sd-block-bars .sd-bar-value').first().textContent(), '00:00:14');
+    assert.equal(await page.locator('.sd-status-chart').count(), 1);
+    assert.equal(await page.getByRole('button', {name:'Interactions',exact:true}).count(), 0);
+    assert.equal(await page.locator('.sd-table td').filter({hasText:'No score recorded'}).count(), 2);
+    const analysis = page.getByRole('link', {name:'Question analysis',exact:true});
+    await analysis.focus();
+    assert.match(await analysis.getAttribute('href'), /panel=questions/);
     const url = await page.locator('.sd-learner-name').last().getAttribute('href');
     assert.match(url, /learner=4/);
     assert.match(url, /attempt=2/);
@@ -45,8 +44,7 @@ test('dashboard fits smaller viewports while only the learner table scrolls hori
         const sizes = await page.evaluate(() => ({width:innerWidth,body:document.documentElement.scrollWidth,overflow:[...document.querySelectorAll("body *")].filter(e=>e.getBoundingClientRect().right>innerWidth+1).slice(0,15).map(e=>({tag:e.tagName,cls:e.className,width:e.getBoundingClientRect().width,text:e.textContent.slice(0,40)}))}));
         assert.ok(sizes.body <= sizes.width + 1, JSON.stringify(sizes));
         assert.equal(await page.locator('.sd-table').count(), 1);
-        await page.getByRole('button', {name:'Interactions', exact:true}).click();
-        assert.equal(await page.locator('#sd-block-bars .sd-bar-value').first().textContent(), '3');
+        assert.equal(await page.locator('.sd-status-chart a').count(), 5);
     }
     if (process.env.SELEDA_DASHBOARD_SCREENSHOTS) {
         await page.setViewportSize({width:375,height:900});

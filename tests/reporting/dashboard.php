@@ -9,7 +9,9 @@ require_once(__DIR__ . '/../../classes/local/reporting_dashboard.php');
 require_once(__DIR__ . '/../../classes/output/reporting_dashboard.php');
 require_once(__DIR__ . '/../../report/seleda_usage.php');
 require_once(__DIR__ . '/../../report/timhirt_reporting.php');
+require_once(__DIR__ . '/../../classes/local/learning_insights.php');
 use mod_seledascorm\local\reporting_dashboard as dashboard;
+use mod_seledascorm\local\learning_insights;
 function ensure($ok, $message) { if (!$ok) { throw new Exception($message); } }
 function fullname($user) { return $user->firstname . ' ' . $user->lastname; }
 function userdate($time) { return gmdate('Y-m-d H:i', $time); }
@@ -128,10 +130,13 @@ try { dashboard::detail((object)['id' => 9], $cm, 99, 6); throw new Exception('M
 ensure($DB->lastparams['activity'] === 9 && $DB->lastparams['learner'] === 99 && $DB->lastparams['attempt'] === 6 &&
     isset($DB->lastparams['dashgroup0']), 'Detail query lost learner, group, activity or attempt scope');
 $data['groups'] = $groups;
+$insights=new learning_insights($pages,(object)['grademethod'=>'1','maxgrade'=>100]);
+iterator_to_array($insights->observe($tracks));
+$data['learning']=$insights->report();
 $model = ['filters' => ['id' => 1, 'q' => '', 'catalogpage' => 0, 'group' => 0, 'search' => '', 'state' => '', 'page' => 0,
     'learner' => 0, 'attempt' => 0], 'catalogue' => ['items' => [(object)['id' => 1, 'name' => 'English practice', 'coursename' => 'English 101']], 'more' => false],
     'activity' => (object)['name' => 'English practice'], 'coursename' => 'English 101', 'metrics' => $data,
-    'rows' => array_values($data['learners']), 'filteredcount' => 3];
+    'rows' => array_values($data['learning']['learners']), 'filteredcount' => 3];
 $html = \mod_seledascorm\output\reporting_dashboard::render($model);
 // Date filters use immutable visit starts, never a row's overwritten save timestamp.
 $dated = array_map(function($row) {
@@ -151,12 +156,13 @@ ensure($oneblock['ms'] === 6000 && count($oneblock['learners']) === 1, 'Chart dr
 $unknown = dashboard::summarise(dashboard::filter_records($tracks, $cm, ['fromts'=>900,'staff'=>1]), $pages);
 ensure(!$unknown['tracked'], 'Undated history was assigned an invented date');
 ensure(strpos($html, '<script>window.injected') === false && strpos($html, '&lt;img') !== false, 'Stored labels execute HTML');
-ensure(strpos($html, '00:00:20') !== false && strpos($html, 'No usage data') !== false, 'Totals or missing-data state lost in UI');
+ensure(strpos($html, '00:00:20') !== false && strpos($html, 'No time recorded') !== false, 'Totals or missing-data state lost in UI');
 $empty = $model;
 $empty['metrics'] = dashboard::summarise([], $pages) + ['groups' => []];
+$empty['metrics']['learning']=(new learning_insights($pages,(object)[]))->report();
 $empty['rows'] = []; $empty['filteredcount'] = 0;
 $emptyhtml = \mod_seledascorm\output\reporting_dashboard::render($empty);
-ensure(strpos($emptyhtml, 'sd-donut is-empty') !== false && strpos($emptyhtml, 'No block-usage data yet') !== false,
+ensure(strpos($emptyhtml, '0 / 0') !== false && strpos($emptyhtml, 'No learners match') !== false,
     'An empty activity should show explicit empty states, not crash or invent failed learners');
 if (in_array('--html', $argv)) {
     echo '<!doctype html><html lang="en"><meta name="viewport" content="width=device-width, initial-scale=1"><meta charset="utf-8"><title>Seleda reports</title><style>body{font:16px system-ui;margin:0;padding:24px;background:#f7f9fd}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}' .

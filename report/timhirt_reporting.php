@@ -257,6 +257,7 @@ final class timhirt_reporting {
                     'correct' => implode(' OR ', array_map(function($value) use ($definition) { return self::response($value, $definition); }, $correct)),
                     'result' => ['correct' => get_string('reportingcorrect', 'mod_seledascorm'), 'wrong' => get_string('reportingincorrect', 'mod_seledascorm'), 'incorrect' => get_string('reportingincorrect', 'mod_seledascorm'), 'neutral' => get_string('reportingrecorded', 'mod_seledascorm'),
                         'unanticipated' => get_string('reportingunexpected', 'mod_seledascorm')][$result] ?? (is_numeric($result) ? get_string('reportingpartial', 'mod_seledascorm') . ' (' . round($credit * 100) . '%)' : $result),
+                    'credit' => $credit,
                     'weight' => $credit * (float)($interaction['weighting'] ?? 1),
                     'graded' => in_array($result, ['correct','wrong','incorrect'], true) || is_numeric($result),
                 ];

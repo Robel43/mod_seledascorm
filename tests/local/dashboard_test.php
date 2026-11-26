@@ -69,12 +69,18 @@ final class dashboard_test extends \advanced_testcase {
         $teacher = $generator->create_user();
         $one = $generator->create_user();
         $two = $generator->create_user();
+        $notstarted = $generator->create_user();
+        $suspended = $generator->create_user(['suspended'=>1]);
         $generator->enrol_user($teacher->id, $course->id, 'editingteacher');
         $generator->enrol_user($one->id, $course->id, 'student');
         $generator->enrol_user($two->id, $course->id, 'student');
+        $generator->enrol_user($notstarted->id, $course->id, 'student');
+        $generator->enrol_user($suspended->id, $course->id, 'student');
         $group = $generator->create_group(['courseid' => $course->id]);
         $generator->create_group_member(['groupid' => $group->id, 'userid' => $teacher->id]);
         $generator->create_group_member(['groupid' => $group->id, 'userid' => $one->id]);
+        $generator->create_group_member(['groupid'=>$group->id,'userid'=>$notstarted->id]);
+        $generator->create_group_member(['groupid'=>$group->id,'userid'=>$suspended->id]);
         $teacherrole = $DB->get_record('role', ['shortname' => 'editingteacher'], '*', MUST_EXIST);
         assign_capability('moodle/site:accessallgroups', CAP_PREVENT, $teacherrole->id, \context_course::instance($course->id)->id);
         $sco = $DB->get_record('seledascorm_scoes', ['seledascorm' => $activity->id, 'seledascormtype' => 'sco'], '*', IGNORE_MULTIPLE);
@@ -95,6 +101,12 @@ final class dashboard_test extends \advanced_testcase {
         $studentmetrics = reporting_dashboard::overview($allowed, $cm, 0, ['staff'=>0]);
         $this->assertSame([(int)$one->id], array_keys($studentmetrics['learners']));
         $this->assertEmpty($metrics['blocks']);
+        $this->assertSame('notstarted', $studentmetrics['learning']['learners'][$notstarted->id]['status']);
+        $this->assertSame(2, $studentmetrics['learning']['roster']);
+        $this->assertSame(1, $studentmetrics['learning']['started']);
+        $this->assertArrayNotHasKey($two->id, $studentmetrics['learning']['learners']);
+        $this->assertArrayNotHasKey($suspended->id, $studentmetrics['learning']['learners']);
+        $this->assertArrayNotHasKey($teacher->id, $studentmetrics['learning']['learners']);
         $this->expectException(\moodle_exception::class);
         reporting_dashboard::detail($allowed, $cm, $two->id, 1);
     }

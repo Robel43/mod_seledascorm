@@ -111,14 +111,14 @@ final class reporting_dashboard {
     private static function visuals(array $data, array $m): string {
         $total=$data['roster']; $radius=64; $circumference=2*M_PI*$radius; $offset=0;
         $colors=['completed'=>'#129576','inprogress'=>'#4f7df4','failed'=>'#df9148','unknown'=>'#94a3b8','notstarted'=>'#d6deeb'];
-        $h='<div class="sd-visuals"><section class="sd-card sd-completion"><h3>'.self::t('completion').'</h3><p>'.self::simple('progresshint').'</p><div class="sd-ring-layout"><svg class="sd-completion-svg" role="img" aria-labelledby="sd-ring-title" viewBox="0 0 180 180" width="180" height="180"><title id="sd-ring-title">'.self::t('completion').': '.$data['completed'].' / '.$data['started'].' '.self::simple('started').'</title><circle cx="90" cy="90" r="64" fill="none" stroke="#edf1f8" stroke-width="20"/>';
+        $h='<div class="sd-visuals"><section class="sd-card sd-completion"><h3>'.self::t('completion').'</h3><p>'.self::simple('progresshint').'</p><div class="sd-ring-layout"><svg class="sd-completion-svg" role="img" aria-labelledby="sd-ring-title" viewBox="0 0 180 180" width="180" height="180"><title id="sd-ring-title">'.self::t('completion').': '.$data['completed'].' / '.$total.'</title><circle cx="90" cy="90" r="64" fill="none" stroke="#edf1f8" stroke-width="20"/>';
         foreach ($data['statuses'] as $state=>$n) {
             if (!$n || !$total) continue;
             $length=$n/$total*$circumference;
             $h.='<circle cx="90" cy="90" r="64" fill="none" stroke="'.$colors[$state].'" stroke-width="20" stroke-dasharray="'.round($length,3).' '.round($circumference,3).'" stroke-dashoffset="'.round(-$offset,3).'" transform="rotate(-90 90 90)"/>';
             $offset+=$length;
         }
-        $h.='<text x="90" y="88" text-anchor="middle" fill="#192a46" font-size="28" font-weight="700">'.($data['started']?round($data['completed']*100/$data['started']).'%':'—').'</text><text x="90" y="110" text-anchor="middle" fill="#63748b" font-size="11">'.self::simple('completed').'</text></svg><div class="sd-status-chart">';
+        $h.='<text x="90" y="88" text-anchor="middle" fill="#192a46" font-size="28" font-weight="700">'.($total ? $data['completed'].' / '.$total : '—').'</text><text x="90" y="110" text-anchor="middle" fill="#63748b" font-size="11">'.self::simple('completed').'</text></svg><div class="sd-status-chart">';
         foreach ($data['statuses'] as $state=>$n) $h.='<a href="'.self::url($m,['state'=>$state,'page'=>0]).'#sd-learners"><span class="sd-legend-dot" style="background:'.$colors[$state].'"></span><span>'.self::status($state).'</span><strong>'.$n.' / '.$total.'</strong></a>';
         $h.='</div></div></section><section class="sd-card sd-time-chart"><h3>'.self::simple('timechart').'</h3><p>'.self::simple('timecharthint').'</p>';
         $pages=[];

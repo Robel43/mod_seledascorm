@@ -868,7 +868,7 @@ $string['simplediagnostics'] = 'Show technical details';
 $string['simplehidediagnostics'] = 'Hide technical details';
 $string['simpleblank'] = 'No answer submitted';
 
-$string['simpleprogresshint'] = 'Latest recorded progress. Select a status to see those learners.';
+$string['simpleprogresshint'] = 'All listed learners, including those not started. Select a status to see those learners.';
 $string['simpletimechart'] = 'Where learners spend time';
 $string['simpletimecharthint'] = 'Top five pages by total active time across recorded attempts. Time does not measure mastery.';
 $string['simplenotimechart'] = 'No active-time data recorded yet.';

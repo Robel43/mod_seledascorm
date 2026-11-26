@@ -25,6 +25,9 @@ ensure($d['pages'][0]['reached']===3 && $d['pages'][0]['completed']===1 && $d['p
 ensure(learning_insights::median([])===null && learning_insights::median([100,10,20])===20.0,'Median edge cases');
 $ungraded=new learning_insights($pages,(object)['grademethod'=>'0']);iterator_to_array($ungraded->observe($records));
 ensure($ungraded->report()['average']===null && $ungraded->report()['grading']==='completion','Completion-count grade advertised as assessment');
+$twoPages=$pages+[8=>(object)['title'=>'Unknown page','launch'=>'unknown.html']];
+$partialCatalog=new learning_insights($twoPages,(object)['grademethod'=>'1'],function($sco){return $sco===7?['q'=>['tracking'=>['mode'=>'completion']]]:[];});
+ensure($partialCatalog->report()['grading']==='unknown','A missing page catalogue must not declare the entire activity ungraded');
 $records=[];
 // Same revision across native retries and Moodle attempts: only first assessed submission counts.
 $catalog=['question-r1'=>['prompt'=>'What is 2 + 2?','type'=>'choice','block'=>'Quiz','blockid'=>'quiz','options'=>['a'=>'4','b'=>'3'],'tracking'=>['mode'=>'graded']]];

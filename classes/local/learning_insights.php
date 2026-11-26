@@ -111,7 +111,10 @@ final class learning_insights {
         foreach ($this->people as $person) { foreach ($person['attempts'] as $a) { if ($a['score'] !== null) { $mode = 'graded'; break 2; } } }
         if ($mode === 'unknown' && $this->loader) {
             $known = 0; $unknown = 0;
-            foreach (array_keys($this->pages) as $sco) { foreach ($this->catalog($sco) as $def) {
+            foreach (array_keys($this->pages) as $sco) {
+                $catalog = $this->catalog($sco);
+                if (!$catalog) $unknown++;
+                foreach ($catalog as $def) {
                 if (!is_array($def)) { continue; } $m = $def['tracking']['mode'] ?? null;
                 if ($m === 'graded') { $mode='graded'; break 2; }
                 if (in_array($m,['off','completion'],true)) $known++; else $unknown++;

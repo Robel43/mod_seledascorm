@@ -88,7 +88,7 @@ final class report_view {
             foreach ($universe as $key=>$meta) {
                 $b=$blocks[$key]??null;$savedstate=$saved[$key]??[];
                 $active=$b && ($b['visits']>0 || $b['ms']>0 || $b['interactions']>0);
-                $rows[]=$meta+['mode'=>$savedstate['mode']??'unknown','ms'=>$active?$b['ms']:null,
+                $rows[]=$meta+['mode'=>$savedstate['mode']??'unknown','ms'=>$b && ($b['visits']>0 || $b['ms']>0)?$b['ms']:null,
                     'interactions'=>$active?$b['interactions']:null,'score'=>$person['grading']==='completion'?null:($savedstate['score']??null),
                     'state'=>!$active?'noactivity':(($savedstate['completed']??null)===true?'completed':'inprogress')];
             }

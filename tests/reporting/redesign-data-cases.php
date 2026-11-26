@@ -38,5 +38,9 @@ function redesign_data_cases(): void {
     verify($answers[0]['question']===null && $answers[0]['response']==='raw answer' && $answers[0]['credit']===null,'Legacy/ungraded answers were discarded or graded');
     $blocks=\mod_seledascorm\local\timhirt_reporting::blocks('<article id="empty" class="idevice_node" data-idevice-type="text"></article>');
     verify(isset($blocks['empty']) && $blocks['empty']['type']==='text','Unvisited block universe missing');
+    $assessmentOnly=\mod_seledascorm\local\report_view::learner_pages($p,1,$pages,[],['blocks'=>[
+        ['scoid'=>7,'id'=>'response','title'=>'Response','type'=>'text','ms'=>0,'visits'=>0,'interactions'=>1]
+    ]],[]);
+    verify($assessmentOnly[0]['blocks'][0]['ms']===null && $assessmentOnly[0]['blocks'][0]['interactions']===1,'An assessment-only event must not invent a measured time of zero');
 
 }

@@ -27,6 +27,9 @@ jobs:
           php -l classes/local/reporting_dashboard.php
           php -l classes/local/learning_insights.php
           php -l classes/local/presentation_assets.php
+          php -l classes/local/report_view.php
+          php -l classes/local/learner_report.php
+          php -l classes/local/report_export.php
           php -l classes/output/reporting_dashboard.php
           php -l classes/hook_callbacks.php
           php -l db/hooks.php

@@ -83,7 +83,7 @@ final class learning_insights {
             $passed = $passed || in_array('passed',$status,true);
             $known = $known || (bool)$status;
         }
-        $attempt['status']=$this->pages && $complete===count($this->pages)?'completed':(!$known && !$coverage && !$attempt['reached']?'unknown':'inprogress');
+        $attempt['status']=$this->pages && $complete===count($this->pages)?'completed':(!$known && !$coverage?'unknown':'inprogress');
         $attempt['result']=$failed?'failed':($passed?'passed':null);
         $attempt['completedpages']=$complete; $attempt['pagescompleted']=$complete;
         $attempt['pagesinprogress']=count(array_filter($states,function($v){return in_array($v,['inprogress','failed'],true);}));
@@ -169,6 +169,8 @@ final class learning_insights {
         return ['learners'=>$people,'statuses'=>$statuses,'started'=>count($this->people),'roster'=>count($people),'completed'=>$statuses['completed'],
             'average'=>$percents?array_sum($percents)/count($percents):null,'scored'=>count($percents),'median'=>self::median($times),'timed'=>count($times),
             'improvement'=>$improvements?array_sum($improvements)/count($improvements):null,'paired'=>count($improvements),'grading'=>$mode,
+            'attentionfailed'=>count(array_filter($people,function($p){return $p['result']==='failed';})),
+            'attentionidle'=>count(array_filter($people,function($p){return $p['needsattention'] && $p['result']!=='failed';})),
             'needsattention'=>count(array_filter($people,function($p){return $p['needsattention'];})), 'uniquepeople'=>count($people),'readable'=>count(array_filter($people,function($p){return !empty($p['answersknown']);})), 'scoreBins'=>report_view::score_bins($people),'maximum'=>(float)($this->activity->maxgrade??100),'questions'=>$questions,'pages'=>array_values($pagecounts)];
     }
 }

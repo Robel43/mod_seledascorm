@@ -5,9 +5,12 @@ Run with PHP 8.1+ (mbstring enabled) and Node.js 22+ from the plugin root:
 ```sh
 php tests/reporting/readable-reporting.php
 php tests/reporting/block-usage.php
+php tests/reporting/dashboard.php
+php tests/reporting/learning-insights.php
 php tests/reporting/overview-reporting.php
 php tests/reporting/overview-reporting.php --csv
 node --test tests/reporting/*.test.cjs
+php tests/reporting/reporting-performance.php
 ```
 
 These execute the plugin's actual PHP report renderer, persistence helper, HTTP
@@ -22,3 +25,26 @@ These checks complement Moodle's native PHPUnit/privacy tests; they do not repla
 an end-to-end run in the site's Moodle version and database. Verify a fresh Studio
 SCORM 1.2 export with two learners, multiple blocks/pages and separate attempts;
 check both the Interactions overview and the individual attempt report.
+
+## Redesign checks
+
+`overview-reporting.php` also executes `redesign-data-cases.php`: roles, separate
+completion/result fields, missing values, visits, completion-based grading,
+score bins, sample suppression, attempt comparisons and safe CSV columns.
+`redesign-ui.test.cjs` exercises summary-before-pages-before-tabs, unvisited
+pages, keyboard expanders, all Content/Insights panels, and JavaScript-disabled
+filters and layout. `presentation-cache.test.cjs` tests actual HTTP stylesheet
+caching with a previously cached old stylesheet.
+
+The performance command reports five-run medians over an in-memory iterable:
+50 people × 5 pages × 10 questions per activity. It deliberately excludes database,
+network and managed-file I/O. The language fixture now caches strings once, as
+Moodle does, rather than repeatedly reading the language file inside the benchmark.
+
+For native Moodle 4.5/MariaDB PHPUnit:
+
+```sh
+vendor/bin/phpunit mod/seledascorm/tests/local/dashboard_test.php
+```
+
+The existing `Seleda reporting checks` workflow runs the native integration test.

@@ -110,8 +110,42 @@ final class dashboard_test extends \advanced_testcase {
         $onlylearners=reporting_dashboard::overview($allowed,$cm,0,['role'=>'learner']);
         $this->assertArrayNotHasKey($teacher->id,$onlylearners['learning']['learners']);
         $this->assertSame($metrics['learning']['roster'],$studentmetrics['learning']['roster']);
+        $nogroup=$generator->create_user();$generator->enrol_user($nogroup->id,$course->id,'editingteacher');
+        $this->setUser($nogroup);
+        $this->assertEmpty(reporting_dashboard::overview($allowed,$cm)['learning']['learners']);
+        $this->setAdminUser();
+        $all=reporting_dashboard::overview($allowed,$cm);
+        $this->assertArrayHasKey($two->id,$all['learning']['learners']);
+        $this->setUser($teacher);
         $this->expectException(\moodle_exception::class);
         reporting_dashboard::detail($allowed, $cm, $two->id, 1);
+    }
+
+    public function test_roles_audit_event_and_real_zero_are_preserved(): void {
+        global $DB;
+        $this->resetAfterTest(true);$this->setAdminUser();$g=$this->getDataGenerator();
+        $course=$g->create_course();$activity=$g->create_module('seledascorm',['course'=>$course->id,'grademethod'=>1]);
+        $student=$g->create_user();$teacher=$g->create_user();
+        $g->enrol_user($student->id,$course->id,'student');$g->enrol_user($teacher->id,$course->id,'editingteacher');
+        $sco=$DB->get_record('seledascorm_scoes',['seledascorm'=>$activity->id,'seledascormtype'=>'sco'],'*',IGNORE_MULTIPLE);
+        foreach([$student,get_admin()]as $user)foreach(['cmi.core.lesson_status'=>'failed','cmi.core.score.raw'=>'0']as $element=>$value)
+            $DB->insert_record('seledascorm_scoes_track',(object)['userid'=>$user->id,'seledascormid'=>$activity->id,'scoid'=>$sco->id,'attempt'=>1,'element'=>$element,'value'=>$value,'timemodified'=>time()]);
+        [$allowed,$cm]=reporting_dashboard::activity($activity->cmid);$m=reporting_dashboard::overview($allowed,$cm,0,['staff'=>0]);
+        $people=$m['learning']['learners'];
+        $this->assertSame('admin',$people[get_admin()->id]['role']);
+        $this->assertSame('staff',$people[$teacher->id]['role']);
+        $this->assertSame('learner',$people[$student->id]['role']);
+        $this->assertSame('inprogress',$people[$student->id]['status']);
+        $this->assertSame('failed',$people[$student->id]['result']);
+        $this->assertSame(0.0,$people[$student->id]['score']);
+        $sink=$this->redirectEvents();
+        $detail=learner_report::build($allowed,$cm,$people[$student->id],1,$m['pages'],0,'answers');
+        $events=$sink->get_events();$this->assertCount(1,$events);
+        $this->assertInstanceOf(\mod_seledascorm\event\user_report_viewed::class,$events[0]);
+        $this->assertEquals($student->id,$events[0]->relateduserid);
+        $this->assertCount(count(array_filter($m['pages'],function($p){return !empty($p->launch)&&$p->seledascormtype==='sco';})),$detail['pages']);
+        $this->setUser($student);$this->expectException(\required_capability_exception::class);
+        learner_report::build($allowed,$cm,$people[$student->id],1,$m['pages'],0,'answers');
     }
 
     public function test_student_cannot_select_an_activity_directly(): void {

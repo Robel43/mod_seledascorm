@@ -17,7 +17,7 @@ $add(3,1,'cmi.core.lesson_status','incomplete');$add(3,1,'cmi.core.score.raw','0
 $add(3,1,'seleda.usage.v1.c',json_encode(['v'=>1,'id'=>'c','title'=>'Text','type'=>'text','ms'=>10000,'visits'=>1]));
 $calc=new learning_insights($pages,(object)['grademethod'=>'1','maxgrade'=>100]);iterator_to_array($calc->observe($records));
 $d=$calc->report([4=>(object)['firstname'=>'Enrolled','lastname'=>'No access']]);
-ensure($d['started']===3 && $d['roster']===4 && $d['statuses']['notstarted']===1 && $d['statuses']['inprogress']===2,'Access, enrolment and missing progress conflated');
+ensure($d['started']===3 && $d['roster']===4 && $d['statuses']['notstarted']===1 && $d['statuses']['unknown']===1,'Access, enrolment and missing progress conflated');
 ensure($d['scored']===2 && $d['average']===40.0 && $d['learners'][3]['score']===0.0 && $d['learners'][2]['score']===null,'Missing score treated as zero or true zero excluded');
 ensure($d['median']===20000.0 && $d['timed']===2 && $d['learners'][2]['ms']===null,'Typical time must be median of known learner totals');
 $rosterModel=$model;$rosterModel['metrics']['learning']=$d;

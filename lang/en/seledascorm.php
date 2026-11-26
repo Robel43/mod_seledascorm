@@ -939,7 +939,7 @@ $string['rptquestion'] = 'Question';
 $string['rptaccuracy'] = 'First-submission accuracy';
 $string['rptanswered'] = 'Answered';
 $string['rptcommonwrong'] = 'Common wrong answers';
-$string['rptnoquestions'] = 'No readable assessed answers recorded yet';
+$string['rptnoquestions'] = 'No readable assessed answers recorded yet. Ask users to submit an activity, or check package tracking.';
 $string['rptshowing'] = 'Showing {$a->shown} of {$a->total}';
 $string['rptname'] = 'Name';
 $string['rptprogress'] = 'Progress';
@@ -1020,3 +1020,17 @@ $string['rptcoveragenote'] = 'Low coverage means the other numbers describe only
 $string['rptrecordedtime'] = 'Recorded time';
 $string['rptrecordedscore'] = 'Recorded score';
 $string['rptreadableanswers'] = 'Readable answers';
+
+$string['rptpagestotal'] = 'Total pages';
+$string['rptaccesspeople'] = 'People with access';
+$string['rptscoredpeople'] = 'Scored people';
+$string['rpttimedpeople'] = 'People with recorded time';
+$string['rptpairedpeople'] = 'People with comparable scored attempts';
+$string['rptupdated'] = 'Updated {$a}';
+$string['rptunknownnote'] = 'No recorded progress means the package saved no status or usage. It does not prove the person never opened it.';
+$string['rptanswerlimit'] = 'Saved answer text may be shortened by the package or tracking limits. Older records do not identify which answers were shortened.';
+$string['rptsortnote'] = 'Select a column heading to change the sort order.';
+
+$string['rptpagination'] = 'Report pages';
+
+$string['rptattentionbreakdown'] = '{$a->failed} failed, {$a->idle} inactive';

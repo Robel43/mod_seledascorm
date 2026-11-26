@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## Unreleased: progress-first reporting redesign
+
+- Include staff and admins within the existing module/course/group scope, with role filters.
+- Add visible filters, five scope-based KPI cards, page progress and sortable learner rows.
+- Lead learner reports with progress, all pages and time; add blocks, answer history and server-rendered tabs.
+- Add ten-activity Insights, distinct people/participations, score bins, coverage and small-sample suppression.
+- Preserve completion-count grading, real zeroes, missing values, CSV safety and audit personal-report access.
+- Cache package metadata by content hash and verify packaged page-session and single-block timer behaviour.
+
+
 ## Unreleased: standalone reporting dashboard
 
 - Add Seleda reports to Moodle's main navigation outside course and activity pages.

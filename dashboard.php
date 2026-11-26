@@ -69,20 +69,14 @@ if ($filters['id'] && $filters['view'] === 'teacher') {
     // Keys are hashes for links; resolve package IDs to the same hash namespace.
     foreach ($titles as $key => $title) { foreach ($metrics['blocks'] as &$block) { if (!empty($block['generic']) && $block['key'] === hash('sha256', $key)) { $block['title'] = $title['title']; } } unset($block); }
     $model['metrics'] = $metrics;
+    $model['updated']=$metrics['learning']['learners']?max(array_column($metrics['learning']['learners'],'last')):null;
+    foreach ($metrics['blocks'] as $block) if ($block['key']===$filters['block']) $model['blocktitle']=$block['title'];
     $matching = report_view::table($metrics['learning']['learners'],$filters);
     if ($download === 'csv') {
         require_once($CFG->libdir . '/csvlib.class.php');
         $csv = new csv_export_writer();
         $csv->set_filename('seleda-dashboard-' . $activity->id);
-        $csv->add_data(array_map(function($key) { return get_string('dash' . $key, 'mod_seledascorm'); },
-            ['activity', 'course', 'learner', 'status', 'attempts', 'score', 'activetime', 'lastaccess']));
-        foreach ($matching as $learner) {
-            $csv->add_data(array_map([timhirt_reporting::class, 'exportcell'], [
-                $activity->name, $course->fullname, $learner['name'], get_string(in_array($learner['status'], ['unknown','notstarted']) ? 'simple' . $learner['status'] : 'dash' . $learner['status'], 'mod_seledascorm'),
-                $learner['attemptcount'], $learner['score'] === null ? '' : $learner['score'],
-                $learner['ms'] !== null ? seleda_usage::duration($learner['ms']) : '', $learner['last'] ? userdate($learner['last']) : '',
-            ]));
-        }
+        foreach (\mod_seledascorm\local\report_export::people($matching,$activity->name,$course->fullname) as $row) $csv->add_data($row);
         $csv->download_file();
         exit;
     }
@@ -98,28 +92,7 @@ if ($filters['id'] && $filters['view'] === 'teacher') {
             throw new moodle_exception('nopermissiontoshow');
         }
         $model['filters']['attempt'] = $attempt;
-        $tracks = service::detail($activity, $cm, $learner['id'], $attempt, $filters['group']);
-        $pages = array_map(function($p) { return $p->title; }, $metrics['pages']);
-        $catalogues = [];
-        foreach ($tracks as $track) {
-            if (!array_key_exists($track->scoid, $catalogues)) {
-                $catalogues[$track->scoid] = timhirt_reporting::packagecatalog($cm->context, $activity, (int)$track->scoid);
-            }
-        }
-        $usage=seleda_usage::summary($tracks);
-        $blockmeta=\mod_seledascorm\output\dashboard_detail::titles($cm->context,$metrics['pages']);
-        $questions=report_view::answers($tracks,$catalogues,$pages);
-        $blockstates=timhirt_reporting::blockstates($tracks,$catalogues);
-        $pageitems=report_view::learner_pages($learner,$attempt,$metrics['pages'],$blockmeta,$usage,$blockstates);
-        $grade=$learner['attempts'][$attempt]['score'];
-        $event=\mod_seledascorm\event\user_report_viewed::create(['context'=>$cm->context,'relateduserid'=>$learner['id'],
-            'other'=>['attemptid'=>$attempt,'instanceid'=>$activity->id]]);
-        $event->trigger();
-        $model['detail']=['person'=>$learner,'selected'=>$learner['attempts'][$attempt], 'attempt'=>$attempt,
-            'pages'=>$pageitems,'questions'=>$questions,'history'=>report_view::attempts($learner['attempts']),
-            'usagehtml'=>$filters['tab']==='technical' || $filters['diagnostics'] ?
-                \mod_seledascorm\output\dashboard_detail::tracking($blockstates,$pages) .
-                \mod_seledascorm\output\dashboard_detail::usage($usage,$pages,timhirt_reporting::rows($tracks,$catalogues)) : ''];
+        $model['detail']=\mod_seledascorm\local\learner_report::build($activity,$cm,$learner,$attempt,$metrics['pages'],$filters['group'],$filters['tab'],(bool)$filters['diagnostics']);
         if ($filters['diagnostics']) $model['filters']['tab']='technical';
 
     }
@@ -141,18 +114,19 @@ if ($filters['view'] === 'analytics') {
     if ($download === 'csv') {
         require_once($CFG->libdir . '/csvlib.class.php');
         $csv = new csv_export_writer(); $csv->set_filename('seleda-activity-comparison');
-        $csv->add_data(array_map(function($key) { return get_string('simple'.$key, 'mod_seledascorm'); },
-            ['activity','course','started','completed','average','scored','typical','timed','improvement','paired']));
-        foreach ($model['comparisons'] as $item) {
-            $d=$item['data'];
-            $csv->add_data(array_map([timhirt_reporting::class,'exportcell'], [$item['name'],$item['course'],$d['started'],$d['completed'],
-                $d['average'] === null ? '' : round($d['average'],1),$d['scored'],$d['median'] === null ? '' : seleda_usage::duration($d['median']),
-                $d['timed'],$d['improvement'] === null ? '' : round($d['improvement'],1),$d['paired']]));
-        }
+        foreach (\mod_seledascorm\local\report_export::insights($model['comparisons'],$model['insights']) as $row) $csv->add_data($row);
         $csv->download_file(); exit;
     }
 }
 $model['catalogue'] = service::activities_for_filter($filters['course'],200);
+if (!$filters['id'] && $filters['view']==='teacher') {
+    $model['quickcounts']=[];
+    foreach (array_slice($model['catalogue']['items'],0,6) as $item) {
+        [$quickactivity,$quickcm]=service::activity($item->id);
+        $quick=service::overview($quickactivity,$quickcm,0,array_merge($options,['questions'=>false]));
+        $model['quickcounts'][$item->id]=$quick['learning']['started'];
+    }
+}
 $model['courses'] = [];
 foreach (service::catalogue('', 0, PHP_INT_MAX)['items'] as $item) { $model['courses'][$item->course] = $item->coursename; }
 $PAGE->set_url(new moodle_url('/mod/seledascorm/dashboard.php', $model['filters']));

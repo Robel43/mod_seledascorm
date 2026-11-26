@@ -28,5 +28,15 @@ function redesign_data_cases(): void {
     verify($cross['unique']===2&&$cross['participations']===4,'People confused with participations');
     $history=\mod_seledascorm\local\report_view::attempts([1=>['score'=>0,'percent'=>0,'ms'=>100,'timeknown'=>true],2=>['score'=>50,'percent'=>50,'ms'=>20,'timeknown'=>true]]);
     verify($history['best']===50&&$history['change']===50&&$history['extratime']===20,'Attempt summary missing real zero');
-    verify(\mod_seledascorm\local\report_view::attempts([1=>$a])['change']===null,'Single attempt invented improvement');
+    verify(\mod_seledascorm\local\report_view::attempts([1=>$a])['change']===null,'Single attempt invented improvement');    require_once(__DIR__.'/../../classes/local/report_export.php');
+    $csv=\mod_seledascorm\local\report_export::people($d['learners'],'=Unsafe','Course');
+    verify(in_array(get_string('rptrole','mod_seledascorm'),$csv[0]) && in_array(get_string('rptresult','mod_seledascorm'),$csv[0]),'CSV new columns missing');
+    verify($csv[1][0]==="'=Unsafe" && in_array('—',$csv[2],true),'CSV formula protection or null marker missing');
+    verify($csv[1][8]==='0','CSV lost a real zero');
+    $native=[];foreach(['id'=>'old-question','type'=>'choice','student_response'=>'raw answer','result'=>'neutral']as $key=>$value)$native[]=$make(1,1,7,'cmi.interactions_0.'.$key,$value);
+    $answers=\mod_seledascorm\local\report_view::answers($native,[],[7=>'Page']);
+    verify($answers[0]['question']===null && $answers[0]['response']==='raw answer' && $answers[0]['credit']===null,'Legacy/ungraded answers were discarded or graded');
+    $blocks=\mod_seledascorm\local\timhirt_reporting::blocks('<article id="empty" class="idevice_node" data-idevice-type="text"></article>');
+    verify(isset($blocks['empty']) && $blocks['empty']['type']==='text','Unvisited block universe missing');
+
 }

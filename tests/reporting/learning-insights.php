@@ -22,7 +22,7 @@ ensure($d['scored']===2 && $d['average']===40.0 && $d['learners'][3]['score']===
 ensure($d['median']===20000.0 && $d['timed']===2 && $d['learners'][2]['ms']===null,'Typical time must be median of known learner totals');
 $rosterModel=$model;$rosterModel['metrics']['learning']=$d;
 $rosterHtml=\mod_seledascorm\output\reporting_dashboard::render($rosterModel);
-ensure(strpos($rosterHtml,'>1 / 4</text>')!==false,'Completion ring must show the same all-learner denominator as its segments');
+ensure(strpos($rosterHtml,'1 of 4 people')!==false && strpos($rosterHtml,'25%')!==false,'Completion KPI must use the full roster denominator');
 ensure($d['paired']===1 && $d['improvement']===80.0,'Retry improvement lost first score of zero');
 ensure($d['pages'][0]['reached']===3 && $d['pages'][0]['completed']===1 && $d['pages'][0]['unfinished']===2 && $d['pages'][0]['unknown']===0,'Unknown completion incorrectly treated as unfinished');
 ensure(learning_insights::median([])===null && learning_insights::median([100,10,20])===20.0,'Median edge cases');

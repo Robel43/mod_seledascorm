@@ -20,9 +20,9 @@ test('upgraded report and sidebar bypass a previously cached stylesheet and surv
   const page=await browser.newPage({viewport:{width:1400,height:900}}),base='http://127.0.0.1:'+server.address().port;
   await page.goto(base+'/warm');await page.goto(base+'/report');
   assert.equal(await page.locator('.sd-tabs').first().evaluate(e=>getComputedStyle(e).display),'flex');
-  assert.equal(await page.locator('.sd-visuals svg').count(),2);
-  assert.equal(await page.locator('.sd-status-chart').evaluate(e=>getComputedStyle(e).display),'grid');
-  assert.equal(await page.locator('select:visible').count(),0);
+  assert.equal(await page.locator('.sd-page-bar svg').count(),2);
+  assert.equal(await page.locator('.sd-kpis').evaluate(e=>getComputedStyle(e).display),'grid');
+  assert.equal(await page.locator('.sd-filter-bar select:visible').count(),5);
   await page.goto(base+'/sidebar');
   assert.equal(await page.locator('.yui3-treeview-icon').evaluate(e=>getComputedStyle(e).display),'none');
   const positions=await page.locator('.yui3-treeview-row').evaluate(e=>({arrow:e.querySelector('.yui3-treeview-indicator').getBoundingClientRect().x,label:e.querySelector('.yui3-treeview-label').getBoundingClientRect().right}));

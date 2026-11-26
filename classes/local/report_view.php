@@ -33,7 +33,7 @@ final class report_view {
     public static function table(array $people, array $filters): array {
         $rows=array_values(array_filter($people,function($p) use($filters) {
             $state=$filters['state'] ?? '';
-            return (!$state || ($state==='attention' ? $p['needsattention'] : $p['status']===$state)) &&
+            return (!$state || ($state==='attention' ? $p['needsattention'] : ($state==='failed' ? $p['result']==='failed' : $p['status']===$state))) &&
                 (empty($filters['search']) || mb_stripos($p['name'],$filters['search'],0,'UTF-8')!==false);
         }));
         $key=['name'=>'name','status'=>'status','progress'=>'progress','score'=>'score','time'=>'ms','attempts'=>'attemptcount','last'=>'last'][$filters['sort'] ?? 'last'];

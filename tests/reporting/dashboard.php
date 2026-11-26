@@ -15,12 +15,16 @@ use mod_seledascorm\local\learning_insights;
 function ensure($ok, $message) { if (!$ok) { throw new Exception($message); } }
 function fullname($user) { return $user->firstname . ' ' . $user->lastname; }
 function userdate($time) { return gmdate('Y-m-d H:i', $time); }
-function get_string($key, $component = null) {
-    $string = [];
-    require(__DIR__ . '/../../lang/en/seledascorm.php');
-    if (!isset($string[$key])) { throw new Exception('Missing language string ' . $key); }
-    return $string[$key];
+function get_string($key, $component = null, $a = null) {
+    static $strings = null;
+    if ($strings === null) { $string=[]; require(__DIR__.'/../../lang/en/seledascorm.php'); $strings=$string; }
+    if (!isset($strings[$key])) throw new Exception('Missing language string '.$key);
+    $text=$strings[$key];
+    if (is_scalar($a)) $text=str_replace('{$a}',(string)$a,$text);
+    if (is_object($a) || is_array($a)) foreach((array)$a as $name=>$value) $text=str_replace('{$a->'.$name.'}',(string)$value,$text);
+    return $text;
 }
+
 class moodle_url {
     private $url;
     function __construct($url, $params = []) { $this->url = $url . '?' . http_build_query($params); }
@@ -139,7 +143,7 @@ $insights=new learning_insights($pages,(object)['grademethod'=>'1','maxgrade'=>1
 iterator_to_array($insights->observe($tracks));
 $data['learning']=$insights->report();
 $model = ['filters' => ['id' => 1, 'q' => '', 'catalogpage' => 0, 'group' => 0, 'search' => '', 'state' => '', 'page' => 0,
-    'learner' => 0, 'attempt' => 0], 'catalogue' => ['items' => [(object)['id' => 1, 'name' => 'English practice', 'coursename' => 'English 101']], 'more' => false],
+    'learner' => 0, 'attempt' => 0], 'catalogue' => ['items' => [(object)['id' => 1, 'name' => 'English practice', 'course'=>1, 'coursename' => 'English 101']], 'more' => false],
     'activity' => (object)['name' => 'English practice'], 'coursename' => 'English 101', 'metrics' => $data,
     'rows' => array_values($data['learning']['learners']), 'filteredcount' => 3];
 $html = \mod_seledascorm\output\reporting_dashboard::render($model);
@@ -161,13 +165,13 @@ ensure($oneblock['ms'] === 6000 && count($oneblock['learners']) === 1, 'Chart dr
 $unknown = dashboard::summarise(dashboard::filter_records($tracks, $cm, ['fromts'=>900,'staff'=>1]), $pages);
 ensure(!$unknown['tracked'], 'Undated history was assigned an invented date');
 ensure(strpos($html, '<script>window.injected') === false && strpos($html, '&lt;img') !== false, 'Stored labels execute HTML');
-ensure(strpos($html, '00:00:20') !== false && strpos($html, 'No time recorded') !== false, 'Totals or missing-data state lost in UI');
+ensure(strpos($html, '00:00:20') !== false && strpos($html, '—') !== false, 'Totals or missing-data state lost in UI');
 $empty = $model;
 $empty['metrics'] = dashboard::summarise([], $pages) + ['groups' => []];
 $empty['metrics']['learning']=(new learning_insights($pages,(object)[]))->report();
 $empty['rows'] = []; $empty['filteredcount'] = 0;
 $emptyhtml = \mod_seledascorm\output\reporting_dashboard::render($empty);
-ensure(strpos($emptyhtml, '0 / 0') !== false && strpos($emptyhtml, 'No learners match') !== false,
+ensure(strpos($emptyhtml, '0 of 0') !== false && strpos($emptyhtml, 'No people match') !== false,
     'An empty activity should show explicit empty states, not crash or invent failed learners');
 if (in_array('--html', $argv)) {
     echo '<!doctype html><html lang="en"><meta name="viewport" content="width=device-width, initial-scale=1"><meta charset="utf-8"><title>Seleda reports</title><style>body{font:16px system-ui;margin:0;padding:24px;background:#f7f9fd}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}' .

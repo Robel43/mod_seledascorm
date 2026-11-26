@@ -1,5 +1,11 @@
-// All report navigation and figures work without JavaScript.
+// Progressive enhancement only: all filters and report links work without JavaScript.
 export const init = () => {
-    const sidebar = document.querySelector('.sd-catalogue details');
-    if (sidebar && matchMedia('(max-width:700px)').matches) sidebar.open = false;
+    document.querySelectorAll('[data-rpt-submit]').forEach(field => {
+        field.addEventListener('change', () => {
+            if (field.dataset.rptSubmit === 'course') field.form.elements.id.value = '0';
+            const group = field.form.elements.group;
+            if (group) group.value = '0';
+            field.form.requestSubmit();
+        });
+    });
 };

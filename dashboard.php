@@ -9,6 +9,7 @@ require_once($CFG->dirroot . '/mod/seledascorm/report/seleda_usage.php');
 
 use mod_seledascorm\local\reporting_dashboard as service;
 use mod_seledascorm\local\seleda_usage;
+use mod_seledascorm\local\report_view;
 use mod_seledascorm\local\timhirt_reporting;
 
 require_login();
@@ -16,6 +17,10 @@ if (isguestuser()) {
     throw new required_capability_exception(context_system::instance(), 'mod/seledascorm:viewreport', 'nopermissions', '');
 }
 $filters = [
+    'role' => optional_param('role', 'all', PARAM_ALPHA),
+    'sort' => optional_param('sort', 'last', PARAM_ALPHA),
+    'dir' => optional_param('dir', 'desc', PARAM_ALPHA),
+    'tab' => optional_param('tab', 'answers', PARAM_ALPHA),
     'view' => optional_param('view', 'teacher', PARAM_ALPHA),
     'panel' => optional_param('panel', 'overview', PARAM_ALPHA),
     'diagnostics' => optional_param('diagnostics', 0, PARAM_BOOL),
@@ -36,8 +41,13 @@ $filters = [
     'attempt' => max(0, optional_param('attempt', 0, PARAM_INT)),
 ];
 if (!in_array($filters['view'], ['teacher','analytics'], true) || !in_array($filters['panel'], ['overview','questions'], true)) { throw new moodle_exception('invalidparameter'); }
+foreach (['role'=>['all','learner','staff'], 'sort'=>['name','status','progress','score','time','attempts','last'],
+    'dir'=>['asc','desc'], 'tab'=>['answers','attempts','technical'],
+    'state'=>['','completed','inprogress','notstarted','unknown','attention','failed']] as $key=>$allowed) {
+    if (!in_array($filters[$key],$allowed,true)) throw new moodle_exception('invalidparameter');
+}
 $options = $filters;
-$options['questions'] = $filters['panel'] === 'questions' && !$filters['learner'];
+$options['questions'] = !$filters['learner'];
 foreach (['from', 'to'] as $datekey) {
     if ($filters[$datekey] !== '') {
         $date = DateTimeImmutable::createFromFormat('!Y-m-d', $filters[$datekey], core_date::get_user_timezone_object());
@@ -58,10 +68,7 @@ if ($filters['id'] && $filters['view'] === 'teacher') {
     // Keys are hashes for links; resolve package IDs to the same hash namespace.
     foreach ($titles as $key => $title) { foreach ($metrics['blocks'] as &$block) { if (!empty($block['generic']) && $block['key'] === hash('sha256', $key)) { $block['title'] = $title; } } unset($block); }
     $model['metrics'] = $metrics;
-    $matching = array_filter($metrics['learning']['learners'], function($learner) use ($filters) {
-        return ($filters['state'] === '' || $filters['state'] === $learner['status']) &&
-            ($filters['search'] === '' || mb_stripos($learner['name'], $filters['search'], 0, 'UTF-8') !== false);
-    });
+    $matching = report_view::table($metrics['learning']['learners'],$filters);
     if ($download === 'csv') {
         require_once($CFG->libdir . '/csvlib.class.php');
         $csv = new csv_export_writer();
@@ -163,7 +170,7 @@ if ($filters['view'] === 'analytics') {
         $csv->download_file(); exit;
     }
 }
-$model['catalogue'] = service::catalogue($filters['q'], $filters['catalogpage'], 30, $filters['course']);
+$model['catalogue'] = service::activities_for_filter($filters['course'],200);
 $model['courses'] = [];
 foreach (service::catalogue('', 0, PHP_INT_MAX)['items'] as $item) { $model['courses'][$item->course] = $item->coursename; }
 $PAGE->set_url(new moodle_url('/mod/seledascorm/dashboard.php', $model['filters']));

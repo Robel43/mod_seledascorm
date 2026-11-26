@@ -310,6 +310,24 @@ final class reporting_dashboard {
                 function($l) { return $l['tracked']; })), 'pages' => $pages];
     }
 
+    /** Compact full-history aggregates for one opened learner, never all learners' event histories. */
+    public static function person_metrics($activity,$cm,int $userid,array $pages,int $group=0): array {
+        global $DB;
+        require_capability('mod/seledascorm:viewreport',$cm->context);
+        [, $where, $params]=self::group_scope($cm,$group);
+        $params+=['activity'=>$activity->id,'learner'=>$userid];
+        $names=implode(', ',array_map(function($name){return 'u.'.$name;},\core_user\fields::get_name_fields()));
+        $tracks=$DB->get_recordset_sql('SELECT t.*, '.$names.' FROM {seledascorm_scoes_track} t JOIN {user} u ON u.id=t.userid
+            WHERE t.seledascormid=:activity AND t.userid=:learner AND u.deleted=0'.$where.' ORDER BY t.attempt,t.scoid,t.id',$params);
+        try {
+            $insights=new learning_insights($pages,$activity);
+            foreach($insights->observe($tracks) as $unused) {}
+            $people=$insights->report()['learners'];
+        } finally { $tracks->close(); }
+        if(!isset($people[$userid]))throw new \moodle_exception('nopermissiontoshow');
+        return $people[$userid];
+    }
+
     /** Detailed records remain scoped by activity, learner, attempt and allowed groups. */
     public static function detail($activity, $cm, int $userid, int $attempt, int $group = 0): array {
         global $DB;

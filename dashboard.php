@@ -92,7 +92,7 @@ if ($filters['id'] && $filters['view'] === 'teacher') {
             throw new moodle_exception('nopermissiontoshow');
         }
         $model['filters']['attempt'] = $attempt;
-        $model['detail']=\mod_seledascorm\local\learner_report::build($activity,$cm,$learner,$attempt,$metrics['pages'],$filters['group'],$filters['tab'],(bool)$filters['diagnostics']);
+        $model['detail']=\mod_seledascorm\local\learner_report::build($activity,$cm,$learner,$attempt,$metrics['pages'],$filters['group'],$filters['tab'],(bool)$filters['diagnostics'],!empty($options['fromts'])||!empty($options['tots'])||!empty($filters['block'])||!empty($filters['type']));
         if ($filters['diagnostics']) $model['filters']['tab']='technical';
 
     }

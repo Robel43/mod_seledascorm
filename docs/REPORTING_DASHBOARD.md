@@ -22,7 +22,7 @@ changes KPIs, charts and the learner table. Status and name search change only t
 table and CSV. Date/block/type filters retain the existing recorded-attempt scope
 and hide roster-only people. A date qualifies a visit by its immutable saved start;
 completion and scores describe the complete qualifying attempt. Learner detail
-shows the selected complete attempt, matching the existing behaviour.
+shows the selected complete attempt, matching the existing behaviour. For a date/block/type-filtered detail, one extra group-scoped recordset recomputes only that opened person’s full attempt aggregates, so header, page and block totals agree. Raw logs remain loaded only for the selected attempt.
 
 Legacy `state=failed` links filter Result Failed. `diagnostics=1` selects Technical
 details. Other old parameters remain accepted. Unknown enum values are rejected.

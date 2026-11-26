@@ -5,8 +5,13 @@ defined('MOODLE_INTERNAL') || die();
 
 /** Builds one learner's already-authorised detail; tracks are rechecked against group scope. */
 final class learner_report {
-    public static function build($activity,$cm,array $learner,int $attempt,array $pagesource,int $group,string $tab,bool $diagnostics=false): array {
+    public static function build($activity,$cm,array $learner,int $attempt,array $pagesource,int $group,string $tab,bool $diagnostics=false,bool $expandtime=false): array {
         $tracks = reporting_dashboard::detail($activity, $cm, $learner['id'], $attempt, $group);
+        if ($expandtime) {
+            $full=reporting_dashboard::person_metrics($activity,$cm,$learner['id'],$pagesource,$group);
+            foreach(['role','staff','grading']as $key)$full[$key]=$learner[$key];
+            $learner=$full;
+        }
         $pages = array_map(function($p) { return $p->title; }, $pagesource);
         $catalogues = [];
         foreach ($tracks as $track) {

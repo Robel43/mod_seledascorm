@@ -130,6 +130,11 @@ final class dashboard_test extends \advanced_testcase {
         $sco=$DB->get_record('seledascorm_scoes',['seledascorm'=>$activity->id,'seledascormtype'=>'sco'],'*',IGNORE_MULTIPLE);
         foreach([$student,get_admin()]as $user)foreach(['cmi.core.lesson_status'=>'failed','cmi.core.score.raw'=>'0']as $element=>$value)
             $DB->insert_record('seledascorm_scoes_track',(object)['userid'=>$user->id,'seledascormid'=>$activity->id,'scoid'=>$sco->id,'attempt'=>1,'element'=>$element,'value'=>$value,'timemodified'=>time()]);
+        foreach([100=>1000,200=>2000]as $started=>$ms) {
+            $session=str_repeat($started===100?'a':'b',24);
+            $DB->insert_record('seledascorm_scoes_track',(object)['userid'=>$student->id,'seledascormid'=>$activity->id,'scoid'=>$sco->id,'attempt'=>1,
+                'element'=>'seleda.usage.v1.reading.'.$session,'value'=>json_encode(['v'=>1,'id'=>'reading','title'=>'Reading','type'=>'text','ms'=>$ms,'visits'=>1,'actions'=>[],'events'=>[],'started'=>$started]),'timemodified'=>time()]);
+        }
         [$allowed,$cm]=reporting_dashboard::activity($activity->cmid);$m=reporting_dashboard::overview($allowed,$cm,0,['staff'=>0]);
         $people=$m['learning']['learners'];
         $this->assertSame('admin',$people[get_admin()->id]['role']);
@@ -138,8 +143,14 @@ final class dashboard_test extends \advanced_testcase {
         $this->assertSame('inprogress',$people[$student->id]['status']);
         $this->assertSame('failed',$people[$student->id]['result']);
         $this->assertSame(0.0,$people[$student->id]['score']);
+        $filtered=reporting_dashboard::overview($allowed,$cm,0,['fromts'=>150,'tots'=>250]);
+        $this->assertSame(2000,$filtered['learning']['learners'][$student->id]['ms']);
         $sink=$this->redirectEvents();
-        $detail=learner_report::build($allowed,$cm,$people[$student->id],1,$m['pages'],0,'answers');
+        $detail=learner_report::build($allowed,$cm,$filtered['learning']['learners'][$student->id],1,$m['pages'],0,'answers',false,true);
+        $this->assertSame(3000,$detail['selected']['ms']);
+        $this->assertSame(3000,$detail['pages'][0]['ms']);
+        $this->assertSame(2,$detail['pages'][0]['visits']);
+        $this->assertSame(0.0,$detail['selected']['score']);
         $events=$sink->get_events();$this->assertCount(1,$events);
         $this->assertInstanceOf(\mod_seledascorm\event\user_report_viewed::class,$events[0]);
         $this->assertEquals($student->id,$events[0]->relateduserid);

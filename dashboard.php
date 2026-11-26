@@ -66,7 +66,7 @@ if ($filters['id'] && $filters['view'] === 'teacher') {
     $titlepages = array_intersect_key($metrics['pages'], array_flip(array_column(array_filter($metrics['blocks'], function($b) { return !empty($b['generic']); }), 'scoid')));
     $titles = \mod_seledascorm\output\dashboard_detail::titles($cm->context, $titlepages);
     // Keys are hashes for links; resolve package IDs to the same hash namespace.
-    foreach ($titles as $key => $title) { foreach ($metrics['blocks'] as &$block) { if (!empty($block['generic']) && $block['key'] === hash('sha256', $key)) { $block['title'] = $title; } } unset($block); }
+    foreach ($titles as $key => $title) { foreach ($metrics['blocks'] as &$block) { if (!empty($block['generic']) && $block['key'] === hash('sha256', $key)) { $block['title'] = $title['title']; } } unset($block); }
     $model['metrics'] = $metrics;
     $matching = report_view::table($metrics['learning']['learners'],$filters);
     if ($download === 'csv') {
@@ -105,43 +105,22 @@ if ($filters['id'] && $filters['view'] === 'teacher') {
                 $catalogues[$track->scoid] = timhirt_reporting::packagecatalog($cm->context, $activity, (int)$track->scoid);
             }
         }
-        $questions = timhirt_reporting::rows($tracks, $catalogues);
-        // Keep the latest assessed submission per revisioned question. Never turn clicks into results.
-        $latestquestions = [];
-        foreach ($questions as $question) {
-            if (empty($question['resolved']) || empty($question['graded'])) continue;
-            $key = $question['scoid'] . ':' . preg_replace('/-a[1-9][0-9]*$/', '', $question['id']);
-            $latestquestions[$key] = $question;
-        }
-        $questions = array_values($latestquestions);
-        foreach ($questions as &$question) {
-            $question['page'] = $pages[$question['scoid']] ?? '';
-        }
-        unset($question);
-        $grade = $learner['attempts'][$attempt]['score'];
-        $usage = seleda_usage::summary($tracks);
-        foreach ($usage['blocks'] as &$block) { $key = $block['scoid'] . ':' . $block['id']; if (isset($titles[$key]) && in_array(strtolower($block['title']), ['text','untitled',''])) { $block['title'] = $titles[$key]; } } unset($block);
-        // Custom HTML activities explicitly report checked answers; ordinary clicks stay in diagnostics.
-        foreach ($usage['blocks'] as $block) {
-            $answers = [];
-            foreach ($block['events'] as $event) {
-                if (($event['action'] ?? '') !== 'answer' || !isset($event['result'])) continue;
-                $key = $event['label'] . ':' . ($event['expected'] ?? '');
-                $answers[$key] = ['page'=>$pages[$block['scoid']] ?? '', 'question'=>$event['label'],
-                    'response'=>$event['value'] ?? '', 'correct'=>$event['expected'] ?? '',
-                    'result'=>get_string(['correct'=>'reportingcorrect','incorrect'=>'reportingincorrect'][$event['result']] ?? 'reportingrecorded','mod_seledascorm')];
-            }
-            $questions = array_merge($questions, array_values($answers));
-        }
-        $model['detail'] = ['name' => $learner['name'], 'attempts' => array_keys($learner['attempts']),
-            'active' => $learner['attempts'][$attempt]['timeknown'] ? seleda_usage::duration($usage['ms']) : get_string('dashnodata','mod_seledascorm'),
-            'completion' => \mod_seledascorm\output\dashboard_detail::completion($tracks, $metrics['pages']),
-            'visited' => count(array_filter(array_unique(array_map(function($t) { return strpos($t->element, 'seleda.usage.v1.') === 0 ? $t->scoid : null; }, $tracks)))), 'questionsanswered' => count(array_filter($questions, function($q) { return trim($q['response']) !== ''; })),
-            'graded' => count(array_filter($questions, function($q) { return !empty($q['graded']); })),
-            'correct' => count(array_filter($questions, function($q) { return $q['result'] === get_string('reportingcorrect', 'mod_seledascorm'); })),
-            'maximum' => $activity->maxgrade, 'status' => $learner['attempts'][$attempt]['status'], 'grading' => $learner['grading'],
-            'score' => $grade === false || $grade === null ? null : $grade,
-            'usagehtml' => !$filters['diagnostics'] ? '' : \mod_seledascorm\output\dashboard_detail::tracking(timhirt_reporting::blockstates($tracks, $catalogues), $pages) . \mod_seledascorm\output\dashboard_detail::usage($usage, $pages, $questions), 'questions' => $questions];
+        $usage=seleda_usage::summary($tracks);
+        $blockmeta=\mod_seledascorm\output\dashboard_detail::titles($cm->context,$metrics['pages']);
+        $questions=report_view::answers($tracks,$catalogues,$pages);
+        $blockstates=timhirt_reporting::blockstates($tracks,$catalogues);
+        $pageitems=report_view::learner_pages($learner,$attempt,$metrics['pages'],$blockmeta,$usage,$blockstates);
+        $grade=$learner['attempts'][$attempt]['score'];
+        $event=\mod_seledascorm\event\user_report_viewed::create(['context'=>$cm->context,'relateduserid'=>$learner['id'],
+            'other'=>['attemptid'=>$attempt,'instanceid'=>$activity->id]]);
+        $event->trigger();
+        $model['detail']=['person'=>$learner,'selected'=>$learner['attempts'][$attempt], 'attempt'=>$attempt,
+            'pages'=>$pageitems,'questions'=>$questions,'history'=>report_view::attempts($learner['attempts']),
+            'usagehtml'=>$filters['tab']==='technical' || $filters['diagnostics'] ?
+                \mod_seledascorm\output\dashboard_detail::tracking($blockstates,$pages) .
+                \mod_seledascorm\output\dashboard_detail::usage($usage,$pages,timhirt_reporting::rows($tracks,$catalogues)) : ''];
+        if ($filters['diagnostics']) $model['filters']['tab']='technical';
+
     }
 } else if (!service::can_open()) {
     throw new required_capability_exception(context_system::instance(), 'mod/seledascorm:viewreport', 'nopermissions', '');

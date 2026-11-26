@@ -35,19 +35,9 @@ final class dashboard_detail {
             $file = get_file_storage()->get_file($context->id, 'mod_seledascorm', 'content', 0,
                 $dir === '.' ? '/' : '/' . trim($dir, '/') . '/', basename($launch));
             if (!$file || $file->get_filesize() > 10485760) { continue; }
-            $dom = new \DOMDocument(); $before = libxml_use_internal_errors(true);
-            try {
-                $dom->loadHTML('<?xml encoding="UTF-8">' . $file->get_content(), LIBXML_NONET);
-                $xpath = new \DOMXPath($dom);
-                foreach ($xpath->query('//*[contains(concat(" ", normalize-space(@class), " "), " idevice_node ")]') as $node) {
-                    foreach ($xpath->query('.//h1|.//h2|.//h3|.//h4|.//p', $node) as $text) {
-                        $label = trim(preg_replace('/\s+/u', ' ', $text->textContent));
-                        if ($label !== '' && !in_array(strtolower($label), ['text', 'untitled'])) {
-                            $titles[$scoid . ':' . $node->getAttribute('id')] = mb_substr($label, 0, 120); break;
-                        }
-                    }
-                }
-            } finally { libxml_clear_errors(); libxml_use_internal_errors($before); }
+            foreach (\mod_seledascorm\local\timhirt_reporting::blocks($file->get_content()) as $id=>$metadata) {
+                $titles[$scoid.':'.$id]=$metadata;
+            }
         }
         return $titles;
     }

@@ -54,6 +54,52 @@ final class report_view {
         return ['best'=>$scores?max($scores):null, 'change'=>count($percents)>1?end($percents)-$percents[0]:null,
             'extratime'=>count($timed)>1?array_sum(array_column(array_slice($timed,1),'ms')):null];
     }
+    /** Latest answer plus its earlier submissions; no ordinary clicks are graded. */
+    public static function answers(array $tracks, array $catalogues, array $pages): array {
+        $groups=[];
+        foreach (timhirt_reporting::rows($tracks,$catalogues) as $row) {
+            $key=$row['scoid'].':native:'.preg_replace('/-a[1-9][0-9]*$/','',$row['id']);
+            $groups[$key][]=['page'=>$pages[$row['scoid']]??'', 'question'=>$row['prompt'] === preg_replace('/-a[1-9][0-9]*$/','',$row['id']) ? null : $row['prompt'], 'response'=>$row['response'],
+                'expected'=>$row['correct'], 'credit'=>$row['graded']?$row['credit']:null,'retry'=>$row['activityAttempt'],
+                'shortened'=>!empty($row['shortened'])];
+        }
+        foreach (seleda_usage::summary($tracks)['blocks'] as $block) foreach ($block['events'] as $event) {
+            if (($event['action']??'')!=='answer') continue;
+            $key=$block['scoid'].':'.$block['id'].':'.hash('sha256',json_encode([$event['label'],$event['expected']??'']));
+            $groups[$key][]=['page'=>$pages[$block['scoid']]??'', 'question'=>$event['label'],'response'=>$event['value']??'',
+                'expected'=>$event['expected']??'', 'credit'=>['correct'=>1,'incorrect'=>0][$event['result']??'']??null,
+                'retry'=>0,'shortened'=>!empty($event['shortened'])];
+        }
+        $rows=[];
+        foreach ($groups as $history) { $latest=array_pop($history);$latest['earlier']=$history;$rows[]=$latest; }
+        return $rows;
+    }
+    public static function learner_pages(array $person,int $attempt,array $pages,array $metadata,array $usage,array $states): array {
+        $a=$person['attempts'][$attempt];$blocks=[];$saved=[];
+        foreach ($usage['blocks'] as $block) $blocks[$block['scoid'].':'.$block['id']]=$block;
+        foreach ($states as $state) $saved[$state['scoid'].':'.$state['id']]=$state;
+        $out=[];
+        foreach ($pages as $id=>$page) {
+            if (empty($page->launch) || ($page->seledascormtype??'sco')!=='sco') continue;
+            $universe=[];
+            foreach ($metadata as $key=>$meta) if (strpos($key,$id.':')===0) $universe[$key]=$meta;
+            foreach ($blocks as $key=>$block) if ($block['scoid']==$id && !isset($universe[$key])) $universe[$key]=['id'=>$block['id'],'title'=>$block['title'],'type'=>$block['type']];
+            $rows=[];
+            foreach ($universe as $key=>$meta) {
+                $b=$blocks[$key]??null;$savedstate=$saved[$key]??[];
+                $active=$b && ($b['visits']>0 || $b['ms']>0 || $b['interactions']>0);
+                $rows[]=$meta+['mode'=>$savedstate['mode']??'unknown','ms'=>$active?$b['ms']:null,
+                    'interactions'=>$active?$b['interactions']:null,'score'=>$person['grading']==='completion'?null:($savedstate['score']??null),
+                    'state'=>!$active?'noactivity':(($savedstate['completed']??null)===true?'completed':'inprogress')];
+            }
+            $times=[];foreach ($person['attempts'] as $other) if(array_key_exists($id,$other['pagetimems']))$times[]=$other['pagetimems'][$id];
+            $out[]=['id'=>$id,'title'=>$page->title,'state'=>$a['pagestate'][$id],'ms'=>$a['pagetimems'][$id]??null,
+                'allms'=>$times?array_sum($times):null,'visits'=>$a['pagevisits'][$id]??null,
+                'score'=>$person['grading']==='completion'?null:($a['pagescore'][$id]??null),
+                'last'=>$a['pagelast'][$id]??null,'blocks'=>$rows];
+        }
+        return $out;
+    }
     public static function comparison(array $items): array {
         $ids=[];$participations=0;$questions=[];$pages=[];$bins=array_fill_keys(['<50','50–59','60–69','70–79','80–89','90–100'],0);
         foreach ($items as $item) {

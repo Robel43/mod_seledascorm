@@ -64,7 +64,10 @@ $model['filters']['view']='analytics';$model['comparisons']=[['id'=>1,'name'=>'<
 $orghtml=\mod_seledascorm\output\reporting_dashboard::render($model);
 ensure(strpos($orghtml,'sd-participation-svg')!==false && strpos($orghtml,'learner–activity')!==false && strpos($orghtml,'<script>bad')===false,'Organisation scope or escaping lost');
 $model['filters']['view']='teacher';$model['filters']['attempt']=1;
-$model['detail']=['name'=>'Learner','attempts'=>[1],'status'=>'inprogress','score'=>null,'grading'=>'unknown','active'=>'00:01:00','questions'=>[],'usagehtml'=>''];
+$person=$data['learning']['learners'][4];$attempt=2;
+$detailpages=\mod_seledascorm\local\report_view::learner_pages($person,$attempt,$pages,[],['blocks'=>[]],[]);
+$model['detail']=['person'=>$person,'selected'=>$person['attempts'][$attempt],'attempt'=>$attempt,'pages'=>$detailpages,
+    'questions'=>[],'history'=>\mod_seledascorm\local\report_view::attempts($person['attempts']),'usagehtml'=>''];
 $detailhtml=\mod_seledascorm\output\reporting_dashboard::render($model);
-ensure(strpos($detailhtml,'name="attempt" id="sd-attempt"')===false && strpos($detailhtml,'<section class="sd-card sd-answers">')!==false,'Single-attempt detail should not require a dropdown or expanding submitted answers');
+ensure(strpos($detailhtml,'sd-learner-header')<strpos($detailhtml,'sd-learner-pages') && strpos($detailhtml,'sd-learner-pages')<strpos($detailhtml,'sd-learner-tabs'),'Learner detail must lead with summary and every page before answer tabs');
 echo "PASS: meaningful scores, missing data, roster, median time, first submissions, retry comparisons, page progress and scoped views\n";

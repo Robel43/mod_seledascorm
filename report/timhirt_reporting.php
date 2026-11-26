@@ -5,6 +5,7 @@ defined('MOODLE_INTERNAL') || die();
 
 /** Versioned, block-independent labels and attempt-scoped response decoding. */
 final class timhirt_reporting {
+    private static $parsed = [];
     const SNAPSHOT = 'timhirt.reporting.catalog.v1';
 
     public static function hash(string $value): string {
@@ -48,12 +49,24 @@ final class timhirt_reporting {
     }
 
     public static function catalog(string $html): array {
-        $catalog = [];
+        $hash=hash('sha256',$html);
+        if (isset(self::$parsed[$hash])) return self::$parsed[$hash]['catalog'];
+        $catalog = []; $blocks=[];
         $previous = libxml_use_internal_errors(true);
         try {
             $document = new \DOMDocument();
             $document->loadHTML('<?xml encoding="UTF-8">' . $html, LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING);
             $xpath = new \DOMXPath($document);
+            foreach ($xpath->query('//*[contains(concat(" ", normalize-space(@class), " "), " idevice_node ")]') as $node) {
+                $id=$node->getAttribute('id'); if (!$id) continue;
+                $label='';
+                foreach ($xpath->query('.//h1|.//h2|.//h3|.//h4|.//p',$node) as $text) {
+                    $candidate=self::text($text->textContent);
+                    if ($candidate!=='' && !in_array(strtolower($candidate),['text','untitled'])) { $label=mb_substr($candidate,0,120); break; }
+                }
+                $blocks[$id]=['id'=>$id,'title'=>$label ?: get_string('rptblocknumber','mod_seledascorm',count($blocks)+1),
+                    'type'=>$node->getAttribute('data-idevice-type') ?: $node->getAttribute('data-idevice-name')];
+            }
             // JSON iDevices render their definition only in the browser. Read the
             // same saved source here, without running authored JavaScript.
             foreach ($xpath->query('//*[@data-idevice-type="mcq-feedback" and @data-idevice-json-data]') as $node) {
@@ -142,7 +155,12 @@ final class timhirt_reporting {
         } finally {
             libxml_clear_errors(); libxml_use_internal_errors($previous);
         }
+        self::$parsed[$hash]=['catalog'=>$catalog,'blocks'=>$blocks];
         return $catalog;
+    }
+    public static function blocks(string $html): array {
+        self::catalog($html);
+        return self::$parsed[hash('sha256',$html)]['blocks'];
     }
 
     /** Read only Moodle-managed local package files, never fetch external URLs. */
@@ -251,6 +269,7 @@ final class timhirt_reporting {
                     'scoid' => $scoid, 'index' => $index, 'id' => $id, 'resolved' => !empty($definition['prompt']),
                     'legacy' => !empty($definition['legacy']), 'labelSource' => isset($snapshots[$scoid][$catalogid]) ? 'snapshot' : ($definition ? 'package' : 'unavailable'),
                     'block' => $definition['block'] ?? '', 'blockid' => $definition['blockid'] ?? '', 'type' => $type,
+                    'prompt' => $definition['prompt'] ?? null, 'rawresult'=>$result,
                     'question' => ($definition['prompt'] ?? $id) . ($activityattempt ? ' (' . get_string('reportingactivityattempt', 'mod_seledascorm') . ' ' . $activityattempt . ')' : ''),
                     'activityAttempt' => $activityattempt,
                     'response' => self::response($response, $definition),
@@ -295,7 +314,7 @@ final class timhirt_reporting {
                 $mode = ['g'=>'graded', 'c'=>'completion', 'o'=>'off'][$state['m'] ?? ''] ?? ($definition['tracking']['mode'] ?? null);
                 if (!in_array($mode, ['graded','completion','off'], true)) { continue; }
                 $score = $mode === 'graded' && isset($state['s']) && is_numeric($state['s']) ? max(0, min(100, (float)$state['s'])) : null;
-                $blocks[$scoid . ':' . $id] = ['scoid'=>$scoid, 'id'=>$id, 'title'=>$definition['block'], 'mode'=>$mode, 'score'=>$score];
+                $blocks[$scoid . ':' . $id] = ['scoid'=>$scoid, 'id'=>$id, 'title'=>$definition['block'], 'mode'=>$mode, 'score'=>$score, 'completed'=>isset($state['c'])?(bool)$state['c']:null];
             }
         }
         return array_values($blocks);

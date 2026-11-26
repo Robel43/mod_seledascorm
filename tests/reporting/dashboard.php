@@ -173,7 +173,19 @@ $empty['rows'] = []; $empty['filteredcount'] = 0;
 $emptyhtml = \mod_seledascorm\output\reporting_dashboard::render($empty);
 ensure(strpos($emptyhtml, '0 of 0') !== false && strpos($emptyhtml, 'No people match') !== false,
     'An empty activity should show explicit empty states, not crash or invent failed learners');
-if (in_array('--html', $argv)) {
+if (in_array('--detailhtml',$argv)) {
+    $person=$data['learning']['learners'][4];$attempt=2;
+    $model['filters']['learner']=4;$model['filters']['attempt']=$attempt;$model['filters']['tab']='answers';
+    $selected=$person['attempts'][$attempt];
+    $pageitems=\mod_seledascorm\local\report_view::learner_pages($person,$attempt,$pages,
+        ['7:unvisited'=>['id'=>'unvisited','title'=>'Unvisited block','type'=>'text']],['blocks'=>[]],[]);
+    $model['detail']=['person'=>$person,'selected'=>$selected,'attempt'=>$attempt,'pages'=>$pageitems,
+        'history'=>\mod_seledascorm\local\report_view::attempts($person['attempts']), 'usagehtml'=>'',
+        'questions'=>[['page'=>'Practice','question'=>'What is 2 + 2?','response'=>'4','expected'=>'4','credit'=>1,'retry'=>2,'shortened'=>false,
+            'earlier'=>[['page'=>'Practice','question'=>'What is 2 + 2?','response'=>'3','expected'=>'4','credit'=>0,'retry'=>1,'shortened'=>false]]]]];
+    $html=\mod_seledascorm\output\reporting_dashboard::render($model);
+}
+if (in_array('--html', $argv) || in_array('--detailhtml',$argv)) {
     echo '<!doctype html><html lang="en"><meta name="viewport" content="width=device-width, initial-scale=1"><meta charset="utf-8"><title>Seleda reports</title><style>body{font:16px system-ui;margin:0;padding:24px;background:#f7f9fd}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}' .
         file_get_contents(__DIR__ . '/../../dashboard.css') . '</style>' . $html . '<script>window.define=(name,deps,factory)=>factory().init();</script><script>' .
         file_get_contents(__DIR__ . '/../../amd/build/reporting_dashboard.min.js') . '</script></html>';

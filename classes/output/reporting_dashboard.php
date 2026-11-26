@@ -227,20 +227,63 @@ final class reporting_dashboard {
         return $h.'</div></section>';
     }
     private static function detail(array $m): string {
-        $d=$m['detail'];
-        $h='<a href="'.self::url($m,['learner'=>0,'attempt'=>0,'diagnostics'=>0]).'">← '.self::t('alllearners').'</a><section class="sd-card"><div class="sd-section-heading"><h2>'.self::h($d['name']).'</h2>';
-        if (count($d['attempts']) > 1) {
-            $h.='<form method="get" class="sd-attempt">'.self::fields($m['filters'],['attempt','diagnostics']).'<label for="sd-attempt">'.self::t('attempt').'</label><select name="attempt" id="sd-attempt">';
-        foreach ($d['attempts'] as $n) $h.='<option value="'.$n.'"'.($n===$m['filters']['attempt']?' selected':'').'>'.$n.'</option>';
-        $h.='</select><button type="submit">'.self::t('apply').'</button></form>';
-        } else { $h.='<span class="sd-muted">'.self::t('attempt').' '.(int)$m['filters']['attempt'].'</span>'; }
-        $h.='</div><p>'.self::t('attemptscope').'</p><p>'.self::t('status').': <strong>'.self::status($d['status']).'</strong> · '.self::t('score').': <strong>'.self::score($d).'</strong> · '.self::t('activetime').': <strong>'.self::h($d['active']).'</strong></p></section><section class="sd-card sd-answers"><h3>'.self::simple('answers').'</h3><p>'.self::simple('answersnote').'</p>'.self::tablehead(['page','question','response','correctanswer','result']);
-        foreach ($d['questions'] as $q) {
-            $h.='<tr>';foreach (['page','question','response','correct','result'] as $key) $h.='<td>'.self::h($q[$key]).'</td>'; $h.='</tr>';
-        }
-        if (!$d['questions']) $h.='<tr><td colspan="5">'.self::simple('noquestions').'</td></tr>';
-        $h.='</tbody></table></div></section><p class="sd-note"><a href="'.self::url($m,['diagnostics'=>empty($m['filters']['diagnostics'])?1:0]).'">'.self::simple(empty($m['filters']['diagnostics'])?'diagnostics':'hidediagnostics').'</a></p>';
-        if (!empty($m['filters']['diagnostics'])) $h.='<section class="sd-card sd-person-usage"><h3>'.self::simple('diagnostics').'</h3>'.$d['usagehtml'].'</section>';
-        return $h;
+        return self::learner_header($m).self::page_table($m).self::learner_tabs($m);
+    }
+    private static function learner_header(array $m): string {
+        $d=$m['detail'];$p=$d['person'];$a=$d['selected'];
+        $h='<a class="sd-back" href="'.self::url($m,['learner'=>0,'attempt'=>0,'diagnostics'=>0]).'">'.self::r('alllearners').'</a><section class="sd-card sd-learner-header"><div class="sd-section-heading"><h2>'.self::h($p['name']).'</h2><span>'.self::r($p['role']).'</span></div>';
+        $h.='<p>'.self::chip($a['status']).' '.($a['result']?self::chip($a['result'],true):'—').'</p><form method="get" class="sd-attempt">'.self::fields($m['filters'],['attempt','diagnostics']).'<label for="rpt-attempt">'.self::r('moodleattempt').'</label><select name="attempt" id="rpt-attempt">';
+        foreach ($p['attempts'] as $n=>$unused) $h.='<option value="'.$n.'"'.($n===$d['attempt']?' selected':'').'>'.$n.'</option>';
+        $h.='</select><button type="submit">'.self::r('apply').'</button></form>';
+        $selected=$p;foreach (['pagescompleted','pagestotal'] as $key)$selected[$key]=$a[$key];$selected['progress']=$a['status']==='unknown'?null:($a['pagestotal']?$a['pagescompleted']/$a['pagestotal']:null);
+        $h.='<p class="sd-person-progress">'.self::r('progress').': '.self::progress($selected).'</p><p>'.self::r('personpagecounts',(object)['progress'=>$a['pagesinprogress'],'none'=>$a['pagesnotstarted']]).'</p><dl class="sd-person-metrics"><div><dt>'.self::r('thisattempt').'</dt><dd>'.self::time($a['timeknown']?$a['ms']:null).'</dd></div>';
+        if (count($p['attempts'])>1)$h.='<div><dt>'.self::r('allattemptstime').'</dt><dd>'.self::time($p['ms']).'</dd></div>';
+        $h.='<div><dt>'.self::r('last').'</dt><dd>'.($a['last']?self::h(userdate($a['last'])):'—').'</dd></div><div><dt>'.self::r('score').'</dt><dd>'.self::score_value(['score'=>$a['score'],'grading'=>$p['grading'],'maximum'=>$p['maximum']]).'</dd></div>';
+        if ($d['history']['best']!==null)$h.='<div><dt>'.self::r('bestscore').'</dt><dd>'.self::number($d['history']['best']).' / '.self::number($p['maximum']).'</dd></div>';
+        return $h.'</dl></section>';
+    }
+    private static function page_table(array $m): string {
+        $d=$m['detail'];$all=count($d['person']['attempts'])>1;
+        $h='<section class="sd-card sd-learner-pages"><h2>'.self::r('pages').'</h2><div class="sd-table-scroll"><table class="sd-table"><thead><tr>';
+        foreach(array_merge(['page','status','activetime'], $all?['allattemptstime']:[],['visits','score','last','blocks'])as $key)$h.='<th scope="col">'.self::r($key).'</th>';
+        $h.='</tr></thead><tbody>';
+        foreach($d['pages']as $p){$h.='<tr><th scope="row">'.self::h($p['title']).'</th><td>'.self::chip($p['state']).'</td><td>'.self::time($p['ms']).'</td>'.($all?'<td>'.self::time($p['allms']).'</td>':'').'<td>'.self::number($p['visits']).'</td><td>'.self::number($p['score']).'</td><td>'.($p['last']?self::h(userdate($p['last'])):'—').'</td><td><details><summary>'.self::r('blocks').' ('.count($p['blocks']).')</summary>'.self::block_table($p['blocks']).'</details></td></tr>';}
+        return $h.'</tbody></table></div><p class="sd-note">'.self::r('activenote').'</p></section>';
+    }
+    private static function block_table(array $blocks): string {
+        if(!$blocks)return '<p>'.self::r('noblocks').'</p>';
+        $h='<ul class="sd-block-list">';
+        foreach($blocks as $b)$h.='<li><strong>'.self::h($b['title']).'</strong><dl><dt>'.self::r('type').'</dt><dd>'.($b['type']!==''?self::h($b['type']):'—').'</dd><dt>'.self::r('tracking').'</dt><dd>'.self::r('mode'.$b['mode']).'</dd><dt>'.self::r('activetime').'</dt><dd>'.self::time($b['ms']).'</dd><dt>'.self::r('interactions').'</dt><dd>'.self::number($b['interactions']).'</dd><dt>'.self::r('score').'</dt><dd>'.($b['score']===null?'—':self::number($b['score']).'%').'</dd><dt>'.self::r('status').'</dt><dd>'.self::r($b['state']).'</dd></dl></li>';
+        return $h.'</ul>';
+    }
+    private static function learner_tabs(array $m): string {
+        $tab=$m['filters']['tab']??'answers';$h='<nav class="sd-tabs sd-learner-tabs" aria-label="'.self::r('learnersections').'">';
+        foreach(['answers','attempts','technical']as $key)$h.='<a'.($key===$tab?' aria-current="page"':'').' href="'.self::url($m,['tab'=>$key,'diagnostics'=>0]).'">'.self::r($key).'</a>';
+        $h.='</nav>';
+        return $h.($tab==='attempts'?self::attempts_tab($m):($tab==='technical'?self::technical_tab($m):self::answers_tab($m)));
+    }
+    private static function answer_cells(array $q): string {
+        $credit=$q['credit'];$result=$credit===null?self::r('ungraded'):($credit>=1?self::r('correct'):($credit>0?self::r('partial').' ('.round($credit*100).'%)':self::r('incorrect')));
+        return '<td>'.self::h($q['page']).'</td><td>'.($q['question']!==null?self::h($q['question']):self::r('questionunavailable')).'</td><td>'.self::h($q['response']).(!empty($q['shortened'])?' '.self::r('shortened'):'').'</td><td>'.self::h($q['expected']).'</td><td>'.$result.'</td><td>'.($credit===null?'—':round($credit*100).'%').(!empty($q['retry'])?' · '.self::r('retry',$q['retry']):'').'</td>';
+    }
+    private static function answers_tab(array $m): string {
+        $h='<section class="sd-card sd-answers"><h2>'.self::r('answers').'</h2><div class="sd-table-scroll"><table class="sd-table"><thead><tr>';
+        foreach(['page','question','response','expected','result','credit']as $key)$h.='<th scope="col">'.self::r($key).'</th>';
+        $h.='</tr></thead><tbody>';
+        foreach($m['detail']['questions']as $q){$h.='<tr>'.self::answer_cells($q).'</tr>';if($q['earlier']){$h.='<tr><td colspan="6"><details><summary>'.self::r('earliersubmissions',count($q['earlier'])).'</summary><table class="sd-table"><tbody>';foreach($q['earlier']as $earlier)$h.='<tr>'.self::answer_cells($earlier).'</tr>';$h.='</tbody></table></details></td></tr>';}}
+        if(!$m['detail']['questions'])$h.='<tr><td colspan="6">'.self::r('noquestions').'</td></tr>';
+        return $h.'</tbody></table></div><p class="sd-note">'.self::r('retrynote').'</p></section>';
+    }
+    private static function attempts_tab(array $m): string {
+        $d=$m['detail'];$p=$d['person'];$h='<section class="sd-card"><h2>'.self::r('attempts').'</h2><div class="sd-table-scroll"><table class="sd-table"><thead><tr>';
+        foreach(['moodleattempt','status','score','activetime','pagescompleted','last']as $key)$h.='<th scope="col">'.self::r($key).'</th>';
+        $h.='</tr></thead><tbody>';
+        foreach($p['attempts']as $n=>$a)$h.='<tr><th scope="row">'.$n.'</th><td>'.self::chip($a['status']).'</td><td>'.self::score_value(['grading'=>$p['grading'],'score'=>$a['score'],'maximum'=>$p['maximum']]).'</td><td>'.self::time($a['timeknown']?$a['ms']:null).'</td><td>'.$a['pagescompleted'].' / '.$a['pagestotal'].'</td><td>'.($a['last']?self::h(userdate($a['last'])):'—').'</td></tr>';
+        $h.='</tbody></table></div>';
+        foreach(['best'=>'bestscore','change'=>'scorechange','extratime'=>'extratime']as $key=>$label)if($d['history'][$key]!==null)$h.='<p>'.self::r($label).': '.($key==='extratime'?self::time($d['history'][$key]):self::number($d['history'][$key]).($key==='change'?' '.self::r('points'):'' )).'</p>';
+        return $h.'</section>';
+    }
+    private static function technical_tab(array $m): string {
+        return '<section class="sd-card sd-person-usage"><h2>'.self::r('technical').'</h2><details><summary>'.self::r('opentechnical').'</summary>'.$m['detail']['usagehtml'].'</details></section>';
     }
 }

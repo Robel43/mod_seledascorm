@@ -26,6 +26,7 @@ jobs:
           php -l dashboard.php
           php -l classes/local/reporting_dashboard.php
           php -l classes/local/learning_insights.php
+          php -l classes/local/presentation_assets.php
           php -l classes/output/reporting_dashboard.php
           php -l classes/hook_callbacks.php
           php -l db/hooks.php

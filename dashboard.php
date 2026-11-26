@@ -171,7 +171,7 @@ $PAGE->set_context(context_system::instance());
 $PAGE->set_pagelayout('report');
 $PAGE->set_title(get_string('dashboardtitle', 'mod_seledascorm'));
 $PAGE->set_heading(get_string('dashboardtitle', 'mod_seledascorm'));
-$PAGE->requires->css(new moodle_url('/mod/seledascorm/dashboard.css'));
+$PAGE->requires->css(\mod_seledascorm\local\presentation_assets::css('dashboard.css'));
 $PAGE->requires->js_call_amd('mod_seledascorm/reporting_dashboard', 'init');
 $PAGE->set_cacheable(false);
 header('Cache-Control: private, no-store');

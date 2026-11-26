@@ -38,7 +38,7 @@ final class reporting_dashboard {
             self::t('private') . '</span></header><nav class="sd-tabs" aria-label="' . self::simple('views') . '"><a href="' . self::url($m,['view'=>'teacher','learner'=>0,'diagnostics'=>0]) . '">' . self::simple('teacher') . '</a><a href="' . self::url($m,['view'=>'analytics','learner'=>0,'diagnostics'=>0,'group'=>0,'block'=>'','type'=>'','catalogpage'=>0]) . '">' . self::simple('analytics') . '</a></nav><div class="sd-layout"><aside class="sd-catalogue"><details open><summary>' .
             self::t('chooseactivity') . '</summary><form method="get" action="' . self::url($m, []) . '">' .
             '<input type="hidden" name="view" value="' . self::h($m['filters']['view'] ?? 'teacher') . '"><label for="sd-catalogue-search" class="sr-only">' . self::t('searchactivities') . '</label>' .
-            '<label class="sr-only" for="sd-course">' . self::t('course') . '</label><select id="sd-course" name="course"><option value="0">' . self::t('allcourses') . '</option>' . implode('', array_map(function($id, $name) use ($m) { return '<option value="' . (int)$id . '"' . ((int)($m['filters']['course'] ?? 0) === (int)$id ? ' selected' : '') . '>' . self::h($name) . '</option>'; }, array_keys($m['courses'] ?? []), array_values($m['courses'] ?? []))) . '</select>' . '<input id="sd-catalogue-search" type="search" name="q" placeholder="' . self::t('searchactivities') . '" value="' .
+            '<details class="sd-course-filter"><summary>' . self::t('course') . '</summary><label class="sr-only" for="sd-course">' . self::t('course') . '</label><select id="sd-course" name="course"><option value="0">' . self::t('allcourses') . '</option>' . implode('', array_map(function($id, $name) use ($m) { return '<option value="' . (int)$id . '"' . ((int)($m['filters']['course'] ?? 0) === (int)$id ? ' selected' : '') . '>' . self::h($name) . '</option>'; }, array_keys($m['courses'] ?? []), array_values($m['courses'] ?? []))) . '</select></details>' . '<input id="sd-catalogue-search" type="search" name="q" placeholder="' . self::t('searchactivities') . '" value="' .
             self::h($m['filters']['q']) . '"><button class="sd-search" type="submit">' . self::t('search') . '</button></form>' .
             '<nav aria-label="' . self::t('chooseactivity') . '" class="sd-activity-list">';
         foreach ($m['catalogue']['items'] as $item) {
@@ -67,15 +67,15 @@ final class reporting_dashboard {
         $html .= self::filters($m);
         $html .= '<section class="sd-context"><div><span class="sd-eyebrow">' . self::h($m['coursename']) . '</span><h2>' .
             self::h($m['activity']->name) . '</h2></div></section>';
-        if (!empty($m['metrics']['groups'])) {
-            $html .= '<form method="get" class="sd-group">' . self::fields($m['filters'], ['group', 'learner', 'attempt', 'page']) .
+        if (count($m['metrics']['groups'] ?? []) > 1 || !empty($m['filters']['group'])) {
+            $html .= '<details class="sd-advanced"><summary>' . self::t('group') . '</summary><form method="get" class="sd-group">' . self::fields($m['filters'], ['group', 'learner', 'attempt', 'page']) .
                 '<label for="sd-group">' . self::t('group') . '</label><select id="sd-group" name="group"><option value="0">' .
                 self::t('allowedgroups') . '</option>';
             foreach ($m['metrics']['groups'] as $group) {
                 $html .= '<option value="' . (int)$group->id . '"' . ((int)$group->id === (int)$m['filters']['group'] ? ' selected' : '') .
                     '>' . self::h($group->name) . '</option>';
             }
-            $html .= '</select><button type="submit">' . self::t('apply') . '</button></form>';
+            $html .= '</select><button type="submit">' . self::t('apply') . '</button></form></details>';
         }
         if (!empty($m['detail'])) {
             return $html . self::detail($m) . '</main></div></div>';
@@ -93,13 +93,10 @@ final class reporting_dashboard {
         ];
         $html .= self::cards($cards) . '<p class="sd-note">' . self::simple('measuresnote') . '</p>';
         if (!empty($data['recordedonly'])) $html .= '<p class="sd-note">' . self::simple('recordedonly') . '</p>';
-        $html .= '<section class="sd-card sd-completion"><h3>' . self::t('completion') . '</h3><p>' . self::simple('completionnote') . '</p><div class="sd-status-chart">';
-        foreach ($data['statuses'] as $status=>$n) {
-            $html .= '<a href="' . self::url($m,['state'=>$status,'page'=>0]) . '#sd-learners"><span>' . self::status($status) . '</span><span class="sd-chart-track"><span class="sd-' . $status . '" style="width:' . ($data['roster'] ? round($n*100/$data['roster'],2) : 0) . '%"></span></span><strong>' . $n . ' / ' . $data['roster'] . '</strong></a>';
-        }
-        $html .= '</div></section><section id="sd-learners" class="sd-card sd-learners"><div class="sd-section-heading"><h3>' . self::t('learners') . '</h3><a class="sd-button sd-secondary" href="' . self::url($m,['download'=>'csv']) . '">' . self::t('download') . '</a></div><form method="get" class="sd-filters">' . self::fields($m['filters'],['search','state','page','learner','attempt']) . '<label class="sr-only" for="sd-learner-search">' . self::t('searchlearners') . '</label><input type="search" id="sd-learner-search" name="search" value="' . self::h($m['filters']['search']) . '" placeholder="' . self::t('searchlearners') . '"><label class="sr-only" for="sd-state">' . self::t('status') . '</label><select id="sd-state" name="state"><option value="">' . self::t('allstatuses') . '</option>';
-        foreach (array_keys($data['statuses']) as $status) $html .= '<option value="'.$status.'"'.($m['filters']['state']===$status?' selected':'').'>' . self::status($status) . '</option>';
-        $html .= '</select><button type="submit">' . self::t('apply') . '</button></form>' . self::tablehead(['learner','status','score','attempts','activetime','lastaccess','details']);
+        $html .= self::visuals($data, $m);
+        $html .= '<section id="sd-learners" class="sd-card sd-learners"><div class="sd-section-heading"><h3>' . self::t('learners') . '</h3><a class="sd-button sd-secondary" href="' . self::url($m,['download'=>'csv']) . '">' . self::t('download') . '</a></div><form method="get" class="sd-filters">' . self::fields($m['filters'],['search','state','page','learner','attempt']) . '<label class="sr-only" for="sd-learner-search">' . self::t('searchlearners') . '</label><input type="search" id="sd-learner-search" name="search" value="' . self::h($m['filters']['search']) . '" placeholder="' . self::t('searchlearners') . '"><button type="submit">' . self::t('search') . '</button></form><nav class="sd-status-filters" aria-label="' . self::t('status') . '"><a' . ($m['filters']['state']===''?' aria-current="page"':'') . ' href="' . self::url($m,['state'=>'','page'=>0]) . '#sd-learners">' . self::t('allstatuses') . '</a>';
+        foreach ($data['statuses'] as $state=>$count) $html.='<a' . ($m['filters']['state']===$state?' aria-current="page"':'') . ' href="' . self::url($m,['state'=>$state,'page'=>0]) . '#sd-learners">' . self::status($state) . ' <strong>'.$count.'</strong></a>';
+        $html.='</nav>' . self::tablehead(['learner','status','score','attempts','activetime','lastaccess','details']);
         foreach ($m['rows'] as $learner) {
             $url=self::url($m,['learner'=>$learner['id'],'attempt'=>$learner['latest'],'diagnostics'=>0]);
             $html.='<tr><th scope="row">' . ($learner['latest'] ? '<a class="sd-learner-name" href="'.$url.'">'.self::h($learner['name']).'</a>' : self::h($learner['name'])) . (!empty($learner['staff']) ? '<small>'.self::t('stafflabel').'</small>' : '') . '</th><td><span class="sd-status sd-'.$learner['status'].'">'.self::status($learner['status']).'</span></td><td>'.self::score($learner).'</td><td>'.$learner['attemptcount'].'</td><td>'.($learner['ms']===null?self::simple('missingtime'):self::duration($learner['ms'])).'</td><td>'.($learner['last']?self::h(userdate($learner['last'])):'—').'</td><td>'.($learner['latest']?'<a href="'.$url.'">'.self::t('details').' →</a>':'—').'</td></tr>';
@@ -109,6 +106,37 @@ final class reporting_dashboard {
         if ($m['filters']['page']>0) $html.='<a href="'.self::url($m,['page'=>$m['filters']['page']-1]).'">'.self::t('previous').'</a>';
         if (($m['filters']['page']+1)*25<$m['filteredcount']) $html.='<a href="'.self::url($m,['page'=>$m['filters']['page']+1]).'">'.self::t('next').'</a>';
         return $html.'</div></section></main></div></div>';
+    }
+    /** SVG figures remain visible even if a browser has an old cached stylesheet. */
+    private static function visuals(array $data, array $m): string {
+        $total=$data['roster']; $radius=64; $circumference=2*M_PI*$radius; $offset=0;
+        $colors=['completed'=>'#129576','inprogress'=>'#4f7df4','failed'=>'#df9148','unknown'=>'#94a3b8','notstarted'=>'#d6deeb'];
+        $h='<div class="sd-visuals"><section class="sd-card sd-completion"><h3>'.self::t('completion').'</h3><p>'.self::simple('progresshint').'</p><div class="sd-ring-layout"><svg class="sd-completion-svg" role="img" aria-labelledby="sd-ring-title" viewBox="0 0 180 180" width="180" height="180"><title id="sd-ring-title">'.self::t('completion').': '.$data['completed'].' / '.$data['started'].' '.self::simple('started').'</title><circle cx="90" cy="90" r="64" fill="none" stroke="#edf1f8" stroke-width="20"/>';
+        foreach ($data['statuses'] as $state=>$n) {
+            if (!$n || !$total) continue;
+            $length=$n/$total*$circumference;
+            $h.='<circle cx="90" cy="90" r="64" fill="none" stroke="'.$colors[$state].'" stroke-width="20" stroke-dasharray="'.round($length,3).' '.round($circumference,3).'" stroke-dashoffset="'.round(-$offset,3).'" transform="rotate(-90 90 90)"/>';
+            $offset+=$length;
+        }
+        $h.='<text x="90" y="88" text-anchor="middle" fill="#192a46" font-size="28" font-weight="700">'.($data['started']?round($data['completed']*100/$data['started']).'%':'—').'</text><text x="90" y="110" text-anchor="middle" fill="#63748b" font-size="11">'.self::simple('completed').'</text></svg><div class="sd-status-chart">';
+        foreach ($data['statuses'] as $state=>$n) $h.='<a href="'.self::url($m,['state'=>$state,'page'=>0]).'#sd-learners"><span class="sd-legend-dot" style="background:'.$colors[$state].'"></span><span>'.self::status($state).'</span><strong>'.$n.' / '.$total.'</strong></a>';
+        $h.='</div></div></section><section class="sd-card sd-time-chart"><h3>'.self::simple('timechart').'</h3><p>'.self::simple('timecharthint').'</p>';
+        $pages=[];
+        foreach ($m['metrics']['blocks'] as $block) {
+            $id=$block['scoid'];
+            if (!isset($pages[$id])) $pages[$id]=['label'=>$block['page'],'ms'=>0,'learners'=>[]];
+            $pages[$id]['ms']+=$block['ms']; $pages[$id]['learners']+=$block['learners'];
+        }
+        $pages=array_filter($pages,function($p){return $p['ms']>0;});
+        uasort($pages,function($a,$b){return $b['ms']<=>$a['ms'];});$pages=array_slice($pages,0,5);
+        if (!$pages) return $h.'<p class="sd-empty">'.self::simple('notimechart').'</p></section></div>';
+        $maximum=max(array_column($pages,'ms'));$height=count($pages)*66;
+        $h.='<svg role="img" aria-labelledby="sd-time-title" viewBox="0 0 500 '.$height.'" width="100%" class="sd-page-time-svg"><title id="sd-time-title">'.self::simple('timechart').'</title>';
+        foreach ($pages as $i=>$p) {
+            $y=$i*66;$label=mb_strimwidth($p['label'],0,46,'…','UTF-8');
+            $h.='<g><title>'.self::h($p['label']).': '.self::duration($p['ms']).' · '.count($p['learners']).' '.self::t('learners').'</title><text x="0" y="'.($y+16).'" fill="#324b70" font-size="13">'.self::h($label).'</text><text x="500" y="'.($y+16).'" text-anchor="end" fill="#192a46" font-size="13">'.self::duration($p['ms']).'</text><rect x="0" y="'.($y+27).'" width="500" height="9" rx="4" fill="#edf1f8"/><rect x="0" y="'.($y+27).'" width="'.round($p['ms']/$maximum*500,2).'" height="9" rx="4" fill="#4f7df4"/><text x="0" y="'.($y+52).'" fill="#63748b" font-size="11">'.count($p['learners']).' '.self::t('learners').'</text></g>';
+        }
+        return $h.'</svg></section></div>';
     }
     private static function simple(string $key): string { return self::h(get_string('simple'.$key,'mod_seledascorm')); }
     private static function status(string $key): string { return in_array($key,['unknown','notstarted']) ? self::simple($key) : self::t($key); }
@@ -127,9 +155,9 @@ final class reporting_dashboard {
     private static function filters(array $m): string {
         $h = '<details class="sd-advanced"><summary>' . self::simple('filters') . '</summary><form method="get" class="sd-card sd-filters">' . self::fields($m['filters'], ['from','to','staff','block','type','learner','attempt','page']);
         foreach (['from','to'] as $key) { $h .= '<label>' . self::t($key) . '<input type="date" name="' . $key . '" value="' . self::h($m['filters'][$key] ?? '') . '"></label>'; }
-        $h .= '<label>' . self::t('audience') . '<select name="staff"><option value="0">' . self::t('learnersonly') . '</option><option value="1"' . (!empty($m['filters']['staff']) ? ' selected' : '') . '>' . self::t('includestaff') . '</option></select></label>';
-        $h .= '<label>' . self::t('type') . '<select name="type"><option value="">' . self::t('alltypes') . '</option>' . implode('', array_map(function($type) use ($m) { return '<option value="' . self::h($type) . '"' . (($m['filters']['type'] ?? '') === $type ? ' selected' : '') . '>' . self::h($type) . '</option>'; }, array_unique(array_merge(['text','quick-questions','complete','mcq-feedback','speaking-practice','map','dragdrop'], array_column($m['metrics']['blocks'] ?? [], 'type'))))) . '</select></label>';
-        if (!empty($m['filters']['block'])) { $h .= '<input type="hidden" name="block" value="' . self::h($m['filters']['block']) . '"><a href="' . self::url($m, ['block'=>'']) . '">' . self::t('clearblock') . '</a>'; }
+        $h .= '<label class="sd-checkbox"><input type="checkbox" name="staff" value="1"' . (!empty($m['filters']['staff']) ? ' checked' : '') . '>' . self::t('includestaff') . '</label>';
+        foreach (['block','type'] as $key) if (!empty($m['filters'][$key])) $h.='<input type="hidden" name="'.$key.'" value="'.self::h($m['filters'][$key]).'">';
+        if (!empty($m['filters']['block'])) { $h .= '<a href="' . self::url($m, ['block'=>'']) . '">' . self::t('clearblock') . '</a>'; }
         return $h . '<button type="submit">' . self::t('apply') . '</button><p class="sd-note">' . self::t('datenote') . '</p></form></details>';
     }
 
@@ -165,14 +193,18 @@ final class reporting_dashboard {
     }
     private static function detail(array $m): string {
         $d=$m['detail'];
-        $h='<a href="'.self::url($m,['learner'=>0,'attempt'=>0,'diagnostics'=>0]).'">← '.self::t('alllearners').'</a><section class="sd-card"><div class="sd-section-heading"><h2>'.self::h($d['name']).'</h2><form method="get" class="sd-attempt">'.self::fields($m['filters'],['attempt','diagnostics']).'<label for="sd-attempt">'.self::t('attempt').'</label><select name="attempt" id="sd-attempt">';
+        $h='<a href="'.self::url($m,['learner'=>0,'attempt'=>0,'diagnostics'=>0]).'">← '.self::t('alllearners').'</a><section class="sd-card"><div class="sd-section-heading"><h2>'.self::h($d['name']).'</h2>';
+        if (count($d['attempts']) > 1) {
+            $h.='<form method="get" class="sd-attempt">'.self::fields($m['filters'],['attempt','diagnostics']).'<label for="sd-attempt">'.self::t('attempt').'</label><select name="attempt" id="sd-attempt">';
         foreach ($d['attempts'] as $n) $h.='<option value="'.$n.'"'.($n===$m['filters']['attempt']?' selected':'').'>'.$n.'</option>';
-        $h.='</select><button type="submit">'.self::t('apply').'</button></form></div><p>'.self::t('attemptscope').'</p><p>'.self::t('status').': <strong>'.self::status($d['status']).'</strong> · '.self::t('score').': <strong>'.self::score($d).'</strong> · '.self::t('activetime').': <strong>'.self::h($d['active']).'</strong></p></section><details class="sd-card sd-answers"><summary>'.self::simple('answers').'</summary><p>'.self::simple('answersnote').'</p>'.self::tablehead(['page','question','response','correctanswer','result']);
+        $h.='</select><button type="submit">'.self::t('apply').'</button></form>';
+        } else { $h.='<span class="sd-muted">'.self::t('attempt').' '.(int)$m['filters']['attempt'].'</span>'; }
+        $h.='</div><p>'.self::t('attemptscope').'</p><p>'.self::t('status').': <strong>'.self::status($d['status']).'</strong> · '.self::t('score').': <strong>'.self::score($d).'</strong> · '.self::t('activetime').': <strong>'.self::h($d['active']).'</strong></p></section><section class="sd-card sd-answers"><h3>'.self::simple('answers').'</h3><p>'.self::simple('answersnote').'</p>'.self::tablehead(['page','question','response','correctanswer','result']);
         foreach ($d['questions'] as $q) {
             $h.='<tr>';foreach (['page','question','response','correct','result'] as $key) $h.='<td>'.self::h($q[$key]).'</td>'; $h.='</tr>';
         }
         if (!$d['questions']) $h.='<tr><td colspan="5">'.self::simple('noquestions').'</td></tr>';
-        $h.='</tbody></table></div></details><p class="sd-note"><a href="'.self::url($m,['diagnostics'=>empty($m['filters']['diagnostics'])?1:0]).'">'.self::simple(empty($m['filters']['diagnostics'])?'diagnostics':'hidediagnostics').'</a></p>';
+        $h.='</tbody></table></div></section><p class="sd-note"><a href="'.self::url($m,['diagnostics'=>empty($m['filters']['diagnostics'])?1:0]).'">'.self::simple(empty($m['filters']['diagnostics'])?'diagnostics':'hidediagnostics').'</a></p>';
         if (!empty($m['filters']['diagnostics'])) $h.='<section class="sd-card sd-person-usage"><h3>'.self::simple('diagnostics').'</h3>'.$d['usagehtml'].'</section>';
         return $h;
     }

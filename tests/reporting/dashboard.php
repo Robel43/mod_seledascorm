@@ -26,6 +26,11 @@ class moodle_url {
     function __construct($url, $params = []) { $this->url = $url . '?' . http_build_query($params); }
     function out($escaped = true) { return $this->url; }
 }
+require_once(__DIR__ . '/../../classes/local/presentation_assets.php');
+if (in_array('--asseturls', $argv)) {
+    echo json_encode(array_map(function($file) { return \mod_seledascorm\local\presentation_assets::css($file)->out(false); }, ['dashboard.css','learner-layout.css']));
+    exit;
+}
 class moodle_exception extends Exception {}
 class required_capability_exception extends Exception {function __construct(...$args) { parent::__construct('Denied'); }}
 eval('namespace core\access; class get_user_capability_course_helper {static function get_sql(...$a){return $GLOBALS["scope"];}}');

@@ -117,3 +117,11 @@
 /* Leaf pages use the full label width; only chapter headings reserve an arrow. */
 #page-mod-seledascorm-player #seledascorm_tree li:not(.yui3-treeview-has-children) > .yui3-treeview-row { grid-template-columns:minmax(0,1fr); }
 #page-mod-seledascorm-player #seledascorm_tree li:not(.yui3-treeview-has-children) > .yui3-treeview-row > .yui3-treeview-indicator { display:none!important; }
+
+/* Override legacy Moodle/YUI chapter sprites even when theme CSS loads later. */
+#page-mod-seledascorm-player #seledascormpage #seledascorm_tree .yui3-treeview-row > .yui3-treeview-icon{display:none!important;width:0!important;padding:0!important;margin:0!important;background:none!important}
+#page-mod-seledascorm-player #seledascormpage #seledascorm_tree .yui3-treeview-has-children > .yui3-treeview-row{display:grid!important;grid-template-columns:minmax(0,1fr) 32px!important;background:#f5f7f9!important;border-radius:0!important;box-shadow:none}
+#page-mod-seledascorm-player #seledascormpage #seledascorm_tree .yui3-treeview-label{grid-column:1!important;grid-row:1!important;padding-left:0!important;font-family:system-ui,-apple-system,"Segoe UI",sans-serif!important}
+#page-mod-seledascorm-player #seledascormpage #seledascorm_tree .yui3-treeview-row > .yui3-treeview-indicator{grid-column:2!important;grid-row:1!important;margin:0!important;float:none!important;background:none!important}
+#page-mod-seledascorm-player #seledascormpage #seledascorm_tree .yui3-treeview-indicator s{display:none!important;border:0!important}
+#page-mod-seledascorm-player #seledascormpage #seledascorm_tree .yui3-treeview-children .yui3-treeview-children{padding-left:8px!important}

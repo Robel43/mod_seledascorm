@@ -213,7 +213,7 @@ if ($CFG->version >= 2022041900) { // Moodle 4+.
 
     $activityheader->set_attrs($headerconfig);
 }
-$PAGE->requires->css('/mod/seledascorm/learner-layout.css');
+$PAGE->requires->css(\mod_seledascorm\local\presentation_assets::css('learner-layout.css'));
 echo $OUTPUT->header();
 $PAGE->requires->string_for_js('navigation', 'mod_seledascorm');
 $PAGE->requires->string_for_js('toc', 'mod_seledascorm');

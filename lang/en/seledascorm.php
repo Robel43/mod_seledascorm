@@ -872,3 +872,6 @@ $string['simpleprogresshint'] = 'Latest recorded progress. Select a status to se
 $string['simpletimechart'] = 'Where learners spend time';
 $string['simpletimecharthint'] = 'Top five pages by total active time across recorded attempts. Time does not measure mastery.';
 $string['simplenotimechart'] = 'No active-time data recorded yet.';
+
+$string['simpleparticipationchart'] = 'Participation by activity';
+$string['simpleparticipationhint'] = 'Five most-accessed activities on this comparison page, measured by learners with recorded access. The same learner can appear in different activities.';

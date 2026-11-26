@@ -59,7 +59,7 @@ $questionhtml=\mod_seledascorm\output\reporting_dashboard::render($model);
 ensure(strpos($questionhtml,'Reading question')!==false && strpos($questionhtml,'A book')!==false,'Question analysis not rendered');
 $model['filters']['view']='analytics';$model['comparisons']=[['id'=>1,'name'=>'<script>bad</script>','course'=>'Course','data'=>$d]];$model['comparisonmore']=false;
 $orghtml=\mod_seledascorm\output\reporting_dashboard::render($model);
-ensure(strpos($orghtml,'learner–activity')!==false && strpos($orghtml,'<script>bad')===false,'Organisation scope or escaping lost');
+ensure(strpos($orghtml,'sd-participation-svg')!==false && strpos($orghtml,'learner–activity')!==false && strpos($orghtml,'<script>bad')===false,'Organisation scope or escaping lost');
 $model['filters']['view']='teacher';$model['filters']['attempt']=1;
 $model['detail']=['name'=>'Learner','attempts'=>[1],'status'=>'inprogress','score'=>null,'grading'=>'unknown','active'=>'00:01:00','questions'=>[],'usagehtml'=>''];
 $detailhtml=\mod_seledascorm\output\reporting_dashboard::render($model);

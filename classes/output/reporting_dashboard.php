@@ -176,10 +176,21 @@ final class reporting_dashboard {
         foreach (array_slice($data['pages'],0,5) as $p) $h.='<tr><th scope="row">'.self::h($p['page']).'</th><td>'.$p['reached'].'</td><td>'.$p['unfinished'].' / '.$p['reached'].'</td><td>'.$p['unknown'].' / '.$p['reached'].'</td></tr>';
         return $h.'</tbody></table></div></section>';
     }
+    private static function participation_chart(array $items): string {
+        if (!$items) return '';
+        usort($items,function($a,$b){return $b['data']['started'] <=> $a['data']['started'];});
+        $items=array_slice($items,0,5);$maximum=max(1,max(array_map(function($item){return $item['data']['started'];},$items)));
+        $h='<section class="sd-card"><h3>'.self::simple('participationchart').'</h3><p>'.self::simple('participationhint').'</p><svg class="sd-participation-svg" role="img" aria-labelledby="sd-participation-title" width="100%" viewBox="0 0 700 '.(count($items)*60).'"><title id="sd-participation-title">'.self::simple('participationchart').'</title>';
+        foreach ($items as $i=>$item) {
+            $n=$item['data']['started'];$y=$i*60;$label=mb_strimwidth($item['name'],0,65,'…','UTF-8');
+            $h.='<g><title>'.self::h($item['course'].' / '.$item['name']).': '.$n.' '.self::simple('started').'</title><text x="0" y="'.($y+16).'" fill="#324b70" font-size="13">'.self::h($label).'</text><text x="700" y="'.($y+16).'" text-anchor="end" fill="#192a46" font-size="13">'.$n.'</text><rect x="0" y="'.($y+28).'" width="700" height="10" rx="5" fill="#edf1f8"/><rect x="0" y="'.($y+28).'" width="'.round($n/$maximum*700,2).'" height="10" rx="5" fill="#129576"/></g>';
+        }
+        return $h.'</svg></section>';
+    }
     private static function analytics(array $m): string {
         $items=$m['comparisons'];$started=0;$completed=0;
         foreach ($items as $item) {$started+=$item['data']['started'];$completed+=$item['data']['completed'];}
-        $h='<section class="sd-context"><h2>'.self::simple('analytics').'</h2><a href="'.self::url($m,['download'=>'csv']).'">'.self::t('download').'</a></section><p class="sd-note">'.self::simple('analyticsscope').'</p><p><strong>'.$started.'</strong> '.self::simple('participations').' · <strong>'.$completed.' / '.$started.'</strong> '.self::simple('completed').'</p><section class="sd-card"><div class="sd-table-scroll"><table class="sd-table"><thead><tr>';
+        $h='<section class="sd-context"><h2>'.self::simple('analytics').'</h2><a href="'.self::url($m,['download'=>'csv']).'">'.self::t('download').'</a></section><p class="sd-note">'.self::simple('analyticsscope').'</p><p><strong>'.$started.'</strong> '.self::simple('participations').' · <strong>'.$completed.' / '.$started.'</strong> '.self::simple('completed').'</p>' . self::participation_chart($items) . '<section class="sd-card"><div class="sd-table-scroll"><table class="sd-table"><thead><tr>';
         foreach (['activity','started','completion','average','typical','improvement'] as $k) $h.='<th scope="col">'.self::simple($k).'</th>';
         $h.='</tr></thead><tbody>';
         foreach ($items as $item) {

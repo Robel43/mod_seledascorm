@@ -40,7 +40,7 @@ final class learning_insights {
     private function attempt(array $records): void {
         $first = $records[0]; $id = (int)$first->userid; $number = (int)$first->attempt;
         if (!isset($this->people[$id])) {
-            $this->people[$id] = ['id'=>$id, 'name'=>fullname($first), 'staff'=>!empty($first->dashboardstaff), 'role'=>$first->dashboardrole ?? (!empty($first->dashboardstaff)?'staff':'learner'), 'attempts'=>[]];
+            $this->people[$id] = ['id'=>$id, 'name'=>fullname($first), 'staff'=>!empty($first->dashboardstaff), 'answersknown'=>false, 'role'=>$first->dashboardrole ?? (!empty($first->dashboardstaff)?'staff':'learner'), 'attempts'=>[]];
         }
         $attempt = ['statuses'=>[], 'scores'=>[], 'reached'=>[], 'ms'=>0, 'timeknown'=>false, 'last'=>0, 'first'=>PHP_INT_MAX];
         $custom = []; $scos = []; $pagetime=[]; $pagelast=[]; $pagehas=[]; $coverage=false;
@@ -66,6 +66,7 @@ final class learning_insights {
             if ($ms || !empty($data['visits'])) { $attempt['timeknown'] = true; $attempt['reached'][$sco] = true; }
             if ($this->questionsenabled) {
                 foreach (($data['events'] ?? []) as $event) {
+                    if (($event['action'] ?? '')==='answer' && !empty($event['label'])) $this->people[$id]['answersknown']=true;
                     if (($event['action'] ?? '') !== 'answer' || !in_array($event['result'] ?? '', ['correct','incorrect'], true)) { continue; }
                     $key = $sco . ':custom:' . hash('sha256', json_encode([$data['id'], $event['label'], $event['expected'] ?? '']));
                     $custom[] = ['key'=>$key, 'sco'=>$sco, 'prompt'=>$event['label'], 'response'=>$event['value'] ?? '',
@@ -101,6 +102,7 @@ final class learning_insights {
             $catalogs = [];
             foreach (array_keys($scos) as $sco) { $catalogs[$sco] = $this->catalog($sco); }
             foreach (timhirt_reporting::rows($records, $catalogs) as $row) {
+                if (!empty($row['resolved'])) $this->people[$id]['answersknown']=true;
                 if (empty($row['graded']) || empty($row['resolved'])) { continue; }
                 $key = $row['scoid'] . ':native:' . preg_replace('/-a[1-9][0-9]*$/', '', $row['id']);
                 $this->answer($id, $key, (int)$row['scoid'], $row['question'], $row['response'], $row['credit']);
@@ -167,6 +169,6 @@ final class learning_insights {
         return ['learners'=>$people,'statuses'=>$statuses,'started'=>count($this->people),'roster'=>count($people),'completed'=>$statuses['completed'],
             'average'=>$percents?array_sum($percents)/count($percents):null,'scored'=>count($percents),'median'=>self::median($times),'timed'=>count($times),
             'improvement'=>$improvements?array_sum($improvements)/count($improvements):null,'paired'=>count($improvements),'grading'=>$mode,
-            'needsattention'=>count(array_filter($people,function($p){return $p['needsattention'];})), 'uniquepeople'=>count($people),'scoreBins'=>report_view::score_bins($people),'maximum'=>(float)($this->activity->maxgrade??100),'questions'=>$questions,'pages'=>array_values($pagecounts)];
+            'needsattention'=>count(array_filter($people,function($p){return $p['needsattention'];})), 'uniquepeople'=>count($people),'readable'=>count(array_filter($people,function($p){return !empty($p['answersknown']);})), 'scoreBins'=>report_view::score_bins($people),'maximum'=>(float)($this->activity->maxgrade??100),'questions'=>$questions,'pages'=>array_values($pagecounts)];
     }
 }

@@ -173,6 +173,11 @@ $empty['rows'] = []; $empty['filteredcount'] = 0;
 $emptyhtml = \mod_seledascorm\output\reporting_dashboard::render($empty);
 ensure(strpos($emptyhtml, '0 of 0') !== false && strpos($emptyhtml, 'No people match') !== false,
     'An empty activity should show explicit empty states, not crash or invent failed learners');
+if (in_array('--contenthtml',$argv)) { $model['filters']['panel']='questions'; $html=\mod_seledascorm\output\reporting_dashboard::render($model); }
+if (in_array('--insightshtml',$argv)) {
+    $model['filters']['view']='analytics';$model['comparisons']=[['id'=>1,'name'=>'English practice','course'=>'English 101','data'=>$data['learning']]];
+    $model['comparisonmore']=false;$html=\mod_seledascorm\output\reporting_dashboard::render($model);
+}
 if (in_array('--detailhtml',$argv)) {
     $person=$data['learning']['learners'][4];$attempt=2;
     $model['filters']['learner']=4;$model['filters']['attempt']=$attempt;$model['filters']['tab']='answers';
@@ -185,7 +190,7 @@ if (in_array('--detailhtml',$argv)) {
             'earlier'=>[['page'=>'Practice','question'=>'What is 2 + 2?','response'=>'3','expected'=>'4','credit'=>0,'retry'=>1,'shortened'=>false]]]]];
     $html=\mod_seledascorm\output\reporting_dashboard::render($model);
 }
-if (in_array('--html', $argv) || in_array('--detailhtml',$argv)) {
+if (in_array('--html', $argv) || in_array('--detailhtml',$argv) || in_array('--contenthtml',$argv) || in_array('--insightshtml',$argv)) {
     echo '<!doctype html><html lang="en"><meta name="viewport" content="width=device-width, initial-scale=1"><meta charset="utf-8"><title>Seleda reports</title><style>body{font:16px system-ui;margin:0;padding:24px;background:#f7f9fd}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}' .
         file_get_contents(__DIR__ . '/../../dashboard.css') . '</style>' . $html . '<script>window.define=(name,deps,factory)=>factory().init();</script><script>' .
         file_get_contents(__DIR__ . '/../../amd/build/reporting_dashboard.min.js') . '</script></html>';

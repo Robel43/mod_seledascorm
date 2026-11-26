@@ -50,7 +50,7 @@ final class reporting_dashboard {
         $html.='<nav class="sd-tabs" aria-label="'.self::r('sections').'">';
         foreach (['overview','questions'] as $panel) $html.='<a'.(($m['filters']['panel']??'overview')===$panel?' aria-current="page"':'').' href="'.self::url($m,['panel'=>$panel,'page'=>0]).'">'.self::r($panel==='overview'?'overview':'content').'</a>';
         $html.='</nav>';
-        if (($m['filters']['panel']??'')==='questions') return $html.self::questions($data).'</main></div>';
+        if (($m['filters']['panel']??'')==='questions') return $html.self::content($m).'</main></div>';
         $html.=self::kpis($data,$m).'<p class="sd-note">'.self::r('scope',(object)['total'=>$data['roster'],'started'=>$data['started'],'notstarted'=>$data['statuses']['notstarted']]).'</p>';
         $html.='<div class="sd-visuals">'.self::page_progress($data).self::hardest($data['questions'],5).'</div><a href="'.self::url($m,['panel'=>'questions']).'">'.self::r('seequestions').'</a>';
         $html.=self::learner_table($m);
@@ -116,7 +116,7 @@ final class reporting_dashboard {
         $h='<section class="sd-card"><h2>'.self::r('hardest').'</h2><div class="sd-table-scroll"><table class="sd-table"><thead><tr>';
         foreach(['question','accuracy','answered','commonwrong']as $key)$h.='<th scope="col">'.self::r($key).'</th>';
         $h.='</tr></thead><tbody>';
-        foreach(array_slice($questions,0,$limit)as $q){$wrong=[];foreach($q['wrong']as $answer=>$n)$wrong[]=self::h($answer).' ('.$n.')';$h.='<tr><th scope="row">'.self::h($q['question']).'<small>'.self::h($q['page']).'</small></th><td>'.($q['n']<5?self::r('notenough',$q['n']):round($q['accuracy']).'% · '.$q['correct'].' / '.$q['n']).'</td><td>'.$q['answered'].' / '.$q['n'].'</td><td>'.implode('<br>',$wrong).'</td></tr>';}
+        foreach(array_slice($questions,0,$limit)as $q){$wrong=[];foreach($q['wrong']as $answer=>$n)$wrong[]=self::h($answer).' ('.$n.')';$h.='<tr><th scope="row">'.self::h($q['question']).'<small>'.self::h((isset($q['activity'])?$q['activity'].' · ':'').$q['page']).'</small></th><td>'.($q['n']<5?self::r('notenough',$q['n']):round($q['accuracy']).'% · '.$q['correct'].' / '.$q['n']).'</td><td>'.$q['answered'].' / '.$q['n'].'</td><td>'.implode('<br>',$wrong).'</td></tr>';}
         if(!$questions)$h.='<tr><td colspan="4">'.self::r('noquestions').'</td></tr>';
         return $h.'</tbody></table></div></section>';
     }
@@ -185,46 +185,58 @@ final class reporting_dashboard {
         return $h . '<button type="submit">' . self::t('apply') . '</button><p class="sd-note">' . self::t('datenote') . '</p></form></details>';
     }
 
-    private static function questions(array $data): string {
-        $h='<section class="sd-card"><h3>'.self::simple('questions').'</h3><p>'.self::simple('questionnote').'</p><div class="sd-table-scroll"><table class="sd-table"><thead><tr>';
-        foreach (['question','firstaccuracy','commonwrong'] as $k) $h.='<th scope="col">'.self::simple($k).'</th>';
-        $h.='</tr></thead><tbody>';
-        foreach (array_slice($data['questions'],0,50) as $q) {
-            $wrong=[];foreach ($q['wrong'] as $answer=>$n) $wrong[]=self::h($answer).' ('.$n.')';
-            $h.='<tr><th scope="row">'.self::h($q['question']).'<small class="sd-muted">'.self::h($q['page']).'</small></th><td>'.round($q['accuracy']).'% · '.$q['correct'].' / '.$q['n'].'<small class="sd-muted">'.$q['answered'].' / '.$q['n'].' '.self::simple('answered').'</small></td><td>'.($wrong?implode('<br>',$wrong):'—').'</td></tr>';
-        }
-        if (!$data['questions']) $h.='<tr><td colspan="3">'.self::simple('noquestions').'</td></tr>';
-        $h.='</tbody></table></div></section><section class="sd-card"><h3>'.self::simple('unfinished').'</h3><p>'.self::simple('unfinishednote').'</p><div class="sd-table-scroll"><table class="sd-table"><thead><tr>';
-        foreach (['page','reached','unfinished','missingprogress'] as $k) $h.='<th>'.self::simple($k).'</th>';
-        $h.='</tr></thead><tbody>';
-        foreach (array_slice($data['pages'],0,5) as $p) $h.='<tr><th scope="row">'.self::h($p['page']).'</th><td>'.$p['reached'].'</td><td>'.$p['unfinished'].' / '.$p['reached'].'</td><td>'.$p['unknown'].' / '.$p['reached'].'</td></tr>';
+    private static function content(array $m): string {
+        $d=$m['metrics']['learning'];
+        $h='<section class="sd-card"><h2>'.self::r('pages').'</h2>'.self::header_table(['page','reached','completed','inprogress','unknown','median']);
+        foreach($d['pages']as $p)$h.='<tr><th scope="row">'.self::h($p['page']).'</th><td>'.$p['reached'].'</td><td>'.$p['completed'].'</td><td>'.$p['inprogress'].'</td><td>'.$p['unknown'].'</td><td>'.self::time($p['median']).'<small>'.self::sample_hint($p['timed']).'</small></td></tr>';
+        $h.='</tbody></table></div></section>'.self::hardest($d['questions'],PHP_INT_MAX);
+        $time=[];foreach($m['metrics']['blocks']as $b)if(!empty($b['timeknown']))$time[$b['scoid']]=['label'=>$b['page'],'value'=>($time[$b['scoid']]['value']??0)+$b['ms']];
+        $h.=self::bar_chart('timebypage',array_values($time),true);
+        $measure=$m['filters']['measure']??'time';$blocks=$m['metrics']['blocks'];
+        usort($blocks,function($a,$b)use($measure){return $measure==='time'?$b['ms']<=>$a['ms']:$b['interactions']<=>$a['interactions'];});
+        $h.='<section class="sd-card"><h2>'.self::r('mostused').'</h2><nav class="sd-tabs" aria-label="'.self::r('measure').'">';
+        foreach(['time','interactions']as $key)$h.='<a'.($key===$measure?' aria-current="page"':'').' href="'.self::url($m,['measure'=>$key]).'">'.self::r($key).'</a>';
+        $h.='</nav>'.self::header_table(['block','page',$measure,'people']);
+        foreach(array_slice($blocks,0,20)as $b)$h.='<tr><th scope="row"><a href="'.self::url($m,['block'=>$b['key'],'page'=>0]).'">'.self::h($b['title']).'</a></th><td>'.self::h($b['page']).'</td><td>'.($measure==='time'?self::time(!empty($b['timeknown'])?$b['ms']:null):self::number($b['interactions'])).'</td><td>'.count($b['learners']).'</td></tr>';
         return $h.'</tbody></table></div></section>';
     }
-    private static function participation_chart(array $items): string {
-        if (!$items) return '';
-        usort($items,function($a,$b){return $b['data']['started'] <=> $a['data']['started'];});
-        $items=array_slice($items,0,5);$maximum=max(1,max(array_map(function($item){return $item['data']['started'];},$items)));
-        $h='<section class="sd-card"><h3>'.self::simple('participationchart').'</h3><p>'.self::simple('participationhint').'</p><svg class="sd-participation-svg" role="img" aria-labelledby="sd-participation-title" width="100%" viewBox="0 0 700 '.(count($items)*60).'"><title id="sd-participation-title">'.self::simple('participationchart').'</title>';
-        foreach ($items as $i=>$item) {
-            $n=$item['data']['started'];$y=$i*60;$label=mb_strimwidth($item['name'],0,65,'…','UTF-8');
-            $h.='<g><title>'.self::h($item['course'].' / '.$item['name']).': '.$n.' '.self::simple('started').'</title><text x="0" y="'.($y+16).'" fill="#324b70" font-size="13">'.self::h($label).'</text><text x="700" y="'.($y+16).'" text-anchor="end" fill="#192a46" font-size="13">'.$n.'</text><rect x="0" y="'.($y+28).'" width="700" height="10" rx="5" fill="#edf1f8"/><rect x="0" y="'.($y+28).'" width="'.round($n/$maximum*700,2).'" height="10" rx="5" fill="#129576"/></g>';
-        }
-        return $h.'</svg></section>';
+    private static function header_table(array $keys): string {
+        return '<div class="sd-table-scroll"><table class="sd-table"><thead><tr>'.implode('',array_map(function($k){return '<th scope="col">'.self::r($k).'</th>';},$keys)).'</tr></thead><tbody>';
+    }
+    private static function bar_chart(string $key,array $items,bool $time=false): string {
+        $h='<section class="sd-card"><h2>'.self::r($key).'</h2>';
+        if(!$items)return $h.'<p>'.self::r('nodata').'</p></section>';
+        $max=max(1,max(array_column($items,'value')));$h.='<svg class="sd-rpt-chart" role="img" width="100%" viewBox="0 0 600 '.(count($items)*60).'"><title>'.self::r($key).'</title>';
+        foreach($items as $i=>$item){$y=$i*60;$value=$time?self::time($item['value']):self::number($item['value']);$h.='<g><title>'.self::h($item['label']).': '.$value.'</title><text x="0" y="'.($y+16).'" fill="#324b70" font-size="13">'.self::h(mb_strimwidth($item['label'],0,52,'…','UTF-8')).'</text><text x="600" y="'.($y+16).'" text-anchor="end" fill="#192a46" font-size="13">'.$value.'</text><rect y="'.($y+28).'" width="600" height="10" rx="5" fill="#e3e9f2"/><rect y="'.($y+28).'" width="'.round($item['value']/$max*600,2).'" height="10" rx="5" fill="#4f7df4"/></g>';}
+        $h.='</svg><ul class="sd-chart-values">';foreach($items as $item)$h.='<li>'.self::h($item['label']).': '.($time?self::time($item['value']):self::number($item['value'])).'</li>';
+        return $h.'</ul></section>';
+    }
+    private static function insights_value($value,int $n,bool $time=false,string $suffix=''): string {
+        return $n<5?self::r('notenough',$n):($value===null?'—':($time?self::time($value):self::number($value).$suffix)).'<small>'.self::r('sample',$n).'</small>';
     }
     private static function analytics(array $m): string {
-        $items=$m['comparisons'];$started=0;$completed=0;
-        foreach ($items as $item) {$started+=$item['data']['started'];$completed+=$item['data']['completed'];}
-        $h='<section class="sd-context"><h2>'.self::simple('analytics').'</h2><a href="'.self::url($m,['download'=>'csv']).'">'.self::t('download').'</a></section><p class="sd-note">'.self::simple('analyticsscope').'</p><p><strong>'.$started.'</strong> '.self::simple('participations').' · <strong>'.$completed.' / '.$started.'</strong> '.self::simple('completed').'</p>' . self::participation_chart($items) . '<section class="sd-card"><div class="sd-table-scroll"><table class="sd-table"><thead><tr>';
-        foreach (['activity','started','completion','average','typical','improvement'] as $k) $h.='<th scope="col">'.self::simple($k).'</th>';
-        $h.='</tr></thead><tbody>';
-        foreach ($items as $item) {
-            $d=$item['data'];$h.='<tr><th scope="row"><a href="'.self::url($m,['view'=>'teacher','id'=>$item['id'],'learner'=>0,'group'=>0,'panel'=>'overview']).'">'.self::h($item['name']).'</a><small class="sd-muted">'.self::h($item['course']).'</small></th><td>'.$d['started'].'</td><td>'.($d['started']?round($d['completed']*100/$d['started']).'% · ':'').$d['completed'].' / '.$d['started'].'</td><td>'.($d['average']===null?'—':round($d['average'],1).'%').'<small class="sd-muted">'.$d['scored'].' '.self::simple('scored').'</small></td><td>'.($d['median']===null?'—':self::duration($d['median'])).'<small class="sd-muted">'.$d['timed'].' '.self::simple('timed').'</small></td><td>'.($d['improvement']===null?'—':sprintf('%+.1f',$d['improvement']).' '.self::simple('points')).'<small class="sd-muted">'.$d['paired'].' '.self::simple('paired').'</small></td></tr>';
+        $items=$m['comparisons'];$summary=$m['insights']??\mod_seledascorm\local\report_view::comparison($items);
+        $h='<section class="sd-card"><h2>'.self::r('participation').'</h2><p>'.self::r('insightsscope').'</p><dl class="sd-person-metrics"><div><dt>'.self::r('uniquepeople').'</dt><dd>'.$summary['unique'].'</dd></div><div><dt>'.self::r('participations').'</dt><dd>'.$summary['participations'].'</dd></div></dl></section>';
+        $bars=[];foreach($items as $item)$bars[]=['label'=>$item['name'],'value'=>$item['data']['started']];
+        $h.=self::bar_chart('participationactivity',$bars).'<section class="sd-card"><h2>'.self::r('completionactivity').'</h2>'.self::header_table(['activity','completion','completed']);
+        foreach($items as $item){$d=$item['data'];$h.='<tr><th scope="row"><a href="'.self::url($m,['view'=>'teacher','id'=>$item['id'],'group'=>0,'learner'=>0]).'">'.self::h($item['name']).'</a><small>'.self::h($item['course']).'</small></th><td>'.self::insights_value($d['roster']?$d['completed']*100/$d['roster']:null,$d['roster'],false,'%').'</td><td>'.$d['completed'].' / '.$d['roster'].'</td></tr>';}
+        $h.='</tbody></table></div></section><section class="sd-card"><h2>'.self::r('scoredistribution').'</h2>';
+        foreach($items as $item){$d=$item['data'];$h.='<h3>'.self::h($item['name']).'</h3>';if($d['grading']==='completion'){$h.='<p>'.self::r('completionscorelimit').'</p>';continue;}
+            if($d['scored']<5){$h.='<p>'.self::r('notenough',$d['scored']).'</p>';continue;}
+            $bars=[];foreach($d['scoreBins']as $bin=>$n)$bars[]=['label'=>$bin,'value'=>$n];$h.='<p>'.self::r('sample',$d['scored']).'</p>'.self::bar_chart('scorebands',$bars);
         }
-        if (!$items) $h.='<tr><td colspan="6">'.self::t('noactivities').'</td></tr>';
-        $h.='</tbody></table></div><p class="sd-note">'.self::simple('improvementnote').'</p><div class="sd-pagination">';
-        if ($m['filters']['catalogpage']>0) $h.='<a href="'.self::url($m,['catalogpage'=>$m['filters']['catalogpage']-1]).'">'.self::t('previous').'</a>';
-        if ($m['comparisonmore']) $h.='<a href="'.self::url($m,['catalogpage'=>$m['filters']['catalogpage']+1]).'">'.self::t('next').'</a>';
-        return $h.'</div></section>';
+        $h.='</section><section class="sd-card"><h2>'.self::r('timeactivity').'</h2>'.self::header_table(['activity','median']);
+        foreach($items as $item){$d=$item['data'];$h.='<tr><th scope="row">'.self::h($item['name']).'</th><td>'.self::insights_value($d['median'],$d['timed'],true).'</td></tr>';}
+        $h.='</tbody></table></div></section><section class="sd-card"><h2>'.self::r('investigatepages').'</h2>'.self::header_table(['activity','page','unfinished']);
+        foreach($summary['pages']as $p)$h.='<tr><td>'.self::h($p['activity']).'</td><th scope="row">'.self::h($p['page']).'</th><td>'.($p['reached']-$p['completed']).' / '.$p['reached'].'</td></tr>';
+        $h.='</tbody></table></div></section>'.self::hardest($summary['questions'],5).'<section class="sd-card"><h2>'.self::r('retryoutcomes').'</h2>'.self::header_table(['activity','scorechange']);
+        foreach($items as $item){$d=$item['data'];$h.='<tr><th scope="row">'.self::h($item['name']).'</th><td>'.($d['grading']==='completion'?self::r('completionscorelimit'):self::insights_value($d['improvement'],$d['paired'],false,' '.self::r('points'))).'</td></tr>';}
+        $h.='</tbody></table></div></section><section class="sd-card"><h2>'.self::r('coverage').'</h2><p>'.self::r('coveragenote').'</p>'.self::header_table(['activity','recordedtime','recordedscore','readableanswers']);
+        foreach($items as $item){$d=$item['data'];$h.='<tr><th scope="row">'.self::h($item['name']).'</th>';foreach(['timed','scored','readable']as $key)$h.='<td>'.self::insights_value($d['started']?$d[$key]*100/$d['started']:null,$d['started'],false,'%').' · '.$d[$key].' / '.$d['started'].'</td>';$h.='</tr>';}
+        $h.='</tbody></table></div></section><nav class="sd-pagination">';
+        if($m['filters']['catalogpage']>0)$h.='<a href="'.self::url($m,['catalogpage'=>$m['filters']['catalogpage']-1]).'">'.self::r('previous').'</a>';
+        if($m['comparisonmore'])$h.='<a href="'.self::url($m,['catalogpage'=>$m['filters']['catalogpage']+1]).'">'.self::r('next').'</a>';
+        return $h.'</nav>';
     }
     private static function detail(array $m): string {
         return self::learner_header($m).self::page_table($m).self::learner_tabs($m);

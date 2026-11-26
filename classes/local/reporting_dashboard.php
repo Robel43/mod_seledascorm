@@ -273,9 +273,10 @@ final class reporting_dashboard {
             $key = $track->scoid . ':' . $data['id'];
             if (!isset($blocks[$key])) {
                 $blocks[$key] = ['title' => in_array(strtolower(trim($data['title'])), ['text', 'untitled', '']) ? (($pages[$track->scoid]->title ?? 'Content') . ' · ' . ($data['type'] ?? 'text') . ' · ' . substr(hash('sha256', $data['id']), 0, 5)) : $data['title'], 'page' => $pages[$track->scoid]->title ?? '', 'generic' => in_array(strtolower(trim($data['title'])), ['text','untitled','']), 'scoid' => (int)$track->scoid, 'key' => hash('sha256', $key), 'type' => $data['type'] ?? '',
-                    'ms' => 0, 'interactions' => 0, 'learners' => []];
+                    'ms' => 0, 'timeknown'=>false, 'interactions' => 0, 'learners' => []];
             }
             $blocks[$key]['ms'] += $ms;
+            $blocks[$key]['timeknown'] = $blocks[$key]['timeknown'] || $ms>0 || !empty($data['visits']);
             $blocks[$key]['interactions'] += $count;
             $blocks[$key]['learners'][$userid] = true;
             foreach (($data['actions'] ?? []) as $action => $number) {

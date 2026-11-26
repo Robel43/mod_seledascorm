@@ -17,6 +17,7 @@ if (isguestuser()) {
     throw new required_capability_exception(context_system::instance(), 'mod/seledascorm:viewreport', 'nopermissions', '');
 }
 $filters = [
+    'measure' => optional_param('measure', 'time', PARAM_ALPHA),
     'role' => optional_param('role', 'all', PARAM_ALPHA),
     'sort' => optional_param('sort', 'last', PARAM_ALPHA),
     'dir' => optional_param('dir', 'desc', PARAM_ALPHA),
@@ -41,7 +42,7 @@ $filters = [
     'attempt' => max(0, optional_param('attempt', 0, PARAM_INT)),
 ];
 if (!in_array($filters['view'], ['teacher','analytics'], true) || !in_array($filters['panel'], ['overview','questions'], true)) { throw new moodle_exception('invalidparameter'); }
-foreach (['role'=>['all','learner','staff'], 'sort'=>['name','status','progress','score','time','attempts','last'],
+foreach (['measure'=>['time','interactions'], 'role'=>['all','learner','staff'], 'sort'=>['name','status','progress','score','time','attempts','last'],
     'dir'=>['asc','desc'], 'tab'=>['answers','attempts','technical'],
     'state'=>['','completed','inprogress','notstarted','unknown','attention','failed']] as $key=>$allowed) {
     if (!in_array($filters[$key],$allowed,true)) throw new moodle_exception('invalidparameter');
@@ -128,13 +129,15 @@ if ($filters['id'] && $filters['view'] === 'teacher') {
 if ($filters['view'] === 'analytics') {
     $model['comparisons'] = [];
     // Bound aggregation to the displayed page. Every activity rechecks course/module/group access.
-    $catalogue = service::catalogue($filters['q'], $filters['catalogpage'], 20, $filters['course']);
+    $catalogue = $filters['id'] ? ['items'=>[(object)['id'=>$filters['id']]],'more'=>false] : service::catalogue($filters['q'], $filters['catalogpage'], 10, $filters['course']);
     foreach ($catalogue['items'] as $item) {
         [$activity, $cm, $course] = service::activity($item->id);
-        $data = service::overview($activity, $cm, 0, array_merge($options, ['questions'=>false]));
+        $data = service::overview($activity, $cm, $filters['id'] ? $filters['group'] : 0, array_merge($options, ['questions'=>true]));
+        if ($filters['id']) { $model['activity']=$activity; $model['coursename']=$course->fullname; $model['metrics']=$data; }
         $model['comparisons'][] = ['id'=>$item->id, 'name'=>$activity->name, 'course'=>$course->fullname, 'data'=>$data['learning']];
     }
     $model['comparisonmore'] = $catalogue['more'];
+    $model['insights'] = report_view::comparison($model['comparisons']);
     if ($download === 'csv') {
         require_once($CFG->libdir . '/csvlib.class.php');
         $csv = new csv_export_writer(); $csv->set_filename('seleda-activity-comparison');

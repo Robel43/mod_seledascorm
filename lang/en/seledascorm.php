@@ -1050,3 +1050,6 @@ $string['rptfullpage'] = 'Open full page report';
 $string['rptretryload'] = 'Try again';
 
 $string['rptactivitycountone'] = '1 SCORM activity';
+
+$string['rptdatacoverage'] = 'Data from {$a->count} of {$a->total} participants';
+$string['rptinsufficientdata'] = 'Not enough data';

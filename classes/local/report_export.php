@@ -15,16 +15,16 @@ final class report_export {
             $p['attemptcount']?:null,$p['last']?userdate($p['last']):null]);
         return $rows;
     }
-    private static function statistic($value,int $n,bool $time=false): string {
-        if($n<report_view::MIN_SAMPLE)return get_string('rptnotenough','mod_seledascorm',$n);
+    private static function statistic($value,int $n,int $total,bool $time=false): string {
+        if($n<report_view::MIN_SAMPLE)return self::text('insufficientdata').' — '.get_string('rptdatacoverage','mod_seledascorm',(object)['count'=>$n,'total'=>$total]);
         return $value===null?'—':($time?seleda_usage::duration($value):(string)round($value,1));
     }
     public static function insights(array $items,array $summary): array {
         $rows=[array_map([self::class,'text'],['activity','course','accesspeople','people','completed','average','scoredpeople','median','timedpeople','scorechange','pairedpeople','uniquepeople','participations'])];
         foreach($items as $item){$d=$item['data'];$completion=$d['grading']==='completion';
             $rows[]=self::safe([$item['name'],$item['course'],$d['started'],$d['roster'],$d['completed'],
-                $completion?self::text('completionbased'):self::statistic($d['average'],$d['scored']),$d['scored'],self::statistic($d['median'],$d['timed'],true),$d['timed'],
-                $completion?self::text('completionbased'):self::statistic($d['improvement'],$d['paired']),$d['paired'],$summary['unique'],$summary['participations']]);}
+                $completion?self::text('completionbased'):self::statistic($d['average'],$d['scored'],$d['roster']),$d['scored'],self::statistic($d['median'],$d['timed'],$d['roster'],true),$d['timed'],
+                $completion?self::text('completionbased'):self::statistic($d['improvement'],$d['paired'],$d['roster']),$d['paired'],$summary['unique'],$summary['participations']]);}
         return $rows;
     }
 }

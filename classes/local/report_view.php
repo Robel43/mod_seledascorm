@@ -114,7 +114,7 @@ final class report_view {
         foreach ($items as $item) {
             $d=$item['data'];$participations+=$d['roster'];
             foreach ($d['learners'] as $id=>$person) $ids[$id]=true;
-            foreach ($d['questions'] as $q) if ($q['n']>=self::MIN_SAMPLE) $questions[]=$q+['activity'=>$item['name']];
+            foreach ($d['questions'] as $q) if ($q['n']>=self::MIN_SAMPLE) $questions[]=$q+['activity'=>$item['name'],'scopeparticipants'=>$d['roster']];
             foreach ($d['pages'] as $p) $pages[]=$p+['activity'=>$item['name']];
             foreach ($d['scoreBins'] as $bin=>$n) $bins[$bin]+=$n;
         }

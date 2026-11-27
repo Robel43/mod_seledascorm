@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## Scoped participant counts
+
+- Label report samples “Data from X of Y participants”, using contributors and
+  the matching activity report scope, including eligible not-started participants.
+- Keep each Insights question tied to its own activity denominator; preserve
+  formulas, small-sample suppression and permission/group boundaries.
+- Include scoped coverage in suppressed CSV statistics; package suffix is 21.
+
+
 ## Simpler reporting copy
 
 - Remove the long calculation explanation beneath course and activity cards.

@@ -1,7 +1,13 @@
 <?php
 // Execute the real overview renderer against a small Moodle boundary fixture.
 define('MOODLE_INTERNAL', true);
-function reporting_string($key, $value = null) { $string = []; require(__DIR__ . '/../../lang/en/seledascorm.php'); return $string[$key] ?? ($key . ($value === null || is_object($value) ? '' : $value)); }
+function reporting_string($key, $value = null) {
+    $string = []; require(__DIR__ . '/../../lang/en/seledascorm.php');
+    $text=$string[$key] ?? ($key . ($value === null || is_object($value) ? '' : $value));
+    if(is_scalar($value))$text=str_replace('{$a}',(string)$value,$text);
+    if(is_object($value)||is_array($value))foreach((array)$value as $field=>$item)$text=str_replace('{$a->'.$field.'}',(string)$item,$text);
+    return $text;
+}
 
 define('SELEDASCORM_GRADEHIGHEST', 1); define('SELEDASCORM_GRADEAVERAGE', 2); define('SELEDASCORM_GRADESUM', 3); define('SELEDASCORM_GRADESCOES', 0);
 define('PARAM_ALPHA', 1); define('PARAM_RAW', 2); define('PARAM_INT', 3);

@@ -26,6 +26,15 @@ function redesign_data_cases(): void {
     }
     $cross=\mod_seledascorm\local\report_view::comparison([['name'=>'A','data'=>$d],['name'=>'B','data'=>$d]]);
     verify($cross['unique']===2&&$cross['participations']===4,'People confused with participations');
+    $questiondata=$d;$questiondata['roster']=12;
+    $questiondata['questions']=[['n'=>5,'accuracy'=>20,'question'=>'Question']];
+    $questioncross=\mod_seledascorm\local\report_view::comparison([['name'=>'Scoped activity','data'=>$questiondata],['name'=>'Other','data'=>$d]]);
+    verify($questioncross['questions'][0]['scopeparticipants']===12,'Cross-activity questions lost their own scoped participant denominator');
+    require_once(__DIR__.'/../../classes/local/report_export.php');
+    $exportsummary=\mod_seledascorm\local\report_view::comparison([['name'=>'A','data'=>$d]]);
+    $export=\mod_seledascorm\local\report_export::insights([['name'=>'A','course'=>'Course','data'=>$d]],$exportsummary);
+    verify(strpos($export[1][5],'Data from 1 of 2 participants')!==false,'Suppressed CSV statistic lost scoped coverage');
+
     $history=\mod_seledascorm\local\report_view::attempts([1=>['score'=>0,'percent'=>0,'ms'=>100,'timeknown'=>true],2=>['score'=>50,'percent'=>50,'ms'=>20,'timeknown'=>true]]);
     verify($history['best']===50&&$history['change']===50&&$history['extratime']===20,'Attempt summary missing real zero');
     verify(\mod_seledascorm\local\report_view::attempts([1=>$a])['change']===null,'Single attempt invented improvement');    require_once(__DIR__.'/../../classes/local/report_export.php');

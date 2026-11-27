@@ -147,8 +147,19 @@ $model = ['filters' => ['id' => 1, 'q' => '', 'catalogpage' => 0, 'group' => 0, 
     'activity' => (object)['name' => 'English practice'], 'coursename' => 'English 101', 'metrics' => $data,
     'rows' => array_values($data['learning']['learners']), 'filteredcount' => 3];
 $html = \mod_seledascorm\output\reporting_dashboard::render($model);
+ensure(substr_count($html,'Data from 1 of 3 participants')>=2,'Time and score must show their contributors out of the scoped roster');
+$withroster=$model;
+$withroster['metrics']['learning']=$insights->report([
+    50=>(object)['firstname'=>'Not','lastname'=>'Started','dashboardrole'=>'learner'],
+    51=>(object)['firstname'=>'Another','lastname'=>'Participant','dashboardrole'=>'learner']
+]);
+$rosterhtml=\mod_seledascorm\output\reporting_dashboard::render($withroster);
+ensure(strpos($rosterhtml,'Data from 1 of 5 participants')!==false,'Not-started participants must be included in the scope denominator');
+$noobservations=$withroster;$noobservations['metrics']['learning']['timed']=0;$noobservations['metrics']['learning']['median']=null;
+ensure(strpos(\mod_seledascorm\output\reporting_dashboard::render($noobservations),'Data from 0 of 5 participants')!==false,'Zero contributors must not become a zero measured value or disappear');
 $narrow=$model;$narrow['rows']=array_slice($model['rows'],0,1);$narrow['filteredcount']=1;
 ensure(strpos(\mod_seledascorm\output\reporting_dashboard::render($narrow),'Showing 1 of 3')!==false,'Status/search table subtitle must retain the full scope denominator');
+ensure(strpos(\mod_seledascorm\output\reporting_dashboard::render($narrow),'Data from 1 of 3 participants')!==false,'Table-only filtering changed the metric participant scope');
 // Date filters use immutable visit starts, never a row's overwritten save timestamp.
 $dated = array_map(function($row) {
     $row = clone $row;

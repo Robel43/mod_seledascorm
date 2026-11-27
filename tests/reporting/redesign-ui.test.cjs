@@ -35,12 +35,15 @@ test('visible filters and learner details work without JavaScript and fit small 
 test('Content and Insights show the requested panels without exposing small-sample averages',async()=>{
  const page=await browser.newPage({viewport:{width:1440,height:1100}});
  await page.setContent(fixture('--contenthtml'));
+ assert.match(await page.locator('.sd-main').innerText(),/Data from 1 of 3 participants/);
+ assert.doesNotMatch(await page.locator('.sd-main').innerText(),/Participants:|n =/);
  for(const name of ['Pages','Hardest questions','Time by page','Most used content blocks'])assert.equal(await page.getByRole('heading',{name,exact:true}).count(),1);
  assert.match(await page.getByRole('link',{name:'Interactions',exact:true}).getAttribute('href'),/measure=interactions/);
  for(const width of [320,375,768,1024]){
   await page.setViewportSize({width,height:1000});await page.setContent(fixture('--insightshtml'));
   for(const name of ['Participation','Completion by activity','Score distribution','Median active time by activity','Pages to investigate','Hardest questions','Retry outcomes','Tracking coverage'])assert.equal(await page.getByRole('heading',{name,exact:true}).count(),1);
-  assert.match(await page.locator('.sd-main').innerText(),/Not enough data \(Participants: 1\)/);
+  assert.match(await page.locator('.sd-main').innerText(),/Not enough data/);
+  assert.match(await page.locator('.sd-main').innerText(),/Data from 1 of 3 participants/);
   assert.equal(await page.getByText('Unique people',{exact:true}).count(),1);
   assert.equal(await page.getByText('Participations',{exact:true}).count(),1);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));

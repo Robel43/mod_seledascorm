@@ -5,7 +5,7 @@ and all filters still work without JavaScript. The optional drawer uses a Moodle
 AJAX external function, the same renderer and reporting service, and an audit event
 on each successful load. No tables, dependencies, browser storage, permission or
 privacy-provider changes were introduced. The source dev version sentinel stays
-in place; packaging suffix is now 20 (phase 6 introduced 18) to register the AJAX function
+in place; packaging suffix is now 21 (phase 6 introduced 18) to register the AJAX function
 and refresh AMD caches when Moodle upgrades.
 
 ## Screens and scope
@@ -173,6 +173,24 @@ explicit spacing and responsive columns. Names never share an inline row with
 the progress percentage. The suffix-19 package refreshes the cached stylesheet.
 
 The course-card calculation explanation is kept in this documentation instead of
-the report screen. Statistical sample labels use “Participants: N”: the count of
-people contributing to that specific metric, not the full enrolled population.
+the report screen. Statistical sample labels use “Data from X of Y participants”: X is the count
+contributing to that metric and Y is the current activity report scope.
 Small-sample suppression still applies. Package suffix 20 refreshes this copy.
+
+## Scoped participant coverage
+
+Median time, average score, page medians, question accuracy, score distributions
+and retry statistics display “Data from X of Y participants”. X is the existing
+metric sample count; Y is that activity’s scoped roster count, including not-started
+people when the selected filters allow them. Course/activity, allowed group, role,
+date/block/type scopes stay enforced by the existing service. Status and learner
+search remain table-only filters and do not change KPI/chart denominators.
+Questions in cross-activity Insights carry their own activity scope, not a sum of
+all activity rosters. Coverage percentages retain their existing access-based
+formula and explicit numerator/access denominator; their sample label shows the
+access sample out of the scoped roster. Suppressed CSV statistics include the same
+coverage wording. No new query or permission change is needed; formulas and
+small-sample thresholds stay unchanged. Package suffix 21 refreshes this display.
+
+Course cards keep their explicit learner–activity record counts: those sums are
+not labelled participants because one person can contribute to multiple activities.

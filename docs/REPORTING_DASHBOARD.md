@@ -1,11 +1,12 @@
 # Seleda reporting dashboard
 
-Implemented phases 1–5 of the corrected redesign brief. The optional drawer and
-external service are not included. Full-page links and all filters work without
-JavaScript. No tables, external dependencies, browser storage, permission changes
-or privacy-provider changes were introduced. Source `version.php` is unchanged;
-the existing packaging date suffix advances to 17 so a rebuilt ZIP can upgrade the
-previous suffix-16 ZIP and refresh Moodle's AMD cache.
+Implemented phases 1–6 of the corrected redesign brief. Full-page learner links
+and all filters still work without JavaScript. The optional drawer uses a Moodle
+AJAX external function, the same renderer and reporting service, and an audit event
+on each successful load. No tables, dependencies, browser storage, permission or
+privacy-provider changes were introduced. The source dev version sentinel stays
+in place; packaging suffix advances from 17 to 18 to register the AJAX function
+and refresh AMD caches when Moodle upgrades.
 
 ## Screens and scope
 
@@ -14,7 +15,30 @@ blocks; learner detail starts with a summary and every learning page before
 Answers, Attempts and Technical details. Insights aggregates at most ten permitted
 activities per page. Each activity rechecks course access, visibility, reporting
 capability and group restrictions. The activity picker is capped at 200. The home
-screen computes access counts for at most six quick picks using those same checks.
+screen lists every permitted course containing Seleda SCORM activities, with no
+six-card or 200-activity truncation. Opening a course lists every permitted activity
+in it. Courses without permitted Seleda activities are not exposed. Course cards
+stream each permitted activity with question aggregation disabled, then discard
+its learner model. Cost grows with the permitted activity count: this deliberately
+trades the old six-card cap for the requested complete course catalogue.
+
+Course average progress is `100 * sum(latest completed pages / required pages) /
+number of learner–activity records with known progress`. Each person/activity
+has equal weight. Roster-only not-started progress is a known zero, missing progress
+is excluded and the known/total coverage is displayed. No observations gives “—”.
+Role/date/block/type and module/group scope apply. Search/status remain learner-table
+filters. These are SCORM progress figures, not Moodle course completion grades.
+
+The right-side learner drawer uses a native modal plus explicit keyboard cycling,
+Escape, focus return, scroll containment, an accessible loading/error message,
+retry and full-page fallback. Tabs and Moodle attempts load inside it; modified
+clicks retain native link behaviour. Stale responses after closing or switching
+are ignored. No new capabilities: `mod_seledascorm_get_learner_report` rechecks
+activity/course visibility, report capability, external context, allowed groups,
+role/date/block/type scope, learner membership and the selected attempt. Only that
+attempt loads full logs. The same learner_report builder triggers the existing
+user_report_viewed event. Moodle core/ajax supplies authentication/session checks.
+
 
 The obsolete `staff` parameter is accepted but ignored. All roles are included
 unless `role=learner|staff` is selected; the latter includes admins. Role filtering

@@ -48,3 +48,12 @@ vendor/bin/phpunit mod/seledascorm/tests/local/dashboard_test.php
 ```
 
 The existing `Seleda reporting checks` workflow runs the native integration test.
+
+## Phase 6 and course catalogue
+
+`drawer-ui.test.cjs` tests the real compiled drawer against the PHP-rendered
+fragment: tabs, attempt switching, keyboard containment, Escape/focus return,
+error/retry/full-page fallback, late responses, no-JS course/activity links,
+missing-progress coverage and small viewports. Native dashboard_test also tests
+the actual external function with separate groups, invalid learner/attempt/filter
+selections, denied capability, audit event and admin access.

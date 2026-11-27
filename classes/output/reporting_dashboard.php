@@ -39,9 +39,7 @@ final class reporting_dashboard {
         $html.=self::filter_bar($m);
         if (($m['filters']['view']??'teacher')==='analytics') return $html.self::analytics($m).'</main></div>';
         if (empty($m['activity'])) {
-            $html.='<section class="sd-card"><h2>'.self::r('chooseactivity').'</h2><div class="sd-quick-picks">';
-            foreach (array_slice($m['catalogue']['items'],0,6) as $item) $html.='<a href="'.self::url($m,['id'=>$item->id,'group'=>0]).'">'.self::h($item->name).'<small>'.self::h($item->coursename).'</small><small>'.self::r('accesspeople').': '.self::number($m['quickcounts'][$item->id]??null).'</small></a>';
-            return $html.'</div></section></main></div>';
+            return $html.self::course_cards($m).'</main></div>';
         }
         if (!empty($m['detail'])) return $html.self::detail($m).'</main></div>';
         $data=$m['metrics']['learning'];
@@ -53,6 +51,24 @@ final class reporting_dashboard {
         $html.='<div class="sd-visuals">'.self::page_progress($data).self::hardest($data['questions'],5).'</div><a href="'.self::url($m,['panel'=>'questions']).'">'.self::r('seequestions').'</a>';
         $html.=self::learner_table($m).'<p class="sd-note">'.self::r('unknownnote').'</p>';
         return $html.'</main></div>';
+    }
+    private static function course_cards(array $m): string {
+        $incourse=!empty($m['filters']['course']);
+        $h='<section class="sd-card sd-course-browser"><h2>'.self::r($incourse?'courseactivities':'choosecourse').'</h2>';
+        if ($incourse) $h.='<a href="'.self::url($m,['course'=>0,'id'=>0,'group'=>0,'catalogpage'=>0]).'">'.self::r('allcourses').'</a>';
+        $cards=$incourse?($m['activitycards']??[]):($m['coursecards']??[]);
+        $h.='<div class="sd-quick-picks">';
+        foreach($cards as $card) {
+            $changes=$incourse?['id'=>$card['id'],'group'=>0,'learner'=>0,'attempt'=>0]:['course'=>$card['id'],'id'=>0,'group'=>0,'learner'=>0,'attempt'=>0];
+            $percent=$card['known']?round(100*$card['sum']/$card['known'],1):null;
+            $h.='<a class="sd-course-card" href="'.self::url($m,$changes).'"><strong>'.self::h($card['name']).'</strong>';
+            if (!$incourse) $h.='<small>'.self::r('activitycount',$card['activities']).'</small>';
+            $h.='<span>'.self::r('averageprogress').': '.self::number($percent).($percent===null?'':'%').'</span>';
+            if($percent!==null)$h.='<span class="sd-progress" role="img" aria-label="'.self::r('averageprogress').': '.$percent.'%"><span style="width:'.$percent.'%"></span></span>';
+            $h.='<small>'.self::r('progresscoverage',(object)['known'=>$card['known'],'total'=>$card['total']]).'</small></a>';
+        }
+        if(!$cards)$h.='<p>'.self::r('nocourses').'</p>';
+        return $h.'</div><p class="sd-note">'.self::r('courseprogressnote').'</p></section>';
     }
     private static function r(string $key,$a=null): string { return self::h(get_string('rpt'.$key,'mod_seledascorm',$a)); }
     private static function chip(string $state,bool $result=false): string {
@@ -122,7 +138,7 @@ final class reporting_dashboard {
         $d=$m['metrics']['learning'];$h='<section id="sd-learners" class="sd-card"><h2>'.self::r('learners').'</h2><p>'.self::r('showing',(object)['shown'=>count($m['rows']),'total'=>$d['roster']]).'</p><div class="sd-table-scroll"><table class="sd-table sd-learner-table"><thead><tr>';
         foreach(['name','status','progress','result','score','time','attempts','last','details']as $key){$sort=in_array($key,['result','details'])?null:$key;$active=($m['filters']['sort']??'last')===$sort;$h.='<th scope="col"'.($active?' aria-sort="'.(($m['filters']['dir']??'desc')==='asc'?'ascending':'descending').'"':'').'>' . ($sort?'<a href="'.self::url($m,['sort'=>$sort,'dir'=>$active&&($m['filters']['dir']??'desc')==='asc'?'desc':'asc','page'=>0]).'">'.self::r($key).'</a>':self::r($key)).'</th>';}
         $h.='</tr></thead><tbody>';
-        foreach($m['rows']as $p){$url=self::url($m,['learner'=>$p['id'],'attempt'=>$p['latest'],'tab'=>'answers','diagnostics'=>0]);$h.='<tr><th scope="row">'.($p['latest']?'<a class="sd-learner-name" href="'.$url.'">'.self::h($p['name']).'</a>':self::h($p['name'])).'<small>'.self::r($p['role']).'</small></th><td>'.self::chip($p['status']).'</td><td>'.self::progress($p).'</td><td>'.($p['result']?self::chip($p['result'],true):'—').'</td><td>'.self::score_value($p).'</td><td>'.self::time($p['ms']).'</td><td>'.($p['attemptcount']?:'—').'</td><td>'.($p['last']?self::h(userdate($p['last'])):'—').'</td><td>'.($p['latest']?'<a href="'.$url.'">'.self::r('details').'</a>':'—').'</td></tr>';}
+        foreach($m['rows']as $p){$url=self::url($m,['learner'=>$p['id'],'attempt'=>$p['latest'],'tab'=>'answers','diagnostics'=>0]);$h.='<tr><th scope="row">'.($p['latest']?'<a data-rpt-learner class="sd-learner-name" href="'.$url.'">'.self::h($p['name']).'</a>':self::h($p['name'])).'<small>'.self::r($p['role']).'</small></th><td>'.self::chip($p['status']).'</td><td>'.self::progress($p).'</td><td>'.($p['result']?self::chip($p['result'],true):'—').'</td><td>'.self::score_value($p).'</td><td>'.self::time($p['ms']).'</td><td>'.($p['attemptcount']?:'—').'</td><td>'.($p['last']?self::h(userdate($p['last'])):'—').'</td><td>'.($p['latest']?'<a data-rpt-learner href="'.$url.'">'.self::r('details').'</a>':'—').'</td></tr>';}
         if(!$m['rows'])$h.='<tr><td colspan="9">'.self::r('nolearners').'</td></tr>';
         $h.='</tbody></table></div><nav class="sd-pagination">';
         if($m['filters']['page']>0)$h.='<a href="'.self::url($m,['page'=>$m['filters']['page']-1]).'">'.self::r('previous').'</a>';
@@ -182,7 +198,7 @@ final class reporting_dashboard {
         if($m['comparisonmore'])$h.='<a href="'.self::url($m,['catalogpage'=>$m['filters']['catalogpage']+1]).'">'.self::r('next').'</a>';
         return $h.'</nav>';
     }
-    private static function detail(array $m): string {
+    public static function detail(array $m): string {
         return self::learner_header($m).self::page_table($m).self::learner_tabs($m);
     }
     private static function learner_header(array $m): string {

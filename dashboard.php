@@ -120,11 +120,20 @@ if ($filters['view'] === 'analytics') {
 }
 $model['catalogue'] = service::activities_for_filter($filters['course'],200);
 if (!$filters['id'] && $filters['view']==='teacher') {
-    $model['quickcounts']=[];
-    foreach (array_slice($model['catalogue']['items'],0,6) as $item) {
-        [$quickactivity,$quickcm]=service::activity($item->id);
-        $quick=service::overview($quickactivity,$quickcm,0,array_merge($options,['questions'=>false]));
-        $model['quickcounts'][$item->id]=$quick['learning']['started'];
+    $model['coursecards']=[];
+    $model['activitycards']=[];
+    // All permitted courses, not the 200-option activity filter cap. No question histories loaded.
+    foreach (service::catalogue($filters['q'],0,PHP_INT_MAX,$filters['course'])['items'] as $item) {
+        [$listedactivity,$listedcm]=service::activity($item->id);
+        $listed=service::overview($listedactivity,$listedcm,0,array_merge($options,['questions'=>false]));
+        $progress=report_view::course_progress($listed['learning']['learners']);
+        if (!isset($model['coursecards'][$item->course])) $model['coursecards'][$item->course]=
+            ['id'=>$item->course,'name'=>$item->coursename,'activities'=>0,'sum'=>0,'known'=>0,'total'=>0];
+        $card=&$model['coursecards'][$item->course];
+        $card['activities']++;
+        foreach (['sum','known','total'] as $key) $card[$key]+=$progress[$key];
+        unset($card);
+        if ($filters['course']) $model['activitycards'][]=['id'=>$item->id,'name'=>$item->name]+$progress;
     }
 }
 $model['courses'] = [];
@@ -136,6 +145,7 @@ $PAGE->set_title(get_string('dashboardtitle', 'mod_seledascorm'));
 $PAGE->set_heading(get_string('dashboardtitle', 'mod_seledascorm'));
 $PAGE->requires->css(\mod_seledascorm\local\presentation_assets::css('dashboard.css'));
 $PAGE->requires->js_call_amd('mod_seledascorm/reporting_dashboard', 'init');
+$PAGE->requires->js_call_amd('mod_seledascorm/reporting_drawer', 'init');
 $PAGE->set_cacheable(false);
 header('Cache-Control: private, no-store');
 echo $OUTPUT->header();

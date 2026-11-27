@@ -27,6 +27,14 @@
 defined('MOODLE_INTERNAL') || die();
 
 $functions = [
+    'mod_seledascorm_get_learner_report' => [
+        'classname' => 'mod_seledascorm\external\learner_report',
+        'methodname' => 'execute',
+        'description' => 'Read a permitted learner report and audit personal-data access.',
+        'type' => 'read',
+        'ajax' => true,
+        'capabilities' => 'mod/seledascorm:viewreport',
+    ],
 
     'mod_seledascorm_view_seledascorm' => [
         'classname' => 'mod_seledascorm_external',

@@ -8,6 +8,15 @@ final class report_view {
     const MIN_SAMPLE = 5;
     const STALLED_DAYS = 7;
 
+    /** Equal-weight learner/activity progress; missing progress never becomes zero. */
+    public static function course_progress(array $people): array {
+        $sum=0; $known=0;
+        foreach ($people as $person) {
+            if ($person['progress'] !== null) { $sum += $person['progress']; $known++; }
+        }
+        return ['sum'=>$sum,'known'=>$known,'total'=>count($people)];
+    }
+
     public static function page_state(array $statuses, bool $reached, bool $hasrows, bool $coverage): string {
         if (array_intersect($statuses, ['passed', 'completed'])) return 'completed';
         if (in_array('failed', $statuses, true)) return 'failed';

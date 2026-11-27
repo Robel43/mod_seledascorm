@@ -173,4 +173,41 @@ final class dashboard_test extends \advanced_testcase {
         $this->expectException(\required_capability_exception::class);
         reporting_dashboard::activity($activity->cmid);
     }
+    public function test_drawer_rechecks_capability_groups_learner_and_attempt(): void {
+        global $DB;
+        $this->resetAfterTest(true);$this->setAdminUser();$g=$this->getDataGenerator();
+        $course=$g->create_course();
+        $activity=$g->create_module('seledascorm',['course'=>$course->id,'groupmode'=>SEPARATEGROUPS]);
+        $teacher=$g->create_user();$one=$g->create_user();$two=$g->create_user();
+        $g->enrol_user($teacher->id,$course->id,'editingteacher');
+        foreach([$one,$two] as $user)$g->enrol_user($user->id,$course->id,'student');
+        $a=$g->create_group(['courseid'=>$course->id]);$b=$g->create_group(['courseid'=>$course->id]);
+        groups_add_member($a,$teacher);groups_add_member($a,$one);groups_add_member($b,$two);
+        $role=$DB->get_field('role','id',['shortname'=>'editingteacher']);
+        assign_capability('moodle/site:accessallgroups',CAP_PREVENT,$role,\context_course::instance($course->id));
+        $sco=$DB->get_record('seledascorm_scoes',['seledascorm'=>$activity->id,'seledascormtype'=>'sco'],'*',IGNORE_MULTIPLE);
+        foreach([$one,$two] as $user)$DB->insert_record('seledascorm_scoes_track',(object)[
+            'userid'=>$user->id,'seledascormid'=>$activity->id,'scoid'=>$sco->id,'attempt'=>1,
+            'element'=>'cmi.core.lesson_status','value'=>'completed','timemodified'=>time()]);
+        $this->setUser($teacher);$sink=$this->redirectEvents();
+        $external=\mod_seledascorm\external\learner_report::class;
+        $result=$external::execute($activity->cmid,$one->id,1,0,'answers','{}');
+        $clean=\core_external\external_api::clean_returnvalue($external::execute_returns(),$result);
+        $this->assertStringContainsString('sd-learner-header',$clean['html']);
+        $this->assertStringContainsString('sd-learner-pages',$clean['html']);
+        $this->assertCount(1,$sink->get_events());
+        foreach([[$two->id,1,0,'answers','{}'],[$one->id,99,0,'answers','{}'],
+            [$one->id,1,$b->id,'answers','{}'],[$one->id,1,0,'bogus','{}'],
+            [$one->id,1,0,'answers','{"role":"learner","from":"invalid"}'],
+            [$one->id,1,0,'answers','{"staff":1}']] as $args) {
+            try{$external::execute($activity->cmid,...$args);$this->fail('Forged drawer selection accepted');}
+            catch(\moodle_exception $e){$this->assertNotEmpty($e->getMessage());}
+        }
+        $this->setAdminUser();
+        $this->assertStringContainsString('sd-learner-header',$external::execute($activity->cmid,$two->id,1,0,'attempts','{}')['html']);
+        $this->setUser($one);
+        $this->expectException(\required_capability_exception::class);
+        $external::execute($activity->cmid,$one->id,1,0,'answers','{}');
+    }
+
 }

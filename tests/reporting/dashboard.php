@@ -180,7 +180,7 @@ if (in_array('--insightshtml',$argv)) {
     $model['filters']['view']='analytics';$model['comparisons']=[['id'=>1,'name'=>'English practice','course'=>'English 101','data'=>$data['learning']]];
     $model['comparisonmore']=false;$html=\mod_seledascorm\output\reporting_dashboard::render($model);
 }
-if (in_array('--detailhtml',$argv)) {
+if (in_array('--detailhtml',$argv) || in_array('--detailfragment',$argv)) {
     $person=$data['learning']['learners'][4];$attempt=2;
     $model['filters']['learner']=4;$model['filters']['attempt']=$attempt;$model['filters']['tab']='answers';
     $selected=$person['attempts'][$attempt];
@@ -190,9 +190,20 @@ if (in_array('--detailhtml',$argv)) {
         'history'=>\mod_seledascorm\local\report_view::attempts($person['attempts']), 'usagehtml'=>'',
         'questions'=>[['page'=>'Practice','question'=>'What is 2 + 2?','response'=>'4','expected'=>'4','credit'=>1,'retry'=>2,'shortened'=>false,
             'earlier'=>[['page'=>'Practice','question'=>'What is 2 + 2?','response'=>'3','expected'=>'4','credit'=>0,'retry'=>1,'shortened'=>false]]]]];
+    if(in_array('--detailfragment',$argv)){echo \mod_seledascorm\output\reporting_dashboard::detail($model);exit;}
     $html=\mod_seledascorm\output\reporting_dashboard::render($model);
 }
-if (in_array('--html', $argv) || in_array('--detailhtml',$argv) || in_array('--contenthtml',$argv) || in_array('--insightshtml',$argv)) {
+if (in_array('--coursehtml',$argv) || in_array('--activitylisthtml',$argv)) {
+    $model['activity']=null;
+    $model['coursecards']=[1=>['id'=>1,'name'=>'English 101','activities'=>2,'sum'=>1,'known'=>3,'total'=>4],
+        2=>['id'=>2,'name'=>'Course without progress','activities'=>1,'sum'=>0,'known'=>0,'total'=>1]];
+    $model['activitycards']=[['id'=>1,'name'=>'English practice','sum'=>1,'known'=>3,'total'=>4]];
+    $model['filters']['course']=in_array('--activitylisthtml',$argv)?1:0;
+    $html=\mod_seledascorm\output\reporting_dashboard::render($model);
+}
+$progress=\mod_seledascorm\local\report_view::course_progress([['progress'=>1],['progress'=>0.5],['progress'=>0],['progress'=>null]]);
+ensure($progress===['sum'=>1.5,'known'=>3,'total'=>4],'Course average invented missing progress or excluded a genuine zero');
+if (in_array('--coursehtml',$argv) || in_array('--activitylisthtml',$argv) || in_array('--html', $argv) || in_array('--detailhtml',$argv) || in_array('--contenthtml',$argv) || in_array('--insightshtml',$argv)) {
     echo '<!doctype html><html lang="en"><meta name="viewport" content="width=device-width, initial-scale=1"><meta charset="utf-8"><title>Seleda reports</title><style>body{font:16px system-ui;margin:0;padding:24px;background:#f7f9fd}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}' .
         file_get_contents(__DIR__ . '/../../dashboard.css') . '</style>' . $html . '<script>window.define=(name,deps,factory)=>factory().init();</script><script>' .
         file_get_contents(__DIR__ . '/../../amd/build/reporting_dashboard.min.js') . '</script></html>';

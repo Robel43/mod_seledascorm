@@ -39,3 +39,16 @@
 .sd-person-metrics{display:flex;gap:16px 28px;flex-wrap:wrap;margin:16px 0 0}.sd-person-metrics dt{font-size:.8rem;color:var(--sd-muted)}.sd-person-metrics dd{font-size:1.1rem;font-weight:650;margin:4px 0 0}.sd-person-progress{margin-top:16px!important}.sd-block-list{padding-left:16px}.sd-block-list li{padding:12px 0;border-bottom:1px solid var(--sd-line)}.sd-block-list dl{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0}.sd-block-list dd{margin:0}.sd-learner-pages summary{cursor:pointer}.sd-learner-header .sd-progress{width:140px}
 
 .sd-rpt-chart{display:block;width:100%;max-width:900px;height:auto}.sd-chart-values{font-size:.8rem;color:var(--sd-muted);padding-left:20px}.sd-redesign .sd-person-metrics{margin-bottom:12px}
+
+/* Native modal supplies keyboard containment and makes the background inert. */
+dialog.sd-report-drawer {position:fixed;inset:0 0 0 auto;margin:0;width:min(1100px,96vw);max-width:100vw;height:100dvh;max-height:100dvh;padding:0;border:0;border-left:1px solid var(--sd-line);background:var(--sd-bg,#f6f8fc);color:var(--sd-text);overflow:hidden;box-sizing:border-box;}
+.sd-report-drawer::backdrop {background:#192a4666;}
+.sd-drawer-heading {display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:16px;background:#fff;border-bottom:1px solid var(--sd-line);}
+.sd-drawer-heading h2 {margin:0;flex:1;font-size:1.2rem;}
+.sd-drawer-heading button {padding:8px 12px;}
+.sd-report-drawer > [role=status] {margin:0;padding:0 16px;}
+.sd-drawer-content {padding:16px;overflow:auto;overscroll-behavior:contain;height:calc(100% - 110px);box-sizing:border-box;}
+.sd-drawer-content > .sd-card {margin-top:16px;}
+.sd-course-card {gap:10px;}
+.sd-course-card .sd-progress {width:100%;}
+@media(max-width:700px) {dialog.sd-report-drawer {width:100vw;}.sd-drawer-heading {gap:8px;}.sd-drawer-content {padding:10px;}}

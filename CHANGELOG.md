@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## Learner drawer and course report catalogue
+
+- Open learner reports in an accessible side drawer, with tabs, Moodle attempts,
+  retry, audit events and a full-page/no-JavaScript fallback.
+- List every permitted course first, showing average SCORM page progress and data
+  coverage; open a course to browse all its permitted activities.
+- Register the permission-checked reporting AJAX function; advance package suffix
+  to 18. No schema, tracking storage or capability changes.
+
+
 ## Unreleased: progress-first reporting redesign
 
 - Include staff and admins within the existing module/course/group scope, with role filters.

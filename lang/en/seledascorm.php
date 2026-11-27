@@ -1034,3 +1034,17 @@ $string['rptsortnote'] = 'Select a column heading to change the sort order.';
 $string['rptpagination'] = 'Report pages';
 
 $string['rptattentionbreakdown'] = '{$a->failed} failed, {$a->idle} inactive';
+
+$string['rptchoosecourse'] = 'Choose a course';
+$string['rptcourseactivities'] = 'SCORM activities in this course';
+$string['rptactivitycount'] = '{$a} SCORM activities';
+$string['rptaverageprogress'] = 'Average progress';
+$string['rptprogresscoverage'] = 'Progress available for {$a->known} of {$a->total} learner–activity records';
+$string['rptcourseprogressnote'] = 'Average page-completion progress across permitted people and SCORM activities, with equal weight per learner–activity record. Not started counts as 0%; missing progress is excluded. This is SCORM progress, not Moodle course completion.';
+$string['rptnocourses'] = 'No permitted SCORM activities match these filters.';
+$string['rptdrawer'] = 'Learner report';
+$string['rptdrawerclose'] = 'Close learner report';
+$string['rptdrawerloading'] = 'Loading learner report…';
+$string['rptdrawererror'] = 'The learner report could not be loaded. Try again or open the full page report.';
+$string['rptfullpage'] = 'Open full page report';
+$string['rptretryload'] = 'Try again';

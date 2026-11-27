@@ -1,0 +1,116 @@
+// All learner URLs remain usable without this progressive enhancement.
+import Ajax from 'core/ajax';
+import {get_strings as getStrings} from 'core/str';
+
+export const init = async() => {
+    if (document.querySelector('.sd-report-drawer') || !document.querySelector('[data-rpt-learner]')) return;
+    if (!window.HTMLDialogElement || !HTMLDialogElement.prototype.showModal) return;
+    let strings;
+    try {
+        strings = await getStrings(['rptdrawer', 'rptdrawerclose', 'rptdrawerloading', 'rptdrawererror',
+            'rptfullpage', 'rptretryload'].map(key => ({key, component: 'mod_seledascorm'})));
+    } catch (_) {
+        return; // Normal full-page links continue to work.
+    }
+    const dialog = document.createElement('dialog');
+    dialog.className = 'sd-report-drawer sd-dashboard sd-redesign';
+    dialog.setAttribute('aria-labelledby', 'sd-drawer-title');
+    const header = document.createElement('header');
+    header.className = 'sd-drawer-heading';
+    const title = document.createElement('h2');
+    title.id = 'sd-drawer-title';
+    title.textContent = strings[0];
+    const close = document.createElement('button');
+    close.type = 'button';
+    close.textContent = strings[1];
+    const fullpage = document.createElement('a');
+    fullpage.textContent = strings[4];
+    const content = document.createElement('div');
+    content.className = 'sd-drawer-content';
+    content.tabIndex = -1;
+    const status = document.createElement('p');
+    status.setAttribute('role', 'status');
+    header.append(title, fullpage, close);
+    dialog.append(header, status, content);
+    document.body.append(dialog);
+    let trigger, current, generation = 0, scroll;
+    const end = () => {
+        generation++;
+        document.documentElement.style.overflow = scroll;
+        content.replaceChildren();
+        trigger?.focus();
+    };
+    dialog.addEventListener('keydown', e => {
+        if (e.key !== 'Tab') return;
+        const items = [...dialog.querySelectorAll('a[href],button,input,select,textarea,summary,[tabindex="0"]')]
+            .filter(item => !item.disabled && item.getClientRects().length);
+        const index = items.indexOf(document.activeElement);
+        if (index < 0 || (e.shiftKey && index === 0) || (!e.shiftKey && index === items.length - 1)) {
+            e.preventDefault();
+            (e.shiftKey ? items[items.length - 1] : items[0])?.focus();
+        }
+    });
+    dialog.addEventListener('close', end);
+    close.addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', e => { if (e.target === dialog) dialog.close(); });
+    const load = async(url) => {
+        const ticket = ++generation;
+        current = new URL(url);
+        fullpage.href = current.href;
+        content.replaceChildren();
+        status.textContent = strings[2];
+        content.setAttribute('aria-busy', 'true');
+        const p = current.searchParams, filters = {};
+        for (const key of ['role', 'from', 'to', 'block', 'type']) {
+            if (p.has(key)) filters[key] = p.get(key);
+        }
+        try {
+            const result = await Ajax.call([{methodname: 'mod_seledascorm_get_learner_report', args: {
+                cmid: Number(p.get('id')), userid: Number(p.get('learner')), attempt: Number(p.get('attempt') || 0),
+                groupid: Number(p.get('group') || 0), tab: p.get('tab') || 'answers', filters: JSON.stringify(filters)
+            }}])[0];
+            if (ticket !== generation || !dialog.open) return;
+            content.innerHTML = result.html; // Same escaped renderer as the full page; no scripts returned.
+            status.textContent = '';
+            content.scrollTop = 0;
+            content.focus();
+        } catch (_) {
+            if (ticket !== generation || !dialog.open) return;
+            status.textContent = strings[3];
+            const retry = document.createElement('button');
+            retry.type = 'button';
+            retry.textContent = strings[5];
+            retry.addEventListener('click', () => load(current));
+            content.append(retry);
+        } finally {
+            if (ticket === generation) content.removeAttribute('aria-busy');
+        }
+    };
+    document.addEventListener('click', e => {
+        const link = e.target.closest('[data-rpt-learner]');
+        if (!link || e.defaultPrevented || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+        e.preventDefault();
+        trigger = link;
+        scroll = document.documentElement.style.overflow;
+        dialog.showModal();
+        document.documentElement.style.overflow = 'hidden';
+        close.focus();
+        load(link.href);
+    });
+    content.addEventListener('click', e => {
+        const link = e.target.closest('.sd-learner-tabs a, .sd-back');
+        if (!link || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+        e.preventDefault();
+        if (link.classList.contains('sd-back')) { dialog.close(); return; }
+        const next = new URL(current), params = new URL(link.href).searchParams;
+        for (const key of ['learner', 'attempt', 'tab', 'diagnostics']) if (params.has(key)) next.searchParams.set(key, params.get(key));
+        load(next);
+    });
+    content.addEventListener('submit', e => {
+        if (!e.target.matches('.sd-attempt')) return;
+        e.preventDefault();
+        const next = new URL(current);
+        next.searchParams.set('attempt', new FormData(e.target).get('attempt'));
+        load(next);
+    });
+};

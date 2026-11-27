@@ -16,7 +16,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot.'/mod/exescorm/locallib.php');
+require_once($CFG->dirroot.'/mod/seledascorm/locallib.php');
 
 $userdata = new stdClass();
 $def = new stdClass();
@@ -29,38 +29,38 @@ if (!isset($currentorg)) {
     $currentorg = '';
 }
 
-if ($scoes = $DB->get_records('exescorm_scoes', array('exescorm' => $exescorm->id), 'sortorder, id')) {
+if ($scoes = $DB->get_records('seledascorm_scoes', array('seledascorm' => $seledascorm->id), 'sortorder, id')) {
     // Drop keys so that it is a simple array.
     $scoes = array_values($scoes);
     foreach ($scoes as $sco) {
         $def->{($sco->id)} = new stdClass();
         $userdata->{($sco->id)} = new stdClass();
-        $def->{($sco->id)} = get_exescorm_default($userdata->{($sco->id)}, $exescorm, $sco->id, $attempt, $mode);
+        $def->{($sco->id)} = get_seledascorm_default($userdata->{($sco->id)}, $seledascorm, $sco->id, $attempt, $mode);
 
         // Reconstitute objectives, comments_from_learner and comments_from_lms.
-        $cmiobj->{($sco->id)} = exescorm_reconstitute_array_element($exescorm->version, $userdata->{($sco->id)},
+        $cmiobj->{($sco->id)} = seledascorm_reconstitute_array_element($seledascorm->version, $userdata->{($sco->id)},
                                                                     'cmi.objectives', array('score'));
-        $cmiint->{($sco->id)} = exescorm_reconstitute_array_element($exescorm->version, $userdata->{($sco->id)},
+        $cmiint->{($sco->id)} = seledascorm_reconstitute_array_element($seledascorm->version, $userdata->{($sco->id)},
                                                                     'cmi.interactions', array('objectives', 'correct_responses'));
-        $cmicommentsuser->{($sco->id)} = exescorm_reconstitute_array_element($exescorm->version, $userdata->{($sco->id)},
+        $cmicommentsuser->{($sco->id)} = seledascorm_reconstitute_array_element($seledascorm->version, $userdata->{($sco->id)},
                                                                     'cmi.comments_from_learner', array());
-        $cmicommentslms->{($sco->id)} = exescorm_reconstitute_array_element($exescorm->version, $userdata->{($sco->id)},
+        $cmicommentslms->{($sco->id)} = seledascorm_reconstitute_array_element($seledascorm->version, $userdata->{($sco->id)},
                                                                     'cmi.comments_from_lms', array());
     }
 }
 
-$exescorm->autocommit = ($exescorm->autocommit === "1") ? true : false;
+$seledascorm->autocommit = ($seledascorm->autocommit === "1") ? true : false;
 $PAGE->requires->js_init_call(
-                                'M.exescorm_api.init',
+                                'M.seledascorm_api.init',
                                  array($def, $cmiobj, $cmiint, $cmicommentsuser, $cmicommentslms,
-                                exescorm_debugging($exescorm), $exescorm->auto, $exescorm->id, $CFG->wwwroot,
-                                sesskey(), $scoid, $attempt, $mode, $id, $currentorg, $exescorm->autocommit)
+                                seledascorm_debugging($seledascorm), $seledascorm->auto, $seledascorm->id, $CFG->wwwroot,
+                                sesskey(), $scoid, $attempt, $mode, $id, $currentorg, $seledascorm->autocommit)
                             );
 
 
 // Pull in the debugging utilities.
-if (exescorm_debugging($exescorm)) {
-    require_once($CFG->dirroot.'/mod/exescorm/datamodels/debug.js.php');
+if (seledascorm_debugging($seledascorm)) {
+    require_once($CFG->dirroot.'/mod/seledascorm/datamodels/debug.js.php');
     echo html_writer::script('AppendToLog("Moodle SCORM 1.3 API Loaded, Activity: '.
-                                $exescorm->name.', SCO: '.$sco->identifier.'", 0);');
+                                $seledascorm->name.', SCO: '.$sco->identifier.'", 0);');
 }

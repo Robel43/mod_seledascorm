@@ -1,0 +1,349 @@
+<?php
+// Seleda shared reporting for mod_seledascorm. GPL-3.0-or-later.
+namespace mod_seledascorm\local;
+defined('MOODLE_INTERNAL') || die();
+
+/** Versioned, block-independent labels and attempt-scoped response decoding. */
+final class timhirt_reporting {
+    private static $parsed = [];
+    const SNAPSHOT = 'timhirt.reporting.catalog.v1';
+
+    public static function hash(string $value): string {
+        $utf16 = mb_convert_encoding($value, 'UTF-16LE', 'UTF-8');
+        $hash = 2166136261;
+        for ($i = 0; $i < strlen($utf16); $i += 2) {
+            $unit = ord($utf16[$i]) | (ord($utf16[$i + 1]) << 8);
+            $hash = (($hash ^ $unit) * 16777619) & 0xffffffff;
+        }
+        return str_pad(dechex($hash), 8, '0', STR_PAD_LEFT);
+    }
+
+    private static function safeid(string $value): string {
+        return trim(preg_replace('/[^A-Za-z0-9_.:-]+/', '-', $value), '-');
+    }
+
+    public static function interactionid(string $block, string $item, string $revision): string {
+        return substr(self::safeid($block), 0, 100) . '-r1-' . $revision . '-'
+            . substr(self::safeid($item), 0, 100) . '-' . self::hash($block . "\0" . $item);
+    }
+
+    public static function text($html): string {
+        if (!is_scalar($html)) { return ''; }
+        $html = preg_replace('/<(script|style)\b[^>]*>.*?<\/\1>/is', '', (string)$html);
+        $html = preg_replace_callback('/<img\b[^>]*\balt\s*=\s*([\'"])(.*?)\1[^>]*>/is', function($m) {
+            return ' ' . $m[2] . ' ';
+        }, $html);
+        $html = preg_replace('/<\/(p|div|li|h[1-6])>|<br\s*\/?\s*>/i', ' ', $html);
+        return trim(preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+    }
+
+    private static function options($items): array {
+        $result = [];
+        if (!is_array($items)) { return $result; }
+        foreach ($items as $item) {
+            if (is_array($item) && isset($item['id']) && is_scalar($item['id'])) {
+                $result[(string)$item['id']] = self::text($item['label'] ?? '');
+            }
+        }
+        return $result;
+    }
+
+    public static function catalog(string $html): array {
+        $hash=hash('sha256',$html);
+        if (isset(self::$parsed[$hash])) return self::$parsed[$hash]['catalog'];
+        $catalog = []; $blocks=[];
+        $previous = libxml_use_internal_errors(true);
+        try {
+            $document = new \DOMDocument();
+            $document->loadHTML('<?xml encoding="UTF-8">' . $html, LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING);
+            $xpath = new \DOMXPath($document);
+            foreach ($xpath->query('//*[contains(concat(" ", normalize-space(@class), " "), " idevice_node ")]') as $node) {
+                $id=$node->getAttribute('id'); if (!$id) continue;
+                $label='';
+                foreach ($xpath->query('.//h1|.//h2|.//h3|.//h4|.//p',$node) as $text) {
+                    $candidate=self::text($text->textContent);
+                    if ($candidate!=='' && !in_array(strtolower($candidate),['text','untitled'])) { $label=mb_substr($candidate,0,120); break; }
+                }
+                $blocks[$id]=['id'=>$id,'title'=>$label ?: get_string('rptblocknumber','mod_seledascorm',count($blocks)+1),
+                    'type'=>$node->getAttribute('data-idevice-type') ?: $node->getAttribute('data-idevice-name')];
+            }
+            // JSON iDevices render their definition only in the browser. Read the
+            // same saved source here, without running authored JavaScript.
+            foreach ($xpath->query('//*[@data-idevice-type="mcq-feedback" and @data-idevice-json-data]') as $node) {
+                $raw = $node->getAttribute('data-idevice-json-data');
+                if (strlen($raw) > 1048576) { continue; }
+                $data = json_decode($raw, true);
+                if (!is_array($data) || !is_array($data['mcqQuestions'] ?? null)) { continue; }
+                $items = [];
+                foreach (array_slice($data['mcqQuestions'], 0, 1000) as $i => $question) {
+                    if (!is_array($question)) { continue; }
+                    $options = [];
+                    foreach ((is_array($question['choices'] ?? null) ? $question['choices'] : []) as $n => $choice) {
+                        if (!is_array($choice)) { continue; }
+                        $options[] = ['id'=>($choice['id'] ?? '') ?: 'c' . $n, 'label'=>$choice['text'] ?? ''];
+                    }
+                    $items[] = ['id'=>($question['id'] ?? '') ?: 'q' . $i, 'type'=>'choice',
+                        'prompt'=>$question['text'] ?? '', 'options'=>$options];
+                }
+                // Property order and JSON escaping must match reportDefinition()
+                // in the exported mcq-feedback runtime: these bytes form its ID.
+                $definition = ['schema'=>1, 'blockType'=>'mcq-feedback',
+                    'title'=>'Multiple Choice (per-answer feedback)', 'items'=>$items];
+                if (!$node->hasAttribute('data-timhirt-reporting')) {
+                    $node->setAttribute('data-timhirt-reporting', json_encode($definition,
+                        JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_LINE_TERMINATORS));
+                }
+            }
+            foreach ($xpath->query('//*[@data-timhirt-reporting]') as $element) {
+                $raw = $element->getAttribute('data-timhirt-reporting');
+                if (strlen($raw) > 524288) { continue; }
+                $definition = json_decode($raw, true);
+                if (!is_array($definition) || ($definition['schema'] ?? null) !== 1 || !is_array($definition['items'] ?? null)) { continue; }
+                $node = $element;
+                while ($node instanceof \DOMElement && !in_array('idevice_node', preg_split('/\s+/', $node->getAttribute('class')))) {
+                    $node = $node->parentNode;
+                }
+                if (!($node instanceof \DOMElement) || !$node->getAttribute('id')) { continue; }
+                $blockid = $node->getAttribute('id');
+                $revision = self::hash($raw);
+                $heading = $xpath->query('.//*[contains(concat(" ", normalize-space(@class), " "), " box-title ")]', $node)->item(0);
+                $blocktitle = $heading ? self::text($heading->textContent) : self::text($definition['title'] ?? $definition['blockType'] ?? 'Content Block');
+                $tracking = null;
+                $data = json_decode($node->getAttribute('data-idevice-json-data'), true);
+                if (($node->getAttribute('data-idevice-type') === 'mcq-feedback') && is_array($data)) {
+                    $tracking = is_array($data['mcqTracking'] ?? null) ? $data['mcqTracking'] : [];
+                    $tracking['mode'] = in_array($tracking['mode'] ?? '', ['off','completion'], true) ? $tracking['mode'] : 'graded';
+                } else {
+                    $settingsnode = $element->hasAttribute('data-settings') ? $element : $xpath->query('.//*[@data-settings]', $node)->item(0);
+                    $settings = $settingsnode ? json_decode($settingsnode->getAttribute('data-settings'), true) : [];
+                    $tracking = $settings['tracking'] ?? ($definition['rules']['tracking'] ?? null);
+                }
+                $seen = [];
+                foreach (array_slice($definition['items'], 0, 1000) as $item) {
+                    if (!is_array($item) || !isset($item['id']) || !is_scalar($item['id'])) { continue; }
+                    $localid = (string)$item['id'];
+                    $key = self::interactionid($blockid, $localid, $revision);
+                    if (isset($seen[$localid])) { unset($catalog[$key]); continue; }
+                    $seen[$localid] = true;
+                    $catalog[$key] = [
+                        'block' => $blocktitle, 'blockType' => self::text($definition['blockType'] ?? ''),
+                        'prompt' => self::text($item['prompt'] ?? ''), 'type' => self::text($item['type'] ?? 'performance'),
+                        'options' => self::options($item['options'] ?? []),
+                        'sources' => self::options($item['sources'] ?? []), 'targets' => self::options($item['targets'] ?? []),
+                        'blockid' => $blockid, 'tracking' => $tracking,
+                    ];
+                }
+            }
+            // Read older MCQ exports too. This adapter only supplies labels;
+            // the renderer and transport remain block-independent.
+            foreach ($xpath->query('//*[contains(concat(" ", normalize-space(@class), " "), " mcqf-question ")]') as $question) {
+                $node = $question;
+                while ($node instanceof \DOMElement && !in_array('idevice_node', preg_split('/\s+/', $node->getAttribute('class')))) { $node = $node->parentNode; }
+                if (!($node instanceof \DOMElement) || !$question->getAttribute('data-qid')) { continue; }
+                $id = substr(self::safeid($node->getAttribute('id') . '-' . $question->getAttribute('data-qid')), 0, 250);
+                $prompt = $xpath->query('.//*[contains(concat(" ", normalize-space(@class), " "), " mcqf-question-text ")]', $question)->item(0);
+                $heading = $xpath->query('.//*[contains(concat(" ", normalize-space(@class), " "), " box-title ")]', $node)->item(0);
+                $options = [];
+                foreach ($xpath->query('.//*[@data-cid]', $question) as $choice) {
+                    $label = $xpath->query('.//*[contains(concat(" ", normalize-space(@class), " "), " mcqf-choice-text ")]', $choice)->item(0);
+                    if ($label) { $options[$choice->getAttribute('data-cid')] = self::text($label->textContent); }
+                }
+                $catalog[$id] = ['block' => $heading ? self::text($heading->textContent) : 'Multiple Choice', 'blockid'=>$node->getAttribute('id'),
+                    'prompt' => $prompt ? self::text($prompt->textContent) : $id, 'type' => 'choice',
+                    'options' => $options, 'legacy' => true];
+            }
+        } finally {
+            libxml_clear_errors(); libxml_use_internal_errors($previous);
+        }
+        self::$parsed[$hash]=['catalog'=>$catalog,'blocks'=>$blocks];
+        return $catalog;
+    }
+    public static function blocks(string $html): array {
+        self::catalog($html);
+        return self::$parsed[hash('sha256',$html)]['blocks'];
+    }
+
+    /** Read only Moodle-managed local package files, never fetch external URLs. */
+    public static function packagecatalog($context, $seledascorm, int $scoid): array {
+        global $DB;
+        $sco = $DB->get_record('seledascorm_scoes', ['id' => $scoid, 'seledascorm' => $seledascorm->id]);
+        if (!$sco || empty($sco->launch)) { return []; }
+        $launch = rawurldecode(preg_split('/[?#]/', $sco->launch, 2)[0]);
+        if (preg_match('#^[a-z][a-z0-9+.-]*:|^[/\\\\]|(^|/)\.\.(/|$)#i', $launch)) { return []; }
+        $launch = preg_replace('#^\./#', '', $launch);
+        $directory = dirname($launch);
+        $filepath = $directory === '.' ? '/' : '/' . trim($directory, '/') . '/';
+        $file = get_file_storage()->get_file($context->id, 'mod_seledascorm', 'content', 0, $filepath, basename($launch));
+        if (!$file || $file->get_filesize() > 10485760) { return []; }
+        return self::catalog($file->get_content());
+    }
+
+    /** Metadata uses the existing tracking table; no grade or schema changes. */
+    public static function snapshot($context, $seledascorm, int $scoid, int $userid, int $attempt): void {
+        global $DB;
+        $where = ['userid' => $userid, 'seledascormid' => $seledascorm->id, 'scoid' => $scoid,
+            'attempt' => $attempt, 'element' => self::SNAPSHOT];
+        $existing = $DB->get_record('seledascorm_scoes_track', $where);
+        $previous = $existing ? json_decode($existing->value, true) : [];
+        if (!is_array($previous)) { $previous = []; }
+        if (($previous['_package_revision'] ?? null) === (int)$seledascorm->revision && ($previous['_catalog_version'] ?? 0) === 2) { return; }
+        $catalog = self::packagecatalog($context, $seledascorm, $scoid);
+        if (!$catalog) { return; }
+        $merged = $previous + $catalog;
+        foreach ($catalog as $key => $definition) {
+            // Add newly supported metadata only for the exact same revisioned
+            // identity. Historical question/answer labels remain immutable.
+            if (is_array($merged[$key] ?? null)) { $merged[$key] += $definition; }
+        }
+        $merged['_package_revision'] = (int)$seledascorm->revision;
+        $merged['_catalog_version'] = 2;
+        $value = json_encode($merged, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if ($value === false || strlen($value) > 1048576 || ($existing && $existing->value === $value)) { return; }
+        $record = (object)($where + ['value' => $value, 'timemodified' => time()]);
+        if ($existing) { $record->id = $existing->id; $DB->update_record('seledascorm_scoes_track', $record); }
+        else { $DB->insert_record('seledascorm_scoes_track', $record); }
+    }
+
+    private static function label(string $id, array $labels): string {
+        return array_key_exists($id, $labels) ? (string)$labels[$id] : $id;
+    }
+
+    public static function response(string $raw, array $definition): string {
+        $type = $definition['type'] ?? 'performance';
+        if ($type === 'true-false') {
+            if ($raw === 't' || $raw === 'true') { return 'True'; }
+            if ($raw === 'f' || $raw === 'false') { return 'False'; }
+        }
+        if (!in_array($type, ['choice', 'sequencing', 'matching', 'likert'])) { return $raw; }
+        $parts = preg_split('/\[,]\s*|,\s*/', $raw);
+        $labels = $definition['options'] ?? [];
+        $decoded = [];
+        foreach ($parts as $part) {
+            if ($type === 'matching') {
+                $pair = preg_split('/\[\.\]|\./', $part, 2);
+                $decoded[] = count($pair) === 2 ? self::label($pair[0], $definition['sources'] ?? $labels) . ' → '
+                    . self::label($pair[1], $definition['targets'] ?? $labels) : $part;
+            } else { $decoded[] = self::label($part, $labels); }
+        }
+        return implode($type === 'sequencing' ? ' → ' : '; ', $decoded);
+    }
+
+    public static function rows(array $tracks, array $fallback = []): array {
+        $groups = []; $catalogs = $fallback; $snapshots = [];
+        foreach ($tracks as $track) {
+            $scoid = (int)$track->scoid;
+            if ($track->element === self::SNAPSHOT) {
+                $snapshot = json_decode($track->value, true);
+                if (is_array($snapshot)) { $snapshots[$scoid] = $snapshot; $catalogs[$scoid] = $snapshot + ($catalogs[$scoid] ?? []); }
+            }
+            if (preg_match('/^cmi\.interactions[._](\d+)\.(.+)$/', $track->element, $match)) {
+                $groups[$scoid][(int)$match[1]][$match[2]] = (string)$track->value;
+            }
+        }
+        $rows = []; ksort($groups);
+        foreach ($groups as $scoid => $interactions) {
+            ksort($interactions);
+            foreach ($interactions as $index => $interaction) {
+                $id = $interaction['id'] ?? '';
+                if ($id === '') { continue; }
+                $baseid = $id; $activityattempt = 0;
+                if (preg_match('/^(.*)-a([1-9][0-9]*)$/', $id, $attemptmatch)) { $baseid = $attemptmatch[1]; $activityattempt = (int)$attemptmatch[2]; }
+                $catalogid = isset($catalogs[$scoid][$id]) ? $id : $baseid;
+                $definition = $catalogs[$scoid][$catalogid] ?? [];
+                // Older immutable label snapshots predate block grouping. Fill
+                // identity only from the exact matching catalog key, not titles.
+                if (empty($definition['blockid']) && isset($fallback[$scoid][$catalogid]['blockid'])) {
+                    $definition['blockid'] = $fallback[$scoid][$catalogid]['blockid'];
+                }
+                $type = $interaction['type'] ?? $definition['type'] ?? 'performance';
+                $definition['type'] = $type;
+                $response = $interaction['student_response'] ?? $interaction['learner_response'] ?? '';
+                $correct = [];
+                foreach ($interaction as $key => $value) {
+                    if (preg_match('/^correct_responses[._](\d+)\.pattern$/', $key, $match)) { $correct[(int)$match[1]] = $value; }
+                }
+                ksort($correct);
+                $result = $interaction['result'] ?? '';
+                $credit = $result === 'correct' ? 1 : (is_numeric($result) ? max(0, min(1, (float)$result)) : 0);
+                $rows[] = [
+                    'scoid' => $scoid, 'index' => $index, 'id' => $id, 'resolved' => !empty($definition['prompt']),
+                    'legacy' => !empty($definition['legacy']), 'labelSource' => isset($snapshots[$scoid][$catalogid]) ? 'snapshot' : ($definition ? 'package' : 'unavailable'),
+                    'block' => $definition['block'] ?? '', 'blockid' => $definition['blockid'] ?? '', 'type' => $type,
+                    'prompt' => $definition['prompt'] ?? null, 'rawresult'=>$result,
+                    'question' => ($definition['prompt'] ?? $id) . ($activityattempt ? ' (' . get_string('reportingactivityattempt', 'mod_seledascorm') . ' ' . $activityattempt . ')' : ''),
+                    'activityAttempt' => $activityattempt,
+                    'response' => self::response($response, $definition),
+                    'correct' => implode(' OR ', array_map(function($value) use ($definition) { return self::response($value, $definition); }, $correct)),
+                    'result' => ['correct' => get_string('reportingcorrect', 'mod_seledascorm'), 'wrong' => get_string('reportingincorrect', 'mod_seledascorm'), 'incorrect' => get_string('reportingincorrect', 'mod_seledascorm'), 'neutral' => get_string('reportingrecorded', 'mod_seledascorm'),
+                        'unanticipated' => get_string('reportingunexpected', 'mod_seledascorm')][$result] ?? (is_numeric($result) ? get_string('reportingpartial', 'mod_seledascorm') . ' (' . round($credit * 100) . '%)' : $result),
+                    'credit' => $credit,
+                    'weight' => $credit * (float)($interaction['weighting'] ?? 1),
+                    'graded' => in_array($result, ['correct','wrong','incorrect'], true) || is_numeric($result),
+                ];
+            }
+        }
+        return $rows;
+    }
+
+    /** Explicit per-block mode and saved score, independent of generic click logs. */
+    public static function blockstates(array $tracks, array $catalogs): array {
+        $states = [];
+        foreach ($tracks as $track) {
+            if ($track->element === self::SNAPSHOT) {
+                $saved = json_decode($track->value, true);
+                if (is_array($saved)) {
+                    $current = $catalogs[$track->scoid] ?? [];
+                    foreach ($saved as $key => &$definition) {
+                        if (is_array($definition)) { $definition += $current[$key] ?? []; }
+                    } unset($definition);
+                    $catalogs[$track->scoid] = $saved + $current;
+                }
+            }
+            if ($track->element !== 'cmi.suspend_data') { continue; }
+            foreach (explode(".\t", $track->value) as $part) {
+                if (strpos($part, 'TS1:') !== 0) { continue; }
+                $data = json_decode(substr($part, 4), true);
+                if (($data['v'] ?? null) === 1 && is_array($data['b'] ?? null)) { $states[$track->scoid] = $data['b']; }
+            }
+        }
+        $blocks = [];
+        foreach ($catalogs as $scoid => $catalog) {
+            foreach ($catalog as $definition) {
+                if (!is_array($definition) || empty($definition['blockid'])) { continue; }
+                $id = $definition['blockid']; $state = $states[$scoid][$id] ?? [];
+                $mode = ['g'=>'graded', 'c'=>'completion', 'o'=>'off'][$state['m'] ?? ''] ?? ($definition['tracking']['mode'] ?? null);
+                if (!in_array($mode, ['graded','completion','off'], true)) { continue; }
+                $score = $mode === 'graded' && isset($state['s']) && is_numeric($state['s']) ? max(0, min(100, (float)$state['s'])) : null;
+                $blocks[$scoid . ':' . $id] = ['scoid'=>$scoid, 'id'=>$id, 'title'=>$definition['block'], 'mode'=>$mode, 'score'=>$score, 'completed'=>isset($state['c'])?(bool)$state['c']:null];
+            }
+        }
+        return array_values($blocks);
+    }
+
+    /** Decode formatted upstream tracks without querying another learner or SCO. */
+    public static function overviewcells(int $scoid, $trackdata, array $catalog, int $count, array $options): array {
+        $tracks = [];
+        foreach ((array)$trackdata as $element => $value) {
+            if ($element === self::SNAPSHOT || strpos($element, 'cmi.interactions') === 0) {
+                $tracks[] = (object)['scoid' => $scoid, 'element' => $element, 'value' => (string)$value];
+            }
+        }
+        $byindex = [];
+        foreach (self::rows($tracks, [$scoid => $catalog]) as $row) { $byindex[$row['index']] = $row; }
+        $cells = [];
+        for ($index = 0; $index < $count; $index++) {
+            $row = $byindex[$index] ?? [];
+            foreach (['qtext' => 'question', 'resp' => 'response', 'right' => 'correct', 'result' => 'result'] as $option => $field) {
+                if (empty($options[$option])) { continue; }
+                $text = $row[$field] ?? '';
+                if ($field === 'question' && !empty($row['block'])) { $text = $row['block'] . ': ' . $text; }
+                $cells[] = $text;
+            }
+        }
+        return $cells;
+    }
+
+    public static function exportcell(string $value): string {
+        return preg_match('/^[\s]*[=+@-]/u', $value) ? "'" . $value : $value;
+    }
+}

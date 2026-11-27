@@ -17,7 +17,7 @@
 /**
  * Capability definitions for the quiz module.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $capabilities = array(
 
-    'mod/exescorm:addinstance' => array(
+    'mod/seledascorm:addinstance' => array(
         'riskbitmask' => RISK_XSS,
 
         'captype' => 'write',
@@ -38,7 +38,7 @@ $capabilities = array(
         'clonepermissionsfrom' => 'moodle/course:manageactivities'
     ),
 
-    'mod/exescorm:viewreport' => array(
+    'mod/seledascorm:viewreport' => array(
 
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
@@ -49,7 +49,7 @@ $capabilities = array(
         )
     ),
 
-    'mod/exescorm:skipview' => array(
+    'mod/seledascorm:skipview' => array(
 
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
@@ -58,7 +58,7 @@ $capabilities = array(
         )
     ),
 
-    'mod/exescorm:savetrack' => array(
+    'mod/seledascorm:savetrack' => array(
 
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
@@ -70,7 +70,7 @@ $capabilities = array(
         )
     ),
 
-    'mod/exescorm:viewscores' => array(
+    'mod/seledascorm:viewscores' => array(
 
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
@@ -81,7 +81,7 @@ $capabilities = array(
             'manager' => CAP_ALLOW
         )
     ),
-    'mod/exescorm:deleteresponses' => array(
+    'mod/seledascorm:deleteresponses' => array(
 
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
@@ -91,14 +91,14 @@ $capabilities = array(
             'manager' => CAP_ALLOW
         )
     ),
-    'mod/exescorm:deleteownresponses' => array(
+    'mod/seledascorm:deleteownresponses' => array(
 
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array()
     ),
 
-    'mod/exescorm:manageembeddededitor' => array(
+    'mod/seledascorm:manageembeddededitor' => array(
         'riskbitmask' => RISK_CONFIG | RISK_DATALOSS,
 
         'captype' => 'write',

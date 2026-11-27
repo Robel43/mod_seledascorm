@@ -1,5 +1,106 @@
 # CHANGELOG
 
+## Report access through selected roles
+
+- Make the reports role selector grant Seleda View reports through Moodle role
+  permissions, preserving existing course/group restrictions and Prohibit overrides.
+- Use safe upgrade defaults instead of granting the previous all-role selection.
+- Track and restore only plugin-created grants when roles are deselected; preserve
+  independent permissions. Capability changes require role-management permission,
+  use core audit events and transactional, serialised saves. Package suffix is 24.
+
+
+## Reports navigation roles
+
+- Add a multi-select for all Moodle roles and site administrators controlling
+  the global Seleda reports link. Custom roles appear automatically in the list.
+- Preserve current visibility by default and retain all report permission checks;
+  an empty selection hides the link. Package suffix advances to 23.
+
+
+## Compact interactive report charts
+
+- Remove repeated lists beneath charts; keep full names and values on the charts.
+- Show six compact learning-page rows with expandable counts, search, sorting and
+  a native Show all pages control.
+- Add a participant-progress doughnut with status-filter links. Bar charts support
+  hover, keyboard selection and pinned values with a share of the displayed total.
+- Preserve missing values, small-sample protections, no-JavaScript access and
+  existing permissions. Package suffix advances to 22.
+
+
+## Scoped participant counts
+
+- Label report samples “Data from X of Y participants”, using contributors and
+  the matching activity report scope, including eligible not-started participants.
+- Keep each Insights question tied to its own activity denominator; preserve
+  formulas, small-sample suppression and permission/group boundaries.
+- Include scoped coverage in suppressed CSV statistics; package suffix is 21.
+
+
+## Simpler reporting copy
+
+- Remove the long calculation explanation beneath course and activity cards.
+- Replace statistical “n” notation with explicit participant counts while keeping
+  small-sample protections and metric calculations. Package suffix advances to 20.
+
+
+## Course and SCORM card layout
+
+- Separate names, activity counts, progress metrics and coverage into spaced rows.
+- Show a larger progress percentage and clear progress bar; preserve keyboard focus
+  and readable wrapping on small screens. Advance package suffix to 19.
+
+
+## Learner drawer and course report catalogue
+
+- Open learner reports in an accessible side drawer, with tabs, Moodle attempts,
+  retry, audit events and a full-page/no-JavaScript fallback.
+- List every permitted course first, showing average SCORM page progress and data
+  coverage; open a course to browse all its permitted activities.
+- Register the permission-checked reporting AJAX function; advance package suffix
+  to 18. No schema, tracking storage or capability changes.
+
+
+## Unreleased: progress-first reporting redesign
+
+- Include staff and admins within the existing module/course/group scope, with role filters.
+- Add visible filters, five scope-based KPI cards, page progress and sortable learner rows.
+- Lead learner reports with progress, all pages and time; add blocks, answer history and server-rendered tabs.
+- Add ten-activity Insights, distinct people/participations, score bins, coverage and small-sample suppression.
+- Preserve completion-count grading, real zeroes, missing values, CSV safety and audit personal-report access.
+- Cache package metadata by content hash and verify packaged page-session and single-block timer behaviour.
+
+
+## Unreleased: standalone reporting dashboard
+
+- Add Seleda reports to Moodle's main navigation outside course and activity pages.
+- Browse accessible SCORM activities and explore learner, attempt, active-time and interaction summaries.
+- Add completion, content-block and action charts, filtered learner CSV, and learner/attempt drill-downs.
+- Preserve course, module and separate-group permissions across every dashboard view and export.
+
+---
+
+## Unreleased: per-block usage reporting
+
+- Add independent content-block active time and action logs, plus whole-attempt totals and CSV exports.
+- Merge retry and late saves within their authenticated learner/SCO/attempt without changing grades or completion.
+- Add reporting regression checks while preserving the Seleda component, branding and bundled editor.
+
+---
+
+## Unreleased – Seleda alignment
+
+- Brand the Moodle-facing activity as **Seleda** and remote authoring as **Seleda Studio** while retaining the internal `mod_exescorm` component for compatibility.
+- Integrate Seleda readable interaction reporting into learner-attempt and activity-wide Interactions reports.
+- Preserve attempt-time label metadata during SCORM commits so reports can show human-readable questions, learner responses, correct responses, results and calculated weight.
+- Add Seleda blue/teal visual alignment to the player without changing upstream player identifiers or SCORM APIs.
+- Keep the embedded editor explicitly identified as the upstream eXeLearning-compatible fallback rather than presenting it as the customized Seleda Studio build.
+- Target Moodle 4.5 while preserving existing activity, grade, completion, backup and restore data.
+
+---
+
+
 ## v4.0.6 – 2026-10-29
 
 - Fix "Edit with eXeLearning" in eXeLearning Cloud showing "Access denied" when another teacher was the last to send the activity back from eXeLearning.

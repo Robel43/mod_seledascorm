@@ -17,13 +17,13 @@
 /**
  * Serve static files from the embedded eXeLearning editor.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  2025 eXeLearning
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require('../../../config.php');
-require_once($CFG->dirroot . '/mod/exescorm/lib.php');
+require_once($CFG->dirroot . '/mod/seledascorm/lib.php');
 
 // Support both slash arguments (PATH_INFO) and query params.
 // Slash arguments: /static.php/{cmid}/{filepath}
@@ -58,7 +58,7 @@ if (!empty($pathinfo)) {
     $id = required_param('id', PARAM_INT);
 }
 
-$cm = get_coursemodule_from_id('exescorm', $id, 0, false, MUST_EXIST);
+$cm = get_coursemodule_from_id('seledascorm', $id, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST);
 
 require_login($course, true, $cm);
@@ -110,7 +110,7 @@ $contenttype = isset($mimetypes[$ext]) ? $mimetypes[$ext] : 'application/octet-s
 // Release session lock early so parallel requests are not blocked.
 \core\session\manager::write_close();
 
-$staticdir = \mod_exescorm\local\embedded_editor_source_resolver::get_active_dir();
+$staticdir = \mod_seledascorm\local\embedded_editor_source_resolver::get_active_dir();
 if ($staticdir === null) {
     send_header_404();
     die('Embedded editor not installed');

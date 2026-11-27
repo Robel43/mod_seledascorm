@@ -15,19 +15,19 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Cognitive depth indicator - exescorm.
+ * Cognitive depth indicator - seledascorm.
  *
- * @package   mod_exescorm
+ * @package   mod_seledascorm
  * @copyright 2017 David Monllao {@link http://www.davidmonllao.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_exescorm\analytics\indicator;
+namespace mod_seledascorm\analytics\indicator;
 
 /**
- * Cognitive depth indicator - exescorm.
+ * Cognitive depth indicator - seledascorm.
  *
- * @package   mod_exescorm
+ * @package   mod_seledascorm
  * @copyright 2017 David Monllao {@link http://www.davidmonllao.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -41,7 +41,7 @@ class cognitive_depth extends activity_base {
      * @return \lang_string
      */
     public static function get_name() : \lang_string {
-        return new \lang_string('indicator:cognitivedepth', 'mod_exescorm');
+        return new \lang_string('indicator:cognitivedepth', 'mod_seledascorm');
     }
 
     public function get_indicator_type() {

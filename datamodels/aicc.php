@@ -16,7 +16,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot.'/mod/exescorm/locallib.php');
+require_once($CFG->dirroot.'/mod/seledascorm/locallib.php');
 
 $userdata = new stdClass();
 $def = new stdClass();
@@ -26,13 +26,13 @@ if (!isset($currentorg)) {
     $currentorg = '';
 }
 
-if ($scoes = $DB->get_records('exescorm_scoes', array('exescorm' => $exescorm->id), 'sortorder, id')) {
+if ($scoes = $DB->get_records('seledascorm_scoes', array('seledascorm' => $seledascorm->id), 'sortorder, id')) {
     // Drop keys so that it is a simple array.
     $scoes = array_values($scoes);
     foreach ($scoes as $sco) {
         $def->{($sco->id)} = new stdClass();
         $userdata->{($sco->id)} = new stdClass();
-        $def->{($sco->id)} = get_exescorm_default($userdata->{($sco->id)}, $exescorm, $sco->id, $attempt, $mode);
+        $def->{($sco->id)} = get_seledascorm_default($userdata->{($sco->id)}, $seledascorm, $sco->id, $attempt, $mode);
 
         // Reconstitute objectives, comments_from_learner and comments_from_lms.
         $cmiobj->{($sco->id)} = '';
@@ -64,7 +64,7 @@ if ($scoes = $DB->get_records('exescorm_scoes', array('exescorm' => $exescorm->i
 }
 
 
-$PAGE->requires->js_init_call('M.exescorm_api.init',
-                                [$def, $cmiobj, $exescorm->auto, $CFG->wwwroot, $exescorm->id, $scoid,
-                                    $attempt, $mode, $currentorg, sesskey(), $id, $exescorm->autocommit]
+$PAGE->requires->js_init_call('M.seledascorm_api.init',
+                                [$def, $cmiobj, $seledascorm->auto, $CFG->wwwroot, $seledascorm->id, $scoid,
+                                    $attempt, $mode, $currentorg, sesskey(), $id, $seledascorm->autocommit]
                             );

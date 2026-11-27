@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 require_once('../../../config.php');
-require_once($CFG->dirroot.'/mod/exescorm/locallib.php');
+require_once($CFG->dirroot.'/mod/seledascorm/locallib.php');
 
 $id = optional_param('id', '', PARAM_INT);  // Course Module ID, or...
 $a = optional_param('a', '', PARAM_INT);  // Exescorm ID.
@@ -25,35 +25,35 @@ $function = required_param('function', PARAM_RAW);  // Function to call.
 $request = optional_param('request', '', PARAM_RAW);  // Scorm ID.
 
 if (!empty($id)) {
-    $cm = get_coursemodule_from_id('exescorm', $id, 0, false, MUST_EXIST);
+    $cm = get_coursemodule_from_id('seledascorm', $id, 0, false, MUST_EXIST);
     $course = $DB->get_record("course", array("id" => $cm->course), '*', MUST_EXIST);
-    $exescorm = $DB->get_record("exescorm", array("id" => $cm->instance), '*', MUST_EXIST);
+    $seledascorm = $DB->get_record("seledascorm", array("id" => $cm->instance), '*', MUST_EXIST);
 } else if (!empty($a)) {
-    $exescorm = $DB->get_record("exescorm", array("id" => $a), '*', MUST_EXIST);
-    $course = $DB->get_record("course", array("id" => $exescorm->course), '*', MUST_EXIST);
-    $cm = get_coursemodule_from_instance("exescorm", $exescorm->id, $course->id, false, MUST_EXIST);
+    $seledascorm = $DB->get_record("seledascorm", array("id" => $a), '*', MUST_EXIST);
+    $course = $DB->get_record("course", array("id" => $seledascorm->course), '*', MUST_EXIST);
+    $cm = get_coursemodule_from_instance("seledascorm", $seledascorm->id, $course->id, false, MUST_EXIST);
 } else {
     throw new \moodle_exception('missingparameter');
 }
 
-$PAGE->set_url('/mod/exescorm/datamodels/sequencinghandler.php',
+$PAGE->set_url('/mod/seledascorm/datamodels/sequencinghandler.php',
     array('scoid' => $scoid, 'attempt' => $attempt, 'id' => $cm->id, 'function' => $function, 'request' => $request));
 
 require_login($course, false, $cm);
 
 if (!empty($scoid) && !empty($function)) {
-    require_once($CFG->dirroot.'/mod/exescorm/datamodels/scorm_13lib.php');
+    require_once($CFG->dirroot.'/mod/seledascorm/datamodels/scorm_13lib.php');
 
-    if (has_capability('mod/exescorm:savetrack', context_module::instance($cm->id))) {
+    if (has_capability('mod/seledascorm:savetrack', context_module::instance($cm->id))) {
         $result = null;
         switch ($function) {
-            case 'exescorm_seq_flow' :
+            case 'seledascorm_seq_flow' :
                 if ($request == 'forward' || $request == 'backward') {
-                    $seq = exescorm_seq_navigation ($scoid, $USER->id, $request.'_', $attempt);
-                    $sco = exescorm_get_sco($scoid);
-                    $seq = exescorm_seq_flow($sco, $request, $seq, true, $USER->id);
+                    $seq = seledascorm_seq_navigation ($scoid, $USER->id, $request.'_', $attempt);
+                    $sco = seledascorm_get_sco($scoid);
+                    $seq = seledascorm_seq_flow($sco, $request, $seq, true, $USER->id);
                     if (!empty($seq->nextactivity)) {
-                        exescorm_seq_end_attempt($sco, $USER->id, $seq);
+                        seledascorm_seq_end_attempt($sco, $USER->id, $seq);
                     }
                 }
                 echo json_encode($seq);

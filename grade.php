@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Redirect the user based on their capabilities to either a exescorm activity or to exescorm reports
+ * Redirect the user based on their capabilities to either a seledascorm activity or to seledascorm reports
  *
- * @package   mod_exescorm
+ * @package   mod_seledascorm
  * @category  grade
  * @copyright 2010 onwards Dan Marsden
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -27,21 +27,21 @@ require_once("../../config.php");
 
 $id = required_param('id', PARAM_INT); // Course module ID.
 
-if (! $cm = get_coursemodule_from_id('exescorm', $id)) {
+if (! $cm = get_coursemodule_from_id('seledascorm', $id)) {
     throw new \moodle_exception('invalidcoursemodule');
 }
 
-if (! $exescorm = $DB->get_record('exescorm', array('id' => $cm->instance))) {
+if (! $seledascorm = $DB->get_record('seledascorm', array('id' => $cm->instance))) {
     throw new \moodle_exception('invalidcoursemodule');
 }
 
-if (! $course = $DB->get_record('course', array('id' => $exescorm->course))) {
+if (! $course = $DB->get_record('course', array('id' => $seledascorm->course))) {
     throw new \moodle_exception('coursemisconf');
 }
 
 require_login($course, false, $cm);
 
-if (has_capability('mod/exescorm:viewreport', context_module::instance($cm->id))) {
+if (has_capability('mod/seledascorm:viewreport', context_module::instance($cm->id))) {
     redirect('report.php?id='.$cm->id);
 } else {
     redirect('view.php?id='.$cm->id);

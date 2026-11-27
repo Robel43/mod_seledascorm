@@ -15,8 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Defines the version of exescorm_objectives
- * @package   exescormreport_objectives
+ * Defines the version of seledascorm_objectives
+ * @package   seledascormreport_objectives
  * @author    Dan Marsden <dan@danmarsden.com>
  * @copyright 2013 Dan Marsden
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -31,7 +31,7 @@ require_once("$CFG->libdir/formslib.php");
  * @copyright  2013 Dan Marsden
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_exescorm_report_objectives_settings extends moodleform {
+class mod_seledascorm_report_objectives_settings extends moodleform {
     /**
      * Definition of the setting form elements
      */
@@ -39,20 +39,20 @@ class mod_exescorm_report_objectives_settings extends moodleform {
         global $COURSE;
         $mform    =& $this->_form;
 
-        $mform->addElement('header', 'preferencespage', get_string('preferencespage', 'mod_exescorm'));
+        $mform->addElement('header', 'preferencespage', get_string('preferencespage', 'mod_seledascorm'));
 
         $options = array();
         if ($COURSE->id != SITEID) {
-            $options[EXESCORM_REPORT_ATTEMPTS_ALL_STUDENTS] = get_string('optallstudents', 'mod_exescorm');
-            $options[EXESCORM_REPORT_ATTEMPTS_STUDENTS_WITH] = get_string('optattemptsonly', 'mod_exescorm');
-            $options[EXESCORM_REPORT_ATTEMPTS_STUDENTS_WITH_NO] = get_string('optnoattemptsonly', 'mod_exescorm');
+            $options[SELEDASCORM_REPORT_ATTEMPTS_ALL_STUDENTS] = get_string('optallstudents', 'mod_seledascorm');
+            $options[SELEDASCORM_REPORT_ATTEMPTS_STUDENTS_WITH] = get_string('optattemptsonly', 'mod_seledascorm');
+            $options[SELEDASCORM_REPORT_ATTEMPTS_STUDENTS_WITH_NO] = get_string('optnoattemptsonly', 'mod_seledascorm');
         }
-        $mform->addElement('select', 'attemptsmode', get_string('show', 'mod_exescorm'), $options);
-        $mform->addElement('advcheckbox', 'objectivescore', '', get_string('objectivescore', 'exescormreport_objectives'));
+        $mform->addElement('select', 'attemptsmode', get_string('show', 'mod_seledascorm'), $options);
+        $mform->addElement('advcheckbox', 'objectivescore', '', get_string('objectivescore', 'seledascormreport_objectives'));
 
-        $mform->addElement('header', 'preferencesuser', get_string('preferencesuser', 'mod_exescorm'));
+        $mform->addElement('header', 'preferencesuser', get_string('preferencesuser', 'mod_seledascorm'));
 
-        $mform->addElement('text', 'pagesize', get_string('pagesize', 'mod_exescorm'));
+        $mform->addElement('text', 'pagesize', get_string('pagesize', 'mod_seledascorm'));
         $mform->setType('pagesize', PARAM_INT);
 
         $this->add_action_buttons(false, get_string('savepreferences'));

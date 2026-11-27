@@ -15,17 +15,17 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * exescorm version information.
+ * seledascorm version information.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 9999999999; // Dev value, overridden by CI/CD (Date: YYYYMMDDXX).
+$plugin->version = 9999999999; // Dev sentinel; CI packages a date-based version to register services and refresh cached assets.
 $plugin->release = 'dev'; // Dev value, overridden by CI/CD (semver from git tag).
-$plugin->requires = 2023042400; // Moodle 4.2+.
-$plugin->component = 'mod_exescorm'; // Full name of the plugin (used for diagnostics).
+$plugin->requires = 2024100700; // Moodle 4.5+.
+$plugin->component = 'mod_seledascorm'; // Full name of the plugin (used for diagnostics).
 $plugin->cron = 0;

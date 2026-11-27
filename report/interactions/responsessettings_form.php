@@ -15,8 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Defines the version of exescorm_interactions
- * @package   exescormreport
+ * Defines the version of seledascorm_interactions
+ * @package   seledascormreport
  * @subpackage interactions
  * @author    Dan Marsden and Ankit Kumar Agarwal
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -25,30 +25,30 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once("$CFG->libdir/formslib.php");
-class mod_exescorm_report_interactions_settings extends moodleform {
+class mod_seledascorm_report_interactions_settings extends moodleform {
 
     public function definition() {
         global $COURSE;
         $mform    =& $this->_form;
         // -------------------------------------------------------------------------------
-        $mform->addElement('header', 'preferencespage', get_string('preferencespage', 'mod_exescorm'));
+        $mform->addElement('header', 'preferencespage', get_string('preferencespage', 'mod_seledascorm'));
 
         $options = array();
         if ($COURSE->id != SITEID) {
-            $options[EXESCORM_REPORT_ATTEMPTS_ALL_STUDENTS] = get_string('optallstudents', 'mod_exescorm');
-            $options[EXESCORM_REPORT_ATTEMPTS_STUDENTS_WITH] = get_string('optattemptsonly', 'mod_exescorm');
-            $options[EXESCORM_REPORT_ATTEMPTS_STUDENTS_WITH_NO] = get_string('optnoattemptsonly', 'mod_exescorm');
+            $options[SELEDASCORM_REPORT_ATTEMPTS_ALL_STUDENTS] = get_string('optallstudents', 'mod_seledascorm');
+            $options[SELEDASCORM_REPORT_ATTEMPTS_STUDENTS_WITH] = get_string('optattemptsonly', 'mod_seledascorm');
+            $options[SELEDASCORM_REPORT_ATTEMPTS_STUDENTS_WITH_NO] = get_string('optnoattemptsonly', 'mod_seledascorm');
         }
-        $mform->addElement('select', 'attemptsmode', get_string('show', 'mod_exescorm'), $options);
-        $mform->addElement('advcheckbox', 'qtext', '', get_string('summaryofquestiontext', 'exescormreport_interactions'));
-        $mform->addElement('advcheckbox', 'resp', '', get_string('summaryofresponse', 'exescormreport_interactions'));
-        $mform->addElement('advcheckbox', 'right', '', get_string('summaryofrightanswer', 'exescormreport_interactions'));
-        $mform->addElement('advcheckbox', 'result', '', get_string('summaryofresult', 'exescormreport_interactions'));
+        $mform->addElement('select', 'attemptsmode', get_string('show', 'mod_seledascorm'), $options);
+        $mform->addElement('advcheckbox', 'qtext', '', get_string('summaryofquestiontext', 'seledascormreport_interactions'));
+        $mform->addElement('advcheckbox', 'resp', '', get_string('summaryofresponse', 'seledascormreport_interactions'));
+        $mform->addElement('advcheckbox', 'right', '', get_string('summaryofrightanswer', 'seledascormreport_interactions'));
+        $mform->addElement('advcheckbox', 'result', '', get_string('summaryofresult', 'seledascormreport_interactions'));
 
         // -------------------------------------------------------------------------------
-        $mform->addElement('header', 'preferencesuser', get_string('preferencesuser', 'mod_exescorm'));
+        $mform->addElement('header', 'preferencesuser', get_string('preferencesuser', 'mod_seledascorm'));
 
-        $mform->addElement('text', 'pagesize', get_string('pagesize', 'mod_exescorm'));
+        $mform->addElement('text', 'pagesize', get_string('pagesize', 'mod_seledascorm'));
         $mform->setType('pagesize', PARAM_INT);
 
         $this->add_action_buttons(false, get_string('savepreferences'));

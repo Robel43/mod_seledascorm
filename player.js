@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-function exescorm_openpopup(url,name,options,width,height) {
+function seledascorm_openpopup(url,name,options,width,height) {
     if (width <= 100) {
         width = Math.round(screen.availWidth * width / 100);
     }

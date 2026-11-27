@@ -26,13 +26,13 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use \mod_exescorm\exeonline\token_manager;
+use \mod_seledascorm\exeonline\token_manager;
 
 // @codingStandardsIgnoreLine as we validate via account id, HMAC keys, etc.
 require_once(__DIR__ . '/../../config.php');
 global $DB, $CFG;
 
-require_once($CFG->dirroot.'/mod/exescorm/locallib.php');
+require_once($CFG->dirroot.'/mod/seledascorm/locallib.php');
 
 // TODO: Add a security measure to prevent unauthorized access adding ip whitelist.
 
@@ -70,13 +70,13 @@ if ($payload->pkgtype !== 'scorm') {
     exit(1);
 }
 
-if (! $cm = get_coursemodule_from_id('exescorm', $payload->cmid, 0, true)) {
+if (! $cm = get_coursemodule_from_id('seledascorm', $payload->cmid, 0, true)) {
     $resultmsg['description'] = 'KO. Invalid ode_id.';
     echo json_encode($resultmsg);
     exit(1);
 }
 
-if (! $exescorm = $DB->get_record('exescorm', ['id' => $cm->instance])) {
+if (! $seledascorm = $DB->get_record('seledascorm', ['id' => $cm->instance])) {
     $resultmsg['description'] = 'KO. Invalid ode_id.';
     echo json_encode($resultmsg);
     exit(1);
@@ -97,7 +97,7 @@ if (! $user) {
 }
 $course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST);
 $context = context_module::instance($cm->id);
-if (! has_capability('mod/exescorm:addinstance', $context, $user)) {
+if (! has_capability('mod/seledascorm:addinstance', $context, $user)) {
     $resultmsg['description'] = 'KO. Forbidden.';
     echo json_encode($resultmsg);
     exit(1);
@@ -119,11 +119,11 @@ if (strlen($content) > $maxbytes) {
 }
 
 $fs = get_file_storage();
-$fs->delete_area_files($context->id, 'mod_exescorm', 'temppackage');
+$fs->delete_area_files($context->id, 'mod_seledascorm', 'temppackage');
 // Create new file from content. We'll use a temporary area to avoid collisions until package is validated.
 $fileinfo = [
     'contextid' => $context->id,
-    'component' => 'mod_exescorm',
+    'component' => 'mod_seledascorm',
     'filearea' => 'temppackage',
     'itemid' => 0,
     'filepath' => '/',
@@ -135,14 +135,14 @@ $fileinfo = [
 ];
 $tmpfile = $fs->create_file_from_string($fileinfo, $content);
 // Validate package.
-$errors = exescorm_validate_package($tmpfile);
+$errors = seledascorm_validate_package($tmpfile);
 if (!empty($errors)) {
     $tmpfile->delete();
     $resultmsg['description'] = 'KO. Invalid package.';
     echo json_encode($resultmsg);
     exit(1);
 }
-// This is the callback of the external eXeOnline flow: exescorm_redirector sends
+// This is the callback of the external eXeOnline flow: seledascorm_redirector sends
 // the author to exeonlinebaseuri, eXeLearning posts the package back here, and
 // get_ode.php hands this exact package back to it on the next edit, so it must
 // carry the eXeLearning source. Uploaded packages are only played and are
@@ -150,31 +150,31 @@ if (!empty($errors)) {
 // a source-less save rather than strand the activity with nothing to edit.
 // editor/save.php runs the same check for the embedded editor.
 $packer = get_file_packer('application/zip');
-if (!\mod_exescorm\exescorm_package::has_editable_source($tmpfile->list_files($packer))) {
+if (!\mod_seledascorm\seledascorm_package::has_editable_source($tmpfile->list_files($packer))) {
     $tmpfile->delete();
     $resultmsg['description'] = 'KO. Package has no eXeLearning source to edit.';
     echo json_encode($resultmsg);
     exit(1);
 }
 // Drop any previous package on the same itemid before moving the validated file in.
-// We can't keep both because mod_exescorm stores its package at itemid 0 and Moodle
+// We can't keep both because mod_seledascorm stores its package at itemid 0 and Moodle
 // rejects two files sharing the same {itemid, filepath, filename} triple. Deferring this
 // to a single targeted delete (instead of wiping the whole package area) keeps the
 // activity recoverable if anything below fails: only the entry being replaced is removed.
-$existingfiles = $fs->get_area_files($context->id, 'mod_exescorm', 'package', 0, 'filename', false);
+$existingfiles = $fs->get_area_files($context->id, 'mod_seledascorm', 'package', 0, 'filename', false);
 foreach ($existingfiles as $existing) {
     $existing->delete();
 }
 $fileinfo['filearea'] = 'package';
 $file = $fs->create_file_from_storedfile($fileinfo, $tmpfile);
-$fs->delete_area_files($context->id, 'mod_exescorm', 'temppackage');
-// Set filename as new instance reference. exescorm_parse() reads the package from the
+$fs->delete_area_files($context->id, 'mod_seledascorm', 'temppackage');
+// Set filename as new instance reference. seledascorm_parse() reads the package from the
 // 'package' filearea using this reference, so it must be persisted before parsing.
-$exescorm->reference = $file->get_filename();
-$exescorm->timemodified = time();
-$DB->update_record('exescorm', $exescorm);
+$seledascorm->reference = $file->get_filename();
+$seledascorm->timemodified = time();
+$DB->update_record('seledascorm', $seledascorm);
 
-exescorm_parse($exescorm, true);
+seledascorm_parse($seledascorm, true);
 
 // Prepare OK response.
 $resultmsg['status'] = '0';

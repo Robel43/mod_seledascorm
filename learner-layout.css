@@ -1,0 +1,127 @@
+/* Learner navigation: Moodle's existing tree, with a drawer on narrow screens. */
+#page-mod-seledascorm-player #seledascormpage #seledascorm_toc {
+    background: #f8faff;
+    border: 1px solid #e0e7f1;
+    border-radius: 16px;
+    padding: 8px;
+    box-shadow: 0 4px 18px #17243b08;
+    font: 400 14px/1.5 system-ui, sans-serif;
+    color: #24344f;
+    overflow: auto; overscroll-behavior:contain;
+    max-height: calc(100dvh - 96px);
+}
+#page-mod-seledascorm-player #seledascormpage #seledascorm_tree { border: 0; padding: 0; }
+#page-mod-seledascorm-player #seledascorm_toc_title { font: 650 20px/1.4 system-ui,sans-serif; padding: 8px 0 16px; overflow-wrap: anywhere; }
+#page-mod-seledascorm-player .seleda-toc-heading {
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:12px 10px; margin-bottom:8px; border-bottom:1px solid #e0e7f1;
+    color:#536482; font-weight:650; font-size:12px; letter-spacing:.04em;
+}
+#page-mod-seledascorm-player .seleda-toc-close { display:none; }
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-row { border:1px solid transparent; border-radius:10px; margin:3px 0; padding:8px 6px; white-space:normal; }
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-row:hover { background:#edf2fc; }
+#page-mod-seledascorm-player #seledascorm_tree a { color:#324b70; text-decoration:none; line-height:1.5; white-space:normal; overflow-wrap:anywhere; }
+#page-mod-seledascorm-player #seledascorm_tree a:hover { color:var(--seleda-primary,#2f6df6); text-decoration:underline; }
+#page-mod-seledascorm-player #seledascorm_tree a[aria-current="page"] { color:var(--seleda-primary,#2f6df6); font-weight:650; }
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-selected > .yui3-treeview-row { background:var(--seleda-primary-light,#e9efff); border-color:#cbd9fb; box-shadow:inset 3px 0 var(--seleda-primary,#2f6df6); }
+#page-mod-seledascorm-player #seledascorm_tree a:focus-visible,
+#page-mod-seledascorm-player .seleda-toc-close:focus-visible,
+#page-mod-seledascorm-player #seledascorm_toc_toggle_btn:focus-visible { outline:3px solid var(--seleda-primary,#2f6df6); outline-offset:2px; }
+#page-mod-seledascorm-player #seledascorm_tree ul { padding-left:14px; }
+#page-mod-seledascorm-player #seledascorm_tree > ul { padding-left:0; }
+#page-mod-seledascorm-player #seledascormpage #seledascorm_toc_toggle_btn {
+    width:34px; height:44px; border:0; border-radius:10px; box-shadow:0 3px 12px #17243b18;
+    background-color:var(--seleda-primary,#2f6df6)!important; color:transparent;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='m9 6 6 6-6 6'/%3E%3C/svg%3E");
+    background-position:center; background-repeat:no-repeat; background-size:22px;
+}
+#page-mod-seledascorm-player #seledascormpage #seledascorm_toc_toggle_btn[aria-expanded="true"] {
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m14 6-6 6 6 6'/%3E%3C/svg%3E");
+}
+#page-mod-seledascorm-player .seleda-toc-backdrop { display:none; }
+
+/* The iframe must have a viewport in fullscreen. Expanding it to the document's
+   full height made its fixed accessibility dock scroll away with the iframe. */
+#page-mod-seledascorm-player #seledascormpage.fullscreen {
+    display:flex; flex-direction:column; width:100%; height:100dvh!important;
+    max-height:100dvh; overflow:hidden; margin:0; padding:12px; box-sizing:border-box;
+}
+#page-mod-seledascorm-player #seledascormpage.fullscreen #toctree { display:flex; flex-direction:column; min-height:0; flex:1; }
+#page-mod-seledascorm-player #seledascormpage.fullscreen #seledascorm_layout { height:0!important; min-height:0; flex:1 1 auto; overflow:hidden; }
+#page-mod-seledascorm-player #seledascormpage.fullscreen #seledascorm_toc { height:100%; max-height:100%; }
+#page-mod-seledascorm-player #seledascormpage.fullscreen #seledascorm_content { display:flex; flex-direction:column; height:100%; overflow:hidden; }
+#page-mod-seledascorm-player #seledascormpage.fullscreen #seledascorm_object { flex:1 1 auto; height:0!important; min-height:0; }
+#page-mod-seledascorm-player #seledascormpage.fullscreen #seledascorm_navpanel { position:static!important; flex:0 0 auto; width:auto; }
+
+@media(max-width:768px) {
+    #page-mod-seledascorm-player #seledascormpage { --seleda-drawer-width:min(320px,calc(100vw - 54px)); }
+    #page-mod-seledascorm-player #seledascormpage #seledascorm_layout { display:flex!important; position:relative; }
+    #page-mod-seledascorm-player #seledascormpage #seledascorm_toc,
+    #page-mod-seledascorm-player #seledascormpage #seledascorm_toc.disabled {
+        display:block!important; position:fixed; top:0; bottom:0; left:0;
+        width:var(--seleda-drawer-width)!important; min-width:0; max-width:none!important;
+        height:100dvh; max-height:100dvh; padding:12px; border:0; border-radius:0 20px 20px 0;
+        transform:translateX(-105%); visibility:hidden; pointer-events:none;
+        transition:transform .2s ease,visibility .2s; z-index:1052; box-shadow:8px 0 36px #17243b26;
+    }
+    #page-mod-seledascorm-player #seledascormpage.seleda-drawer-open #seledascorm_toc { transform:none; visibility:visible; pointer-events:auto; }
+    #page-mod-seledascorm-player #seledascormpage .seleda-toc-close { display:flex; align-items:center; justify-content:center; width:44px; height:44px; flex:0 0 44px; border:1px solid #dbe3ef; border-radius:12px; background:#fff; color:#24344f; font:24px/1 system-ui; }
+    #page-mod-seledascorm-player #seledascormpage .seleda-toc-backdrop:not([hidden]) { display:block; position:fixed; inset:0; z-index:1051; border:0; background:#17243b66; padding:0; cursor:pointer; }
+    #page-mod-seledascorm-player #seledascormpage #seledascorm_toc_toggle { position:absolute; width:0!important; min-width:0; height:0; flex:0 0 0; z-index:1053; }
+    #page-mod-seledascorm-player #seledascormpage #seledascorm_toc_toggle_btn { position:absolute; top:6px; left:4px; margin:0; width:40px; height:44px; }
+    #page-mod-seledascorm-player #seledascormpage.seleda-drawer-open #seledascorm_toc_toggle_btn { position:fixed; top:20px; left:var(--seleda-drawer-width); }
+    #page-mod-seledascorm-player #seledascormpage #seledascorm_content { width:100%!important; flex:1 1 100%!important; min-width:0; }
+    #page-mod-seledascorm-player #seledascormpage.fullscreen { padding:8px; }
+    #page-mod-seledascorm-player #seledascormpage.fullscreen #seledascorm_layout { overflow:visible; }
+}
+@media(prefers-reduced-motion:reduce) {
+    #page-mod-seledascorm-player #seledascormpage #seledascorm_toc { transition:none; }
+}
+/* Chapter cards, right-side disclosure arrows and compact completion badges. */
+#page-mod-seledascorm-player #seledascormpage #seledascorm_toc { overflow-x:hidden!important; }
+#page-mod-seledascorm-player #seledascorm_tree,
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-label,
+#page-mod-seledascorm-player #seledascorm_tree a { font-family:system-ui,-apple-system,"Segoe UI",sans-serif!important; }
+#page-mod-seledascorm-player #seledascorm_tree *,
+#page-mod-seledascorm-player #seledascorm_tree *::before,
+#page-mod-seledascorm-player #seledascorm_tree *::after { box-sizing:border-box; }
+#page-mod-seledascorm-player #seledascorm_tree ul,
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-children { width:auto!important; max-width:100%; min-width:0; margin:0!important; padding:0!important; }
+#page-mod-seledascorm-player #seledascorm_tree li { min-width:0; max-width:100%; width:auto!important; margin:0; list-style:none; }
+#page-mod-seledascorm-player #seledascorm_tree li.yui3-treeview-has-children { border:1px solid #dfe5ed; border-radius:8px; margin:0 0 8px; background:#fff; overflow:hidden; }
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-row { display:grid!important; grid-template-columns:minmax(0,1fr) 32px; align-items:center; gap:4px; margin:0; border:0; border-radius:0; padding:12px 10px; background:#fff; min-width:0; width:100%; }
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-children .yui3-treeview-row { border-bottom:1px dotted #e0e5ec; }
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-has-children > .yui3-treeview-row { background:#f5f7f9; padding:12px 10px; }
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-has-children > .yui3-treeview-row .yui3-treeview-label { font-weight:650; font-size:15px; }
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-row > .yui3-treeview-icon { display:none!important; }
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-label { grid-column:1; grid-row:1; min-width:0!important; width:auto!important; margin:0!important; padding:0!important; white-space:normal!important; overflow-wrap:anywhere; text-align:left; line-height:1.6; }
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-label a { display:grid; grid-template-columns:20px minmax(0,1fr); gap:10px; align-items:start; min-width:0; max-width:100%; white-space:normal!important; overflow-wrap:anywhere; word-break:normal; text-decoration:none; }
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-label a:not(:has(.seleda-status)) { display:block; }
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-selected > .yui3-treeview-row { background:#edf3ff; box-shadow:inset 3px 0 var(--seleda-primary,#2f6df6); }
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-row > .yui3-treeview-indicator { grid-column:2; grid-row:1; position:static!important; float:none; width:32px!important; height:36px!important; display:flex!important; align-items:center; justify-content:center; cursor:pointer; margin:0!important; background:none!important; }
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-indicator s { display:none!important; }
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-has-children > .yui3-treeview-row > .yui3-treeview-indicator::after { content:""; width:10px; height:10px; border-right:2px solid #243b56; border-bottom:2px solid #243b56; transform:rotate(45deg); }
+#page-mod-seledascorm-player #seledascorm_tree .yui3-treeview-has-children[aria-expanded="false"] > .yui3-treeview-row > .yui3-treeview-indicator::after { transform:rotate(-45deg); }
+#page-mod-seledascorm-player #seledascorm_tree .seleda-status-source { display:none!important; }
+#page-mod-seledascorm-player #seledascorm_tree .seleda-status { position:relative!important; display:inline-block!important; top:4px!important; left:auto!important; width:16px!important; height:16px!important; margin:0!important; padding:0!important; border:1.5px solid #66758a; border-radius:4px; background:#fff!important; background-image:none!important; font-size:0!important; }
+#page-mod-seledascorm-player #seledascorm_tree .seleda-status::before { content:none!important; }
+#page-mod-seledascorm-player #seledascorm_tree .seleda-status::after { content:none!important; }
+#page-mod-seledascorm-player #seledascorm_tree .seleda-status[data-state="complete"] { border-color:#087f6b; background:#087f6b!important; }
+#page-mod-seledascorm-player #seledascorm_tree .seleda-status[data-state="complete"]::after { content:""!important; position:absolute; left:4px; top:1px; width:5px; height:9px; border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg); }
+#page-mod-seledascorm-player #seledascorm_tree .seleda-status[data-state="inprogress"] { border-color:#3b82f6; background:#eff6ff!important; }
+#page-mod-seledascorm-player #seledascorm_tree .seleda-status[data-state="inprogress"]::after { content:""!important; position:absolute; left:3px; right:3px; top:6px; height:2px; background:#2563eb; }
+#page-mod-seledascorm-player #seledascorm_tree .seleda-status[data-state="failed"] { border-color:#dc5050; background:#fff1f1!important; }
+#page-mod-seledascorm-player #seledascorm_tree .seleda-status[data-state="failed"]::after { content:""!important; position:absolute; left:6px; top:3px; width:2px; height:7px; background:#c33; }
+@media(prefers-reduced-motion:reduce) { #page-mod-seledascorm-player #seledascorm_tree * { transition:none!important; } }
+#page-mod-seledascorm-player #seledascormpage #seledascorm_tree { margin:0!important; min-width:0; max-width:100%; }
+/* Leaf pages use the full label width; only chapter headings reserve an arrow. */
+#page-mod-seledascorm-player #seledascorm_tree li:not(.yui3-treeview-has-children) > .yui3-treeview-row { grid-template-columns:minmax(0,1fr); }
+#page-mod-seledascorm-player #seledascorm_tree li:not(.yui3-treeview-has-children) > .yui3-treeview-row > .yui3-treeview-indicator { display:none!important; }
+
+/* Override legacy Moodle/YUI chapter sprites even when theme CSS loads later. */
+#page-mod-seledascorm-player #seledascormpage #seledascorm_tree .yui3-treeview-row > .yui3-treeview-icon{display:none!important;width:0!important;padding:0!important;margin:0!important;background:none!important}
+#page-mod-seledascorm-player #seledascormpage #seledascorm_tree .yui3-treeview-has-children > .yui3-treeview-row{display:grid!important;grid-template-columns:minmax(0,1fr) 32px!important;background:#f5f7f9!important;border-radius:0!important;box-shadow:none}
+#page-mod-seledascorm-player #seledascormpage #seledascorm_tree .yui3-treeview-label{grid-column:1!important;grid-row:1!important;padding-left:0!important;font-family:system-ui,-apple-system,"Segoe UI",sans-serif!important}
+#page-mod-seledascorm-player #seledascormpage #seledascorm_tree .yui3-treeview-row > .yui3-treeview-indicator{grid-column:2!important;grid-row:1!important;margin:0!important;float:none!important;background:none!important}
+#page-mod-seledascorm-player #seledascormpage #seledascorm_tree .yui3-treeview-indicator s{display:none!important;border:0!important}
+#page-mod-seledascorm-player #seledascormpage #seledascorm_tree .yui3-treeview-children .yui3-treeview-children{padding-left:8px!important}

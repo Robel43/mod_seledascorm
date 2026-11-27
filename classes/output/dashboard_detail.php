@@ -1,0 +1,100 @@
+<?php
+// SPDX-License-Identifier: GPL-3.0-or-later
+namespace mod_seledascorm\output;
+defined('MOODLE_INTERNAL') || die();
+
+/** Human-readable usage details without treating content clicks as graded answers. */
+final class dashboard_detail {
+    public static function tracking(array $blocks, array $pages): string {
+        if (!$blocks) { return ''; }
+        $h = function($value) { return htmlspecialchars((string)$value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); };
+        $html = '<h4>' . $h(get_string('dashtracking', 'mod_seledascorm')) . '</h4><div class="sd-table-scroll"><table class="sd-table"><thead><tr>';
+        foreach (['dashpage','dashblock','dashtracking','dashblockscore'] as $key) { $html .= '<th scope="col">' . $h(get_string($key, 'mod_seledascorm')) . '</th>'; }
+        $html .= '</tr></thead><tbody>';
+        foreach ($blocks as $block) {
+            $html .= '<tr><td>' . $h($pages[$block['scoid']] ?? '') . '</td><td>' . $h($block['title']) . '</td><td>' .
+                $h(get_string('dashmode' . $block['mode'], 'mod_seledascorm')) . '</td><td>' .
+                $h($block['score'] === null ? get_string($block['mode'] === 'graded' ? 'dashawaitingscore' : 'dashnotapplicable', 'mod_seledascorm') : $block['score'] . '%') . '</td></tr>';
+        }
+        return $html . '</tbody></table></div>';
+    }
+    public static function completion(array $tracks, array $pages): string {
+        $done = [];
+        foreach ($tracks as $track) {
+            if (in_array($track->element, ['cmi.core.lesson_status','cmi.completion_status','cmi.success_status']) && in_array($track->value,['passed','completed'])) { $done[$track->scoid] = true; }
+        }
+        $required = array_filter($pages, function($p) { return !empty($p->launch) && ($p->seledascormtype ?? 'sco') === 'sco'; });
+        return count(array_intersect_key($done, $required)) . ' / ' . count($required);
+    }
+    public static function titles($context, array $pages): array {
+        $titles = [];
+        foreach ($pages as $scoid => $page) {
+            $launch = rawurldecode(preg_split('/[?#]/', $page->launch, 2)[0]);
+            if (!$launch || preg_match('#^[a-z][a-z0-9+.-]*:|^[/\\\\]|(^|/)\.\.(/|$)#i', $launch)) { continue; }
+            $dir = dirname($launch);
+            $file = get_file_storage()->get_file($context->id, 'mod_seledascorm', 'content', 0,
+                $dir === '.' ? '/' : '/' . trim($dir, '/') . '/', basename($launch));
+            if (!$file || $file->get_filesize() > 10485760) { continue; }
+            foreach (\mod_seledascorm\local\timhirt_reporting::blocks($file->get_content()) as $id=>$metadata) {
+                $titles[$scoid.':'.$id]=$metadata;
+            }
+        }
+        return $titles;
+    }
+
+    public static function usage(array $usage, array $pages, array $questions = []): string {
+        $html = \mod_seledascorm\local\seleda_usage::table($usage, $pages, false);
+        $h = function($v) { return htmlspecialchars((string)$v, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); };
+        $label = function($key) use ($h) { return $h(get_string('dash' . $key, 'mod_seledascorm')); };
+        $results = []; $blocks = [];
+        foreach ($usage['blocks'] as $block) { $blocks[$block['scoid'] . ':' . $block['id']] = $block; }
+        foreach ($questions as $question) {
+            if (empty($question['blockid'])) { continue; }
+            $key = $question['scoid'] . ':' . $question['blockid'];
+            $results[$key][] = $question;
+            // Results remain available even if this package did not collect usage.
+            if (!isset($blocks[$key])) { $blocks[$key] = ['scoid'=>$question['scoid'], 'id'=>$question['blockid'], 'title'=>$question['block'], 'events'=>[], 'omitted'=>0]; }
+        }
+        foreach ($blocks as $key => $block) {
+            $submitted = $results[$key] ?? [];
+            $answers = array_filter($block['events'], function($event) { return $event['action'] === 'answer'; });
+            $history = array_filter($block['events'], function($event) { return $event['action'] !== 'answer'; });
+            if (!$block['events'] && !$submitted) { continue; }
+            $html .= '<details class="sd-block-detail"><summary>' . $h(($pages[$block['scoid']] ?? '') . ' · ' . $block['title']) . '</summary>';
+            if ($submitted) {
+                $html .= '<h4>' . $label('questionresults') . '</h4><div class="sd-event-log"><table class="sd-table sd-submitted-results"><thead><tr>';
+                foreach (['question','response','correctanswer','result'] as $name) { $html .= '<th scope="col">' . $label($name) . '</th>'; }
+                $html .= '</tr></thead><tbody>';
+                foreach ($submitted as $question) {
+                    $html .= '<tr>';
+                    foreach (['question','response','correct','result'] as $name) { $html .= '<td>' . $h($question[$name]) . '</td>'; }
+                    $html .= '</tr>';
+                }
+                $html .= '</tbody></table></div>';
+            }
+            if ($answers) {
+                $html .= '<h4>' . $label('checkedanswers') . '</h4><div class="sd-event-log"><table class="sd-table"><thead><tr>';
+                foreach (['eventtime','question','eventanswer','eventexpected','eventresult'] as $name) { $html .= '<th scope="col">' . $label($name) . '</th>'; }
+                $html .= '</tr></thead><tbody>';
+                foreach ($answers as $event) {
+                    $result = ['correct'=>'reportingcorrect','incorrect'=>'reportingincorrect','neutral'=>'dashrecorded'][$event['result'] ?? 'neutral'] ?? 'dashrecorded';
+                    $html .= '<tr><td>+' . \mod_seledascorm\local\seleda_usage::duration((int)$event['at']) . '</td><td>' . $h($event['label']) . '</td><td>' . $h($event['value']) . '</td><td>' . $h($event['expected'] ?? '') . '</td><td>' . $h(get_string($result, 'mod_seledascorm')) . '</td></tr>';
+                }
+                $html .= '</tbody></table></div>';
+            }
+            if (!$submitted && !$answers) { $html .= '<p class="sd-note">' . $label('nosubmittedresults') . '</p>'; }
+            if ($history) {
+                $html .= '<details class="sd-interaction-history"><summary>' . $label('interactionhistory') . '</summary><div class="sd-event-log"><table class="sd-table"><thead><tr>';
+                foreach (['eventtime','eventaction','eventdetails','eventanswer'] as $name) { $html .= '<th scope="col">' . $label($name) . '</th>'; }
+                $html .= '</tr></thead><tbody>';
+                foreach ($history as $event) {
+                    $html .= '<tr><td>' . ($event['visit'] ? (int)$event['visit'] . ' · +' : '+') . \mod_seledascorm\local\seleda_usage::duration((int)$event['at']) . '</td><td>' .
+                        $h(get_string('dashaction' . $event['action'], 'mod_seledascorm')) . '</td><td>' . $h($event['label']) . '</td><td>' . $h($event['value']) . '</td></tr>';
+                }
+                $html .= '</tbody></table></div></details>';
+            }
+            $html .= (!empty($block['omitted']) ? '<p>' . (int)$block['omitted'] . ' ' . $h(get_string('usageomitted','mod_seledascorm')) . '</p>' : '') . '</details>';
+        }
+        return $html;
+    }
+}

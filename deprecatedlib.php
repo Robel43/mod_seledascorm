@@ -15,20 +15,20 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * List of deprecated mod_exescorm functions.
+ * List of deprecated mod_seledascorm functions.
  *
- * @package   mod_exescorm
+ * @package   mod_seledascorm
  * @copyright 2021 Shamim Rezaie <shamim@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 /**
- * Obtains the automatic completion state for this exescorm based on any conditions
- * in exescorm settings.
+ * Obtains the automatic completion state for this seledascorm based on any conditions
+ * in seledascorm settings.
  *
  * @deprecated since Moodle 3.11
  * @todo MDL-71196 Final deprecation in Moodle 4.3
- * @see \mod_exescorm\completion\custom_completion
+ * @see \mod_seledascorm\completion\custom_completion
  * @param stdClass $course Course
  * @param cm_info|stdClass $cm Course-module
  * @param int $userid User ID
@@ -36,20 +36,20 @@
  * @return bool True if completed, false if not. (If no conditions, then return
  *   value depends on comparison type)
  */
-function exescorm_get_completion_state($course, $cm, $userid, $type) {
+function seledascorm_get_completion_state($course, $cm, $userid, $type) {
     global $DB;
 
     // No need to call debugging here. Deprecation debugging notice already being called in \completion_info::internal_get_state().
 
     $result = $type;
 
-    // Get exescorm.
-    if (!$exescorm = $DB->get_record('exescorm', array('id' => $cm->instance))) {
-        throw new \moodle_exception('cannotfindexescorm');
+    // Get seledascorm.
+    if (!$seledascorm = $DB->get_record('seledascorm', array('id' => $cm->instance))) {
+        throw new \moodle_exception('cannotfindseledascorm');
     }
     // Only check for existence of tracks and return false if completionstatusrequired or completionscorerequired
     // this means that if only view is required we don't end up with a false state.
-    if ($exescorm->completionstatusrequired !== null || $exescorm->completionscorerequired !== null) {
+    if ($seledascorm->completionstatusrequired !== null || $seledascorm->completionscorerequired !== null) {
         // Get user's tracks data.
         $tracks = $DB->get_records_sql(
             "
@@ -59,9 +59,9 @@ function exescorm_get_completion_state($course, $cm, $userid, $type) {
                 element,
                 value
             FROM
-                {exescorm_scoes_track}
+                {seledascorm_scoes_track}
             WHERE
-                exescormid = ?
+                seledascormid = ?
             AND userid = ?
             AND element IN
             (
@@ -72,7 +72,7 @@ function exescorm_get_completion_state($course, $cm, $userid, $type) {
                 'cmi.score.raw'
             )
             ",
-            array($exescorm->id, $userid)
+            array($seledascorm->id, $userid)
         );
 
         if (!$tracks) {
@@ -81,10 +81,10 @@ function exescorm_get_completion_state($course, $cm, $userid, $type) {
     }
 
     // Check for status.
-    if ($exescorm->completionstatusrequired !== null) {
+    if ($seledascorm->completionstatusrequired !== null) {
 
         // Get status.
-        $statuses = array_flip(exescorm_status_options());
+        $statuses = array_flip(seledascorm_status_options());
         $nstatus = 0;
         // Check any track for these values.
         $scostatus = array();
@@ -98,16 +98,16 @@ function exescorm_get_completion_state($course, $cm, $userid, $type) {
             }
         }
 
-        if (!empty($exescorm->completionstatusallscos)) {
+        if (!empty($seledascorm->completionstatusallscos)) {
             // Iterate over all scos and make sure each has a lesson_status.
-            $scos = $DB->get_records('exescorm_scoes', array('exescorm' => $exescorm->id, 'exescormtype' => 'sco'));
+            $scos = $DB->get_records('seledascorm_scoes', array('seledascorm' => $seledascorm->id, 'seledascormtype' => 'sco'));
             foreach ($scos as $sco) {
                 if (empty($scostatus[$sco->id])) {
                     return completion_info::aggregate_completion_states($type, $result, false);
                 }
             }
             return completion_info::aggregate_completion_states($type, $result, true);
-        } else if ($exescorm->completionstatusrequired & $nstatus) {
+        } else if ($seledascorm->completionstatusrequired & $nstatus) {
             return completion_info::aggregate_completion_states($type, $result, true);
         } else {
             return completion_info::aggregate_completion_states($type, $result, false);
@@ -115,7 +115,7 @@ function exescorm_get_completion_state($course, $cm, $userid, $type) {
     }
 
     // Check for score.
-    if ($exescorm->completionscorerequired !== null) {
+    if ($seledascorm->completionscorerequired !== null) {
         $maxscore = -1;
 
         foreach ($tracks as $track) {
@@ -128,7 +128,7 @@ function exescorm_get_completion_state($course, $cm, $userid, $type) {
             }
         }
 
-        if ($exescorm->completionscorerequired <= $maxscore) {
+        if ($seledascorm->completionscorerequired <= $maxscore) {
             return completion_info::aggregate_completion_states($type, $result, true);
         } else {
             return completion_info::aggregate_completion_states($type, $result, false);

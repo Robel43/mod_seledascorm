@@ -16,12 +16,12 @@
 //
 // SCORM 1.2 API Implementation
 //
-function scormAPI1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, exescormdebugging, exescormauto, exescormid, cfgwwwroot, sesskey,
+function scormAPI1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, seledascormdebugging, seledascormauto, seledascormid, cfgwwwroot, sesskey,
         scoid, attempt, viewmode, cmid, currentorg, autocommit, masteryoverride, hidetoc) {
 
-    var prerequrl = cfgwwwroot + "/mod/exescorm/prereqs.php?a=" + exescormid + "&scoid=" + scoid + "&attempt=" + attempt + "&mode=" + viewmode + "&currentorg=" + currentorg + "&sesskey=" + sesskey;
-    var datamodelurl = cfgwwwroot + "/mod/exescorm/datamodel.php";
-    var datamodelurlparams = "id=" + cmid + "&a=" + exescormid + "&sesskey=" + sesskey + "&attempt=" + attempt + "&scoid=" + scoid;
+    var prerequrl = cfgwwwroot + "/mod/seledascorm/prereqs.php?a=" + seledascormid + "&scoid=" + scoid + "&attempt=" + attempt + "&mode=" + viewmode + "&currentorg=" + currentorg + "&sesskey=" + sesskey;
+    var datamodelurl = cfgwwwroot + "/mod/seledascorm/datamodel.php";
+    var datamodelurlparams = "id=" + cmid + "&a=" + seledascormid + "&sesskey=" + sesskey + "&attempt=" + attempt + "&scoid=" + scoid;
 
     // Standard Data Type Definition
     CMIString256 = cmistring256;
@@ -125,9 +125,23 @@ function scormAPI1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, exescormd
     }
 
     var cmi, nav;
+    var savedModels = {};
+    function refreshToc() {
+        if (String(hidetoc) === '3') return;
+        var sequence = window.seledaTocRefreshSequence = (window.seledaTocRefreshSequence || 0) + 1;
+        var url = prerequrl + '&seleda_refresh=' + sequence;
+        YUI().use('io-base', function(Y) {
+            if (sequence !== window.seledaTocRefreshSequence) return;
+            Y.io(url, {on: {success: function(id, response) {
+                if (sequence === window.seledaTocRefreshSequence && response.responseText) {
+                    M.mod_seledascorm.connectPrereqCallback.success.call(Y, id, response);
+                }
+            }}});
+        });
+    }
     function initdatamodel(scoid){
-        prerequrl = cfgwwwroot + "/mod/exescorm/prereqs.php?a=" + exescormid + "&scoid=" + scoid + "&attempt=" + attempt + "&mode=" + viewmode + "&currentorg=" + currentorg + "&sesskey=" + sesskey;
-        datamodelurlparams = "id=" + cmid + "&a=" + exescormid + "&sesskey=" + sesskey + "&attempt=" + attempt + "&scoid=" + scoid;
+        prerequrl = cfgwwwroot + "/mod/seledascorm/prereqs.php?a=" + seledascormid + "&scoid=" + scoid + "&attempt=" + attempt + "&mode=" + viewmode + "&currentorg=" + currentorg + "&sesskey=" + sesskey;
+        datamodelurlparams = "id=" + cmid + "&a=" + seledascormid + "&sesskey=" + sesskey + "&attempt=" + attempt + "&scoid=" + scoid;
 
         //
         // Datamodel inizialization
@@ -158,6 +172,7 @@ function scormAPI1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, exescormd
 
         eval(cmiobj[scoid]);
         eval(cmiint[scoid]);
+        if (savedModels[scoid]) cmi = JSON.parse(JSON.stringify(savedModels[scoid]));
 
         if (cmi.core.lesson_status == '') {
             cmi.core.lesson_status = 'not attempted';
@@ -170,7 +185,7 @@ function scormAPI1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, exescormd
     var Initialized = false;
 
     function LMSInitialize (param) {
-        scoid = (exescorm_current_node && exescorm_current_node.scoid) ?  exescorm_current_node.scoid : scoid;
+        scoid = (seledascorm_current_node && seledascorm_current_node.scoid) ?  seledascorm_current_node.scoid : scoid;
         initdatamodel(scoid);
 
         errorCode = "0";
@@ -178,7 +193,7 @@ function scormAPI1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, exescormd
             if (!Initialized) {
                 Initialized = true;
                 errorCode = "0";
-                if (exescormdebugging) {
+                if (seledascormdebugging) {
                     LogAPICall("LMSInitialize", param, "", errorCode);
                 }
                 return "true";
@@ -188,7 +203,7 @@ function scormAPI1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, exescormd
         } else {
             errorCode = "201";
         }
-        if (exescormdebugging) {
+        if (seledascormdebugging) {
             LogAPICall("LMSInitialize", param, "", errorCode);
         }
         return "false";
@@ -202,30 +217,25 @@ function scormAPI1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, exescormd
                 result = StoreData(cmi,true);
                 if (nav.event != '') {
                     if (nav.event == 'continue') {
-                        setTimeout('mod_exescorm_launch_next_sco();',500);
+                        setTimeout('mod_seledascorm_launch_next_sco();',500);
                     } else {
-                        setTimeout('mod_exescorm_launch_prev_sco();',500);
+                        setTimeout('mod_seledascorm_launch_prev_sco();',500);
                     }
                 } else {
-                    if (exescormauto == 1) {
-                        setTimeout('mod_exescorm_launch_next_sco();',500);
+                    if (seledascormauto == 1) {
+                        setTimeout('mod_seledascorm_launch_next_sco();',500);
                     }
                 }
-                if (exescormdebugging) {
+                if (seledascormdebugging) {
                     LogAPICall("LMSFinish", "AJAXResult", result, 0);
                 }
                 result = ('true' == result) ? 'true' : 'false';
                 errorCode = (result == 'true') ? '0' : '101';
-                if (exescormdebugging) {
+                if (seledascormdebugging) {
                     LogAPICall("LMSFinish", "result", result, 0);
                     LogAPICall("LMSFinish", param, "", 0);
                 }
-                // trigger TOC update
-                var callback = M.mod_exescorm.connectPrereqCallback;
-                YUI().use('io-base', function(Y) {
-                    Y.on('io:complete', callback.success, Y);
-                    Y.io(prerequrl);
-                });
+                if (result === 'true') refreshToc();
                 return result;
             } else {
                 errorCode = "301";
@@ -233,7 +243,7 @@ function scormAPI1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, exescormd
         } else {
             errorCode = "201";
         }
-        if (exescormdebugging) {
+        if (seledascormdebugging) {
             LogAPICall("LMSFinish", param, "", errorCode);
         }
         return "false";
@@ -256,7 +266,7 @@ function scormAPI1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, exescormd
                         }
                             if (subelement == element) {
                             errorCode = "0";
-                            if (exescormdebugging) {
+                            if (seledascormdebugging) {
                                 LogAPICall("LMSGetValue", element, eval(element), 0);
                             }
                             return eval(element);
@@ -293,7 +303,7 @@ function scormAPI1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, exescormd
         } else {
             errorCode = "301";
         }
-        if (exescormdebugging) {
+        if (seledascormdebugging) {
             LogAPICall("LMSGetValue", element, "", errorCode);
         }
         return "";
@@ -364,7 +374,7 @@ function scormAPI1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, exescormd
                                     if ((value >= ranges[0]) && (value <= ranges[1])) {
                                         eval(element + '=value;');
                                         errorCode = "0";
-                                        if (exescormdebugging) {
+                                        if (seledascormdebugging) {
                                             LogAPICall("LMSSetValue", element, value, errorCode);
                                         }
                                         return "true";
@@ -378,7 +388,7 @@ function scormAPI1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, exescormd
                                         eval(element + '=value;');
                                     }
                                     errorCode = "0";
-                                    if (exescormdebugging) {
+                                    if (seledascormdebugging) {
                                         LogAPICall("LMSSetValue", element, value, errorCode);
                                     }
                                     return "true";
@@ -399,7 +409,7 @@ function scormAPI1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, exescormd
         } else {
             errorCode = "301";
         }
-        if (exescormdebugging) {
+        if (seledascormdebugging) {
             LogAPICall("LMSSetValue", element, value, errorCode);
         }
         return "false";
@@ -414,26 +424,16 @@ function scormAPI1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, exescormd
         if (param == "") {
             if (Initialized) {
                 result = StoreData(cmi,false);
-                // Trigger TOC update only if TOC is displayed.
-                // Checks against setting Display course structure in player:
-                // 0 = To the side, 1 = Hidden, 2 = In a drop down menu, 3 = Disabled
-                if (hidetoc !== '3') {
-                    Y.log('Refreshing toc');
-                    var callback = M.mod_exescorm.connectPrereqCallback;
-                    YUI().use('io-base', function(Y) {
-                        Y.on('io:complete', callback.success, Y);
-                        Y.io(prerequrl);
-                    });
-                }
-                if (exescormdebugging) {
+                if (result === 'true') refreshToc();
+                if (seledascormdebugging) {
                     LogAPICall("Commit", param, "", 0);
                 }
-                if (exescormdebugging) {
+                if (seledascormdebugging) {
                     LogAPICall("LMSCommit", "AJAXResult", result, 0);
                 }
                 result = ('true' == result) ? 'true' : 'false';
                 errorCode = (result == 'true') ? '0' : '101';
-                if (exescormdebugging) {
+                if (seledascormdebugging) {
                     LogAPICall("LMSCommit", "result", result, 0);
                     LogAPICall("LMSCommit", "errorCode", errorCode, 0);
                 }
@@ -444,14 +444,14 @@ function scormAPI1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, exescormd
         } else {
             errorCode = "201";
         }
-        if (exescormdebugging) {
+        if (seledascormdebugging) {
             LogAPICall("LMSCommit", param, "", 0);
         }
         return "false";
     }
 
     function LMSGetLastError () {
-        if (exescormdebugging) {
+        if (seledascormdebugging) {
             LogAPICall("LMSGetLastError", "", "", errorCode);
         }
         return errorCode;
@@ -471,12 +471,12 @@ function scormAPI1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, exescormd
             errorString["403"] = "Element is read only";
             errorString["404"] = "Element is write only";
             errorString["405"] = "Incorrect data type";
-            if (exescormdebugging) {
+            if (seledascormdebugging) {
                 LogAPICall("LMSGetErrorString", param,  errorString[param], 0);
             }
             return errorString[param];
         } else {
-            if (exescormdebugging) {
+            if (seledascormdebugging) {
                 LogAPICall("LMSGetErrorString", param,  "No error string found!", 0);
             }
            return "";
@@ -487,7 +487,7 @@ function scormAPI1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, exescormd
         if (param == "") {
             param = errorCode;
         }
-        if (exescormdebugging) {
+        if (seledascormdebugging) {
             LogAPICall("LMSGetDiagnostic", param, param, 0);
         }
         return param;
@@ -619,6 +619,7 @@ function scormAPI1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, exescormd
     }
 
     function StoreData(data,storetotaltime) {
+        var previousModel = CloneObj(datamodel[scoid]);
         var datastring = '';
         if (storetotaltime) {
             if (cmi.core.lesson_status == 'not attempted') {
@@ -647,19 +648,49 @@ function scormAPI1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, exescormd
         }
 
         var myRequest = NewHttpReq();
-        //alert('going to:' + "<?php p($CFG->wwwroot) ?>/mod/exescorm/datamodel.php" + "id=<?php p($id) ?>&a=<?php p($a) ?>&sesskey=<?php echo sesskey() ?>"+datastring);
-        var result = DoRequest(myRequest, datamodelurl, datamodelurlparams + datastring);
+        //alert('going to:' + "<?php p($CFG->wwwroot) ?>/mod/seledascorm/datamodel.php" + "id=<?php p($id) ?>&a=<?php p($a) ?>&sesskey=<?php echo sesskey() ?>"+datastring);
+        var result;
+        try {
+            result = DoRequest(myRequest, datamodelurl, datamodelurlparams + datastring);
+        } catch (error) {
+            datamodel[scoid] = previousModel;
+            return false;
+        }
 
         if (result === false) {
+            datamodel[scoid] = previousModel;
             return false;
         }
 
         results = String(result).split('\n');
         errorCode = results[1];
+        if (results[0] === 'true') savedModels[scoid] = JSON.parse(JSON.stringify(cmi));
+        else datamodel[scoid] = previousModel;
         return results[0];
     }
 
     this.LMSInitialize = LMSInitialize;
+    // Bind a document to its original server-provided learner/SCO/attempt.
+    // This stays valid for a final keepalive after the player advances, without
+    // initializing SCORM, changing grades, or using the next page's parameters.
+    this.SeledaCreateUsageSender = function() {
+        var usageSco = (seledascorm_current_node && seledascorm_current_node.scoid) || scoid;
+        var defaults = def[usageSco];
+        if (!defaults || defaults['cmi.core.lesson_mode'] === 'review' || defaults['cmi.core.lesson_mode'] === 'browse') return null;
+        var params = 'id=' + cmid + '&a=' + seledascormid + '&sesskey=' + encodeURIComponent(sesskey) + '&attempt=' + attempt + '&scoid=' + usageSco;
+        var student = String(defaults['cmi.core.student_id']);
+        return function(payload, closing) {
+            var body = params + '&seleda_student=' + encodeURIComponent(student) + '&seleda_usage=' + encodeURIComponent(JSON.stringify(payload));
+            return fetch(datamodelurl, {method:'POST', credentials:'same-origin', keepalive:!!closing,
+                headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'}, body:body})
+                .then(function(response) { if (!response.ok) return false; return response.text().then(function(text) { return text.trim() === 'true\n0'; }); })
+                .catch(function() { return false; });
+        };
+    };
+    this.SeledaSaveUsage = function(payload, closing) {
+        var sender = this.SeledaCreateUsageSender();
+        return sender ? sender(payload, closing) : Promise.resolve(false);
+    };
     this.LMSFinish = LMSFinish;
     this.LMSGetValue = LMSGetValue;
     this.LMSSetValue = LMSSetValue;
@@ -669,10 +700,10 @@ function scormAPI1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, exescormd
     this.LMSGetDiagnostic = LMSGetDiagnostic;
 }
 
-M.exescorm_api = {};
+M.seledascorm_api = {};
 
-M.exescorm_api.init = function(Y, def, cmiobj, cmiint, cmistring256, cmistring4096, exescormdebugging, exescormauto, exescormid, cfgwwwroot,
+M.seledascorm_api.init = function(Y, def, cmiobj, cmiint, cmistring256, cmistring4096, seledascormdebugging, seledascormauto, seledascormid, cfgwwwroot,
         sesskey, scoid, attempt, viewmode, cmid, currentorg, autocommit, masteryoverride, hidetoc) {
-    window.API = new scormAPI1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, exescormdebugging, exescormauto, exescormid, cfgwwwroot,
+    window.API = new scormAPI1_2(def, cmiobj, cmiint, cmistring256, cmistring4096, seledascormdebugging, seledascormauto, seledascormid, cfgwwwroot,
             sesskey, scoid, attempt, viewmode, cmid, currentorg, autocommit, masteryoverride, hidetoc);
 }

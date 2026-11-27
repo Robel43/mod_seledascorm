@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * mod_exescorm data generator.
+ * mod_seledascorm data generator.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @category   test
  * @copyright  2013 Marina Glancy
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -26,59 +26,59 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * mod_exescorm data generator class.
+ * mod_seledascorm data generator class.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @category   test
  * @copyright  2013 Marina Glancy
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_exescorm_generator extends testing_module_generator {
+class mod_seledascorm_generator extends testing_module_generator {
 
     public function create_instance($record = null, array $options = null) {
         global $CFG, $USER;
-        require_once($CFG->dirroot.'/mod/exescorm/lib.php');
-        require_once($CFG->dirroot.'/mod/exescorm/locallib.php');
-        $cfgexescorm = get_config('exescorm');
+        require_once($CFG->dirroot.'/mod/seledascorm/lib.php');
+        require_once($CFG->dirroot.'/mod/seledascorm/locallib.php');
+        $cfgseledascorm = get_config('seledascorm');
 
-        // Add default values for exescorm.
+        // Add default values for seledascorm.
         $record = (array)$record + array(
-            'exescormtype' => EXESCORM_TYPE_LOCAL,
+            'seledascormtype' => SELEDASCORM_TYPE_LOCAL,
             'packagefile' => '',
             'packageurl' => '',
-            'updatefreq' => EXESCORM_UPDATE_NEVER,
+            'updatefreq' => SELEDASCORM_UPDATE_NEVER,
             'popup' => 0,
-            'width' => $cfgexescorm->framewidth,
-            'height' => $cfgexescorm->frameheight,
-            'skipview' => $cfgexescorm->skipview,
-            'hidebrowse' => $cfgexescorm->hidebrowse,
-            'displaycoursestructure' => $cfgexescorm->displaycoursestructure,
-            'hidetoc' => $cfgexescorm->hidetoc,
-            'nav' => $cfgexescorm->nav,
-            'navpositionleft' => $cfgexescorm->navpositionleft,
-            'navpositiontop' => $cfgexescorm->navpositiontop,
-            'displayattemptstatus' => $cfgexescorm->displayattemptstatus,
+            'width' => $cfgseledascorm->framewidth,
+            'height' => $cfgseledascorm->frameheight,
+            'skipview' => $cfgseledascorm->skipview,
+            'hidebrowse' => $cfgseledascorm->hidebrowse,
+            'displaycoursestructure' => $cfgseledascorm->displaycoursestructure,
+            'hidetoc' => $cfgseledascorm->hidetoc,
+            'nav' => $cfgseledascorm->nav,
+            'navpositionleft' => $cfgseledascorm->navpositionleft,
+            'navpositiontop' => $cfgseledascorm->navpositiontop,
+            'displayattemptstatus' => $cfgseledascorm->displayattemptstatus,
             'timeopen' => 0,
             'timeclose' => 0,
-            'grademethod' => EXESCORM_GRADESCOES,
-            'maxgrade' => $cfgexescorm->maxgrade,
-            'maxattempt' => $cfgexescorm->maxattempt,
-            'whatgrade' => $cfgexescorm->whatgrade,
-            'forcenewattempt' => $cfgexescorm->forcenewattempt,
-            'lastattemptlock' => $cfgexescorm->lastattemptlock,
-            'forcecompleted' => $cfgexescorm->forcecompleted,
-            'masteryoverride' => $cfgexescorm->masteryoverride,
-            'auto' => $cfgexescorm->auto
+            'grademethod' => SELEDASCORM_GRADESCOES,
+            'maxgrade' => $cfgseledascorm->maxgrade,
+            'maxattempt' => $cfgseledascorm->maxattempt,
+            'whatgrade' => $cfgseledascorm->whatgrade,
+            'forcenewattempt' => $cfgseledascorm->forcenewattempt,
+            'lastattemptlock' => $cfgseledascorm->lastattemptlock,
+            'forcecompleted' => $cfgseledascorm->forcecompleted,
+            'masteryoverride' => $cfgseledascorm->masteryoverride,
+            'auto' => $cfgseledascorm->auto
         );
         if (empty($record['packagefilepath'])) {
-            $record['packagefilepath'] = $CFG->dirroot.'/mod/exescorm/tests/packages/singlescobasic.zip';
+            $record['packagefilepath'] = $CFG->dirroot.'/mod/seledascorm/tests/packages/singlescobasic.zip';
         }
         if (strpos($record['packagefilepath'], $CFG->dirroot) !== 0) {
             $record['packagefilepath'] = "{$CFG->dirroot}/{$record['packagefilepath']}";
         }
 
         // The 'packagefile' value corresponds to the draft file area ID. If not specified, create from packagefilepath.
-        if (empty($record['packagefile']) && $record['exescormtype'] === EXESCORM_TYPE_LOCAL) {
+        if (empty($record['packagefile']) && $record['seledascormtype'] === SELEDASCORM_TYPE_LOCAL) {
             if (!isloggedin() || isguestuser()) {
                 throw new coding_exception('Scorm generator requires a current user');
             }

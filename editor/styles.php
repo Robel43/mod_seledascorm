@@ -17,15 +17,15 @@
 /**
  * Serve files from an admin-uploaded eXeLearning style package.
  *
- * URL layout: `/mod/exescorm/editor/styles.php/{slug}/{filepath}`.
+ * URL layout: `/mod/seledascorm/editor/styles.php/{slug}/{filepath}`.
  *
  * Files are stored outside the plugin source tree at
- * `{dataroot}/mod_exescorm/styles/{slug}/`; this endpoint is the only way
- * the embedded editor reaches them. Access requires `mod/exescorm:view`
+ * `{dataroot}/mod_seledascorm/styles/{slug}/`; this endpoint is the only way
+ * the embedded editor reaches them. Access requires `mod/seledascorm:view`
  * so teachers/students/admins can load the CSS/assets the editor
  * references after an admin has approved the style.
  *
- * @package    mod_exescorm
+ * @package    mod_seledascorm
  * @copyright  2025 eXeLearning
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -35,7 +35,7 @@
 require('../../../config.php');
 require_once($CFG->libdir . '/filelib.php');
 
-use mod_exescorm\local\styles_service;
+use mod_seledascorm\local\styles_service;
 
 $pathinfo = !empty($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO']
     : (!empty($_SERVER['ORIG_PATH_INFO']) ? $_SERVER['ORIG_PATH_INFO'] : '');
@@ -74,16 +74,16 @@ if (strpos($file, '..') !== false || strpos($slug, '..') !== false) {
 }
 
 // Require a real Moodle session. The embedded editor is loaded inside an
-// authenticated admin/teacher context; we still gate on mod/exescorm:view
+// authenticated admin/teacher context; we still gate on mod/seledascorm:view
 // via the system context since admin-approved styles are site-wide.
 require_login(null, false);
 
 $context = \context_system::instance();
-// Any user who can view at least one exescorm activity should be able to
+// Any user who can view at least one seledascorm activity should be able to
 // load the CSS. Check the module capability at system level so the
-// admin preview on /mod/exescorm/admin/styles.php also works.
-if (!has_capability('mod/exescorm:view', $context)
-    && !has_capability('mod/exescorm:manageembeddededitor', $context)) {
+// admin preview on /mod/seledascorm/admin/styles.php also works.
+if (!has_capability('mod/seledascorm:view', $context)
+    && !has_capability('mod/seledascorm:manageembeddededitor', $context)) {
     send_header_404();
     die('Forbidden');
 }

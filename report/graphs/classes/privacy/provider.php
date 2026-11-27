@@ -15,17 +15,17 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Privacy Subsystem implementation for exescormreport_graphs.
+ * Privacy Subsystem implementation for seledascormreport_graphs.
  *
- * @package    exescormreport_graphs
+ * @package    seledascormreport_graphs
  * @copyright  2018 Sara Arjona <sara@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace exescormreport_graphs\privacy;
+namespace seledascormreport_graphs\privacy;
 
 /**
- * Privacy Subsystem for exescormreport_graphs implementing null_provider.
+ * Privacy Subsystem for seledascormreport_graphs implementing null_provider.
  *
  * @copyright  2018 Sara Arjona <sara@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later

@@ -16,8 +16,8 @@
 
 
 /**
- * Defines the version of exescorm_objectives
- * @package   exescormreport_objectives
+ * Defines the version of seledascorm_objectives
+ * @package   seledascormreport_objectives
  * @author    Dan Marsden <dan@danmarsden.com>
  * @copyright 2013 Dan Marsden
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -29,4 +29,4 @@ $plugin->version = 2022112800;
 // $plugin->requires = 2022111800;    // Requires this Moodle version 4.1.
 $plugin->requires = 2020061500;    // Moodle 3.9.
 // $plugin->requires = 2021051700;    // Moodle 3.11.
-$plugin->component = 'exescormreport_objectives';
+$plugin->component = 'seledascormreport_objectives';

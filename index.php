@@ -15,11 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 require_once("../../config.php");
-require_once($CFG->dirroot.'/mod/exescorm/locallib.php');
+require_once($CFG->dirroot.'/mod/seledascorm/locallib.php');
 
 $id = required_param('id', PARAM_INT);   // Course id.
 
-$PAGE->set_url('/mod/exescorm/index.php', array('id' => $id));
+$PAGE->set_url('/mod/seledascorm/index.php', array('id' => $id));
 
 if (!empty($id)) {
     if (!$course = $DB->get_record('course', array('id' => $id))) {
@@ -33,20 +33,20 @@ require_course_login($course);
 $PAGE->set_pagelayout('incourse');
 
 // Trigger instances list viewed event.
-$event = \mod_exescorm\event\course_module_instance_list_viewed::create(['context' => context_course::instance($course->id), ]);
+$event = \mod_seledascorm\event\course_module_instance_list_viewed::create(['context' => context_course::instance($course->id), ]);
 $event->add_record_snapshot('course', $course);
 $event->trigger();
 
-$strexescorm = get_string("modulename", "mod_exescorm");
-$strexescorms = get_string("modulenameplural", "mod_exescorm");
+$strseledascorm = get_string("modulename", "mod_seledascorm");
+$strseledascorms = get_string("modulenameplural", "mod_seledascorm");
 $strname = get_string("name");
 $strsummary = get_string("summary");
-$strreport = get_string("report", 'mod_exescorm');
+$strreport = get_string("report", 'mod_seledascorm');
 $strlastmodified = get_string("lastmodified");
 
-$PAGE->set_title($strexescorms);
+$PAGE->set_title($strseledascorms);
 $PAGE->set_heading($course->fullname);
-$PAGE->navbar->add($strexescorms);
+$PAGE->navbar->add($strseledascorms);
 echo $OUTPUT->header();
 
 $usesections = course_format_uses_sections($course->format);
@@ -57,8 +57,8 @@ if ($usesections) {
     $sortorder = "m.timemodified DESC";
 }
 
-if (! $exescorms = get_all_instances_in_course("exescorm", $course)) {
-    notice(get_string('thereareno', 'moodle', $strexescorms), "../../course/view.php?id=$course->id");
+if (! $seledascorms = get_all_instances_in_course("seledascorm", $course)) {
+    notice(get_string('thereareno', 'moodle', $strseledascorms), "../../course/view.php?id=$course->id");
     exit;
 }
 
@@ -73,43 +73,43 @@ if ($usesections) {
     $table->align = array ("left", "left", "left", "left");
 }
 
-foreach ($exescorms as $exescorm) {
-    $context = context_module::instance($exescorm->coursemodule);
+foreach ($seledascorms as $seledascorm) {
+    $context = context_module::instance($seledascorm->coursemodule);
     $tt = "";
     if ($usesections) {
-        if ($exescorm->section) {
-            $tt = get_section_name($course, $exescorm->section);
+        if ($seledascorm->section) {
+            $tt = get_section_name($course, $seledascorm->section);
         }
     } else {
-        $tt = userdate($exescorm->timemodified);
+        $tt = userdate($seledascorm->timemodified);
     }
     $report = '&nbsp;';
     $reportshow = '&nbsp;';
-    if (has_capability('mod/exescorm:viewreport', $context)) {
-        $trackedusers = exescorm_get_count_users($exescorm->id, $exescorm->groupingid);
+    if (has_capability('mod/seledascorm:viewreport', $context)) {
+        $trackedusers = seledascorm_get_count_users($seledascorm->id, $seledascorm->groupingid);
         if ($trackedusers > 0) {
-            $reportshow = html_writer::link('report.php?id='.$exescorm->coursemodule,
-                                                get_string('viewallreports', 'mod_exescorm', $trackedusers));
+            $reportshow = html_writer::link('report.php?id='.$seledascorm->coursemodule,
+                                                get_string('viewallreports', 'mod_seledascorm', $trackedusers));
         } else {
-            $reportshow = get_string('noreports', 'mod_exescorm');
+            $reportshow = get_string('noreports', 'mod_seledascorm');
         }
-    } else if (has_capability('mod/exescorm:viewscores', $context)) {
+    } else if (has_capability('mod/seledascorm:viewscores', $context)) {
         require_once('locallib.php');
-        $report = exescorm_grade_user($exescorm, $USER->id);
-        $reportshow = get_string('score', 'mod_exescorm').": ".$report;
+        $report = seledascorm_grade_user($seledascorm, $USER->id);
+        $reportshow = get_string('score', 'mod_seledascorm').": ".$report;
     }
     $options = (object)array('noclean' => true);
-    if (!$exescorm->visible) {
+    if (!$seledascorm->visible) {
         // Show dimmed if the mod is hidden.
-        $table->data[] = array ($tt, html_writer::link('view.php?id='.$exescorm->coursemodule,
-                                                        format_string($exescorm->name),
+        $table->data[] = array ($tt, html_writer::link('view.php?id='.$seledascorm->coursemodule,
+                                                        format_string($seledascorm->name),
                                                         array('class' => 'dimmed')),
-                                format_module_intro('exescorm', $exescorm, $exescorm->coursemodule), $reportshow);
+                                format_module_intro('seledascorm', $seledascorm, $seledascorm->coursemodule), $reportshow);
     } else {
         // Show normal if the mod is visible.
         $table->data[] = [$tt,
-                            html_writer::link('view.php?id='.$exescorm->coursemodule, format_string($exescorm->name)),
-                            format_module_intro('exescorm', $exescorm, $exescorm->coursemodule),
+                            html_writer::link('view.php?id='.$seledascorm->coursemodule, format_string($seledascorm->name)),
+                            format_module_intro('seledascorm', $seledascorm, $seledascorm->coursemodule),
                             $reportshow,
                         ];
     }

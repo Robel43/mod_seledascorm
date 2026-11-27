@@ -33,6 +33,7 @@ jobs:
           php -l db/services.php
           php -l classes/local/report_export.php
           php -l classes/local/report_navigation.php
+          php -l classes/local/report_role_setting.php
           php -l settings.php
           php -l classes/output/reporting_dashboard.php
           php -l classes/hook_callbacks.php
@@ -112,3 +113,4 @@ jobs:
         run: |
           cd "$RUNNER_TEMP/moodle"
           vendor/bin/phpunit mod/seledascorm/tests/local/dashboard_test.php
+          vendor/bin/phpunit mod/seledascorm/tests/local/report_role_setting_test.php

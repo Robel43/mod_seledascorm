@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## Report access through selected roles
+
+- Make the reports role selector grant Seleda View reports through Moodle role
+  permissions, preserving existing course/group restrictions and Prohibit overrides.
+- Use safe upgrade defaults instead of granting the previous all-role selection.
+- Track and restore only plugin-created grants when roles are deselected; preserve
+  independent permissions. Capability changes require role-management permission,
+  use core audit events and transactional, serialised saves. Package suffix is 24.
+
+
 ## Reports navigation roles
 
 - Add a multi-select for all Moodle roles and site administrators controlling

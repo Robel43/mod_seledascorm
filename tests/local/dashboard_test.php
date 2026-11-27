@@ -214,6 +214,7 @@ final class dashboard_test extends \advanced_testcase {
         global $CFG, $DB, $PAGE;
         require_once($CFG->libdir.'/adminlib.php');
         $this->resetAfterTest(true);$this->setAdminUser();$g=$this->getDataGenerator();
+        unset_config('reportaccessroles','mod_seledascorm');
         $course=$g->create_course();$other=$g->create_course();
         $g->create_module('seledascorm',['course'=>$course->id]);
         $teacher=$g->create_user();$student=$g->create_user();$analyst=$g->create_user();

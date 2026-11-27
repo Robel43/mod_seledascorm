@@ -5,7 +5,7 @@ define('ROLENAME_ORIGINAL', 1);
 define('SQL_PARAMS_NAMED', 1);
 function ensure($ok, $message) { if (!$ok) throw new Exception($message); }
 function get_string($key, $component=null) { $string=[];require(__DIR__.'/../../lang/en/seledascorm.php');return $string[$key]??$key; }
-function get_config($component,$name) { ensure($component==='mod_seledascorm' && $name==='reportlinkroles','Wrong config key');return $GLOBALS['navconfig']; }
+function get_config($component,$name) { ensure($component==='mod_seledascorm' && in_array($name,['reportaccessroles','reportlinkroles']),'Wrong config key');return $name==='reportaccessroles'?$GLOBALS['navaccessconfig']:$GLOBALS['navconfig']; }
 function role_get_names(...$args) { return $GLOBALS['navchoices']; }
 function is_siteadmin() { return $GLOBALS['navadmin']; }
 eval('namespace mod_seledascorm\\local; class reporting_dashboard {public static $permitted=true;public static function can_open(){return self::$permitted && $GLOBALS["navloggedin"] && !$GLOBALS["navguest"];}}');
@@ -30,10 +30,12 @@ require_once(__DIR__.'/../../classes/hook_callbacks.php');
 use mod_seledascorm\local\report_navigation as policy;
 use mod_seledascorm\local\reporting_dashboard as gate;
 $CFG=(object)['defaultuserroleid'=>7,'defaultfrontpageroleid'=>8];$USER=(object)['id'=>12];$DB=new nav_database();
-$navconfig=false;$navadmin=false;$navloggedin=true;$navguest=false;$navassigned=[3];
+$navaccessconfig=false;$navconfig=false;$navadmin=false;$navloggedin=true;$navguest=false;$navassigned=[3];
 $navchoices=[1=>'Manager',3=>'Teacher',4=>'Non-editing teacher',5=>'Student',6=>'Guest',7=>'Authenticated user',8=>'Front page'];
 ensure(policy::visible(),'Unsaved setting broke existing link visibility');
 $navconfig='';ensure(!policy::visible(),'Empty selection must hide the link');
+$navaccessconfig='3';ensure(policy::visible(),'New access selection did not override legacy navigation');
+$navaccessconfig='';$navconfig='3';ensure(!policy::visible(),'Empty new access selection fell back to legacy roles');$navaccessconfig=false;
 $navconfig='4,3';ensure(policy::visible(),'Multiple selection did not match assigned role');
 $navconfig='4,5';ensure(!policy::visible(),'Unselected role showed the link');
 $navconfig='7';ensure(policy::visible(),'Default authenticated role needs no assignment row');

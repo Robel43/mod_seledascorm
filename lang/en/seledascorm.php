@@ -1072,3 +1072,10 @@ $string['rptnavsettings'] = 'Reports navigation';
 $string['rptnavroles'] = 'Roles shown the Seleda reports link';
 $string['rptnavroles_desc'] = 'Show the top navigation link to users with any selected role. Users must also have reporting permission. Select no roles to hide the link. This does not change report access.';
 $string['rptnavsiteadmins'] = 'Site administrators';
+
+$string['rptaccessroles'] = 'Roles allowed to view Seleda reports';
+$string['rptaccessroles_desc'] = 'Saving grants View reports to selected roles wherever those roles are assigned, and shows the top navigation link. Course access and group restrictions still apply. Deselecting restores only permissions granted by this setting; existing Moodle permissions are preserved.';
+$string['rptgrantprohibited'] = 'Report access is prohibited for {$a}. Change that prohibition in Moodle role permissions before selecting this role.';
+$string['rptgrantstateerror'] = 'The saved report-permission history is invalid. No permissions were changed.';
+
+$string['rptgrantbusy'] = 'Report roles are being updated. Try saving again.';

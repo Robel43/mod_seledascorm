@@ -4,7 +4,7 @@ namespace mod_seledascorm\local;
 
 defined('MOODLE_INTERNAL') || die();
 
-/** Visibility policy for the global reports link; never grants report access. */
+/** Global reports-link policy; access is still enforced through Moodle capabilities. */
 final class report_navigation {
     const SITE_ADMIN = -1;
 
@@ -14,13 +14,26 @@ final class report_navigation {
             role_get_names(null, ROLENAME_ORIGINAL, true);
     }
 
+    /** Safe upgrade default: administrators and roles already allowed at system level. */
+    public static function defaults(): array {
+        global $DB;
+        $defaults = [self::SITE_ADMIN];
+        $roles = $DB->get_records('role_capabilities', ['contextid'=>\context_system::instance()->id,
+            'capability'=>'mod/seledascorm:viewreport', 'permission'=>CAP_ALLOW]);
+        foreach ($roles as $role) $defaults[] = (int)$role->roleid;
+        return array_values(array_unique($defaults));
+    }
+
     /** Match any selected role held anywhere on the site, after the access gate. */
     public static function visible(): bool {
         global $CFG, $DB, $USER;
         if (!reporting_dashboard::can_open()) {
             return false;
         }
-        $configured = get_config('mod_seledascorm', 'reportlinkroles');
+        $configured = get_config('mod_seledascorm', 'reportaccessroles');
+        if ($configured === false) {
+            $configured = get_config('mod_seledascorm', 'reportlinkroles');
+        }
         // Preserve existing navigation until the new setting has been saved.
         if ($configured === false) {
             return true;

@@ -1,32 +1,37 @@
-# Reports navigation roles
+# Reports access roles
 
 Configure this at Site administration → Plugins → Activity modules → Seleda →
-Reports navigation → Roles shown the Seleda reports link.
+Reports navigation → Roles allowed to view Seleda reports.
 
-The standard Moodle multi-select lists every current role, including custom roles,
-using Moodle's display names. Site administrators are an additional explicit
-choice because administrator status is not a normal Moodle role assignment.
-Select one or several entries; clearing all entries hides the top navigation link.
-All entries are selected by default, preserving existing behaviour. An installation
-that has not saved the setting yet also retains its existing visibility.
+The single multi-select lists all Moodle roles and custom roles, plus Site
+administrators. Saving grants only `mod/seledascorm:viewreport` to selected roles
+at system context. Moodle applies that role permission only where a user holds
+the role: course assignments cover that course; category/system assignments can
+cover broader scopes. Existing course access, module visibility and group checks
+continue to run. No other Moodle capability is granted and no role is assigned to
+a user by this setting. Only a user with `moodle/role:manage` at system context may
+make capability changes. Core capability-assigned/unassigned events audit changes.
 
-A user must both match a selected entry and pass reporting_dashboard::can_open().
-This is navigation visibility only. Dashboard, learner drawer, CSV, activity,
-course, group and capability checks are unchanged. Selecting Student or Guest
-never grants report access. Guests and logged-out visitors never see the link.
+The upgrade uses a new `reportaccessroles` setting with safe defaults: site admins
+and roles already allowed this capability at system level. It does not convert
+the old visibility selector's “all roles” values into grants to students or
+Authenticated user. The legacy navigation selection is read only until the new
+setting is saved. All roles remain available as choices; deliberately select only
+the staff roles intended to report. Selecting Authenticated user would cover all
+signed-in users, so it is not newly enabled by default.
 
-Global navigation matches a selected explicit role assignment anywhere on the
-site (system, category, course or module), plus Moodle's default authenticated-user
-and front-page roles. Selecting either default role therefore covers every signed-in
-user who already has reporting access. A site administrator matches the explicit
-administrator choice or any selected role they also hold. The empty selection has
-no administrator bypass. Saving purges caches so the next request sees the change.
+Deselecting restores only system-level capability values this setting changed.
+A pre-existing Allow is never owned or removed. If a different administrator has
+subsequently changed a managed capability away from Allow, deselection preserves
+that change. Lower-context overrides remain intact, and a system Prohibit blocks
+saving that role rather than being silently overwritten. Existing independent
+permissions may therefore still permit direct report URLs after deselection;
+the top link follows the selected roles. No roles selected hides the top link.
 
-One bounded role-assignment existence query is used only when the existing access
-gate passes and no selected default role already matches. No report catalogue,
-tracking or per-course aggregation is loaded to make this decision. No capability,
-schema or privacy-provider changes are introduced. Package suffix 23 refreshes the
-navigation/settings caches during upgrade.
+Prior values are stored in `reportrolegrants` in standard plugin configuration.
+Grant/restore/selection writes are transactional; an exclusive Moodle lock
+serialises simultaneous saves. The core APIs invalidate role caches, and the
+setting's updated callback purges navigation caches. No new tables, services or
+privacy-provider changes are required. Package suffix 24 refreshes the settings.
 
-The sibling mod_exeweb has no corresponding Seleda reporting navigation component;
-this configuration applies only to mod_seledascorm.
+The sibling mod_exeweb has no corresponding Seleda reports component.

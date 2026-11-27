@@ -74,3 +74,16 @@ checks real Moodle role choices (including a newly created custom role), core
 multi-select saving/defaults/empty values, assignments across courses, implicit
 default roles, administrators, guests, the primary navigation hook, and unchanged
 reporting capability checks. The Seleda reporting workflow runs both checks.
+
+## Report-role permission grants
+
+Native Moodle also runs:
+
+```sh
+vendor/bin/phpunit mod/seledascorm/tests/local/report_role_setting_test.php
+```
+
+This tests safe defaults/legacy migration, multiple custom-role grants, core audit
+events, restoration of absent and Prevent permissions, preservation of independent
+allows and later overrides, course assignments, separate groups, module-level
+Prevents, system Prohibits and required role-management permission.

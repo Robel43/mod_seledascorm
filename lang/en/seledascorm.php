@@ -1067,3 +1067,8 @@ $string['rptshowpages'] = 'Showing {$a->shown} of {$a->total} pages';
 $string['rpttotalpages'] = '{$a} pages';
 
 $string['rptdisplayedshare'] = 'Share of displayed total: {$a}';
+
+$string['rptnavsettings'] = 'Reports navigation';
+$string['rptnavroles'] = 'Roles shown the Seleda reports link';
+$string['rptnavroles_desc'] = 'Show the top navigation link to users with any selected role. Users must also have reporting permission. Select no roles to hide the link. This does not change report access.';
+$string['rptnavsiteadmins'] = 'Site administrators';

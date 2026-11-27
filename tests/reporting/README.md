@@ -7,6 +7,7 @@ php tests/reporting/readable-reporting.php
 php tests/reporting/block-usage.php
 php tests/reporting/dashboard.php
 php tests/reporting/learning-insights.php
+php tests/reporting/report-navigation.php
 php tests/reporting/overview-reporting.php
 php tests/reporting/overview-reporting.php --csv
 node --test tests/reporting/*.test.cjs
@@ -64,3 +65,12 @@ selections, denied capability, audit event and admin access.
 keyboard and no-JavaScript expansion, searching hidden pages, sorting, empty
 search results, native doughnut links, bar hover/click/keyboard selection, no
 duplicate bottom lists and readable labels/no overflow at 320/375/768/1024px.
+
+## Reports navigation roles
+
+`report-navigation.php` executes the actual role-visibility helper and navigation
+hook with bounded role-assignment fixtures. Native dashboard_test additionally
+checks real Moodle role choices (including a newly created custom role), core
+multi-select saving/defaults/empty values, assignments across courses, implicit
+default roles, administrators, guests, the primary navigation hook, and unchanged
+reporting capability checks. The Seleda reporting workflow runs both checks.

@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## Reports navigation roles
+
+- Add a multi-select for all Moodle roles and site administrators controlling
+  the global Seleda reports link. Custom roles appear automatically in the list.
+- Preserve current visibility by default and retain all report permission checks;
+  an empty selection hides the link. Package suffix advances to 23.
+
+
 ## Compact interactive report charts
 
 - Remove repeated lists beneath charts; keep full names and values on the charts.

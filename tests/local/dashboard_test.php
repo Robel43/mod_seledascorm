@@ -210,4 +210,63 @@ final class dashboard_test extends \advanced_testcase {
         $external::execute($activity->cmid,$one->id,1,0,'answers','{}');
     }
 
+    public function test_reports_navigation_role_setting_and_permissions(): void {
+        global $CFG, $DB, $PAGE;
+        require_once($CFG->libdir.'/adminlib.php');
+        $this->resetAfterTest(true);$this->setAdminUser();$g=$this->getDataGenerator();
+        $course=$g->create_course();$other=$g->create_course();
+        $g->create_module('seledascorm',['course'=>$course->id]);
+        $teacher=$g->create_user();$student=$g->create_user();$analyst=$g->create_user();
+        $g->enrol_user($teacher->id,$course->id,'editingteacher');
+        $g->enrol_user($student->id,$course->id,'student');
+        $teacherrole=(int)$DB->get_field('role','id',['shortname'=>'editingteacher']);
+        $studentrole=(int)$DB->get_field('role','id',['shortname'=>'student']);
+        $custom=create_role('Course analyst','courseanalyst','Reports analyst');
+        assign_capability('mod/seledascorm:viewreport',CAP_ALLOW,$custom,\context_course::instance($course->id));
+        $g->enrol_user($analyst->id,$course->id,$custom);
+        $choices=report_navigation::choices();
+        $this->assertCount($DB->count_records('role')+1,$choices);
+        $this->assertSame('Course analyst',$choices[$custom]);
+        $this->assertArrayHasKey(report_navigation::SITE_ADMIN,$choices);
+        $setting=new \admin_setting_configmultiselect('mod_seledascorm/reportlinkroles','Roles','',array_keys($choices),$choices);
+        $this->assertSame(array_keys($choices),$setting->get_defaultsetting());
+        $this->assertSame('',$setting->write_setting([$teacherrole,$custom]));
+        $this->assertSame([$teacherrole,$custom],array_map('intval',$setting->get_setting()));
+        $this->setUser($teacher);$this->assertTrue(reporting_dashboard::can_open());
+        $this->assertTrue(report_navigation::visible());
+        set_config('reportlinkroles',(string)$studentrole,'mod_seledascorm');
+        $this->assertFalse(report_navigation::visible());
+        // A global link recognises any selected assigned role, across courses.
+        $g->enrol_user($teacher->id,$other->id,'student');
+        $this->assertTrue(report_navigation::visible());
+        $this->setUser($student);$this->assertFalse(report_navigation::visible());
+        $this->assertFalse(reporting_dashboard::can_open());
+        $this->setUser($analyst);set_config('reportlinkroles',(string)$custom,'mod_seledascorm');
+        $this->assertTrue(report_navigation::visible());
+        set_config('reportlinkroles',(string)$CFG->defaultuserroleid,'mod_seledascorm');
+        $this->assertTrue(report_navigation::visible());
+        set_config('defaultfrontpageroleid',$studentrole);
+        set_config('reportlinkroles',(string)$studentrole,'mod_seledascorm');
+        $this->assertTrue(report_navigation::visible());
+        $this->assertSame('',$setting->write_setting([]));
+        $this->assertSame([],$setting->get_setting());
+        $this->assertFalse(report_navigation::visible());
+        $this->setAdminUser();$this->assertFalse(report_navigation::visible());
+        set_config('reportlinkroles',(string)report_navigation::SITE_ADMIN,'mod_seledascorm');
+        $this->assertTrue(report_navigation::visible());
+        $PAGE->set_context(\context_system::instance());
+        $view=new \core\navigation\views\primary($PAGE);
+        $hook=new \core\hook\navigation\primary_extend($view);
+        \mod_seledascorm\hook_callbacks::extend_primary($hook);
+        $this->assertNotFalse($view->find('seledascorm-dashboard',\navigation_node::TYPE_CUSTOM));
+        set_config('reportlinkroles','','mod_seledascorm');
+        $hiddenview=new \core\navigation\views\primary($PAGE);
+        \mod_seledascorm\hook_callbacks::extend_primary(new \core\hook\navigation\primary_extend($hiddenview));
+        $this->assertFalse($hiddenview->find('seledascorm-dashboard',\navigation_node::TYPE_CUSTOM));
+        unset_config('reportlinkroles','mod_seledascorm');
+        $this->assertTrue(report_navigation::visible());
+        $this->setGuestUser();$this->assertFalse(report_navigation::visible());
+        $this->setUser(0);$this->assertFalse(report_navigation::visible());
+    }
+
 }

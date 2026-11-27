@@ -67,6 +67,21 @@ if ($ADMIN->fulltree) {
     $brandlogosetting->set_updatedcallback('purge_all_caches');
     $settings->add($brandlogosetting);
 
+    // Global reports-link visibility; the reporting capability remains mandatory.
+    $settings->add(new admin_setting_heading(
+        'mod_seledascorm/reportnavigationsettings',
+        get_string('rptnavsettings', 'mod_seledascorm'), ''
+    ));
+    $reportnavroles = \mod_seledascorm\local\report_navigation::choices();
+    $reportnavsetting = new admin_setting_configmultiselect(
+        'mod_seledascorm/reportlinkroles',
+        get_string('rptnavroles', 'mod_seledascorm'),
+        get_string('rptnavroles_desc', 'mod_seledascorm'),
+        array_keys($reportnavroles), $reportnavroles
+    );
+    $reportnavsetting->set_updatedcallback('purge_all_caches');
+    $settings->add($reportnavsetting);
+
     // Embedded editor settings.
     $settings->add(new admin_setting_heading('seledascorm/embeddededitorsettings',
         get_string('embeddededitorsettings', 'mod_seledascorm'), ''));

@@ -32,6 +32,8 @@ jobs:
           php -l classes/external/learner_report.php
           php -l db/services.php
           php -l classes/local/report_export.php
+          php -l classes/local/report_navigation.php
+          php -l settings.php
           php -l classes/output/reporting_dashboard.php
           php -l classes/hook_callbacks.php
           php -l db/hooks.php
@@ -47,6 +49,7 @@ jobs:
           php tests/reporting/overview-reporting.php --csv
           php tests/reporting/dashboard.php
           php tests/reporting/learning-insights.php
+          php tests/reporting/report-navigation.php
           export NODE_PATH="$RUNNER_TEMP/dashboard-browser/node_modules"
           node --test tests/reporting/*.test.cjs
   moodle-dashboard:

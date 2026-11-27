@@ -68,7 +68,7 @@ final class reporting_dashboard {
             $h.='</span><small class="sd-course-card-coverage">'.self::r('progresscoverage',(object)['known'=>$card['known'],'total'=>$card['total']]).'</small></a>';
         }
         if(!$cards)$h.='<p>'.self::r('nocourses').'</p>';
-        return $h.'</div><p class="sd-note">'.self::r('courseprogressnote').'</p></section>';
+        return $h.'</div></section>';
     }
     private static function r(string $key,$a=null): string { return self::h(get_string('rpt'.$key,'mod_seledascorm',$a)); }
     private static function chip(string $state,bool $result=false): string {

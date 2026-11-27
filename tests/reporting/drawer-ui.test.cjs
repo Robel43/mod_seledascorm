@@ -64,6 +64,7 @@ test('course cards list all courses, show honest progress coverage and drill int
  for(const width of [320,375,768,1024]){
   await page.setViewportSize({width,height:1000});await page.setContent(fixture('--coursehtml'));
   assert.equal(await page.locator('.sd-course-card').count(),2);
+  assert.doesNotMatch(await page.locator('.sd-course-browser').innerText(),/Average page-completion progress across/);
   const spacing=await page.locator('.sd-course-card').first().evaluate(card=>({
    titleBottom:card.querySelector('.sd-course-card-heading').getBoundingClientRect().bottom,
    progressTop:card.querySelector('.sd-course-card-progress').getBoundingClientRect().top,

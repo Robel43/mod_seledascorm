@@ -5,7 +5,7 @@ and all filters still work without JavaScript. The optional drawer uses a Moodle
 AJAX external function, the same renderer and reporting service, and an audit event
 on each successful load. No tables, dependencies, browser storage, permission or
 privacy-provider changes were introduced. The source dev version sentinel stays
-in place; packaging suffix is now 19 (phase 6 introduced 18) to register the AJAX function
+in place; packaging suffix is now 20 (phase 6 introduced 18) to register the AJAX function
 and refresh AMD caches when Moodle upgrades.
 
 ## Screens and scope
@@ -171,3 +171,8 @@ view audit event. No optional drawer, web service, DB schema or privacy change i
 Course and activity cards use separate heading, progress and coverage rows with
 explicit spacing and responsive columns. Names never share an inline row with
 the progress percentage. The suffix-19 package refreshes the cached stylesheet.
+
+The course-card calculation explanation is kept in this documentation instead of
+the report screen. Statistical sample labels use “Participants: N”: the count of
+people contributing to that specific metric, not the full enrolled population.
+Small-sample suppression still applies. Package suffix 20 refreshes this copy.

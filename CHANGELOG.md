@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## Simpler reporting copy
+
+- Remove the long calculation explanation beneath course and activity cards.
+- Replace statistical “n” notation with explicit participant counts while keeping
+  small-sample protections and metric calculations. Package suffix advances to 20.
+
+
 ## Course and SCORM card layout
 
 - Separate names, activity counts, progress metrics and coverage into spaced rows.

@@ -40,7 +40,7 @@ test('Content and Insights show the requested panels without exposing small-samp
  for(const width of [320,375,768,1024]){
   await page.setViewportSize({width,height:1000});await page.setContent(fixture('--insightshtml'));
   for(const name of ['Participation','Completion by activity','Score distribution','Median active time by activity','Pages to investigate','Hardest questions','Retry outcomes','Tracking coverage'])assert.equal(await page.getByRole('heading',{name,exact:true}).count(),1);
-  assert.match(await page.locator('.sd-main').innerText(),/Not enough data \(n = 1\)/);
+  assert.match(await page.locator('.sd-main').innerText(),/Not enough data \(Participants: 1\)/);
   assert.equal(await page.getByText('Unique people',{exact:true}).count(),1);
   assert.equal(await page.getByText('Participations',{exact:true}).count(),1);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));

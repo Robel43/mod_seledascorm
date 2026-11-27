@@ -14,7 +14,6 @@ final class report_role_setting_test extends \advanced_testcase {
         $activity=$g->create_module('seledascorm',['course'=>$course->id,'groupmode'=>SEPARATEGROUPS]);
         $role=create_role('Course reviewer','coursereviewer','');
         assign_capability('moodle/course:view',CAP_ALLOW,$role,\context_system::instance());
-        assign_capability('mod/seledascorm:view',CAP_ALLOW,$role,\context_system::instance());
         $user=$g->create_user();$g->enrol_user($user->id,$course->id,$role);
         return [$g,$course,$activity,$role,$user,new report_role_setting()];
     }

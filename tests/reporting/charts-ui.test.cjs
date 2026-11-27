@@ -47,6 +47,7 @@ test('bar charts have no duplicate list and support hover, click, keyboard and d
  assert.equal(await page.locator('.sd-chart-values').count(),0);
  const chart=page.locator('[data-rpt-chart]').first(),row=chart.locator('[data-rpt-chart-item]').first(),detail=chart.locator('.sd-chart-selection');
  assert.equal(await row.getAttribute('role'),'button');
+ assert.equal(await chart.locator('.sd-rpt-chart').getAttribute('role'),'group');
  const name=await row.getAttribute('data-detail');assert.match(name,/Share of displayed total:/);
  await row.hover();assert.equal(await detail.innerText(),name);
  await row.click();assert.equal(await row.getAttribute('aria-pressed'),'true');

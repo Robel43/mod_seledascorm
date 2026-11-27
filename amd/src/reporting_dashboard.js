@@ -51,6 +51,7 @@ export const init = () => {
         if (chart.dataset.rptReady) return;
         chart.dataset.rptReady = '1';
         const rows = [...chart.querySelectorAll('[data-rpt-chart-item]')];
+        chart.querySelector('.sd-rpt-chart')?.setAttribute('role', 'group');
         const detail = chart.querySelector('.sd-chart-selection');
         let selected = null;
         const show = row => {

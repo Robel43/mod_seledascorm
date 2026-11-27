@@ -215,3 +215,7 @@ Labels stay normal HTML text so they remain readable on small screens; native SV
 titles, focus rings and a live detail region provide accessible interaction.
 No library, external request, storage, schema or permission change was introduced.
 Existing sample suppression remains in force. Packaging suffix 22 refreshes AMD/CSS.
+
+Participation bars pin raw counts only; their tooltips do not introduce a new
+percentage for small cross-activity samples. Score-band charts remain suppressed
+until the existing minimum sample is met.

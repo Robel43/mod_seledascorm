@@ -196,7 +196,7 @@ final class reporting_dashboard {
         $h.='<div class="sd-rpt-chart" role="list" aria-label="'.self::r($key).'">';
         foreach($items as $item) {
             $value=$time?self::time($item['value']):self::number($item['value']);$full=self::h($item['label']).': '.$value;
-            $detail=$full.' · '.self::r('displayedshare',$total?round($item['value']*100/$total,1).'%':'—');
+            $detail=$full.($key==='participationactivity'?'':' · '.self::r('displayedshare',$total?round($item['value']*100/$total,1).'%':'—'));
             $h.='<div class="sd-chart-item" role="listitem" data-rpt-chart-item data-label="'.$full.'" data-detail="'.$detail.'"><span class="sd-chart-item-label">'.self::h($item['label']).'</span><strong>'.$value.'</strong><svg role="img" class="sd-chart-bar-svg" viewBox="0 0 600 8" preserveAspectRatio="none" width="100%" height="8"><title>'.$full.'</title><rect width="600" height="8" rx="4" fill="#e3e9f2"/><rect class="sd-chart-bar" width="'.round($item['value']/$max*600,2).'" height="8" rx="4" fill="#4f7df4"/></svg></div>';
         }
         return $h.'</div><p class="sd-chart-selection" role="status" aria-live="polite" hidden></p></section>';

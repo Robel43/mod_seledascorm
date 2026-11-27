@@ -54,6 +54,9 @@ test('bar charts have no duplicate list and support hover, click, keyboard and d
  await page.mouse.move(0,0);assert.equal(await detail.isVisible(),true);
  await row.focus();await page.keyboard.press('Enter');assert.equal(await row.getAttribute('aria-pressed'),'false');
  await page.keyboard.press('Space');assert.equal(await row.getAttribute('aria-pressed'),'true');
+ await page.setContent(fixture('--insightshtml'));
+ const participation=page.locator('[data-rpt-chart]').first().locator('[data-rpt-chart-item]').first();
+ assert.doesNotMatch(await participation.getAttribute('data-detail'),/Share of displayed total/);
  assert.deepEqual(errors,[]);await page.close();
 });
 test('compact charts fit narrow screens; native page expansion and chart labels work without JavaScript',async()=>{

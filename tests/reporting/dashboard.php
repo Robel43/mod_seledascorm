@@ -186,6 +186,15 @@ $empty['rows'] = []; $empty['filteredcount'] = 0;
 $emptyhtml = \mod_seledascorm\output\reporting_dashboard::render($empty);
 ensure(strpos($emptyhtml, '0 of 0') !== false && strpos($emptyhtml, 'No people match') !== false,
     'An empty activity should show explicit empty states, not crash or invent failed learners');
+if (in_array('--compacthtml',$argv)) {
+    $model['metrics']['learning']['pages']=[];
+    for($i=0;$i<40;$i++) {
+        $done=$i%4;$reached=$i%5===0?$done:min(3,$done+1);
+        $model['metrics']['learning']['pages'][]=['scoid'=>100+$i,'page'=>sprintf('Page %02d: Lesson and activity with a readable full title',$i+1),
+            'completed'=>$done,'reached'=>$reached,'inprogress'=>$reached-$done,'unknown'=>0,'median'=>null,'timed'=>0];
+    }
+    $html=\mod_seledascorm\output\reporting_dashboard::render($model);
+}
 if (in_array('--contenthtml',$argv)) { $model['filters']['panel']='questions'; $html=\mod_seledascorm\output\reporting_dashboard::render($model); }
 if (in_array('--insightshtml',$argv)) {
     $model['filters']['view']='analytics';$model['comparisons']=[['id'=>1,'name'=>'English practice','course'=>'English 101','data'=>$data['learning']]];
@@ -214,7 +223,7 @@ if (in_array('--coursehtml',$argv) || in_array('--activitylisthtml',$argv)) {
 }
 $progress=\mod_seledascorm\local\report_view::course_progress([['progress'=>1],['progress'=>0.5],['progress'=>0],['progress'=>null]]);
 ensure($progress===['sum'=>1.5,'known'=>3,'total'=>4],'Course average invented missing progress or excluded a genuine zero');
-if (in_array('--coursehtml',$argv) || in_array('--activitylisthtml',$argv) || in_array('--html', $argv) || in_array('--detailhtml',$argv) || in_array('--contenthtml',$argv) || in_array('--insightshtml',$argv)) {
+if (in_array('--compacthtml',$argv) || in_array('--coursehtml',$argv) || in_array('--activitylisthtml',$argv) || in_array('--html', $argv) || in_array('--detailhtml',$argv) || in_array('--contenthtml',$argv) || in_array('--insightshtml',$argv)) {
     echo '<!doctype html><html lang="en"><meta name="viewport" content="width=device-width, initial-scale=1"><meta charset="utf-8"><title>Seleda reports</title><style>body{font:16px system-ui;margin:0;padding:24px;background:#f7f9fd}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}' .
         file_get_contents(__DIR__ . '/../../dashboard.css') . '</style>' . $html . '<script>window.define=(name,deps,factory)=>factory().init();</script><script>' .
         file_get_contents(__DIR__ . '/../../amd/build/reporting_dashboard.min.js') . '</script></html>';

@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## Compact interactive report charts
+
+- Remove repeated lists beneath charts; keep full names and values on the charts.
+- Show six compact learning-page rows with expandable counts, search, sorting and
+  a native Show all pages control.
+- Add a participant-progress doughnut with status-filter links. Bar charts support
+  hover, keyboard selection and pinned values with a share of the displayed total.
+- Preserve missing values, small-sample protections, no-JavaScript access and
+  existing permissions. Package suffix advances to 22.
+
+
 ## Scoped participant counts
 
 - Label report samples “Data from X of Y participants”, using contributors and

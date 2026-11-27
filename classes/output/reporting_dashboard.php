@@ -48,7 +48,7 @@ final class reporting_dashboard {
         $html.='</nav>';
         if (($m['filters']['panel']??'')==='questions') return $html.self::content($m).'</main></div>';
         $html.=self::kpis($data,$m).'<p class="sd-note">'.self::r('scope',(object)['total'=>$data['roster'],'started'=>$data['started'],'notstarted'=>$data['statuses']['notstarted']]).'</p>';
-        $html.='<div class="sd-visuals">'.self::page_progress($data).self::hardest($data['questions'],5,$data['roster']).'</div><a href="'.self::url($m,['panel'=>'questions']).'">'.self::r('seequestions').'</a>';
+        $html.='<div class="sd-visuals">'.self::page_progress($data,$m).self::hardest($data['questions'],5,$data['roster']).'</div><a href="'.self::url($m,['panel'=>'questions']).'">'.self::r('seequestions').'</a>';
         $html.=self::learner_table($m).'<p class="sd-note">'.self::r('unknownnote').'</p>';
         return $html.'</main></div>';
     }
@@ -124,10 +124,33 @@ final class reporting_dashboard {
         if($p['progress']===null)return '—';$done=$p['pagescompleted'];$total=$p['pagestotal'];
         return '<span class="sd-progress" role="img" aria-label="'.self::r('pageprogress',(object)['done'=>$done,'total'=>$total]).'"><span style="width:'.($total?round($done*100/$total):0).'%"></span></span><span>'.$done.' / '.$total.'</span>';
     }
-    private static function page_progress(array $d): string {
-        $h='<section class="sd-card"><h2>'.self::r('wherestop').'</h2>';
-        foreach($d['pages']as $p){$n=$d['roster'];$h.='<div class="sd-page-bar"><strong>'.self::h($p['page']).'</strong><svg role="img" viewBox="0 0 500 12" width="100%" height="12"><title>'.self::h($p['page']).': '.$p['completed'].' / '.$n.'</title><rect width="500" height="12" fill="#d6deeb"/><rect width="'.($n?round($p['reached']*500/$n,2):0).'" height="12" fill="#4f7df4"/><rect width="'.($n?round($p['completed']*500/$n,2):0).'" height="12" fill="#129576"/></svg><small>'.self::r('pagecounts',(object)['done'=>$p['completed'],'progress'=>$p['reached']-$p['completed'],'none'=>$n-$p['reached'],'total'=>$n]).'</small></div>';}
-        return $h.'</section>';
+    /** Mutually exclusive learner states, with native links to filter the table. */
+    private static function completion_chart(array $d,array $m): string {
+        $total=$d['roster'];$offset=0;
+        $colors=['completed'=>'#129576','inprogress'=>'#4f7df4','notstarted'=>'#d6deeb','unknown'=>'#94a3b8'];
+        $h='<div class="sd-completion-summary"><svg class="sd-completion-donut" role="group" viewBox="0 0 140 140" aria-label="'.self::r('completionoverview').'"><title>'.self::r('completionoverview').'</title><circle cx="70" cy="70" r="50" fill="none" stroke="#e3e9f2" stroke-width="14"/>';
+        foreach($colors as $state=>$color) {
+            $n=$d['statuses'][$state];$part=$total?$n*100/$total:0;
+            if($part>0)$h.='<a href="'.self::url($m,['state'=>$state,'page'=>0]).'#sd-learners" aria-label="'.self::r($state).': '.$n.' / '.$total.'"><title>'.self::r($state).': '.$n.' / '.$total.'</title><circle cx="70" cy="70" r="50" fill="none" stroke="'.$color.'" stroke-width="14" pathLength="100" stroke-dasharray="'.$part.' '.(100-$part).'" stroke-dashoffset="'.(-$offset).'" transform="rotate(-90 70 70)"/></a>';
+            $offset+=$part;
+        }
+        $h.='<text x="70" y="68" text-anchor="middle" class="sd-donut-value">'.($total?round($d['completed']*100/$total).'%':'—').'</text><text x="70" y="87" text-anchor="middle" class="sd-donut-label">'.self::r('completed').'</text></svg><div class="sd-donut-legend"><h3>'.self::r('completionoverview').'</h3>';
+        foreach($colors as $state=>$color)$h.='<a href="'.self::url($m,['state'=>$state,'page'=>0]).'#sd-learners"><span class="sd-chart-dot" style="background:'.$color.'" aria-hidden="true"></span><span>'.self::r($state).'</span><strong>'.$d['statuses'][$state].' / '.$total.'</strong></a>';
+        return $h.'</div></div>';
+    }
+    private static function page_progress(array $d,array $m): string {
+        $h='<section class="sd-card sd-page-progress" data-rpt-pages><h2>'.self::r('wherestop').'</h2>'.self::completion_chart($d,$m);
+        $h.='<div class="sd-page-tools" hidden><label>'.self::r('findpage').'<input type="search" data-rpt-page-search></label><label>'.self::r('sortpages').'<select aria-label="'.self::r('sortpages').'" data-rpt-page-sort><option value="order">'.self::r('pageorder').'</option><option value="unfinished">'.self::r('mostunfinished').'</option><option value="completed">'.self::r('leastcompleted').'</option></select></label></div>';
+        $h.='<div class="sd-page-legend">';
+        foreach(['completed'=>'#129576','inprogress'=>'#4f7df4','notreached'=>'#d6deeb']as $key=>$color)$h.='<span><i class="sd-chart-dot" style="background:'.$color.'" aria-hidden="true"></i>'.self::r($key).'</span>';
+        $h.='</div><div class="sd-page-preview">';
+        foreach(array_values($d['pages'])as $i=>$p) {
+            if($i===6)$h.='</div><details class="sd-more-pages"><summary data-rpt-more-label="'.self::r('allpages','{count}').'">'.self::r('allpages',count($d['pages'])).'</summary><div class="sd-page-rest">';
+            $n=$d['roster'];$counts=self::r('pagecounts',(object)['done'=>$p['completed'],'progress'=>$p['reached']-$p['completed'],'none'=>$n-$p['reached'],'total'=>$n]);
+            $h.='<details class="sd-page-bar" data-order="'.$i.'" data-unfinished="'.($p['reached']-$p['completed']).'" data-completed="'.$p['completed'].'" data-name="'.self::h($p['page']).'"><summary><span class="sd-page-name">'.self::h($p['page']).'</span><svg role="img" viewBox="0 0 500 10" width="100%" height="10"><title>'.self::h($p['page']).': '.$counts.'</title><rect width="500" height="10" rx="5" fill="#d6deeb"/><rect width="'.($n?round($p['reached']*500/$n,2):0).'" height="10" fill="#4f7df4"/><rect width="'.($n?round($p['completed']*500/$n,2):0).'" height="10" fill="#129576"/></svg><span class="sd-page-fraction" aria-label="'.self::r('pageprogress',(object)['done'=>$p['completed'],'total'=>$n]).'">'.$p['completed'].' / '.$n.'</span></summary><p class="sd-page-breakdown">'.$counts.'</p></details>';
+        }
+        $h.=count($d['pages'])>6?'</div></details>':'</div>';
+        return $h.'<p class="sd-page-visible-count" aria-live="polite" data-rpt-count-label="'.self::r('showpages',(object)['shown'=>'{shown}','total'=>'{total}']).'">'.self::r('totalpages',count($d['pages'])).'</p></section>';
     }
     private static function hardest(array $questions,int $limit,int $total): string {
         $h='<section class="sd-card"><h2>'.self::r('hardest').'</h2><div class="sd-table-scroll"><table class="sd-table"><thead><tr>';
@@ -167,12 +190,16 @@ final class reporting_dashboard {
         return '<div class="sd-table-scroll"><table class="sd-table"><thead><tr>'.implode('',array_map(function($k){return '<th scope="col">'.self::r($k).'</th>';},$keys)).'</tr></thead><tbody>';
     }
     private static function bar_chart(string $key,array $items,bool $time=false): string {
-        $h='<section class="sd-card"><h2>'.self::r($key).'</h2>';
+        $h='<section class="sd-card sd-interactive-chart" data-rpt-chart><h2>'.self::r($key).'</h2>';
         if(!$items)return $h.'<p>'.self::r('nodata').'</p></section>';
-        $max=max(1,max(array_column($items,'value')));$h.='<svg class="sd-rpt-chart" role="img" width="100%" viewBox="0 0 600 '.(count($items)*60).'"><title>'.self::r($key).'</title>';
-        foreach($items as $i=>$item){$y=$i*60;$value=$time?self::time($item['value']):self::number($item['value']);$h.='<g><title>'.self::h($item['label']).': '.$value.'</title><text x="0" y="'.($y+16).'" fill="#324b70" font-size="13">'.self::h(mb_strimwidth($item['label'],0,52,'…','UTF-8')).'</text><text x="600" y="'.($y+16).'" text-anchor="end" fill="#192a46" font-size="13">'.$value.'</text><rect y="'.($y+28).'" width="600" height="10" rx="5" fill="#e3e9f2"/><rect y="'.($y+28).'" width="'.round($item['value']/$max*600,2).'" height="10" rx="5" fill="#4f7df4"/></g>';}
-        $h.='</svg><ul class="sd-chart-values">';foreach($items as $item)$h.='<li>'.self::h($item['label']).': '.($time?self::time($item['value']):self::number($item['value'])).'</li>';
-        return $h.'</ul></section>';
+        $max=max(1,max(array_column($items,'value')));$total=array_sum(array_column($items,'value'));
+        $h.='<div class="sd-rpt-chart" role="list" aria-label="'.self::r($key).'">';
+        foreach($items as $item) {
+            $value=$time?self::time($item['value']):self::number($item['value']);$full=self::h($item['label']).': '.$value;
+            $detail=$full.' · '.self::r('displayedshare',$total?round($item['value']*100/$total,1).'%':'—');
+            $h.='<div class="sd-chart-item" role="listitem" data-rpt-chart-item data-label="'.$full.'" data-detail="'.$detail.'"><span class="sd-chart-item-label">'.self::h($item['label']).'</span><strong>'.$value.'</strong><svg role="img" class="sd-chart-bar-svg" viewBox="0 0 600 8" preserveAspectRatio="none" width="100%" height="8"><title>'.$full.'</title><rect width="600" height="8" rx="4" fill="#e3e9f2"/><rect class="sd-chart-bar" width="'.round($item['value']/$max*600,2).'" height="8" rx="4" fill="#4f7df4"/></svg></div>';
+        }
+        return $h.'</div><p class="sd-chart-selection" role="status" aria-live="polite" hidden></p></section>';
     }
     private static function insights_value($value,int $n,int $total,bool $time=false,string $suffix=''): string {
         return ($n<5?self::r('insufficientdata'):($value===null?'—':($time?self::time($value):self::number($value).$suffix))).'<small>'.self::coverage($n,$total).'</small>';

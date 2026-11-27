@@ -1053,3 +1053,17 @@ $string['rptactivitycountone'] = '1 SCORM activity';
 
 $string['rptdatacoverage'] = 'Data from {$a->count} of {$a->total} participants';
 $string['rptinsufficientdata'] = 'Not enough data';
+
+$string['rptcompletionoverview'] = 'Participant progress';
+$string['rptfindpage'] = 'Find a page';
+$string['rptsortpages'] = 'Sort pages';
+$string['rptpageorder'] = 'Page order';
+$string['rptmostunfinished'] = 'Most in progress';
+$string['rptleastcompleted'] = 'Fewest completions';
+$string['rptnotreached'] = 'Not reached';
+$string['rptallpages'] = 'Show all pages ({$a})';
+$string['rptshowpages'] = 'Showing {$a->shown} of {$a->total} pages';
+
+$string['rpttotalpages'] = '{$a} pages';
+
+$string['rptdisplayedshare'] = 'Share of displayed total: {$a}';

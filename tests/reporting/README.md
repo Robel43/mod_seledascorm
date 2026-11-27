@@ -57,3 +57,10 @@ error/retry/full-page fallback, late responses, no-JS course/activity links,
 missing-progress coverage and small viewports. Native dashboard_test also tests
 the actual external function with separate groups, invalid learner/attempt/filter
 selections, denied capability, audit event and admin access.
+
+## Interactive charts
+
+`charts-ui.test.cjs` covers a forty-page Overview with six initially visible rows,
+keyboard and no-JavaScript expansion, searching hidden pages, sorting, empty
+search results, native doughnut links, bar hover/click/keyboard selection, no
+duplicate bottom lists and readable labels/no overflow at 320/375/768/1024px.

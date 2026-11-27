@@ -5,7 +5,7 @@ and all filters still work without JavaScript. The optional drawer uses a Moodle
 AJAX external function, the same renderer and reporting service, and an audit event
 on each successful load. No tables, dependencies, browser storage, permission or
 privacy-provider changes were introduced. The source dev version sentinel stays
-in place; packaging suffix is now 21 (phase 6 introduced 18) to register the AJAX function
+in place; packaging suffix is now 22 (phase 6 introduced 18) to register the AJAX function
 and refresh AMD caches when Moodle upgrades.
 
 ## Screens and scope
@@ -194,3 +194,24 @@ small-sample thresholds stay unchanged. Package suffix 21 refreshes this display
 
 Course cards keep their explicit learner–activity record counts: those sums are
 not labelled participants because one person can contribute to multiple activities.
+
+## Compact and interactive charts
+
+Overview shows six learning pages initially, in package order. The native Show all
+pages expander retains every page without JavaScript. Each compact page row can
+expand its completed/in-progress/not-reached breakdown. A progressive search and
+sort toolbar searches all pages and ranks by package order, in-progress count or
+fewest completions; none of these controls changes the report scope or metrics.
+The participant-progress doughnut uses the existing mutually exclusive completion
+states and scoped roster. Segments and matching legend links apply the existing
+learner status filter, preserving other filters. Empty scope shows “—”, not 0%.
+
+Time, participation and score-band charts no longer repeat their data in a second
+visible list. Each row retains its full name and exact value beside an inline SVG
+bar. With JavaScript, hover/focus shows the value and share of the displayed total;
+click or Enter/Space pins or clears a selection. Shares refer to displayed values,
+not unique people across activities. A zero total shows no fabricated percentage.
+Labels stay normal HTML text so they remain readable on small screens; native SVG
+titles, focus rings and a live detail region provide accessible interaction.
+No library, external request, storage, schema or permission change was introduced.
+Existing sample suppression remains in force. Packaging suffix 22 refreshes AMD/CSS.

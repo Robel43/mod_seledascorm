@@ -5,7 +5,7 @@ and all filters still work without JavaScript. The optional drawer uses a Moodle
 AJAX external function, the same renderer and reporting service, and an audit event
 on each successful load. No tables, dependencies, browser storage, permission or
 privacy-provider changes were introduced. The source dev version sentinel stays
-in place; packaging suffix advances from 17 to 18 to register the AJAX function
+in place; packaging suffix is now 19 (phase 6 introduced 18) to register the AJAX function
 and refresh AMD caches when Moodle upgrades.
 
 ## Screens and scope
@@ -167,3 +167,7 @@ See `tests/reporting/README.md`. CI runs standalone PHP and Playwright plus nati
 Moodle 4.5/MariaDB `vendor/bin/phpunit mod/seledascorm/tests/local/dashboard_test.php`.
 The native suite covers report permissions, groups, roles, real zeroes and the report
 view audit event. No optional drawer, web service, DB schema or privacy change is made.
+
+Course and activity cards use separate heading, progress and coverage rows with
+explicit spacing and responsive columns. Names never share an inline row with
+the progress percentage. The suffix-19 package refreshes the cached stylesheet.

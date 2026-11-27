@@ -24,7 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 9999999999; // Dev sentinel; CI packages YYYYMMDD18 to register the learner-report AJAX service.
+$plugin->version = 9999999999; // Dev sentinel; CI packages a date-based version to register services and refresh cached assets.
 $plugin->release = 'dev'; // Dev value, overridden by CI/CD (semver from git tag).
 $plugin->requires = 2024100700; // Moodle 4.5+.
 $plugin->component = 'mod_seledascorm'; // Full name of the plugin (used for diagnostics).

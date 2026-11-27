@@ -61,11 +61,11 @@ final class reporting_dashboard {
         foreach($cards as $card) {
             $changes=$incourse?['id'=>$card['id'],'group'=>0,'learner'=>0,'attempt'=>0]:['course'=>$card['id'],'id'=>0,'group'=>0,'learner'=>0,'attempt'=>0];
             $percent=$card['known']?round(100*$card['sum']/$card['known'],1):null;
-            $h.='<a class="sd-course-card" href="'.self::url($m,$changes).'"><strong>'.self::h($card['name']).'</strong>';
-            if (!$incourse) $h.='<small>'.self::r('activitycount',$card['activities']).'</small>';
-            $h.='<span>'.self::r('averageprogress').': '.self::number($percent).($percent===null?'':'%').'</span>';
+            $h.='<a class="sd-course-card" href="'.self::url($m,$changes).'"><span class="sd-course-card-heading"><strong class="sd-course-card-title">'.self::h($card['name']).'</strong>';
+            if (!$incourse) $h.='<small class="sd-course-card-count">'.self::r($card['activities']===1?'activitycountone':'activitycount',$card['activities']).'</small>';
+            $h.='</span><span class="sd-course-card-progress"><span class="sd-course-card-metric"><span>'.self::r('averageprogress').':</span><strong>'.self::number($percent).($percent===null?'':'%').'</strong></span>';
             if($percent!==null)$h.='<span class="sd-progress" role="img" aria-label="'.self::r('averageprogress').': '.$percent.'%"><span style="width:'.$percent.'%"></span></span>';
-            $h.='<small>'.self::r('progresscoverage',(object)['known'=>$card['known'],'total'=>$card['total']]).'</small></a>';
+            $h.='</span><small class="sd-course-card-coverage">'.self::r('progresscoverage',(object)['known'=>$card['known'],'total'=>$card['total']]).'</small></a>';
         }
         if(!$cards)$h.='<p>'.self::r('nocourses').'</p>';
         return $h.'</div><p class="sd-note">'.self::r('courseprogressnote').'</p></section>';

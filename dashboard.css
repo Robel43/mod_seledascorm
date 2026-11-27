@@ -49,6 +49,19 @@ dialog.sd-report-drawer {position:fixed;inset:0 0 0 auto;margin:0;width:min(1100
 .sd-report-drawer > [role=status] {margin:0;padding:0 16px;}
 .sd-drawer-content {padding:16px;overflow:auto;overscroll-behavior:contain;height:calc(100% - 110px);box-sizing:border-box;}
 .sd-drawer-content > .sd-card {margin-top:16px;}
-.sd-course-card {gap:10px;}
-.sd-course-card .sd-progress {width:100%;}
+.sd-redesign .sd-course-browser > h2 {margin-bottom:16px;}
+.sd-redesign .sd-course-browser > a {display:inline-block;margin-bottom:16px;}
+.sd-redesign .sd-course-browser .sd-quick-picks {gap:20px;margin-bottom:20px;}
+.sd-redesign .sd-quick-picks .sd-course-card {display:flex;flex-direction:column;gap:18px;padding:22px;min-width:0;background:var(--sd-surface);color:var(--sd-text);text-decoration:none;border:1px solid var(--sd-line);border-radius:14px;}
+.sd-redesign .sd-course-card:hover {border-color:#9bb8f5;background:#fbfcff;}
+.sd-course-card-heading {display:flex;flex-direction:column;gap:8px;}
+.sd-course-card-title {font-size:1.05rem;line-height:1.5;overflow-wrap:anywhere;}
+.sd-quick-picks .sd-course-card-count {align-self:flex-start;display:inline-block;padding:3px 9px;border-radius:6px;background:#f0f4fa;color:#435268;font-size:.78rem;}
+.sd-course-card-progress {display:flex;flex-direction:column;gap:12px;padding-top:16px;border-top:1px solid var(--sd-line);}
+.sd-course-card-metric {display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;}
+.sd-course-card-metric > span {font-size:.8rem;color:var(--sd-muted);}
+.sd-course-card-metric > strong {font-size:1.5rem;line-height:1.2;color:var(--sd-text);font-variant-numeric:tabular-nums;}
+.sd-course-card .sd-progress {display:block;width:100%;height:8px;margin:0;}
+.sd-quick-picks .sd-course-card-coverage {margin-top:auto;font-size:.78rem;line-height:1.6;}
+@media(max-width:1100px) and (min-width:701px) {.sd-course-browser .sd-quick-picks {grid-template-columns:repeat(2,minmax(0,1fr));}}
 @media(max-width:700px) {dialog.sd-report-drawer {width:100vw;}.sd-drawer-heading {gap:8px;}.sd-drawer-content {padding:10px;}}

@@ -64,14 +64,24 @@ test('course cards list all courses, show honest progress coverage and drill int
  for(const width of [320,375,768,1024]){
   await page.setViewportSize({width,height:1000});await page.setContent(fixture('--coursehtml'));
   assert.equal(await page.locator('.sd-course-card').count(),2);
-  assert.match(await page.locator('.sd-course-browser').innerText(),/Average progress: 33.3%/);
+  const spacing=await page.locator('.sd-course-card').first().evaluate(card=>({
+   titleBottom:card.querySelector('.sd-course-card-heading').getBoundingClientRect().bottom,
+   progressTop:card.querySelector('.sd-course-card-progress').getBoundingClientRect().top,
+   display:getComputedStyle(card).display
+  }));
+  assert.equal(spacing.display,'flex');assert.ok(spacing.progressTop-spacing.titleBottom>=16);
+  assert.equal(await page.locator('.sd-course-card').first().evaluate(card=>getComputedStyle(card).textDecorationLine),'none');
+  assert.match(await page.locator('.sd-course-browser').innerText(),/Average progress:\s*33.3%/);
   assert.match(await page.locator('.sd-course-browser').innerText(),/3 of 4/);
-  assert.match(await page.locator('.sd-course-browser').innerText(),/Average progress: —/);
+  assert.match(await page.locator('.sd-course-browser').innerText(),/Average progress:\s*—/);
   assert.match(await page.locator('.sd-course-card').first().getAttribute('href'),/course=1/);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  }
  await page.setContent(fixture('--activitylisthtml'));assert.equal(await page.locator('.sd-course-card').count(),1);
  assert.match(await page.locator('.sd-course-card').getAttribute('href'),/id=1/);
+ const separated=await page.locator('.sd-course-card').evaluate(card=>
+  card.querySelector('.sd-course-card-progress').getBoundingClientRect().top-card.querySelector('.sd-course-card-title').getBoundingClientRect().bottom);
+ assert.ok(separated>=16);
  await page.setContent(fixture('--html'));assert.match(await page.locator('.sd-learner-name[href*="learner=4"]').getAttribute('href'),/learner=4/);
  await context.close();
 });

@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## Course and SCORM card layout
+
+- Separate names, activity counts, progress metrics and coverage into spaced rows.
+- Show a larger progress percentage and clear progress bar; preserve keyboard focus
+  and readable wrapping on small screens. Advance package suffix to 19.
+
+
 ## Learner drawer and course report catalogue
 
 - Open learner reports in an accessible side drawer, with tabs, Moodle attempts,

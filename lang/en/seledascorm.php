@@ -1048,3 +1048,5 @@ $string['rptdrawerloading'] = 'Loading learner report…';
 $string['rptdrawererror'] = 'The learner report could not be loaded. Try again or open the full page report.';
 $string['rptfullpage'] = 'Open full page report';
 $string['rptretryload'] = 'Try again';
+
+$string['rptactivitycountone'] = '1 SCORM activity';
